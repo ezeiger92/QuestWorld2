@@ -1,0 +1,18 @@
+package me.mrCookieSlime.QuestWorld.listeners;
+
+public enum InputType {
+	
+	NONE,
+	CATEGORY_CREATION, 
+	QUEST_CREATION,
+	CATEGORY_RENAME,
+	QUEST_RENAME,
+	PARTY_INVITE, 
+	KILL_NAMED,
+	COMMAND_ADD,
+	CITIZEN, 
+	LOCATION_NAME, 
+	CATEGORY_PERMISSION, 
+	QUEST_PERMISSION;
+
+}

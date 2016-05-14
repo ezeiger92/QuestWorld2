@@ -1,0 +1,20 @@
+name: QuestWorld
+version: 2.6
+author: mrCookieSlime
+website: http://mrCookieSlime.github.io
+
+main: me.mrCookieSlime.QuestWorld.QuestWorld
+softdepend: [CS-CoreLib, Vault, Citizens, Votifier, ChatReaction, ASkyBlock]
+
+commands:
+  quests:
+    description: Opens up your Quest Book
+    usage: /quests [Category ID]
+  questeditor:
+    description: Opens up the Quest Editor
+    usage: /questeditor <gui/import/export>
+
+permissions:
+  QuestWorld.editor:
+    description: Allows you to use /questeditor
+    default: op
