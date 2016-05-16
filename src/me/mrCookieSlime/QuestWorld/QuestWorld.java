@@ -207,6 +207,7 @@ public class QuestWorld extends JavaPlugin implements Listener {
 			book.setDefaultValue("button.back.quests", "&7> Click to go back to the Quest Menu");
 			book.setDefaultValue("button.back.general", "&c< Back");
 			book.setDefaultValue("quests.locked", "&4&lLOCKED");
+			book.setDefaultValue("quests.locked-in-world", "&cThis Questline is not available in your World");
 			book.setDefaultValue("quests.tasks_completed", " Tasks completed");
 			book.setDefaultValue("quests.state.cooldown", "&e&lON COOLDOWN");
 			book.setDefaultValue("quests.state.completed", "&2&lCOMPLETED");

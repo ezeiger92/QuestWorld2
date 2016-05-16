@@ -50,37 +50,49 @@ public class QuestBook {
 		addPartyMenuButton(menu, p);
 		
 		for (final Category category: QuestWorld.getInstance().getCategories()) {
-			if (!category.isHidden() && !category.isWorldEnabled(p.getWorld().getName())) {
-				if ((category.getParent() != null && !QuestWorld.getInstance().getManager(p).hasFinished(category.getParent())) || !category.hasPermission(p)) {
-					menu.addItem(category.getID() + 9, new CustomItem(new MaterialData(Material.STAINED_GLASS_PANE, (byte) 14), category.getName(), "", QuestWorld.getInstance().getBookLocal("quests.locked")));
-					menu.addMenuClickHandler(category.getID() + 9, new MenuClickHandler() {
-						
-						@Override
-						public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-							return false;
-						}
-					});
+			if (!category.isHidden()) {
+				if (category.isWorldEnabled(p.getWorld().getName())) {
+					if ((category.getParent() != null && !QuestWorld.getInstance().getManager(p).hasFinished(category.getParent())) || !category.hasPermission(p)) {
+						menu.addItem(category.getID() + 9, new CustomItem(new MaterialData(Material.BARRIER), category.getName(), "", QuestWorld.getInstance().getBookLocal("quests.locked")));
+						menu.addMenuClickHandler(category.getID() + 9, new MenuClickHandler() {
+							
+							@Override
+							public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
+								return false;
+							}
+						});
+					}
+					else {
+						ItemStack item = category.getItem();
+						ItemMeta im = item.getItemMeta();
+						List<String> lore = new ArrayList<String>();
+						lore.add("");
+						lore.add(category.getProgress(p));
+						lore.add("");
+						lore.add(ChatColor.translateAlternateColorCodes('&', "&7" + category.getQuests().size() + QuestWorld.getInstance().getBookLocal("category.desc.total")));
+						lore.add(ChatColor.translateAlternateColorCodes('&', "&a" + category.getFinishedQuests(p).size() + QuestWorld.getInstance().getBookLocal("category.desc.completed")));
+						lore.add(ChatColor.translateAlternateColorCodes('&', "&b" + category.getQuests(p, QuestStatus.AVAILABLE).size() + QuestWorld.getInstance().getBookLocal("category.desc.available")));
+						lore.add(ChatColor.translateAlternateColorCodes('&', "&e" + category.getQuests(p, QuestStatus.ON_COOLDOWN).size() + QuestWorld.getInstance().getBookLocal("category.desc.cooldown")));
+						lore.add(ChatColor.translateAlternateColorCodes('&', "&5" + category.getQuests(p, QuestStatus.REWARD_CLAIMABLE).size() + QuestWorld.getInstance().getBookLocal("category.desc.claimable_reward")));
+						im.setLore(lore);
+						item.setItemMeta(im);
+						menu.addItem(category.getID() + 9, item);
+						menu.addMenuClickHandler(category.getID() + 9, new MenuClickHandler() {
+							
+							@Override
+							public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
+								openCategory(p, category, true);
+								return false;
+							}
+						});
+					}
 				}
 				else {
-					ItemStack item = category.getItem();
-					ItemMeta im = item.getItemMeta();
-					List<String> lore = new ArrayList<String>();
-					lore.add("");
-					lore.add(category.getProgress(p));
-					lore.add("");
-					lore.add(ChatColor.translateAlternateColorCodes('&', "&7" + category.getQuests().size() + QuestWorld.getInstance().getBookLocal("category.desc.total")));
-					lore.add(ChatColor.translateAlternateColorCodes('&', "&a" + category.getFinishedQuests(p).size() + QuestWorld.getInstance().getBookLocal("category.desc.completed")));
-					lore.add(ChatColor.translateAlternateColorCodes('&', "&b" + category.getQuests(p, QuestStatus.AVAILABLE).size() + QuestWorld.getInstance().getBookLocal("category.desc.available")));
-					lore.add(ChatColor.translateAlternateColorCodes('&', "&e" + category.getQuests(p, QuestStatus.ON_COOLDOWN).size() + QuestWorld.getInstance().getBookLocal("category.desc.cooldown")));
-					lore.add(ChatColor.translateAlternateColorCodes('&', "&5" + category.getQuests(p, QuestStatus.REWARD_CLAIMABLE).size() + QuestWorld.getInstance().getBookLocal("category.desc.claimable_reward")));
-					im.setLore(lore);
-					item.setItemMeta(im);
-					menu.addItem(category.getID() + 9, item);
+					menu.addItem(category.getID() + 9, new CustomItem(new MaterialData(Material.BARRIER), category.getName(), "", QuestWorld.getInstance().getBookLocal("quests.locked-in-world")));
 					menu.addMenuClickHandler(category.getID() + 9, new MenuClickHandler() {
 						
 						@Override
 						public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-							openCategory(p, category, true);
 							return false;
 						}
 					});
