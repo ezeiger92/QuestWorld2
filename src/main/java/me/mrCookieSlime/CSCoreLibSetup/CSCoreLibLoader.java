@@ -46,7 +46,7 @@ public class CSCoreLibLoader {
 					System.err.println("downloaded and installed.");
 					System.err.println("But for the time being " + plugin.getName() + " will remain disabled");
 					System.err.println("After the installation process has finished,");
-					System.out.println("you will be asked to restart your Server.");
+					System.err.println("you will be asked to restart your Server.");
 					System.err.println("- mrCookieSlime");
 					System.err.println(" ");
 					System.err.println("#################### - FATAL ERROR - ####################");

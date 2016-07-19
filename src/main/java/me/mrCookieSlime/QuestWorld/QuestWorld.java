@@ -13,7 +13,6 @@ import java.util.UUID;
 import me.mrCookieSlime.CSCoreLibPlugin.PluginUtils;
 import me.mrCookieSlime.CSCoreLibPlugin.Configuration.Config;
 import me.mrCookieSlime.CSCoreLibPlugin.Configuration.Localization;
-import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.Item.CustomItem;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Particles.MC_1_8.ParticleEffect;
 import me.mrCookieSlime.CSCoreLibSetup.CSCoreLibLoader;
 import me.mrCookieSlime.QuestWorld.commands.EditorCommand;
@@ -34,6 +33,7 @@ import me.mrCookieSlime.QuestWorld.quests.Quest;
 import me.mrCookieSlime.QuestWorld.quests.QuestManager;
 import me.mrCookieSlime.QuestWorld.quests.QuestMission;
 import me.mrCookieSlime.QuestWorld.quests.QuestStatus;
+import me.mrCookieSlime.QuestWorld.utils.ItemBuilder;
 import net.citizensnpcs.api.npc.NPC;
 import net.milkbowl.vault.economy.Economy;
 
@@ -76,8 +76,10 @@ public class QuestWorld extends JavaPlugin implements Listener {
 	public void onEnable() {
 		CSCoreLibLoader loader = new CSCoreLibLoader(this);
 		if (loader.load()) {
-			
-			guide = new CustomItem(new MaterialData(Material.ENCHANTED_BOOK), "&eQuest Book &7(Right Click)", "", "&rYour basic Guide for Quests", "&rIn case you lose it, simply place a", "&rWorkbench into your Crafting Grid");
+			guide = new ItemBuilder(Material.ENCHANTED_BOOK)
+				.display("&eQuest Book &7(Right Click)")
+				.lore("", "&rYour basic Guide for Quests", "&rIn case you lose it, simply place a", "&rWorkbench into your Crafting Grid")
+				.get();
 			
 			if (!new File("data-storage/Quest World").exists()) new File("data-storage/Quest World").mkdirs();
 			if (!new File("plugins/QuestWorld/quests").exists()) new File("plugins/QuestWorld/quests").mkdirs();
@@ -91,7 +93,7 @@ public class QuestWorld extends JavaPlugin implements Listener {
 			registerMissionType(new MissionType("DETECT", false, false, false, SubmissionType.ITEM, "Own %s", new MaterialData(Material.COMMAND)));
 			registerMissionType(new MissionType("KILL", true, true, false, SubmissionType.ENTITY, "Kill %s", new MaterialData(Material.IRON_SWORD)));
 			registerMissionType(new MissionType("KILL_NAMED_MOB", true, true, false, SubmissionType.ENTITY, "Kill %s", new MaterialData(Material.GOLD_SWORD)));
-			registerMissionType(new MissionType("FISH", true, true, false, SubmissionType.ITEM, "Catch %s §7using a Fishing Rod", new MaterialData(Material.FISHING_ROD)));
+			registerMissionType(new MissionType("FISH", true, true, false, SubmissionType.ITEM, "Catch %s ï¿½7using a Fishing Rod", new MaterialData(Material.FISHING_ROD)));
 			registerMissionType(new MissionType("REACH_LOCATION", false, false, true, SubmissionType.LOCATION, "Travel to %s", new MaterialData(Material.LEATHER_BOOTS)));
 			registerMissionType(new MissionType("JOIN", true, false, false, SubmissionType.INTEGER, "Join %s times", new MaterialData(Material.SKULL_ITEM, (byte) 3)));
 			registerMissionType(new MissionType("PLAY_TIME", false, false, true, SubmissionType.TIME, "Play for %s", new MaterialData(Material.WATCH)));
@@ -117,7 +119,7 @@ public class QuestWorld extends JavaPlugin implements Listener {
 			
 			if (citizens) {
 				registerMissionType(new MissionType("CITIZENS_INTERACT", false, false, false, SubmissionType.CITIZENS_INTERACT, "Talk to %s", new MaterialData(Material.SKULL_ITEM, (byte) 3)));
-				registerMissionType(new MissionType("CITIZENS_SUBMIT", false, false, false, SubmissionType.CITIZENS_ITEM, "Give %s§7 to %s", new MaterialData(Material.SKULL_ITEM, (byte) 3)));
+				registerMissionType(new MissionType("CITIZENS_SUBMIT", false, false, false, SubmissionType.CITIZENS_ITEM, "Give %sï¿½7 to %s", new MaterialData(Material.SKULL_ITEM, (byte) 3)));
 				registerMissionType(new MissionType("KILL_NPC", true, true, false, SubmissionType.CITIZENS_KILL, "Kill %s", new MaterialData(Material.SKULL_ITEM, (byte) 3)));
 				registerMissionType(new MissionType("ACCEPT_QUEST_FROM_NPC", false, false, false, SubmissionType.CITIZENS_INTERACT, "Accept this Quest by talking to %s", new MaterialData(Material.SKULL_ITEM, (byte) 3)));
 				new CitizensListener(this);
