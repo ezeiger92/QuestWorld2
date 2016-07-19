@@ -119,7 +119,7 @@ public class Quest extends QWObject {
 		cfg.setValue("id", id);
 		cfg.setValue("category", category.getID());
 		cfg.setValue("cooldown", String.valueOf(cooldown));
-		cfg.setValue("name", name.replaceAll("�", "&"));
+		cfg.setValue("name", ChatColor.translateAlternateColorCodes('&', name));
 		cfg.setValue("item", new ItemStack(item));
 		cfg.setValue("rewards.items", null);
 		cfg.setValue("rewards.money", money);
