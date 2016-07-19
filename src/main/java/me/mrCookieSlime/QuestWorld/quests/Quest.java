@@ -10,6 +10,7 @@ import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.Item.CustomItem;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Player.PlayerInventory;
 import me.mrCookieSlime.CSCoreLibPlugin.general.audio.Soundboard;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
+import me.mrCookieSlime.QuestWorld.utils.Text;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -119,7 +120,7 @@ public class Quest extends QWObject {
 		cfg.setValue("id", id);
 		cfg.setValue("category", category.getID());
 		cfg.setValue("cooldown", String.valueOf(cooldown));
-		cfg.setValue("name", ChatColor.translateAlternateColorCodes('&', name));
+		cfg.setValue("name", Text.decolor(name));
 		cfg.setValue("item", new ItemStack(item));
 		cfg.setValue("rewards.items", null);
 		cfg.setValue("rewards.money", money);

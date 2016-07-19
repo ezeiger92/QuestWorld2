@@ -14,8 +14,8 @@ import me.mrCookieSlime.QuestWorld.listeners.InputType;
 import me.mrCookieSlime.QuestWorld.quests.QBDialogue;
 import me.mrCookieSlime.QuestWorld.quests.Quest;
 import me.mrCookieSlime.QuestWorld.quests.QuestBook;
+import me.mrCookieSlime.QuestWorld.utils.Text;
 
-import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -56,12 +56,12 @@ public class EditorCommand implements CommandExecutor {
 						input.close();
 
 						QuestWorld.getInstance().load();
-						sender.sendMessage(ChatColor.GRAY + "Successfully installed the Preset " + ChatColor.GREEN + args[1] + ".zip");
+						sender.sendMessage(Text.colorize("&7Successfully installed the Preset &a", args[1], ".zip"));
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
 				}
-				else sender.sendMessage(ChatColor.RED + "The Preset " + ChatColor.DARK_RED + args[1] + ".zip " + ChatColor.RED + "could not be found");
+				else sender.sendMessage(Text.colorize("&cThe Preset &4", args[1], ".zip &ccould not be found"));
 			}
 			else if (args.length == 2 && args[0].equalsIgnoreCase("export")) {
 				File file = new File("plugins/QuestWorld/presets/" + args[1] + ".zip");
@@ -89,7 +89,7 @@ public class EditorCommand implements CommandExecutor {
 						output.closeEntry();
 					}
 					output.close();
-					sender.sendMessage(ChatColor.GRAY + "Successfully saved the Preset " + ChatColor.GREEN + args[1] + ".zip");
+					sender.sendMessage(Text.colorize("&7Successfully saved the Preset &a", args[1], ".zip"));
 				} catch(IOException e) {
 					e.printStackTrace();
 				}
@@ -98,7 +98,7 @@ public class EditorCommand implements CommandExecutor {
 				if (sender instanceof Player) {
 					QuestBook.openEditor((Player) sender);
 				}
-				else sender.sendMessage(ChatColor.DARK_RED + "You are not a Player");
+				else sender.sendMessage(Text.colorize("&4You are not a Player"));
 			}
 			else if (args.length == 4 && args[0].equalsIgnoreCase("delete_command") && sender instanceof Player) {
 				Quest quest = QuestWorld.getInstance().getCategory(Integer.parseInt(args[1])).getQuest(Integer.parseInt(args[2]));
@@ -107,15 +107,15 @@ public class EditorCommand implements CommandExecutor {
 			}
 			else if (args.length == 3 && args[0].equalsIgnoreCase("add_command") && sender instanceof Player) {
 				Quest quest = QuestWorld.getInstance().getCategory(Integer.parseInt(args[1])).getQuest(Integer.parseInt(args[2]));
-				sender.sendMessage(ChatColor.GRAY + "Type in your desired Command:");
-				sender.sendMessage(ChatColor.GRAY + "Usable Variables: @p (Username)");
+				sender.sendMessage(Text.colorize("&7Type in your desired Command:"));
+				sender.sendMessage(Text.colorize("&7Usable Variables: @p (Username)"));
 				QuestWorld.getInstance().storeInput(((Player) sender).getUniqueId(), new Input(InputType.COMMAND_ADD, quest));
 			}
 			else {
-				sender.sendMessage(ChatColor.DARK_RED + "Usage: " + ChatColor.DARK_RED + "/questeditor <gui/import <File> /export <File> >");
+				sender.sendMessage(Text.colorize("&4Usage: &c/questeditor <gui/import <File> /export <File> >"));
 			}
 		}
-		else sender.sendMessage(ChatColor.DARK_RED + "You are not allowed to do this");
+		else sender.sendMessage(Text.colorize("&4You are not allowed to do this"));
 		return true;
 	}
 
