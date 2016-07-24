@@ -12,6 +12,7 @@ import java.util.Set;
 import me.mrCookieSlime.CSCoreLibPlugin.Configuration.Config;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.Item.CustomItem;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
+import me.mrCookieSlime.QuestWorld.utils.Text;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -83,7 +84,7 @@ public class Category extends QWObject {
 		}
 		Config cfg = new Config(new File("plugins/QuestWorld/quests/" + id + ".category"));
 		cfg.setValue("id", id);
-		cfg.setValue("name", name.replaceAll("§", "&"));
+		cfg.setValue("name", Text.decolor(name));
 		cfg.setValue("item", new ItemStack(item));
 		cfg.setValue("permission", permission);
 		cfg.setValue("hidden", this.hidden);

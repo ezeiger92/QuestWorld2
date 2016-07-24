@@ -93,7 +93,7 @@ public class QuestWorld extends JavaPlugin implements Listener {
 			registerMissionType(new MissionType("DETECT", false, false, false, SubmissionType.ITEM, "Own %s", new MaterialData(Material.COMMAND)));
 			registerMissionType(new MissionType("KILL", true, true, false, SubmissionType.ENTITY, "Kill %s", new MaterialData(Material.IRON_SWORD)));
 			registerMissionType(new MissionType("KILL_NAMED_MOB", true, true, false, SubmissionType.ENTITY, "Kill %s", new MaterialData(Material.GOLD_SWORD)));
-			registerMissionType(new MissionType("FISH", true, true, false, SubmissionType.ITEM, "Catch %s �7using a Fishing Rod", new MaterialData(Material.FISHING_ROD)));
+			registerMissionType(new MissionType("FISH", true, true, false, SubmissionType.ITEM, "Catch %s &7using a Fishing Rod", new MaterialData(Material.FISHING_ROD)));
 			registerMissionType(new MissionType("REACH_LOCATION", false, false, true, SubmissionType.LOCATION, "Travel to %s", new MaterialData(Material.LEATHER_BOOTS)));
 			registerMissionType(new MissionType("JOIN", true, false, false, SubmissionType.INTEGER, "Join %s times", new MaterialData(Material.SKULL_ITEM, (byte) 3)));
 			registerMissionType(new MissionType("PLAY_TIME", false, false, true, SubmissionType.TIME, "Play for %s", new MaterialData(Material.WATCH)));
@@ -119,7 +119,7 @@ public class QuestWorld extends JavaPlugin implements Listener {
 			
 			if (citizens) {
 				registerMissionType(new MissionType("CITIZENS_INTERACT", false, false, false, SubmissionType.CITIZENS_INTERACT, "Talk to %s", new MaterialData(Material.SKULL_ITEM, (byte) 3)));
-				registerMissionType(new MissionType("CITIZENS_SUBMIT", false, false, false, SubmissionType.CITIZENS_ITEM, "Give %s�7 to %s", new MaterialData(Material.SKULL_ITEM, (byte) 3)));
+				registerMissionType(new MissionType("CITIZENS_SUBMIT", false, false, false, SubmissionType.CITIZENS_ITEM, "Give %s&7 to %s", new MaterialData(Material.SKULL_ITEM, (byte) 3)));
 				registerMissionType(new MissionType("KILL_NPC", true, true, false, SubmissionType.CITIZENS_KILL, "Kill %s", new MaterialData(Material.SKULL_ITEM, (byte) 3)));
 				registerMissionType(new MissionType("ACCEPT_QUEST_FROM_NPC", false, false, false, SubmissionType.CITIZENS_INTERACT, "Accept this Quest by talking to %s", new MaterialData(Material.SKULL_ITEM, (byte) 3)));
 				new CitizensListener(this);

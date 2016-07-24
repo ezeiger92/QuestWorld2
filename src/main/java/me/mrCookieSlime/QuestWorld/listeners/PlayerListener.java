@@ -5,7 +5,6 @@ import java.io.File;
 import me.mrCookieSlime.CSCoreLibPlugin.events.ItemUseEvent;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.quests.Category;
-import me.mrCookieSlime.QuestWorld.quests.QWObject;
 import me.mrCookieSlime.QuestWorld.quests.Quest;
 import me.mrCookieSlime.QuestWorld.quests.QuestBook;
 import me.mrCookieSlime.QuestWorld.quests.QuestChecker;
@@ -33,12 +32,7 @@ public class PlayerListener implements Listener {
 	public void onQuestBook(ItemUseEvent e) {
 		if (QuestWorld.getInstance().isItemSimiliar(e.getItem(), QuestWorld.getInstance().guide)) {
 			Player p = e.getPlayer();
-			QWObject last = QuestWorld.getInstance().getManager(p).getLastEntry();
-			if (last == null) QuestBook.openMainMenu(p);
-			else {
-				if (last instanceof Category) QuestBook.openCategory(p, (Category) last, true);
-				else if (last instanceof Quest) QuestBook.openQuest(p, (Quest) last, true, true);
-			}
+			QuestBook.openLastMenu(p);
 		}
 	}
 	

@@ -93,7 +93,7 @@ public class QuestMission extends QWObject {
 	
 	public String getText() {
 		if (getCustomName() != null) return getCustomName();
-		return "§7" + type.getFormat(entity, item, location, amount, ChatColor.translateAlternateColorCodes('&', name), citizen, spawners) + (hasTimeframe() ? (" &7within " + (getTimeframe() / 60) + "h " + (getTimeframe() % 60) + "m"): "") + (resetsonDeath() ? " &7without dying": "");
+		return ChatColor.GRAY + type.getFormat(entity, item, location, amount, ChatColor.translateAlternateColorCodes('&', name), citizen, spawners) + (hasTimeframe() ? (" &7within " + (getTimeframe() / 60) + "h " + (getTimeframe() % 60) + "m"): "") + (resetsonDeath() ? " &7without dying": "");
 	}
 
 	@SuppressWarnings("deprecation")

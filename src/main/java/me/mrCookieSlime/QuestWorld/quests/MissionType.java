@@ -2,6 +2,7 @@ package me.mrCookieSlime.QuestWorld.quests;
 
 import me.mrCookieSlime.CSCoreLibPlugin.general.String.StringUtils;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
+import me.mrCookieSlime.QuestWorld.utils.Text;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
 
@@ -35,7 +36,7 @@ public class MissionType {
 	
 	public MissionType(String name, boolean supportsTimeframes, boolean supportsDeathReset, boolean ticking, SubmissionType type, String format, MaterialData item) {
 		this.id = name;
-		this.format = format;
+		this.format = Text.colorize(format);
 		this.item = item;
 		this.type = type;
 		this.supportsTimeframes = supportsTimeframes;
@@ -44,28 +45,28 @@ public class MissionType {
 	}
 	
 	public String getFormat(EntityType entity, ItemStack item, Location location, int amount, String name, int citizenID, boolean spawners) {
-		name = ChatColor.translateAlternateColorCodes('&', name);
+		name = Text.colorize(name);
 		switch (type) {
 		case ENTITY: {
-			return String.format(format, amount + "x " + (spawners ? "naturally spawned " : "") + StringUtils.format(entity.toString()) + ((!name.equals("") ? (" named §r" + name): "") + "§7"));
+			return String.format(format, amount + "x " + (spawners ? "naturally spawned " : "") + StringUtils.format(entity.toString()) + ((!name.equals("") ? (Text.colorize(" named &r") + name): "") + ChatColor.GRAY));
 		}
 		case ITEM: {
-			return String.format(format, amount + "x " + StringUtils.formatItemName(item, false) + "§7");
+			return String.format(format, amount + "x " + StringUtils.formatItemName(item, false) + ChatColor.GRAY);
 		}
 		case BLOCK: {
-			return String.format(format, amount + "x " + StringUtils.formatItemName(item, false) + "§7");
+			return String.format(format, amount + "x " + StringUtils.formatItemName(item, false) + ChatColor.GRAY);
 		}
 		case CITIZENS_ITEM: {
 			NPC npc = CitizensAPI.getNPCRegistry().getById(citizenID);
-			return String.format(format, amount + "x " + StringUtils.formatItemName(item, false), "§7" + (npc == null ? "N/A": npc.getName()) + "§7");
+			return String.format(format, amount + "x " + StringUtils.formatItemName(item, false), ChatColor.GRAY + (npc == null ? "N/A": npc.getName()) + ChatColor.GRAY);
 		}
 		case CITIZENS_INTERACT: {
 			NPC npc = CitizensAPI.getNPCRegistry().getById(citizenID);
-			return String.format(format, "§7" + (npc == null ? "N/A": npc.getName()) + "§7");
+			return String.format(format, Text.colorize("&7" + (npc == null ? "N/A": npc.getName()) + "&7"));
 		}
 		case CITIZENS_KILL: {
 			NPC npc = CitizensAPI.getNPCRegistry().getById(citizenID);
-			return String.format(format, "§7" + (npc == null ? "N/A": npc.getName()) + "§7 " + amount + " times");
+			return String.format(format, Text.colorize("&7" + (npc == null ? "N/A": npc.getName()) + "&7 " + amount + " times"));
 		}
 		case INTEGER: {
 			return String.format(format, amount);
@@ -74,7 +75,7 @@ public class MissionType {
 			return String.format(format, (amount / 60) + "h " + (amount % 60) + "m");
 		}
 		case LOCATION: {
-			return String.format(format, name.equals("") ? ("X: " + location.getBlockX() + " Y: " + location.getBlockY() + " Z: " + location.getBlockZ() + "§7"): ("§r" + name));
+			return String.format(format, name.equals("") ? ("X: " + location.getBlockX() + " Y: " + location.getBlockY() + " Z: " + location.getBlockZ() + ChatColor.GRAY): (ChatColor.RESET + name));
 		}
 		default:
 			return String.format(format, name);

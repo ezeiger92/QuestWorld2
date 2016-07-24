@@ -2,11 +2,15 @@ package me.mrCookieSlime.QuestWorld.utils;
 
 import java.util.Arrays;
 
-import org.bukkit.ChatColor;
+import org.bukkit.Color;
+import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.LeatherArmorMeta;
+import org.bukkit.material.Colorable;
 
 public class ItemBuilder {
 	private ItemStack stack_;
@@ -39,6 +43,8 @@ public class ItemBuilder {
 		stack_ = new ItemStack(type, amount);
 	}
 	
+	
+	
 	/**
      * Constructs an ItemBuilder.
      *
@@ -51,7 +57,7 @@ public class ItemBuilder {
 	}
 	
 	public ItemBuilder(Material type, int amount, int durability) {
-		stack_ = new ItemStack(type, amount, (short)durability);
+		this(type, amount, (short)durability);
 	}
 	
 	/**
@@ -135,8 +141,7 @@ public class ItemBuilder {
 	}
 	
 	public ItemBuilder durability(int durability) {
-		stack_.setDurability((short)durability);
-		return this;
+		return durability((short)durability);
 	}
 	
 	/**
@@ -151,24 +156,63 @@ public class ItemBuilder {
 		return this;
 	}
 	
+	/**
+     * Sets material color
+     * Use ItemBuilder.leather(org.bukkit.Color) for leather armor color
+     *
+     * @param color Color of material
+     * 
+     * @return this, for chaining
+     */
+	public ItemBuilder color(DyeColor color) {
+		if(stack_.getData() instanceof Colorable) {
+			((Colorable)stack_.getData()).setColor(color);
+		}
+		return this;
+	}
+	
+	/**
+     * Sets leather armor color
+     *
+     * @param color Color of leather armor
+     * 
+     * @return this, for chaining
+     */
+	public ItemBuilder leather(Color color) {
+		if(stack_.getItemMeta() instanceof LeatherArmorMeta) {
+			LeatherArmorMeta meta = (LeatherArmorMeta)stack_.getItemMeta();
+			meta.setColor(color);
+			stack_.setItemMeta(meta);
+		}
+		return this;
+	}
+	
 
 	public ItemBuilder flag(ItemFlag... flags) {
-		stack_.getItemMeta().addItemFlags(flags);
+		ItemMeta stackMeta = stack_.getItemMeta();
+		stackMeta.addItemFlags(flags);
+		stack_.setItemMeta(stackMeta);
 		return this;
 	}
 	
 	public ItemBuilder unflag(ItemFlag... flags) {
-		stack_.getItemMeta().removeItemFlags(flags);
+		ItemMeta stackMeta = stack_.getItemMeta();
+		stackMeta.removeItemFlags(flags);
+		stack_.setItemMeta(stackMeta);
 		return this;
 	}
 	
 	public ItemBuilder display(String displayName) {
-		stack_.getItemMeta().setDisplayName(ChatColor.translateAlternateColorCodes('&', displayName));
+		ItemMeta stackMeta = stack_.getItemMeta();
+		stackMeta.setDisplayName(Text.colorize(displayName));
+		stack_.setItemMeta(stackMeta);
 		return this;
 	}
 	
 	public ItemBuilder lore(String... lore) {
-		stack_.getItemMeta().setLore(Arrays.asList(lore));
+		ItemMeta stackMeta = stack_.getItemMeta();
+		stackMeta.setLore(Arrays.asList(Text.colorizeList(lore)));
+		stack_.setItemMeta(stackMeta);
 		return this;
 	}
 }

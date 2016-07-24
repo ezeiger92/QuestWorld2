@@ -11,6 +11,7 @@ import me.mrCookieSlime.CSCoreLibPlugin.general.Chat.TellRawMessage;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Chat.TellRawMessage.ClickAction;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Chat.TellRawMessage.HoverAction;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
+import me.mrCookieSlime.QuestWorld.utils.Text;
 
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -114,11 +115,11 @@ public class Party {
 		QuestWorld.getInstance().getLocalization().sendTranslation(p, "party.invitation", false, new Variable("%name%", Bukkit.getOfflinePlayer(leader).getName()));
 		
 		new TellRawMessage()
-		.addText("§a§lACCEPT")
-		.addHoverEvent(HoverAction.SHOW_TEXT, "§7Click to accept this Invitation")
+		.addText(Text.colorize("&a&lACCEPT"))
+		.addHoverEvent(HoverAction.SHOW_TEXT, Text.colorize("&7Click to accept this Invitation"))
 		.addClickEvent(ClickAction.RUN_COMMAND, "/quests accept " + leader)
-		.addText(" §4§lDENY")
-		.addHoverEvent(HoverAction.SHOW_TEXT, "§7Click to deny this Invitation")
+		.addText(Text.colorize(" &4&lDENY"))
+		.addHoverEvent(HoverAction.SHOW_TEXT, Text.colorize("&7Click to deny this Invitation"))
 		.send(p);
 		
 		p.sendMessage("");

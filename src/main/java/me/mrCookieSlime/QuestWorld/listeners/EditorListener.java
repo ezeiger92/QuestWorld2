@@ -8,6 +8,7 @@ import me.mrCookieSlime.QuestWorld.quests.QBDialogue;
 import me.mrCookieSlime.QuestWorld.quests.Quest;
 import me.mrCookieSlime.QuestWorld.quests.QuestBook;
 import me.mrCookieSlime.QuestWorld.quests.QuestMission;
+import me.mrCookieSlime.QuestWorld.utils.Text;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -92,7 +93,7 @@ public class EditorListener implements Listener {
 		
 		case KILL_NAMED: {
 			QuestMission mission = (QuestMission) input.getValue();
-			mission.setEntityName(e.getMessage().replaceAll("§", "&"));
+			mission.setEntityName(Text.decolor(e.getMessage()));
 			QuestWorld.getInstance().getLocalization().sendTranslation(e.getPlayer(), "editor.renamed-kill-type", true);
 			QuestWorld.getInstance().removeInput(e.getPlayer().getUniqueId());
 			e.setCancelled(true);
@@ -102,7 +103,7 @@ public class EditorListener implements Listener {
 		
 		case CITIZEN: {
 			QuestMission mission = (QuestMission) input.getValue();
-			mission.setEntityName(e.getMessage().replaceAll("§", "&"));
+			mission.setEntityName(Text.decolor(e.getMessage()));
 			QuestWorld.getInstance().getLocalization().sendTranslation(e.getPlayer(), "editor.renamed-citizen", true);
 			QuestWorld.getInstance().removeInput(e.getPlayer().getUniqueId());
 			e.setCancelled(true);
@@ -112,7 +113,7 @@ public class EditorListener implements Listener {
 		
 		case LOCATION_NAME: {
 			QuestMission mission = (QuestMission) input.getValue();
-			mission.setEntityName(e.getMessage().replaceAll("§", "&"));
+			mission.setEntityName(Text.decolor(e.getMessage()));
 			QuestWorld.getInstance().getLocalization().sendTranslation(e.getPlayer(), "editor.renamed-location", true);
 			QuestWorld.getInstance().removeInput(e.getPlayer().getUniqueId());
 			e.setCancelled(true);

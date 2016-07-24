@@ -17,6 +17,7 @@ import me.mrCookieSlime.QuestWorld.quests.QuestBook;
 import me.mrCookieSlime.QuestWorld.quests.QuestManager;
 import me.mrCookieSlime.QuestWorld.quests.QuestMission;
 import me.mrCookieSlime.QuestWorld.quests.QuestStatus;
+import me.mrCookieSlime.QuestWorld.utils.Text;
 import net.citizensnpcs.api.event.NPCDeathEvent;
 import net.citizensnpcs.api.event.NPCRightClickEvent;
 
@@ -62,8 +63,8 @@ public class CitizensListener implements Listener {
 									lore.addText(task.getLore());
 									lore.color(ChatColor.DARK_AQUA);
 									lore.addText("\n\n    ");
-									lore.addText("§7( §a§l\u2714 §7)");
-									lore.addHoverEvent(HoverAction.SHOW_TEXT, "§7Click to accept this Quest");
+									lore.addText(Text.colorize("&7( &a&l\u2714 &7)"));
+									lore.addHoverEvent(HoverAction.SHOW_TEXT, Text.colorize("&7Click to accept this Quest"));
 									lore.addClickEvent(new PlayerRunnable(3) {
 										
 										@Override
@@ -72,8 +73,8 @@ public class CitizensListener implements Listener {
 										}
 									});
 									lore.addText("      ");
-									lore.addText("§7( §4§l\u2718 §7)");
-									lore.addHoverEvent(HoverAction.SHOW_TEXT, "§7Click to do this Quest later");
+									lore.addText(Text.colorize("&7( &4&l\u2718 &7)"));
+									lore.addHoverEvent(HoverAction.SHOW_TEXT, Text.colorize("&7Click to do this Quest later"));
 									lore.addClickEvent(new PlayerRunnable(3) {
 										
 										@Override

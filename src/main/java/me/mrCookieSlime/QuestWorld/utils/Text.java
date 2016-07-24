@@ -20,6 +20,15 @@ public class Text {
 		return sb.toString();
 	}
 	
+	public static String[] colorizeList(String... inputs) {
+		String[] output = new String[inputs.length];
+		
+		for(int i = 0; i < inputs.length; ++i)
+			output[i] = colorize(inputs[i]);
+		
+		return output;
+	}
+	
 	public static String decolor(String input) {
 		return input.replace(colorChar, dummyChar);
 	}
@@ -31,5 +40,14 @@ public class Text {
 			sb.append(decolor(input));
 		
 		return sb.toString();
+	}
+	
+	public static String[] decolorList(String... inputs) {
+		String[] output = new String[inputs.length];
+		
+		for(int i = 0; i < inputs.length; ++i)
+			output[i] = decolor(inputs[i]);
+		
+		return output;
 	}
 }
