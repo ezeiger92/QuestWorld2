@@ -13,9 +13,10 @@ import me.mrCookieSlime.CSCoreLibPlugin.Configuration.Variable;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.MenuHelper;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.MenuHelper.ChatHandler;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.Item.CustomItem;
-import me.mrCookieSlime.CSCoreLibPlugin.general.audio.Soundboard;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.quests.MissionType.SubmissionType;
+import me.mrCookieSlime.QuestWorld.utils.ItemBuilder;
+import me.mrCookieSlime.QuestWorld.utils.Text;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
 
@@ -100,7 +101,7 @@ public class QuestMission extends QWObject {
 	public ItemStack getItem() {
 		switch (type.getSubmissionType()) {
 		case ENTITY:
-			return new MaterialData(Material.MONSTER_EGG, (byte) entity.getTypeId()).toItemStack(1);
+			return new ItemBuilder(Material.MONSTER_EGG).mob(entity).display("&7Entity Type: &r" + Text.niceName(entity.name())).get();
 		case ITEM:
 		case BLOCK:
 		case CITIZENS_ITEM:
@@ -245,7 +246,7 @@ public class QuestMission extends QWObject {
 				else {
 					dialogue.add(message);
 					addDialogueLine(p, path);
-					p.playSound(p.getLocation(), Soundboard.getLegacySounds("ENTITY_PLAYER_LEVELUP", "LEVEL_UP"), 1F, 1F);
+					QuestWorld.getSounds().DialogAdd().playTo(p);
 				}
 				return true;
 			}

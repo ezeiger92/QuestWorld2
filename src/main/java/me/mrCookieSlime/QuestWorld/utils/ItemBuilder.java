@@ -2,18 +2,23 @@ package me.mrCookieSlime.QuestWorld.utils;
 
 import java.util.Arrays;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
+import org.bukkit.SkullType;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
+import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.material.Colorable;
 
 public class ItemBuilder {
-	private ItemStack stack_;
+	private ItemStack metaHolderStack;
+	private ItemStack resultStack;
 	
 	/**
      * Constructs an ItemBuilder.
@@ -21,7 +26,8 @@ public class ItemBuilder {
      * @param stack Base item to work with
      */
 	public ItemBuilder(ItemStack stack) {
-		stack_ = new ItemStack(stack);
+		resultStack = new ItemStack(stack);
+		metaHolderStack = resultStack.clone();
 	}
 	
 	/**
@@ -30,7 +36,8 @@ public class ItemBuilder {
      * @param type Material of item
      */
 	public ItemBuilder(Material type) {
-		stack_ = new ItemStack(type);
+		resultStack = new ItemStack(type);
+		metaHolderStack = resultStack.clone();
 	}
 	
 	/**
@@ -40,7 +47,8 @@ public class ItemBuilder {
      * @param amount Amount of material
      */
 	public ItemBuilder(Material type, int amount) {
-		stack_ = new ItemStack(type, amount);
+		resultStack = new ItemStack(type, amount);
+		metaHolderStack = resultStack.clone();
 	}
 	
 	
@@ -53,11 +61,41 @@ public class ItemBuilder {
      * @param durability Stack durability
      */
 	public ItemBuilder(Material type, int amount, short durability) {
-		stack_ = new ItemStack(type, amount, durability);
+		resultStack = new ItemStack(type, amount, durability);
+		metaHolderStack = resultStack.clone();
 	}
 	
 	public ItemBuilder(Material type, int amount, int durability) {
 		this(type, amount, (short)durability);
+	}
+	
+	public ItemBuilder(SkullType type) {
+		this(Material.SKULL_ITEM);
+		skull(type);
+	}
+	
+	private void build() {
+		ItemMeta metaHolder = metaHolderStack.getItemMeta();
+		ItemMeta metaResult = resultStack.getItemMeta();
+		
+		if(metaHolder instanceof LeatherArmorMeta) {
+			LeatherArmorMeta lamHolder = (LeatherArmorMeta)metaHolder;
+			LeatherArmorMeta lamResult = (LeatherArmorMeta)metaResult;
+			lamResult.setColor(lamHolder.getColor());
+		}
+		
+		if(metaHolder instanceof SkullMeta) {
+			SkullMeta smHolder = (SkullMeta)metaHolder;
+			SkullMeta smResult = (SkullMeta)metaResult;
+			smResult.setOwner(smHolder.getOwner());
+		}
+		
+		metaResult.addItemFlags(metaHolder.getItemFlags().toArray(new ItemFlag[0]));
+		metaResult.setDisplayName(metaHolder.getDisplayName());
+		metaResult.setLore(metaHolder.getLore());
+
+		resultStack.setItemMeta(metaResult);
+		resultStack.addEnchantments(metaHolderStack.getEnchantments());
 	}
 	
 	/**
@@ -66,7 +104,8 @@ public class ItemBuilder {
      * @return stack
      */
 	public ItemStack get() {
-		return stack_;
+		build();
+		return resultStack;
 	}
 	
 	/**
@@ -75,7 +114,8 @@ public class ItemBuilder {
      * @return stack
      */
 	public ItemStack getNew() {
-		return new ItemStack(stack_);
+		build();
+		return resultStack.clone();
 	}
 	
 	/**
@@ -87,7 +127,7 @@ public class ItemBuilder {
      * @return this, for chaining
      */
 	public ItemBuilder enchant(Enchantment ench, int level) {
-		stack_.addEnchantment(ench, level);
+		metaHolderStack.addEnchantment(ench, level);
 		return this;
 	}
 	
@@ -100,7 +140,7 @@ public class ItemBuilder {
      * @return this, for chaining
      */
 	public ItemBuilder forceEnchant(Enchantment ench, int level) {
-		stack_.addUnsafeEnchantment(ench, level);
+		metaHolderStack.addUnsafeEnchantment(ench, level);
 		return this;
 	}
 	
@@ -112,7 +152,7 @@ public class ItemBuilder {
      * @return this, for chaining
      */
 	public ItemBuilder disenchant(Enchantment ench) {
-		stack_.removeEnchantment(ench);
+		metaHolderStack.removeEnchantment(ench);
 		return this;
 	}
 	
@@ -124,7 +164,7 @@ public class ItemBuilder {
      * @return this, for chaining
      */
 	public ItemBuilder amount(int amount) {
-		stack_.setAmount(amount);
+		resultStack.setAmount(amount);
 		return this;
 	}
 	
@@ -136,7 +176,7 @@ public class ItemBuilder {
      * @return this, for chaining
      */
 	public ItemBuilder durability(short durability) {
-		stack_.setDurability(durability);
+		resultStack.setDurability(durability);
 		return this;
 	}
 	
@@ -152,7 +192,8 @@ public class ItemBuilder {
      * @return this, for chaining
      */
 	public ItemBuilder type(Material type) {
-		stack_.setType(type);
+		resultStack.setType(type);
+		metaHolderStack.setType(type);
 		return this;
 	}
 	
@@ -165,10 +206,62 @@ public class ItemBuilder {
      * @return this, for chaining
      */
 	public ItemBuilder color(DyeColor color) {
-		if(stack_.getData() instanceof Colorable) {
-			((Colorable)stack_.getData()).setColor(color);
+		if(resultStack.getData() instanceof Colorable) {
+			Colorable c = (Colorable)resultStack.getData();
+			c.setColor(color);
 		}
+		
+		legacyMaterialData(color);
 		return this;
+	}
+	
+	public ItemBuilder skull(SkullType type) {
+		if(resultStack.getType() == Material.SKULL_ITEM) {
+			durability(type.ordinal());
+		}
+		
+		return this;
+	}
+	
+	public ItemBuilder skull(String playerName) {
+		skull(SkullType.PLAYER);
+		
+		if(metaHolderStack.getItemMeta() instanceof SkullMeta) {
+			SkullMeta smHolder = (SkullMeta)metaHolderStack.getItemMeta();
+			smHolder.setOwner(playerName);
+			metaHolderStack.setItemMeta(smHolder);
+		}
+		
+		return this;
+	}
+
+	@SuppressWarnings("deprecation")
+	private void legacyMaterialData(DyeColor color) {
+		if(resultStack.getType() == Material.INK_SACK)
+			durability(color.getDyeData());
+		else
+			durability(color.getData());
+	}
+	
+	@SuppressWarnings("deprecation")
+	public ItemBuilder tag(ItemTag tag) {
+		Bukkit.getUnsafe().modifyItemStack(resultStack, tag.toString());
+		return this;
+	}
+	
+	public ItemBuilder mob(EntityOther mob) {
+		legacyEggData(mob.getEntity());
+		return tag(new ItemTag(EntityTag.from(mob)));
+	}
+	
+	public ItemBuilder mob(EntityType mob) {
+		legacyEggData(mob);
+		return tag(new ItemTag(EntityTag.from(mob)));
+	}
+
+	@SuppressWarnings("deprecation")
+	private void legacyEggData(EntityType entity) {
+		durability(entity.getTypeId());
 	}
 	
 	/**
@@ -179,40 +272,40 @@ public class ItemBuilder {
      * @return this, for chaining
      */
 	public ItemBuilder leather(Color color) {
-		if(stack_.getItemMeta() instanceof LeatherArmorMeta) {
-			LeatherArmorMeta meta = (LeatherArmorMeta)stack_.getItemMeta();
+		if(metaHolderStack.getItemMeta() instanceof LeatherArmorMeta) {
+			LeatherArmorMeta meta = (LeatherArmorMeta)metaHolderStack.getItemMeta();
 			meta.setColor(color);
-			stack_.setItemMeta(meta);
+			metaHolderStack.setItemMeta(meta);
 		}
 		return this;
 	}
 	
 
 	public ItemBuilder flag(ItemFlag... flags) {
-		ItemMeta stackMeta = stack_.getItemMeta();
+		ItemMeta stackMeta = metaHolderStack.getItemMeta();
 		stackMeta.addItemFlags(flags);
-		stack_.setItemMeta(stackMeta);
+		metaHolderStack.setItemMeta(stackMeta);
 		return this;
 	}
 	
 	public ItemBuilder unflag(ItemFlag... flags) {
-		ItemMeta stackMeta = stack_.getItemMeta();
+		ItemMeta stackMeta = metaHolderStack.getItemMeta();
 		stackMeta.removeItemFlags(flags);
-		stack_.setItemMeta(stackMeta);
+		metaHolderStack.setItemMeta(stackMeta);
 		return this;
 	}
 	
 	public ItemBuilder display(String displayName) {
-		ItemMeta stackMeta = stack_.getItemMeta();
+		ItemMeta stackMeta = metaHolderStack.getItemMeta();
 		stackMeta.setDisplayName(Text.colorize(displayName));
-		stack_.setItemMeta(stackMeta);
+		metaHolderStack.setItemMeta(stackMeta);
 		return this;
 	}
 	
 	public ItemBuilder lore(String... lore) {
-		ItemMeta stackMeta = stack_.getItemMeta();
+		ItemMeta stackMeta = metaHolderStack.getItemMeta();
 		stackMeta.setLore(Arrays.asList(Text.colorizeList(lore)));
-		stack_.setItemMeta(stackMeta);
+		metaHolderStack.setItemMeta(stackMeta);
 		return this;
 	}
 }

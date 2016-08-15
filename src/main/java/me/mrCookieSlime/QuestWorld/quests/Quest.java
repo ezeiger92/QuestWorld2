@@ -8,7 +8,6 @@ import me.mrCookieSlime.CSCoreLibPlugin.Configuration.Config;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.InvUtils;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.Item.CustomItem;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Player.PlayerInventory;
-import me.mrCookieSlime.CSCoreLibPlugin.general.audio.Soundboard;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.utils.Text;
 
@@ -304,10 +303,10 @@ public class Quest extends QWObject {
 	
 	public void handoutReward(Player p) {
 		for (ItemStack reward: rewards) {
-			if (InvUtils.fits(p.getInventory(), reward)) p.getInventory().addItem(reward.clone());
+			if (InvUtils.fits(p.getInventory(), reward.clone())) p.getInventory().addItem(reward.clone());
 			else p.getWorld().dropItemNaturally(p.getLocation(), reward.clone());
 		}
-		p.playSound(p.getLocation(), Soundboard.getLegacySounds("ENTITY_ITEM_PICKUP", "ITEM_PICKUP"), 1F, 1F);
+		QuestWorld.getSounds().QuestReward().playTo(p);
 		PlayerInventory.update(p);
 		
 		if (xp > 0) p.setLevel(p.getLevel() + xp);

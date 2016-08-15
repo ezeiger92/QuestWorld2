@@ -28,6 +28,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
+import org.bukkit.inventory.ItemStack;
 
 public class CitizensListener implements Listener {
 
@@ -37,7 +38,25 @@ public class CitizensListener implements Listener {
 	
 	public static Map<UUID, QuestMission> link = new HashMap<UUID, QuestMission>();
 	
-	@SuppressWarnings("deprecation")
+	public static ItemStack getActiveHandItem(Player p) {
+		org.bukkit.inventory.PlayerInventory pi = p.getInventory();
+		
+		ItemStack result = pi.getItemInMainHand();
+		if(result == null)
+			result = pi.getItemInOffHand();
+		
+		return result;
+	}
+	
+	public static void setActiveHandItem(Player p, ItemStack is) {
+		org.bukkit.inventory.PlayerInventory pi = p.getInventory();
+		
+		if(pi.getItemInMainHand() == null && pi.getItemInOffHand() != null)
+			pi.setItemInOffHand(is);
+		else
+			pi.setItemInMainHand(is);
+	}
+	
 	@EventHandler
 	public void onInteract(NPCRightClickEvent e) {
 		Player p = e.getClicker();
@@ -83,10 +102,10 @@ public class CitizensListener implements Listener {
 									});
 									new CustomBookOverlay("Quest", "TheBusyBiscuit", lore).open(p);
 								}
-								else if (task.getType().getID().equals("CITIZENS_SUBMIT") && e.getNPC().getId() == task.getCitizenID() && QuestWorld.getInstance().isItemSimiliar(p.getInventory().getItemInHand(), task.getItem())) {
-									int rest = QuestWorld.getInstance().getManager(p).addProgress(task, p.getInventory().getItemInHand().getAmount());
-									if (rest > 0) p.getInventory().setItemInHand(new CustomItem(p.getInventory().getItemInHand(), rest));
-									else p.getInventory().setItemInHand(null);
+								else if (task.getType().getID().equals("CITIZENS_SUBMIT") && e.getNPC().getId() == task.getCitizenID() && QuestWorld.getInstance().isItemSimiliar(getActiveHandItem(p), task.getItem())) {
+									int rest = QuestWorld.getInstance().getManager(p).addProgress(task, getActiveHandItem(p).getAmount());
+									if (rest > 0) setActiveHandItem(p, new CustomItem(getActiveHandItem(p), rest));
+									else setActiveHandItem(p, null);
 									
 									PlayerInventory.update(p);
 								}

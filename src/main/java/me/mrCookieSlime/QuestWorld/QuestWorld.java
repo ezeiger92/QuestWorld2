@@ -2,6 +2,7 @@ package me.mrCookieSlime.QuestWorld;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -34,6 +35,7 @@ import me.mrCookieSlime.QuestWorld.quests.QuestManager;
 import me.mrCookieSlime.QuestWorld.quests.QuestMission;
 import me.mrCookieSlime.QuestWorld.quests.QuestStatus;
 import me.mrCookieSlime.QuestWorld.utils.ItemBuilder;
+import me.mrCookieSlime.QuestWorld.utils.Sounds;
 import net.citizensnpcs.api.npc.NPC;
 import net.milkbowl.vault.economy.Economy;
 
@@ -58,7 +60,7 @@ public class QuestWorld extends JavaPlugin implements Listener {
 	
 	private Map<String, MissionType> types = new HashMap<String, MissionType>();
 	
-	Config cfg, book;
+	Config cfg, book, sounds;
 	List<Category> categories;
 	Map<Integer, Category> categoryIDs;
 	
@@ -68,6 +70,8 @@ public class QuestWorld extends JavaPlugin implements Listener {
 	
 	Localization local;
 	Economy economy;
+	
+	Sounds eventSounds;
 	
 	boolean citizens;
 	
@@ -227,9 +231,28 @@ public class QuestWorld extends JavaPlugin implements Listener {
 			book.setDefaultValue("task.locked", "&4&lLOCKED");
 			book.save();
 			
+			sounds = new Config("plugins/QuestWorld/sounds.yml");
+			sounds.setDefaultValue("sounds.quest.click.list", Arrays.asList("ENTITY_PLAYER_LEVELUP", "LEVEL_UP"));
+			sounds.setDefaultValue("sounds.quest.click.pitch", 0.2F);
+			sounds.setDefaultValue("sounds.quest.mission-submit.list", Arrays.asList("ENTITY_EXPERIENCE_ORB_PICKUP"));
+			sounds.setDefaultValue("sounds.quest.mission-submit.pitch", 0.7F);
+			sounds.setDefaultValue("sounds.quest.mission-submit.pitch", 0.3F);
+			sounds.setDefaultValue("sounds.quest.mission-reject.list", Arrays.asList("BLOCK_NOTE_SNARE", "NOTE_SNARE"));
+			sounds.setDefaultValue("sounds.quest.reward.list", Arrays.asList("ENTITY_ITEM_PICKUP", "ITEM_PICKUP"));
+			sounds.setDefaultValue("sounds.editor.click.list", Arrays.asList("UI_BUTTON_CLICK", "CLICK"));
+			sounds.setDefaultValue("sounds.editor.click.pitch", 0.2F);
+			sounds.setDefaultValue("sounds.editor.dialog-add.list", Arrays.asList("ENTITY_PLAYER_LEVELUP", "LEVEL_UP"));
+			sounds.setDefaultValue("sounds.editor.destructive-action-warning.list", Arrays.asList("NOTE_PLING", "BLOCK_NOTE_HARP"));
+			sounds.setDefaultValue("sounds.editor.destructive-action-click.list", Arrays.asList("ENTITY_BAT_DEATH", "BAT_DEATH"));
+			sounds.setDefaultValue("sounds.editor.destructive-action-click.pitch", 0.5F);
+			sounds.setDefaultValue("sounds.editor.destructive-action-click.volume", 0.5F);
+			sounds.setDefaultValue("sounds.party.click.list", Arrays.asList("BLOCK_NOTE_PLING", "NOTE_PLING"));
+			sounds.setDefaultValue("sounds.party.click.pitch", 0.2F);
+			sounds.save();
+			
 			getCommand("quests").setExecutor(new QuestsCommand());
 			getCommand("questeditor").setExecutor(new EditorCommand());
-			
+
 			new EditorListener(this);
 			new PlayerListener(this);
 			new TaskListener(this);
@@ -289,6 +312,8 @@ public class QuestWorld extends JavaPlugin implements Listener {
 					}
 				}, 0L, 12L);
 			}
+			
+			eventSounds = new Sounds();
 		}
 	}
 	
@@ -425,36 +450,19 @@ public class QuestWorld extends JavaPlugin implements Listener {
 		return local;
 	}
 	
-	@SuppressWarnings("deprecation")
 	public boolean isItemSimiliar(ItemStack item, ItemStack SFitem) {
-		boolean similiar = false;
-		if (item != null && SFitem != null) {
-			if (item.getType() == SFitem.getType() && item.getData().getData() == SFitem.getData().getData()) {
-				if (item.hasItemMeta() && SFitem.hasItemMeta()) {
-					if (item.getItemMeta().hasDisplayName() && SFitem.getItemMeta().hasDisplayName()) {
-						if (item.getItemMeta().getDisplayName().equals(SFitem.getItemMeta().getDisplayName())) {
-							if (item.getItemMeta().hasLore() && SFitem.getItemMeta().hasLore()) {
-								if (item.getItemMeta().getLore().toString().equals(SFitem.getItemMeta().getLore().toString())) similiar = true;
-							}
-							else if (!item.getItemMeta().hasLore() && !SFitem.getItemMeta().hasLore()) similiar = true;
-						}
-					}
-					else if (!item.getItemMeta().hasDisplayName() && !SFitem.getItemMeta().hasDisplayName()) {
-						if (item.getItemMeta().hasLore() && SFitem.getItemMeta().hasLore()) {
-							if (item.getItemMeta().getLore().toString().equals(SFitem.getItemMeta().getLore().toString())) similiar = true;
-						}
-						else if (!item.getItemMeta().hasLore() && !SFitem.getItemMeta().hasLore()) similiar = true;
-					}
-				} else if (!item.hasItemMeta() && !SFitem.hasItemMeta()) similiar = true;
-			}
-		}
+		if(item == null || SFitem == null)
+			return item == SFitem;
 		
-		if (item == null && SFitem == null) similiar = true;
-		return similiar;
+		return item.isSimilar(SFitem);
 	}
 
 	public Config getCfg() {
 		return cfg;
+	}
+	
+	public Config getSoundCfg() {
+		return sounds;
 	}
 	
 	public Economy getEconomy() {
@@ -467,5 +475,9 @@ public class QuestWorld extends JavaPlugin implements Listener {
 	
 	public String getBookLocal(String input) {
 		return ChatColor.translateAlternateColorCodes('&', book.getString(input));
+	}
+	
+	public static Sounds getSounds() {
+		return instance.eventSounds;
 	}
 }

@@ -59,17 +59,28 @@ public class Party {
 		save();
 	}
 	
-	@SuppressWarnings("deprecation")
 	public void removePlayer(String name) {
+		OfflinePlayer target = null;
+		List<Player> existingParty = new ArrayList<Player>();
+		
 		for (UUID member: getPlayers()) {
 			Player p = Bukkit.getPlayer(member);
-			if (p != null) QuestWorld.getInstance().getLocalization().sendTranslation(p, "party.kicked", true, new Variable("%name%", name));
+			if (p != null) {
+				existingParty.add(p);
+				if(p.getName().equalsIgnoreCase(name))
+					target = p;
+			}
 		}
 		
-		OfflinePlayer player = Bukkit.getOfflinePlayer(name);
-		members.remove(player.getUniqueId());
-		QuestWorld.getInstance().getManager(player).toConfig().setValue("party.associated", null);
-		save();
+		if(target != null) {
+			for(Player p : existingParty) {
+				QuestWorld.getInstance().getLocalization().sendTranslation(p, "party.kicked", true, new Variable("%name%", name));
+			}
+			
+			members.remove(target.getUniqueId());
+			QuestWorld.getInstance().getManager(target).toConfig().setValue("party.associated", null);
+			save();
+		}
 	}
 	
 	public void abandon() {

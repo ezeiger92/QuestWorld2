@@ -9,32 +9,33 @@ import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu.MenuClickHandler;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu.MenuOpeningHandler;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ClickAction;
-import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.Item.CustomItem;
-import me.mrCookieSlime.CSCoreLibPlugin.general.audio.Soundboard;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
+import me.mrCookieSlime.QuestWorld.utils.ItemBuilder;
 import me.mrCookieSlime.QuestWorld.utils.Text;
 
+import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.material.MaterialData;
 
 public class QBDialogue {
 	
-	@SuppressWarnings("deprecation")
+
 	public static void openDeletionConfirmation(Player p, final QWObject q) {
 		ChestMenu menu = new ChestMenu(Text.colorize("&4&lAre you Sure?"));
 		menu.addMenuOpeningHandler(new MenuOpeningHandler() {
 			
 			@Override
 			public void onOpen(Player p) {
-				p.playSound(p.getLocation(), Soundboard.getLegacySounds("NOTE_PLING", "BLOCK_NOTE_HARP"), 1F, 1F);
+				QuestWorld.getSounds().DestructiveWarning().playTo(p);
 			}
 		});
 		
-		menu.addItem(6, new CustomItem(new MaterialData(Material.WOOL, (byte) 14), Text.colorize("&cNo")));
+		ItemBuilder wool = new ItemBuilder(Material.WOOL);
+		
+		menu.addItem(6, wool.color(DyeColor.RED).display("&cNo").getNew());
 		menu.addMenuClickHandler(6, new MenuClickHandler() {
 			
 			@Override
@@ -51,11 +52,13 @@ public class QBDialogue {
 		else if (q instanceof Category) tag += "your Category \"" + ((Category) q).getName() + "\"";
 		else if (q instanceof QuestMission) tag += "your Task";
 		
-		menu.addItem(2, new CustomItem(new MaterialData(Material.WOOL, (byte) 5), Text.colorize("&aYes I am sure"), "", Text.colorize("&rThis will delete"), tag));
+		menu.addItem(2, wool.color(DyeColor.LIME).display("&aYes I am sure").lore("", "&rThis will delete", tag).getNew());
 		menu.addMenuClickHandler(2, new MenuClickHandler() {
 			
 			@Override
 			public boolean onClick(Player p, int arg1, ItemStack arg2, ClickAction arg3) {
+				QuestWorld.getSounds().DestructiveClick().playTo(p);
+				QuestWorld.getSounds().muteNext();
 				if (q instanceof Category) {
 					QuestWorld.getInstance().unregisterCategory((Category) q);
 					p.closeInventory();
@@ -71,7 +74,6 @@ public class QBDialogue {
 				}
 				else if (q instanceof QuestMission) {
 					((QuestMission) q).getQuest().removeMission((QuestMission) q);
-					QuestBook.openQuestEditor(p, ((QuestMission) q).getQuest());
 					p.closeInventory();
 					QuestBook.openQuestEditor(p, ((QuestMission) q).getQuest());
 				}
@@ -79,19 +81,22 @@ public class QBDialogue {
 			}
 		});
 		
-		menu.build().open(p);
-	}@SuppressWarnings("deprecation")
+		menu.open(p);
+	}
+
 	public static void openResetConfirmation(Player p, final Quest q) {
 		ChestMenu menu = new ChestMenu(Text.colorize("&4&lAre you Sure?"));
 		menu.addMenuOpeningHandler(new MenuOpeningHandler() {
 			
 			@Override
 			public void onOpen(Player p) {
-				p.playSound(p.getLocation(), Soundboard.getLegacySounds("NOTE_PLING", "BLOCK_NOTE_HARP"), 1F, 1F);
+				QuestWorld.getSounds().DestructiveWarning().playTo(p);
 			}
 		});
 		
-		menu.addItem(6, new CustomItem(new MaterialData(Material.WOOL, (byte) 14), Text.colorize("&cNo")));
+		ItemBuilder wool = new ItemBuilder(Material.WOOL);
+		
+		menu.addItem(6, wool.color(DyeColor.RED).display("&cNo").getNew());
 		menu.addMenuClickHandler(6, new MenuClickHandler() {
 			
 			@Override
@@ -101,7 +106,7 @@ public class QBDialogue {
 			}
 		});
 		
-		menu.addItem(2, new CustomItem(new MaterialData(Material.WOOL, (byte) 5), Text.colorize("&aYes I am sure"), "", Text.colorize("&rThis will reset this Quest's Database")));
+		menu.addItem(2, wool.color(DyeColor.LIME).display("&aYes I am sure").lore("", "&rThis will reset this Quest's Database").getNew());
 		menu.addMenuClickHandler(2, new MenuClickHandler() {
 			
 			@Override
@@ -112,55 +117,45 @@ public class QBDialogue {
 			}
 		});
 		
-		menu.build().open(p);
+		menu.open(p);
 	}
-
-	@SuppressWarnings("deprecation")
+	
 	public static void openQuestMissionEntityEditor(Player p, final QuestMission mission) {
 		final ChestMenu menu = new ChestMenu(mission.getQuest().getName());
 		menu.addMenuOpeningHandler(new MenuOpeningHandler() {
 			
 			@Override
 			public void onOpen(Player p) {
-				p.playSound(p.getLocation(), Soundboard.getLegacySounds("UI_BUTTON_CLICK", "CLICK"), 1F, 0.2F);
+				QuestWorld.getSounds().EditorClick().playTo(p);
 			}
 		});
 		
-		int[] entities = {50, 51, 52, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 120, 53};
-		int index = 1;
+		List<EntityType> entities = new ArrayList<EntityType>();
+		entities.add(EntityType.PLAYER);
 		
-		menu.addItem(0, new CustomItem(new MaterialData(Material.MONSTER_EGG, (byte) -1), "&7Entity Type: &rPLAYER", "", Text.colorize("&e> Click to select")));
-		menu.addMenuClickHandler(0, new MenuClickHandler() {
-			
-			@Override
-			public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-				mission.setEntity(EntityType.PLAYER);
-				QuestBook.openQuestMissionEditor(p, mission);
-				return false;
-			}
-		});
+		for(EntityType ent : EntityType.values()) {
+			if(ent.isAlive() && ent != EntityType.PLAYER && ent != EntityType.ARMOR_STAND)
+				entities.add(ent);
+		}
+
+		ItemBuilder spawnEgg = new ItemBuilder(Material.MONSTER_EGG).lore("", "&e> Click to select");
 		
-		for (final int i: entities) {
-			try {
-				final EntityType entity = EntityType.fromId(i);
-				if (entity != null) {
-					menu.addItem(index, new CustomItem(new MaterialData(Material.MONSTER_EGG, (byte) i), "&7Entity Type: &r" + entity.toString(), "", Text.colorize("&e> Click to select")));
-					menu.addMenuClickHandler(index, new MenuClickHandler() {
-						
-						@Override
-						public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-							mission.setEntity(entity);
-							QuestBook.openQuestMissionEditor(p, mission);
-							return false;
-						}
-					});
-					index++;
+		int index = 0;
+		for (final EntityType entity: entities) {
+			menu.addItem(index, spawnEgg.mob(entity).display("&7Entity Type: &r" + Text.niceName(entity.name())).getNew());
+			menu.addMenuClickHandler(index, new MenuClickHandler() {
+				
+				@Override
+				public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
+					mission.setEntity(entity);
+					QuestBook.openQuestMissionEditor(p, mission);
+					return false;
 				}
-			} catch(Exception x) {
-			}
+			});
+			index++;
 		}
 		
-		menu.build().open(p);
+		menu.open(p);
 	}
 
 	public static void openCommandEditor(Player p, Quest quest) {
@@ -183,7 +178,7 @@ public class QBDialogue {
 		menu.addMenuOpeningHandler(new MenuOpeningHandler() {
 			@Override
 			public void onOpen(Player p) {
-				p.playSound(p.getLocation(), Soundboard.getLegacySounds("UI_BUTTON_CLICK", "CLICK"), 1F, 0.2F);
+				QuestWorld.getSounds().EditorClick().playTo(p);
 			}
 		});
 		
@@ -218,7 +213,7 @@ public class QBDialogue {
 			
 			@Override
 			public void onOpen(Player p) {
-				p.playSound(p.getLocation(), Soundboard.getLegacySounds("UI_BUTTON_CLICK", "CLICK"), 1F, 0.2F);
+				QuestWorld.getSounds().EditorClick().playTo(p);
 			}
 		});
 		

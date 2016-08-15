@@ -1,5 +1,8 @@
 package me.mrCookieSlime.QuestWorld.utils;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.bukkit.ChatColor;
 
 public class Text {
@@ -49,5 +52,18 @@ public class Text {
 			output[i] = decolor(inputs[i]);
 		
 		return output;
+	}
+	
+	public static String niceName(String INPUT) {
+		String Output = INPUT.replace('_', ' ').trim().toLowerCase();
+		Pattern p = Pattern.compile("\\b[a-z]");
+		Matcher m = p.matcher(Output);
+		StringBuffer sb = new StringBuffer();
+		while (m.find()) {
+			m.appendReplacement(sb, Output.substring(m.start(), m.end()).toUpperCase());
+		}
+		m.appendTail(sb);
+		
+		return sb.toString();
 	}
 }

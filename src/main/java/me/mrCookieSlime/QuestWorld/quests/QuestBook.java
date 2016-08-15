@@ -13,7 +13,6 @@ import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.MenuHelper.ChatHandler
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.Item.CustomItem;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Player.PlayerInventory;
 import me.mrCookieSlime.CSCoreLibPlugin.general.String.StringUtils;
-import me.mrCookieSlime.CSCoreLibPlugin.general.audio.Soundboard;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.hooks.CitizensListener;
 import me.mrCookieSlime.QuestWorld.listeners.Input;
@@ -26,17 +25,16 @@ import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.SkullType;
 import org.bukkit.World;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.material.MaterialData;
 
 public class QuestBook {
 	
-	@SuppressWarnings("deprecation")
 	public static void openMainMenu(Player p) {
 		QuestWorld.getInstance().getManager(p).update(false);
 		QuestWorld.getInstance().getManager(p).updateLastEntry(null);
@@ -46,7 +44,7 @@ public class QuestBook {
 			
 			@Override
 			public void onOpen(Player p) {
-				p.playSound(p.getLocation(), Soundboard.getLegacySounds("ENTITY_PLAYER_LEVELUP", "LEVEL_UP"), 1F, 0.2F);
+				QuestWorld.getSounds().QuestClick().playTo(p);
 			}
 		});
 		
@@ -102,7 +100,7 @@ public class QuestBook {
 				}
 			}
 		}
-		menu.build().open(p);
+		menu.open(p);
 	}
 	
 	public static void openLastMenu(Player p) {
@@ -120,10 +118,13 @@ public class QuestBook {
 		QuestBook.openMainMenu(p);
 	}
 	
-	@SuppressWarnings("deprecation")
 	private static void addPartyMenuButton(ChestMenu menu, Player p) {
 		if (QuestWorld.getInstance().getCfg().getBoolean("party.enabled")) {
-			menu.addItem(4, new CustomItem(new MaterialData(Material.SKULL_ITEM, (byte) 3), QuestWorld.getInstance().getBookLocal("gui.party"), QuestWorld.getInstance().getManager(p).getProgress(), "", QuestWorld.getInstance().getBookLocal("button.open")));
+			ItemStack skullItem = new ItemBuilder(SkullType.PLAYER)
+				.display(QuestWorld.getInstance().getBookLocal("gui.party"))
+				.lore(QuestWorld.getInstance().getManager(p).getProgress(), "", QuestWorld.getInstance().getBookLocal("button.open"))
+				.get();
+			menu.addItem(4, skullItem);
 			menu.addMenuClickHandler(4, new MenuClickHandler() {
 				
 				@Override
@@ -145,7 +146,6 @@ public class QuestBook {
 		}
 	}
 
-	@SuppressWarnings("deprecation")
 	public static void openPartyMembers(final Player p) {
 		ChestMenu menu = new ChestMenu(QuestWorld.getInstance().getBookLocal("gui.party"));
 		
@@ -153,11 +153,11 @@ public class QuestBook {
 			
 			@Override
 			public void onOpen(Player p) {
-				p.playSound(p.getLocation(), Soundboard.getLegacySounds("BLOCK_NOTE_PLING", "NOTE_PLING"), 1F, 0.2F);
+				QuestWorld.getSounds().PartyClick().playTo(p);
 			}
 		});
-		
-		menu.addItem(4, new CustomItem(new MaterialData(Material.SKULL_ITEM, (byte) 3), QuestWorld.getInstance().getBookLocal("gui.party"), "", QuestWorld.getInstance().getBookLocal("button.back.party")));
+		ItemBuilder skull = new ItemBuilder(SkullType.PLAYER);
+		menu.addItem(4, skull.display(QuestWorld.getInstance().getBookLocal("gui.party")).lore("", QuestWorld.getInstance().getBookLocal("button.back.party")).get());
 		menu.addMenuClickHandler(4, new MenuClickHandler() {
 			
 			@Override
@@ -172,10 +172,8 @@ public class QuestBook {
 			for (int i = 0; i < party.getPlayers().size(); i++) {
 				final OfflinePlayer player = Bukkit.getOfflinePlayer(party.getPlayers().get(i));
 				if (!party.isLeader(p)) {
-					ItemStack item = new CustomItem(new MaterialData(Material.SKULL_ITEM, (byte) 3), "&e" + player.getName(), "", (party.isLeader(player) ? "&4Party Leader": "&eParty Member"));
-					SkullMeta meta = (SkullMeta) item.getItemMeta();
-					meta.setOwner(player.getName());
-					item.setItemMeta(meta);
+					
+					ItemStack item = skull.skull(player.getName()).display("&e" + player.getName()).lore("", (party.isLeader(player) ? "&4Party Leader": "&eParty Member")).get();
 					menu.addItem(i + 9, item);
 					menu.addMenuClickHandler(i + 9, new MenuClickHandler() {
 						
@@ -186,10 +184,10 @@ public class QuestBook {
 					});
 				}
 				else {
-					ItemStack item = new CustomItem(new MaterialData(Material.SKULL_ITEM, (byte) 3), "&e" + player.getName(), "", (party.isLeader(player) ? "&5&lParty Leader": "&e&lParty Member"), "", (party.isLeader(player) ? "": "&7&oClick here to kick this Member"));
-					SkullMeta meta = (SkullMeta) item.getItemMeta();
-					meta.setOwner(player.getName());
-					item.setItemMeta(meta);
+					ItemStack item = skull.skull(player.getName())
+							.display("&e" + player.getName())
+							.lore("", (party.isLeader(player) ? "&5&lParty Leader": "&e&lParty Member"), "", (party.isLeader(player) ? "": "&7&oClick here to kick this Member"))
+							.get();
 					menu.addItem(i + 9, item);
 					menu.addMenuClickHandler(i + 9, new MenuClickHandler() {
 						
@@ -206,10 +204,9 @@ public class QuestBook {
 			}
 		}
 		
-		menu.build().open(p);
+		menu.open(p);
 	}
 
-	@SuppressWarnings("deprecation")
 	public static void openPartyMenu(final Player p) {
 		ChestMenu menu = new ChestMenu(QuestWorld.getInstance().getBookLocal("gui.party"));
 		
@@ -217,7 +214,7 @@ public class QuestBook {
 			
 			@Override
 			public void onOpen(Player p) {
-				p.playSound(p.getLocation(), Soundboard.getLegacySounds("BLOCK_NOTE_PLING", "NOTE_PLING"), 1F, 0.2F);
+				QuestWorld.getSounds().PartyClick().playTo(p);
 			}
 		});
 		
@@ -233,8 +230,10 @@ public class QuestBook {
 		
 		final Party party = QuestWorld.getInstance().getManager(p).getParty();
 		
+		ItemBuilder wool = new ItemBuilder(Material.WOOL);
+		
 		if (party == null) {
-			menu.addItem(9, new CustomItem(new MaterialData(Material.WOOL, (byte) 13), "&a&lCreate a new Party", "", "&rCreates a brand new Party for you", "&rto invite Friends and share your Progress"));
+			menu.addItem(9, wool.color(DyeColor.GREEN).display("&a&lCreate a new Party").lore("", "&rCreates a brand new Party for you", "&rto invite Friends and share your Progress").getNew());
 			menu.addMenuClickHandler(9, new MenuClickHandler() {
 				
 				@Override
@@ -247,7 +246,7 @@ public class QuestBook {
 		}
 		else {
 			if (party.isLeader(p)) {
-				menu.addItem(9, new CustomItem(new MaterialData(Material.WOOL, (byte) 13), "&a&lInvite a Player", "", "&rInvites a Player to your Party", "&rMax. Party Members: &e" + QuestWorld.getInstance().getCfg().getInt("party.max-members")));
+				menu.addItem(9, wool.color(DyeColor.GREEN).display("&a&lInvite a Player").lore("", "&rInvites a Player to your Party", "&rMax. Party Members: &e" + QuestWorld.getInstance().getCfg().getInt("party.max-members")).getNew());
 				menu.addMenuClickHandler(9, new MenuClickHandler() {
 					
 					@Override
@@ -262,7 +261,7 @@ public class QuestBook {
 					}
 				});
 				
-				menu.addItem(17, new CustomItem(new MaterialData(Material.WOOL, (byte) 14), "&4&lDelete your Party", "", "&rDeletes this Party", "&rBe careful with this Option!"));
+				menu.addItem(17, wool.color(DyeColor.RED).display("&4&lDelete your Party").lore("", "&rDeletes this Party", "&rBe careful with this Option!").getNew());
 				menu.addMenuClickHandler(17, new MenuClickHandler() {
 					
 					@Override
@@ -274,7 +273,7 @@ public class QuestBook {
 				});
 			}
 			else {
-				menu.addItem(17, new CustomItem(new MaterialData(Material.WOOL, (byte) 14), "&4&lLeave your Party", "", "&rLeaves this Party", "&rBe careful with this Option!"));
+				menu.addItem(17, wool.color(DyeColor.RED).display("&4&lLeave your Party").lore("", "&rLeaves this Party", "&rBe careful with this Option!").getNew());
 				menu.addMenuClickHandler(17, new MenuClickHandler() {
 					
 					@Override
@@ -285,8 +284,8 @@ public class QuestBook {
 					}
 				});
 			}
-			
-			menu.addItem(13, new CustomItem(new MaterialData(Material.SKULL_ITEM, (byte) 3), "&eMember List", "", "&rShows you all Members of this Party"));
+			ItemStack skullItem = new ItemBuilder(SkullType.PLAYER).display("&eMember List").lore("", "&rShows you all Members of this Party").get();
+			menu.addItem(13, skullItem);
 			menu.addMenuClickHandler(13, new MenuClickHandler() {
 				
 				@Override
@@ -297,10 +296,9 @@ public class QuestBook {
 			});
 		}
 		
-		menu.build().open(p);
+		menu.open(p);
 	}
 
-	@SuppressWarnings("deprecation")
 	public static void openCategory(Player p, Category category, final boolean back) {
 		QuestWorld.getInstance().getManager(p).update(false);
 		QuestWorld.getInstance().getManager(p).updateLastEntry(category);
@@ -310,7 +308,7 @@ public class QuestBook {
 			
 			@Override
 			public void onOpen(Player p) {
-				p.playSound(p.getLocation(), Soundboard.getLegacySounds("ENTITY_PLAYER_LEVELUP", "LEVEL_UP"), 1F, 0.2F);
+				QuestWorld.getSounds().QuestClick().playTo(p);
 			}
 		});
 		
@@ -395,10 +393,9 @@ public class QuestBook {
 				});
 			}
 		}
-		menu.build().open(p);
+		menu.open(p);
 	}
-
-	@SuppressWarnings("deprecation")
+	
 	public static void openQuest(final Player p, final Quest quest, final boolean categoryBack, final boolean back) {
 		QuestWorld.getInstance().getManager(p).update(false);
 		QuestWorld.getInstance().getManager(p).updateLastEntry(quest);
@@ -409,7 +406,7 @@ public class QuestBook {
 			
 			@Override
 			public void onOpen(Player p) {
-				p.playSound(p.getLocation(), Soundboard.getLegacySounds("ENTITY_PLAYER_LEVELUP", "LEVEL_UP"), 1F, 0.2F);
+				QuestWorld.getSounds().QuestClick().playTo(p);
 			}
 		});
 		
@@ -466,6 +463,8 @@ public class QuestBook {
 			rewardIndex++;
 		}
 		
+		ItemBuilder glassPane = new ItemBuilder(Material.STAINED_GLASS_PANE);
+		
 		int index = 9;
 		for (final QuestMission mission: quest.getMissions()) {
 			if (QuestWorld.getInstance().getManager(p).hasUnlockedTask(mission)) {
@@ -474,34 +473,44 @@ public class QuestBook {
 				else if (mission.getType().getID().equals("SUBMIT")) manual = "Submit";
 				else if (mission.getType().getID().equals("REACH_LOCATION")) manual = "Detect";
 				
-				if (manual == null) menu.addItem(index, new CustomItem(mission.getItem(), mission.getText(), "", mission.getProgress(p)));
-				else menu.addItem(index, new CustomItem(mission.getItem(), mission.getText(), "", mission.getProgress(p), "", "&r> Click for Manual " + manual));
+				ItemBuilder entryItem = new ItemBuilder(mission.getItem()).display(mission.getText());
+
+				if (manual == null) entryItem.lore("", mission.getProgress(p));
+				else entryItem.lore("", mission.getProgress(p), "", "&r> Click for Manual " + manual);
+				
+				menu.addItem(index, entryItem.get());
 			}
 			else {
-				menu.addItem(index, new CustomItem(new MaterialData(Material.STAINED_GLASS_PANE, (byte) 14), "§7§kSOMEWEIRDMISSION", "", QuestWorld.getInstance().getBookLocal("task.locked")));
+				
+				menu.addItem(index, glassPane.color(DyeColor.RED).display("&7&kSOMEWEIRDMISSION").lore("", QuestWorld.getInstance().getBookLocal("task.locked")).get());
 			}
 			
 			menu.addMenuClickHandler(index, new MenuClickHandler() {
 				
 				@Override
 				public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-					if (!QuestWorld.getInstance().getManager(p).hasUnlockedTask(mission)) return false;
-					if (QuestWorld.getInstance().getManager(p).getStatus(quest).equals(QuestStatus.AVAILABLE) && quest.isWorldEnabled(p.getWorld().getName())) {
-						if (QuestWorld.getInstance().getManager(p).hasCompletedTask(mission)) return false;
+					QuestManager manager = QuestWorld.getInstance().getManager(p);
+					
+					if (!manager.hasUnlockedTask(mission)) return false;
+					if (manager.getStatus(quest).equals(QuestStatus.AVAILABLE) && quest.isWorldEnabled(p.getWorld().getName())) {
+						if (manager.hasCompletedTask(mission)) return false;
 						if (mission.getType().getID().equals("DETECT")) {
 							int amount = 0;
 							for (int i = 0; i < 36; i++) {
 								ItemStack current = p.getInventory().getItem(i);
 								if (QuestWorld.getInstance().isItemSimiliar(current, mission.getItem())) amount = amount + current.getAmount();
 							}
-							if (amount >= mission.getAmount()) QuestWorld.getInstance().getManager(p).setProgress(mission, mission.getAmount());
+							if (amount >= mission.getAmount()) manager.setProgress(mission, mission.getAmount());
 							openQuest(p, quest, categoryBack, back);
 						}
 						else if (mission.getType().getID().equals("SUBMIT")) {
+							boolean success = false;
+							
 							for (int i = 0; i < 36; i++) {
 								ItemStack current = p.getInventory().getItem(i);
 								if (QuestWorld.getInstance().isItemSimiliar(current, mission.getItem())) {
-									int rest = QuestWorld.getInstance().getManager(p).addProgress(mission, current.getAmount());
+									success = true;
+									int rest = manager.addProgress(mission, current.getAmount());
 									if (rest > 0) {
 										p.getInventory().setItem(i, new CustomItem(current, rest));
 										break;
@@ -509,8 +518,15 @@ public class QuestBook {
 									else p.getInventory().setItem(i, null);
 								}
 							}
-							PlayerInventory.update(p);
-							openQuest(p, quest, categoryBack, back);
+							
+							if(success) {
+								QuestWorld.getSounds().MissionSubmit().playTo(p);
+								PlayerInventory.update(p);
+								QuestWorld.getSounds().muteNext();
+								openQuest(p, quest, categoryBack, back);
+							}
+							else
+								QuestWorld.getSounds().MissionReject().playTo(p);
 						}
 						else if (mission.getType().getID().equals("REACH_LOCATION")) {
 							if (mission.getLocation().getWorld().getName().equals(p.getWorld().getName()) && mission.getLocation().distance(p.getLocation()) < mission.getAmount()) {
@@ -527,19 +543,20 @@ public class QuestBook {
 		
 		for (int i = 0; i < 9; i++) {
 			if (QuestWorld.getInstance().getManager(p).getStatus(quest).equals(QuestStatus.REWARD_CLAIMABLE)) {
-				menu.addItem(i + 18, new CustomItem(new MaterialData(Material.STAINED_GLASS_PANE, (byte) 10), QuestWorld.getInstance().getBookLocal("quests.state.reward_claim")));
+				menu.addItem(i + 18, glassPane.color(DyeColor.PURPLE).display(QuestWorld.getInstance().getBookLocal("quests.state.reward_claim")).get());
 				menu.addMenuClickHandler(i + 18, new MenuClickHandler() {
 					
 					@Override
 					public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
 						quest.handoutReward(p);
+						QuestWorld.getSounds().muteNext();
 						openQuest(p, quest, categoryBack, back);
 						return false;
 					}
 				});
 			}
 			else if (QuestWorld.getInstance().getManager(p).getStatus(quest).equals(QuestStatus.ON_COOLDOWN)) {
-				menu.addItem(i + 18, new CustomItem(new MaterialData(Material.STAINED_GLASS_PANE, (byte) 4), QuestWorld.getInstance().getBookLocal("quests.state.cooldown")));
+				menu.addItem(i + 18, glassPane.color(DyeColor.YELLOW).display(QuestWorld.getInstance().getBookLocal("quests.state.cooldown")).get());
 				menu.addMenuClickHandler(i + 18, new MenuClickHandler() {
 					
 					@Override
@@ -549,7 +566,7 @@ public class QuestBook {
 				});
 			}
 			else {
-				menu.addItem(i + 18, new CustomItem(new MaterialData(Material.STAINED_GLASS_PANE, (byte) 7), QuestWorld.getInstance().getBookLocal("quests.display.rewards")));
+				menu.addItem(i + 18, glassPane.color(DyeColor.GRAY).display(QuestWorld.getInstance().getBookLocal("quests.display.rewards")).get());
 				menu.addMenuClickHandler(i + 18, new MenuClickHandler() {
 					
 					@Override
@@ -573,7 +590,7 @@ public class QuestBook {
 			slot++;
 		}
 		
-		menu.build().open(p);
+		menu.open(p);
 	}
 
 	
@@ -590,7 +607,7 @@ public class QuestBook {
 		menu.addMenuOpeningHandler(new MenuOpeningHandler() {
 			@Override
 			public void onOpen(Player p) {
-				p.playSound(p.getLocation(), Soundboard.getLegacySounds("UI_BUTTON_CLICK", "CLICK"), 1F, 0.2F);
+				QuestWorld.getSounds().EditorClick().playTo(p);
 			}
 		});
 		for (int i = 0; i < 45; i++) {
@@ -649,7 +666,7 @@ public class QuestBook {
 			
 			@Override
 			public void onOpen(Player p) {
-				p.playSound(p.getLocation(), Soundboard.getLegacySounds("UI_BUTTON_CLICK", "CLICK"), 1F, 0.2F);
+				QuestWorld.getSounds().EditorClick().playTo(p);
 			}
 		});
 		
@@ -713,7 +730,7 @@ public class QuestBook {
 			
 			@Override
 			public void onOpen(Player p) {
-				p.playSound(p.getLocation(), Soundboard.getLegacySounds("UI_BUTTON_CLICK", "CLICK"), 1F, 0.2F);
+				QuestWorld.getSounds().EditorClick().playTo(p);
 			}
 		});
 		
@@ -812,7 +829,7 @@ public class QuestBook {
 				for (Quest quest: category.getQuests()) {
 					QuestManager.clearAllQuestData(quest);
 				}
-				p.playSound(p.getLocation(), Soundboard.getLegacySounds("ENTITY_BAT_DEATH", "BAT_DEATH"), 0.5F, 0.5F);
+				QuestWorld.getSounds().DestructiveClick().playTo(p);
 				return false;
 			}
 		});
@@ -827,7 +844,7 @@ public class QuestBook {
 			
 			@Override
 			public void onOpen(Player p) {
-				p.playSound(p.getLocation(), Soundboard.getLegacySounds("UI_BUTTON_CLICK", "CLICK"), 1F, 0.2F);
+				QuestWorld.getSounds().EditorClick().playTo(p);
 			}
 		});
 		
@@ -1030,7 +1047,7 @@ public class QuestBook {
 			@Override
 			public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
 				QuestManager.clearAllQuestData(quest);
-				p.playSound(p.getLocation(), Soundboard.getLegacySounds("ENTITY_BAT_DEATH", "BAT_DEATH"), 0.5F, 0.5F);
+				QuestWorld.getSounds().DestructiveClick().playTo(p);
 				return false;
 			}
 		});
@@ -1090,7 +1107,7 @@ public class QuestBook {
 			
 			@Override
 			public void onOpen(Player p) {
-				p.playSound(p.getLocation(), Soundboard.getLegacySounds("UI_BUTTON_CLICK", "CLICK"), 1F, 0.2F);
+				QuestWorld.getSounds().EditorClick().playTo(p);
 			}
 		});
 		
@@ -1129,7 +1146,7 @@ public class QuestBook {
 			
 			@Override
 			public void onOpen(Player p) {
-				p.playSound(p.getLocation(), Soundboard.getLegacySounds("UI_BUTTON_CLICK", "CLICK"), 1F, 0.2F);
+				QuestWorld.getSounds().EditorClick().playTo(p);
 			}
 		});
 		
@@ -1168,7 +1185,7 @@ public class QuestBook {
 			
 			@Override
 			public void onOpen(Player p) {
-				p.playSound(p.getLocation(), Soundboard.getLegacySounds("UI_BUTTON_CLICK", "CLICK"), 1F, 0.2F);
+				QuestWorld.getSounds().EditorClick().playTo(p);
 			}
 		});
 		
@@ -1185,13 +1202,12 @@ public class QuestBook {
 		switch (mission.getType().getSubmissionType()) {
 		
 		case ENTITY: {
-			ItemStack item = new MaterialData(Material.MONSTER_EGG, (byte) mission.getEntity().getTypeId()).toItemStack(1);
-			ItemMeta im = item.getItemMeta();
-			im.setDisplayName("§7Entity Type: §r" + mission.getEntity().toString());
-			im.setLore(Arrays.asList("", "§e> Click to change the Entity"));
-			item.setItemMeta(im);
-			
-			menu.addItem(10, item);
+			EntityType entity = mission.getEntity();
+			ItemBuilder egg = new ItemBuilder(Material.MONSTER_EGG).mob(entity);
+			egg.display("&7Entity Type: &r" + Text.niceName(entity.name()));
+			egg.lore("", "&e> Click to change the Entity");
+
+			menu.addItem(10, egg.get());
 			menu.addMenuClickHandler(10, new MenuClickHandler() {
 				
 				@Override
