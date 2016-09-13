@@ -36,11 +36,11 @@ import me.mrCookieSlime.QuestWorld.quests.QuestMission;
 import me.mrCookieSlime.QuestWorld.quests.QuestStatus;
 import me.mrCookieSlime.QuestWorld.utils.ItemBuilder;
 import me.mrCookieSlime.QuestWorld.utils.Sounds;
+import me.mrCookieSlime.QuestWorld.utils.Text;
 import net.citizensnpcs.api.npc.NPC;
 import net.milkbowl.vault.economy.Economy;
 
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Entity;
@@ -474,7 +474,7 @@ public class QuestWorld extends JavaPlugin implements Listener {
 	}
 	
 	public String getBookLocal(String input) {
-		return ChatColor.translateAlternateColorCodes('&', book.getString(input));
+		return Text.colorize(book.getString(input));
 	}
 	
 	public static Sounds getSounds() {

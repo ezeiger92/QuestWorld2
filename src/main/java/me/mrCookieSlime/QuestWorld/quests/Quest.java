@@ -12,7 +12,6 @@ import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.utils.Text;
 
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
@@ -50,7 +49,7 @@ public class Quest extends QWObject {
 		this.disableParties = cfg.getBoolean("disable-parties");
 		this.ordered = cfg.getBoolean("in-order");
 		this.autoclaim = cfg.getBoolean("auto-claim");
-		this.name = ChatColor.translateAlternateColorCodes('&', cfg.getString("name"));
+		this.name = Text.colorize(cfg.getString("name"));
 		this.item = new CustomItem(cfg.getItem("item"), name);
 		this.tasks = loadMissions(cfg);
 		this.rewards = loadRewards(cfg);
@@ -73,7 +72,7 @@ public class Quest extends QWObject {
 		
 		this.id = Integer.parseInt(input.split(" M ")[1]);
 		this.cooldown = 0;
-		this.name = ChatColor.translateAlternateColorCodes('&', name);
+		this.name = Text.colorize(name);
 		this.item = new CustomItem(new MaterialData(Material.BOOK_AND_QUILL).toItemStack(1), name);
 		
 		this.tasks = new ArrayList<QuestMission>();
@@ -106,9 +105,33 @@ public class Quest extends QWObject {
 			if (!cfg.contains("missions." + key + ".location.world")) {
 				cfg.setValue("missions." + key + ".location", new Location(Bukkit.getWorlds().get(0), 0, 0, 0));
 				cfg.save();
-				missions.add(new QuestMission(this, key, MissionType.valueOf(cfg.getString("missions." + key + ".type")), EntityType.valueOf(cfg.getString("missions." + key + ".entity")), cfg.getString("missions." + key + ".name"), cfg.getItem("missions." + key + ".item"), new Location(Bukkit.getWorlds().get(0), 0, 0, 0), cfg.getInt("missions." + key + ".amount"), cfg.getString("missions." + key + ".display-name"), cfg.contains("missions." + key + ".timeframe") ? cfg.getLong("missions." + key + ".timeframe"): 0, cfg.getBoolean("missions." + key + ".reset-on-death"), cfg.getInt("missions." + key + ".citizen"), cfg.getBoolean("missions." + key + ".exclude-spawners"), cfg.getString("missions." + key + ".lore")));
+				missions.add(new QuestMission(this, key,
+						MissionType.valueOf(cfg.getString("missions." + key + ".type")),
+						EntityType.valueOf(cfg.getString("missions." + key + ".entity")),
+						Text.colorize(cfg.getString("missions." + key + ".name")),
+						cfg.getItem("missions." + key + ".item"),
+						new Location(Bukkit.getWorlds().get(0), 0, 0, 0),
+						cfg.getInt("missions." + key + ".amount"),
+						Text.colorize(cfg.getString("missions." + key + ".display-name")),
+						cfg.contains("missions." + key + ".timeframe") ? cfg.getLong("missions." + key + ".timeframe"): 0,
+						cfg.getBoolean("missions." + key + ".reset-on-death"),
+						cfg.getInt("missions." + key + ".citizen"),
+						cfg.getBoolean("missions." + key + ".exclude-spawners"),
+						Text.colorize(cfg.getString("missions." + key + ".lore"))));
 			}
-			else missions.add(new QuestMission(this, key, MissionType.valueOf(cfg.getString("missions." + key + ".type")), EntityType.valueOf(cfg.getString("missions." + key + ".entity")), cfg.getString("missions." + key + ".name"), cfg.getItem("missions." + key + ".item"), cfg.getLocation("missions." + key + ".location"), cfg.getInt("missions." + key + ".amount"), cfg.getString("missions." + key + ".display-name"), cfg.contains("missions." + key + ".timeframe") ? cfg.getLong("missions." + key + ".timeframe"): 0, cfg.getBoolean("missions." + key + ".reset-on-death"), cfg.getInt("missions." + key + ".citizen"), cfg.getBoolean("missions." + key + ".exclude-spawners"), cfg.getString("missions." + key + ".lore")));
+			else missions.add(new QuestMission(this, key,
+					MissionType.valueOf(cfg.getString("missions." + key + ".type")),
+					EntityType.valueOf(cfg.getString("missions." + key + ".entity")),
+					Text.colorize(cfg.getString("missions." + key + ".name")),
+					cfg.getItem("missions." + key + ".item"),
+					cfg.getLocation("missions." + key + ".location"),
+					cfg.getInt("missions." + key + ".amount"),
+					Text.colorize(cfg.getString("missions." + key + ".display-name")),
+					cfg.contains("missions." + key + ".timeframe") ? cfg.getLong("missions." + key + ".timeframe"): 0,
+					cfg.getBoolean("missions." + key + ".reset-on-death"),
+					cfg.getInt("missions." + key + ".citizen"),
+					cfg.getBoolean("missions." + key + ".exclude-spawners"),
+					Text.colorize(cfg.getString("missions." + key + ".lore"))));
 			
 		}
 		return missions;
@@ -119,7 +142,7 @@ public class Quest extends QWObject {
 		cfg.setValue("id", id);
 		cfg.setValue("category", category.getID());
 		cfg.setValue("cooldown", String.valueOf(cooldown));
-		cfg.setValue("name", Text.decolor(name));
+		cfg.setValue("name", Text.escape(name));
 		cfg.setValue("item", new ItemStack(item));
 		cfg.setValue("rewards.items", null);
 		cfg.setValue("rewards.money", money);
@@ -146,11 +169,11 @@ public class Quest extends QWObject {
 			cfg.setValue("missions." + mission.getID() + ".item", new ItemStack(mission.getItem()));
 			cfg.setValue("missions." + mission.getID() + ".entity", mission.getEntity().toString());
 			if (mission.getLocation() != null && mission.getLocation().getWorld() != null) cfg.setValue("missions." + mission.getID() + ".location", mission.getLocation());
-			cfg.setValue("missions." + mission.getID() + ".name", mission.getEntityName());
-			cfg.setValue("missions." + mission.getID() + ".display-name", mission.getCustomName());
+			cfg.setValue("missions." + mission.getID() + ".name", Text.escape(mission.getEntityName()));
+			cfg.setValue("missions." + mission.getID() + ".display-name", Text.escape(mission.getCustomName()));
 			cfg.setValue("missions." + mission.getID() + ".timeframe", mission.getTimeframe());
 			cfg.setValue("missions." + mission.getID() + ".reset-on-death", mission.resetsonDeath());
-			cfg.setValue("missions." + mission.getID() + ".lore", mission.getLore());
+			cfg.setValue("missions." + mission.getID() + ".lore", Text.escape(mission.getLore()));
 			cfg.setValue("missions." + mission.getID() + ".citizen", mission.getCitizenID());
 			cfg.setValue("missions." + mission.getID() + ".exclude-spawners", mission.acceptsSpawners());
 		}
@@ -209,7 +232,7 @@ public class Quest extends QWObject {
 		
 		progress.append(" - " + percentage + "%");
 		
-		return ChatColor.translateAlternateColorCodes('&', progress.toString());
+		return Text.colorize(progress.toString());
 	}
 
 	public List<QuestMission> getMissions() {
@@ -249,7 +272,7 @@ public class Quest extends QWObject {
 	}
 
 	public void setName(String name) {
-		this.name = ChatColor.translateAlternateColorCodes('&', name);
+		this.name = Text.colorize(name);
 		this.item = new CustomItem(item, name);
 	}
 

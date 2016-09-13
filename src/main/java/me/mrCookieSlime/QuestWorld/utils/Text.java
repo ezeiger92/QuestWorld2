@@ -8,7 +8,7 @@ import org.bukkit.ChatColor;
 public class Text {
 	// TODO: Probably make all of this better and then comment
 	public final static char dummyChar = '&';
-	public final static char colorChar = ChatColor.RESET.toString().charAt(0);
+	public final static char colorChar = ChatColor.COLOR_CHAR;
 	
 	public static String colorize(String input) {
 		return ChatColor.translateAlternateColorCodes(dummyChar, input);
@@ -33,7 +33,7 @@ public class Text {
 	}
 	
 	public static String decolor(String input) {
-		return input.replace(colorChar, dummyChar);
+		return ChatColor.stripColor(input);
 	}
 	
 	public static String decolor(String... inputs) {
@@ -50,6 +50,28 @@ public class Text {
 		
 		for(int i = 0; i < inputs.length; ++i)
 			output[i] = decolor(inputs[i]);
+		
+		return output;
+	}
+	
+	public static String escape(String input) {
+		return input.replace(colorChar, dummyChar);
+	}
+	
+	public static String escape(String... inputs) {
+		StringBuilder sb = new StringBuilder();
+		
+		for(String input : inputs)
+			sb.append(escape(input));
+		
+		return sb.toString();
+	}
+	
+	public static String[] escapeList(String... inputs) {
+		String[] output = new String[inputs.length];
+		
+		for(int i = 0; i < inputs.length; ++i)
+			output[i] = escape(inputs[i]);
 		
 		return output;
 	}

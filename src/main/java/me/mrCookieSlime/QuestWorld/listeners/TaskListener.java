@@ -8,8 +8,8 @@ import me.mrCookieSlime.QuestWorld.quests.QuestListener;
 import me.mrCookieSlime.QuestWorld.quests.QuestManager;
 import me.mrCookieSlime.QuestWorld.quests.QuestMission;
 import me.mrCookieSlime.QuestWorld.quests.QuestStatus;
+import me.mrCookieSlime.QuestWorld.utils.Text;
 
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
@@ -99,7 +99,7 @@ public class TaskListener implements Listener {
 									}
 									else if (task.getType().getID().equals("KILL_NAMED_MOB") && e.getEntityType().equals(task.getEntity())) {
 										String name = e.getEntity() instanceof Player ? ((Player) e.getEntity()).getName(): e.getEntity().getCustomName();
-										if (name != null && name.equals(ChatColor.translateAlternateColorCodes('&', task.getEntityName()))) {
+										if (name != null && name.equals(Text.colorize(task.getEntityName()))) {
 											if (task.acceptsSpawners()) manager.addProgress(task, 1);
 											else if (!e.getEntity().hasMetadata("spawned_by_spawner")) manager.addProgress(task, 1);
 										}

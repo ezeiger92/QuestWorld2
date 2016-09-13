@@ -70,7 +70,7 @@ public class EditorListener implements Listener {
 		
 		case PARTY_INVITE: {
 			Party party = (Party) input.getValue();
-			String name = ChatColor.stripColor(e.getMessage()).replace("@", "");
+			String name = Text.decolor(e.getMessage()).replace("@", "");
 			Player player = Bukkit.getPlayer(name);
 			if (player != null) {
 				if (QuestWorld.getInstance().getManager(player).getParty() == null) {
@@ -93,7 +93,7 @@ public class EditorListener implements Listener {
 		
 		case KILL_NAMED: {
 			QuestMission mission = (QuestMission) input.getValue();
-			mission.setEntityName(Text.decolor(e.getMessage()));
+			mission.setEntityName(Text.colorize(e.getMessage()));
 			QuestWorld.getInstance().getLocalization().sendTranslation(e.getPlayer(), "editor.renamed-kill-type", true);
 			QuestWorld.getInstance().removeInput(e.getPlayer().getUniqueId());
 			e.setCancelled(true);
@@ -103,7 +103,7 @@ public class EditorListener implements Listener {
 		
 		case CITIZEN: {
 			QuestMission mission = (QuestMission) input.getValue();
-			mission.setEntityName(Text.decolor(e.getMessage()));
+			mission.setEntityName(Text.colorize(e.getMessage()));
 			QuestWorld.getInstance().getLocalization().sendTranslation(e.getPlayer(), "editor.renamed-citizen", true);
 			QuestWorld.getInstance().removeInput(e.getPlayer().getUniqueId());
 			e.setCancelled(true);
@@ -113,7 +113,7 @@ public class EditorListener implements Listener {
 		
 		case LOCATION_NAME: {
 			QuestMission mission = (QuestMission) input.getValue();
-			mission.setEntityName(Text.decolor(e.getMessage()));
+			mission.setEntityName(Text.colorize(e.getMessage()));
 			QuestWorld.getInstance().getLocalization().sendTranslation(e.getPlayer(), "editor.renamed-location", true);
 			QuestWorld.getInstance().removeInput(e.getPlayer().getUniqueId());
 			e.setCancelled(true);

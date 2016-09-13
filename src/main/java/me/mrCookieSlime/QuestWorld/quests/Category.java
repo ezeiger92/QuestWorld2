@@ -14,7 +14,6 @@ import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.Item.CustomItem;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.utils.Text;
 
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -35,7 +34,7 @@ public class Category extends QWObject {
 	public Category(String name, int id) {
 		this.id = id;
 		this.quests = new HashMap<Integer, Quest>();
-		this.name = ChatColor.translateAlternateColorCodes('&', name);
+		this.name = Text.colorize(name);
 		this.item = new CustomItem(new MaterialData(Material.BOOK_AND_QUILL).toItemStack(1), name);
 		this.world_blacklist = new ArrayList<String>();
 		this.permission = "";
@@ -51,7 +50,7 @@ public class Category extends QWObject {
 			new Quest(this, f);
 		}
 		Config cfg = new Config(file);
-		this.name = ChatColor.translateAlternateColorCodes('&', cfg.getString("name"));
+		this.name = Text.colorize(cfg.getString("name"));
 		this.item = cfg.getItem("item");
 		this.item = new CustomItem(item, name);
 		this.hidden = cfg.getBoolean("hidden");
@@ -84,7 +83,7 @@ public class Category extends QWObject {
 		}
 		Config cfg = new Config(new File("plugins/QuestWorld/quests/" + id + ".category"));
 		cfg.setValue("id", id);
-		cfg.setValue("name", Text.decolor(name));
+		cfg.setValue("name", Text.escape(name));
 		cfg.setValue("item", new ItemStack(item));
 		cfg.setValue("permission", permission);
 		cfg.setValue("hidden", this.hidden);
@@ -149,7 +148,7 @@ public class Category extends QWObject {
 		
 		progress.append(" - " + percentage + "%");
 		
-		return ChatColor.translateAlternateColorCodes('&', progress.toString());
+		return Text.colorize(progress.toString());
 	}
 
 	public Quest getQuest(int i) {
@@ -166,7 +165,7 @@ public class Category extends QWObject {
 	}
 
 	public void setName(String name) {
-		this.name = ChatColor.translateAlternateColorCodes('&', name);
+		this.name = Text.colorize(name);
 		this.item = new CustomItem(item, name);
 	}
 	

@@ -70,11 +70,11 @@ public class QuestBook {
 						lore.add("");
 						lore.add(category.getProgress(p));
 						lore.add("");
-						lore.add(ChatColor.translateAlternateColorCodes('&', "&7" + category.getQuests().size() + QuestWorld.getInstance().getBookLocal("category.desc.total")));
-						lore.add(ChatColor.translateAlternateColorCodes('&', "&a" + category.getFinishedQuests(p).size() + QuestWorld.getInstance().getBookLocal("category.desc.completed")));
-						lore.add(ChatColor.translateAlternateColorCodes('&', "&b" + category.getQuests(p, QuestStatus.AVAILABLE).size() + QuestWorld.getInstance().getBookLocal("category.desc.available")));
-						lore.add(ChatColor.translateAlternateColorCodes('&', "&e" + category.getQuests(p, QuestStatus.ON_COOLDOWN).size() + QuestWorld.getInstance().getBookLocal("category.desc.cooldown")));
-						lore.add(ChatColor.translateAlternateColorCodes('&', "&5" + category.getQuests(p, QuestStatus.REWARD_CLAIMABLE).size() + QuestWorld.getInstance().getBookLocal("category.desc.claimable_reward")));
+						lore.add(Text.colorize("&7" + category.getQuests().size() + QuestWorld.getInstance().getBookLocal("category.desc.total")));
+						lore.add(Text.colorize("&a" + category.getFinishedQuests(p).size() + QuestWorld.getInstance().getBookLocal("category.desc.completed")));
+						lore.add(Text.colorize("&b" + category.getQuests(p, QuestStatus.AVAILABLE).size() + QuestWorld.getInstance().getBookLocal("category.desc.available")));
+						lore.add(Text.colorize("&e" + category.getQuests(p, QuestStatus.ON_COOLDOWN).size() + QuestWorld.getInstance().getBookLocal("category.desc.cooldown")));
+						lore.add(Text.colorize("&5" + category.getQuests(p, QuestStatus.REWARD_CLAIMABLE).size() + QuestWorld.getInstance().getBookLocal("category.desc.claimable_reward")));
 						im.setLore(lore);
 						item.setItemMeta(im);
 						menu.addItem(category.getID() + 9, item);
