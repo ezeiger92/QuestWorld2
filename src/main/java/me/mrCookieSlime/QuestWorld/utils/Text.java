@@ -11,6 +11,9 @@ public class Text {
 	public final static char colorChar = ChatColor.COLOR_CHAR;
 	
 	public static String colorize(String input) {
+		if(input == null)
+			return null;
+		
 		return ChatColor.translateAlternateColorCodes(dummyChar, input);
 	}
 	
@@ -33,6 +36,9 @@ public class Text {
 	}
 	
 	public static String decolor(String input) {
+		if(input == null)
+			return null;
+		
 		return ChatColor.stripColor(input);
 	}
 	
@@ -55,6 +61,9 @@ public class Text {
 	}
 	
 	public static String escape(String input) {
+		if(input == null)
+			return null;
+		
 		return input.replace(colorChar, dummyChar);
 	}
 	
