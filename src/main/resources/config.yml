@@ -6,3 +6,5 @@ party:
   enabled: true
 book:
   on-first-join: true
+dialogue:
+  prefix: '&f'

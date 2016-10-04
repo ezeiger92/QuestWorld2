@@ -220,6 +220,7 @@ public class QuestMission extends QWObject {
 	
 	public void addDialogueLine(Player p, final String path) {
 		QuestWorld.getInstance().getLocalization().sendTranslation(p, "editor.add-dialogue", true);
+		String dprefix = QuestWorld.getInstance().getCfg().getString("dialogue.prefix");
 		final QuestMission mission = this;
 		MenuHelper.awaitChatInput(p, true, new ChatHandler() {
 			
@@ -244,7 +245,7 @@ public class QuestMission extends QWObject {
 					}
 				}
 				else {
-					dialogue.add(message);
+					dialogue.add(dprefix + message);
 					addDialogueLine(p, path);
 					QuestWorld.getSounds().DialogAdd().playTo(p);
 				}
