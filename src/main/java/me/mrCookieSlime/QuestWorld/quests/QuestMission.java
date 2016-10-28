@@ -23,10 +23,10 @@ import net.citizensnpcs.api.npc.NPC;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.SkullType;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.MaterialData;
 
 public class QuestMission extends QWObject {
 	
@@ -97,7 +97,6 @@ public class QuestMission extends QWObject {
 		return ChatColor.GRAY + type.getFormat(entity, item, location, amount, ChatColor.translateAlternateColorCodes('&', name), citizen, spawners) + (hasTimeframe() ? (" &7within " + (getTimeframe() / 60) + "h " + (getTimeframe() % 60) + "m"): "") + (resetsonDeath() ? " &7without dying": "");
 	}
 
-	@SuppressWarnings("deprecation")
 	public ItemStack getItem() {
 		switch (type.getSubmissionType()) {
 		case ENTITY:
@@ -115,7 +114,7 @@ public class QuestMission extends QWObject {
 		case CITIZENS_INTERACT:
 			return type.getItem().toItemStack(1);
 		case CITIZENS_KILL:
-			return new MaterialData(Material.SKULL_ITEM, (byte) 3).toItemStack(1);
+			return new ItemBuilder(Material.SKULL_ITEM).skull(SkullType.PLAYER).get();
 		default:
 			return new ItemStack(Material.COMMAND);
 		}
@@ -156,7 +155,7 @@ public class QuestMission extends QWObject {
 	public String getProgress(Player p) {
 		StringBuilder progress = new StringBuilder();
 		int amount = QuestWorld.getInstance().getManager(p).getProgress(this);
-		float percentage = Math.round((((amount * 100.0f) / getAmount()) * 100.0f) / 100.0f);
+		float percentage = Math.round((amount * 100.0f) / this.amount);
 		
 		if (percentage < 16.0F) progress.append("&4");
 		else if (percentage < 32.0F) progress.append("&c");
@@ -165,24 +164,22 @@ public class QuestMission extends QWObject {
 		else if (percentage < 80.0F) progress.append("&2");
 		else progress = progress.append("&a");
 		
-		int rest = 20;
-		for (int i = (int) percentage; i >= 5; i = i - 5) {
-			progress.append(":");
-			rest--;
-		}
+		String bar = "::::::::::::::::::::";
+		int prog = ((int)percentage) / 5;
+		int rest = 20 - prog;
+		
+		progress.append(bar.substring(0, prog));
 		
 		progress.append("&7");
+		progress.append(bar.substring(0, rest));
 		
-		for (int i = 0; i < rest; i++) {
-			progress.append(":");
-		}
 		if (getType().getSubmissionType().equals(SubmissionType.TIME)) {
 			int remaining = getAmount() - amount;
 			progress.append(" - " + percentage + "% (" + (remaining / 60) + "h " + (remaining % 60) + "m remaining)");
 		}
 		else progress.append(" - " + percentage + "% (" + amount + "/" + getAmount() + ")");
 		
-		return ChatColor.translateAlternateColorCodes('&', progress.toString());
+		return Text.colorize(progress.toString());
 	}
 
 	@Override

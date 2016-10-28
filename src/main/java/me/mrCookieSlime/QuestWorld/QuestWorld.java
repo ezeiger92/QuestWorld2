@@ -34,6 +34,7 @@ import me.mrCookieSlime.QuestWorld.quests.Quest;
 import me.mrCookieSlime.QuestWorld.quests.QuestManager;
 import me.mrCookieSlime.QuestWorld.quests.QuestMission;
 import me.mrCookieSlime.QuestWorld.quests.QuestStatus;
+import me.mrCookieSlime.QuestWorld.quests.missions.*;
 import me.mrCookieSlime.QuestWorld.utils.ItemBuilder;
 import me.mrCookieSlime.QuestWorld.utils.Sounds;
 import me.mrCookieSlime.QuestWorld.utils.Text;
@@ -92,17 +93,17 @@ public class QuestWorld extends JavaPlugin implements Listener {
 			
 			instance = this;
 			
-			registerMissionType(new MissionType("CRAFT", true, true, false, SubmissionType.ITEM, "Craft %s", new MaterialData(Material.WORKBENCH)));
-			registerMissionType(new MissionType("SUBMIT", false, false, false, SubmissionType.ITEM, "Submit %s", new MaterialData(Material.CHEST)));
-			registerMissionType(new MissionType("DETECT", false, false, false, SubmissionType.ITEM, "Own %s", new MaterialData(Material.COMMAND)));
-			registerMissionType(new MissionType("KILL", true, true, false, SubmissionType.ENTITY, "Kill %s", new MaterialData(Material.IRON_SWORD)));
-			registerMissionType(new MissionType("KILL_NAMED_MOB", true, true, false, SubmissionType.ENTITY, "Kill %s", new MaterialData(Material.GOLD_SWORD)));
-			registerMissionType(new MissionType("FISH", true, true, false, SubmissionType.ITEM, "Catch %s &7using a Fishing Rod", new MaterialData(Material.FISHING_ROD)));
-			registerMissionType(new MissionType("REACH_LOCATION", false, false, true, SubmissionType.LOCATION, "Travel to %s", new MaterialData(Material.LEATHER_BOOTS)));
-			registerMissionType(new MissionType("JOIN", true, false, false, SubmissionType.INTEGER, "Join %s times", new MaterialData(Material.SKULL_ITEM, (byte) 3)));
-			registerMissionType(new MissionType("PLAY_TIME", false, false, true, SubmissionType.TIME, "Play for %s", new MaterialData(Material.WATCH)));
-			registerMissionType(new MissionType("MINE_BLOCK", true, true, false, SubmissionType.BLOCK, "Mine %s", new MaterialData(Material.IRON_PICKAXE)));
-			registerMissionType(new MissionType("REACH_LEVEL", false, false, false, SubmissionType.INTEGER, "Reach Level %s", new MaterialData(Material.EXP_BOTTLE)));
+			registerMissionType(new CraftMission());
+			registerMissionType(new SubmitMission());
+			registerMissionType(new DetectMission());
+			registerMissionType(new KillMission());
+			registerMissionType(new KillNamedMission());
+			registerMissionType(new FishMission());
+			registerMissionType(new LocationMission());
+			registerMissionType(new JoinMission());
+			registerMissionType(new PlayMission());
+			registerMissionType(new MineMission());
+			registerMissionType(new LevelMission());
 			
 			if (getServer().getPluginManager().isPluginEnabled("Votifier")) {
 				registerMissionType(new MissionType("VOTIFIER_VOTE", true, false, false, SubmissionType.INTEGER, "Vote %s times", new MaterialData(Material.DIAMOND)));
