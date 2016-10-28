@@ -157,99 +157,7 @@ public class QuestWorld extends JavaPlugin implements Listener {
 				}
 			}, 0L);
 			
-			PluginUtils utils = new PluginUtils(this);
-			utils.setupConfig();
-			cfg = utils.getConfig();
-			utils.setupMetrics();
-			utils.setupUpdater(77071, getFile());
-			utils.setupLocalization();
-			local = utils.getLocalization();
-			
-			local.setPrefix("&4Quest World &7> ");
-			local.setDefault("editor.create-category", "&7Please type in the Name of your new Category (Color codes are supported)");
-			local.setDefault("editor.create-quest", "&7Please type in the Name of your new Quest (Color codes are supported)");
-			local.setDefault("editor.new-category", "&aSuccessfully created a new Category called &7\"&r%name%&7\"");
-			local.setDefault("editor.deleted-category", "&cSuccessfully deleted Category");
-			local.setDefault("editor.deleted-quest", "&cSuccessfully deleted Quest");
-			local.setDefault("editor.rename-category", "&7Please type in the Name for your Category (Color codes are supported)");
-			local.setDefault("editor.renamed-category", "&aSuccessfully renamed Category");
-			local.setDefault("editor.rename-quest", "&7Please type in the Name for your Quest (Color codes are supported)");
-			local.setDefault("editor.renamed-quest", "&aSuccessfully renamed Quest");
-			local.setDefault("party.full", "&4You cannot have more than &c4 &4Party Members!");
-			local.setDefault("party.invite", "&7Please type in the Name of the Player you want to invite");
-			local.setDefault("party.invited", "&7Successfully invited &e%name% &7to your Party");
-			local.setDefault("party.invitation", "&e%name% &7has invited you to join their Party");
-			local.setDefault("party.not-online", "&cPlayer &4%name% &cis not online");
-			local.setDefault("party.join", "&e%name% has accepted your Invitation and joined your Party");
-			local.setDefault("party.joined", "&7You are now a member of &e%name%'s &7Party!");
-			local.setDefault("party.kicked", "&e%name% &7has been kicked from the Party");
-			local.setDefault("party.already", "&4%name% &cis already a Member of a Party");
-			local.setDefault("editor.rename-kill-mission", "&7Please type in the Name of the Mob/Player you want to be killed (Color Code supported)");
-			local.setDefault("editor.renamed-kill-type", "&aSuccessfully specified a Name for your Mob/Player");
-			local.setDefault("editor.link-citizen", "&7Please right click the NPC you want to link with this Quest");
-			local.setDefault("editor.link-citizen-finished", "&aSuccessfully linked this NPC");
-			
-			local.setDefault("notifications.task-completed", "&e&l! &7You have completed a Task for the Quest &b<Quest>", "&e&l! &7Check your Quest Book for more Info");
-			local.setDefault("notifications.task-failed-timeframe", "&c&l! &7You failed to complete a Task for the Quest &b<Quest> &7within the given Timeframe.");
-			local.setDefault("notifications.task-timeframe-started", "&a&l! &7You have &b<Timeframe> &7of time to &b<Objective>");
-			
-			local.setDefault("editor.rename-location", "&7Please type in a Name for your Location", "&7Example: Awesomeville");
-			local.setDefault("editor.renamed-location", "&aSuccessfully given this Location a Name");
-			local.setDefault("editor.permission-quest", "&7Please type in a Permission Node for this Quest. Type \"none\" for no Permission Node");
-			local.setDefault("editor.permission-category", "&7Please type in a Permission Node for this Category. Type \"none\" for no Permission Node");
-			local.setDefault("editor.permission-set-quest", "&aSuccessfully set a Permission Node for this Quest");
-			local.setDefault("editor.permission-set-category", "&aSuccessfully set a Permission Node for this Category");
-			local.setDefault("editor.add-dialogue", "&7Please type in the Message you want to add to the Dialogue! You can do this multiple times, simply type &eexit() &7when you are done! You can also add Commands! Just type in your command &e(ex. /say hello) &7and it will be executed within the Dialogue, use &e<player> &7for the Player's Username");
-			local.setDefault("editor.set-dialogue", "&7Successfully set a Dialogue!", "&7If you want to change something you can edit the Dialogue at any time at", "&e<path>");
-			local.setDefault("editor.edit-mission-name", "&aSuccessfully edited the Mission's Display Name");
-			local.setDefault("editor.await-mission-name", "&7Please type in a Custom Name for this Mission.");
-			local.setDefault("editor.misssion-description", "&7Please type in a Description for your Quest");
-			local.save();
-			
-			book = new Config("plugins/QuestWorld/questbook_local.yml");
-			book.setDefaultValue("gui.title", "&e&lQuest Book");
-			book.setDefaultValue("gui.party", "&eParty Menu");
-			book.setDefaultValue("button.open", "&7> Click to open");
-			book.setDefaultValue("button.back.party", "&7> Click to go back to the Party Menu");
-			book.setDefaultValue("button.back.quests", "&7> Click to go back to the Quest Menu");
-			book.setDefaultValue("button.back.general", "&c< Back");
-			book.setDefaultValue("quests.locked", "&4&lLOCKED");
-			book.setDefaultValue("quests.locked-in-world", "&cThis Questline is not available in your World");
-			book.setDefaultValue("quests.tasks_completed", " Tasks completed");
-			book.setDefaultValue("quests.state.cooldown", "&e&lON COOLDOWN");
-			book.setDefaultValue("quests.state.completed", "&2&lCOMPLETED");
-			book.setDefaultValue("quests.state.reward_claimable", "&5&lUNCLAIMED REWARD");
-			book.setDefaultValue("quests.state.reward_claim", "&5&lCLAIM REWARD");
-			book.setDefaultValue("quests.display.cooldown", "&7Cooldown");
-			book.setDefaultValue("quests.display.monetary", "&7Monetary Reward");
-			book.setDefaultValue("quests.display.exp", "&7XP Reward");
-			book.setDefaultValue("quests.display.rewards", "&rRewards");
-			book.setDefaultValue("category.desc.total", " Quests in total");
-			book.setDefaultValue("category.desc.completed", " completed Quests");
-			book.setDefaultValue("category.desc.available", " Quests available for completion");
-			book.setDefaultValue("category.desc.cooldown", " Quests are on Cooldown");
-			book.setDefaultValue("category.desc.claimable_reward", " Quests with unclaimed Reward");
-			book.setDefaultValue("task.locked", "&4&lLOCKED");
-			book.save();
-			
-			sounds = new Config("plugins/QuestWorld/sounds.yml");
-			sounds.setDefaultValue("sounds.quest.click.list", Arrays.asList("ENTITY_PLAYER_LEVELUP", "LEVEL_UP"));
-			sounds.setDefaultValue("sounds.quest.click.pitch", 0.2F);
-			sounds.setDefaultValue("sounds.quest.mission-submit.list", Arrays.asList("ENTITY_EXPERIENCE_ORB_PICKUP"));
-			sounds.setDefaultValue("sounds.quest.mission-submit.pitch", 0.7F);
-			sounds.setDefaultValue("sounds.quest.mission-submit.pitch", 0.3F);
-			sounds.setDefaultValue("sounds.quest.mission-reject.list", Arrays.asList("BLOCK_NOTE_SNARE", "NOTE_SNARE"));
-			sounds.setDefaultValue("sounds.quest.reward.list", Arrays.asList("ENTITY_ITEM_PICKUP", "ITEM_PICKUP"));
-			sounds.setDefaultValue("sounds.editor.click.list", Arrays.asList("UI_BUTTON_CLICK", "CLICK"));
-			sounds.setDefaultValue("sounds.editor.click.pitch", 0.2F);
-			sounds.setDefaultValue("sounds.editor.dialog-add.list", Arrays.asList("ENTITY_PLAYER_LEVELUP", "LEVEL_UP"));
-			sounds.setDefaultValue("sounds.editor.destructive-action-warning.list", Arrays.asList("NOTE_PLING", "BLOCK_NOTE_HARP"));
-			sounds.setDefaultValue("sounds.editor.destructive-action-click.list", Arrays.asList("ENTITY_BAT_DEATH", "BAT_DEATH"));
-			sounds.setDefaultValue("sounds.editor.destructive-action-click.pitch", 0.5F);
-			sounds.setDefaultValue("sounds.editor.destructive-action-click.volume", 0.5F);
-			sounds.setDefaultValue("sounds.party.click.list", Arrays.asList("BLOCK_NOTE_PLING", "NOTE_PLING"));
-			sounds.setDefaultValue("sounds.party.click.pitch", 0.2F);
-			sounds.save();
+			loadConfigs();
 			
 			getCommand("quests").setExecutor(new QuestsCommand());
 			getCommand("questeditor").setExecutor(new EditorCommand());
@@ -323,6 +231,102 @@ public class QuestWorld extends JavaPlugin implements Listener {
 	    if (economyProvider != null) economy = (Economy)economyProvider.getProvider();
 
 	    return economy != null;
+	}
+	
+	public void loadConfigs() {
+		PluginUtils utils = new PluginUtils(this);
+		utils.setupConfig();
+		cfg = utils.getConfig();
+		utils.setupMetrics();
+		utils.setupUpdater(77071, getFile());
+		utils.setupLocalization();
+		local = utils.getLocalization();
+		
+		local.setPrefix("&4Quest World &7> ");
+		local.setDefault("editor.create-category", "&7Please type in the Name of your new Category (Color codes are supported)");
+		local.setDefault("editor.create-quest", "&7Please type in the Name of your new Quest (Color codes are supported)");
+		local.setDefault("editor.new-category", "&aSuccessfully created a new Category called &7\"&r%name%&7\"");
+		local.setDefault("editor.deleted-category", "&cSuccessfully deleted Category");
+		local.setDefault("editor.deleted-quest", "&cSuccessfully deleted Quest");
+		local.setDefault("editor.rename-category", "&7Please type in the Name for your Category (Color codes are supported)");
+		local.setDefault("editor.renamed-category", "&aSuccessfully renamed Category");
+		local.setDefault("editor.rename-quest", "&7Please type in the Name for your Quest (Color codes are supported)");
+		local.setDefault("editor.renamed-quest", "&aSuccessfully renamed Quest");
+		local.setDefault("party.full", "&4You cannot have more than &c4 &4Party Members!");
+		local.setDefault("party.invite", "&7Please type in the Name of the Player you want to invite");
+		local.setDefault("party.invited", "&7Successfully invited &e%name% &7to your Party");
+		local.setDefault("party.invitation", "&e%name% &7has invited you to join their Party");
+		local.setDefault("party.not-online", "&cPlayer &4%name% &cis not online");
+		local.setDefault("party.join", "&e%name% has accepted your Invitation and joined your Party");
+		local.setDefault("party.joined", "&7You are now a member of &e%name%'s &7Party!");
+		local.setDefault("party.kicked", "&e%name% &7has been kicked from the Party");
+		local.setDefault("party.already", "&4%name% &cis already a Member of a Party");
+		local.setDefault("editor.rename-kill-mission", "&7Please type in the Name of the Mob/Player you want to be killed (Color Code supported)");
+		local.setDefault("editor.renamed-kill-type", "&aSuccessfully specified a Name for your Mob/Player");
+		local.setDefault("editor.link-citizen", "&7Please right click the NPC you want to link with this Quest");
+		local.setDefault("editor.link-citizen-finished", "&aSuccessfully linked this NPC");
+		
+		local.setDefault("notifications.task-completed", "&e&l! &7You have completed a Task for the Quest &b<Quest>", "&e&l! &7Check your Quest Book for more Info");
+		local.setDefault("notifications.task-failed-timeframe", "&c&l! &7You failed to complete a Task for the Quest &b<Quest> &7within the given Timeframe.");
+		local.setDefault("notifications.task-timeframe-started", "&a&l! &7You have &b<Timeframe> &7of time to &b<Objective>");
+		
+		local.setDefault("editor.rename-location", "&7Please type in a Name for your Location", "&7Example: Awesomeville");
+		local.setDefault("editor.renamed-location", "&aSuccessfully given this Location a Name");
+		local.setDefault("editor.permission-quest", "&7Please type in a Permission Node for this Quest. Type \"none\" for no Permission Node");
+		local.setDefault("editor.permission-category", "&7Please type in a Permission Node for this Category. Type \"none\" for no Permission Node");
+		local.setDefault("editor.permission-set-quest", "&aSuccessfully set a Permission Node for this Quest");
+		local.setDefault("editor.permission-set-category", "&aSuccessfully set a Permission Node for this Category");
+		local.setDefault("editor.add-dialogue", "&7Please type in the Message you want to add to the Dialogue! You can do this multiple times, simply type &eexit() &7when you are done! You can also add Commands! Just type in your command &e(ex. /say hello) &7and it will be executed within the Dialogue, use &e<player> &7for the Player's Username");
+		local.setDefault("editor.set-dialogue", "&7Successfully set a Dialogue!", "&7If you want to change something you can edit the Dialogue at any time at", "&e<path>");
+		local.setDefault("editor.edit-mission-name", "&aSuccessfully edited the Mission's Display Name");
+		local.setDefault("editor.await-mission-name", "&7Please type in a Custom Name for this Mission.");
+		local.setDefault("editor.misssion-description", "&7Please type in a Description for your Quest");
+		local.save();
+		
+		book = new Config("plugins/QuestWorld/questbook_local.yml");
+		book.setDefaultValue("gui.title", "&e&lQuest Book");
+		book.setDefaultValue("gui.party", "&eParty Menu");
+		book.setDefaultValue("button.open", "&7> Click to open");
+		book.setDefaultValue("button.back.party", "&7> Click to go back to the Party Menu");
+		book.setDefaultValue("button.back.quests", "&7> Click to go back to the Quest Menu");
+		book.setDefaultValue("button.back.general", "&c< Back");
+		book.setDefaultValue("quests.locked", "&4&lLOCKED");
+		book.setDefaultValue("quests.locked-in-world", "&cThis Questline is not available in your World");
+		book.setDefaultValue("quests.tasks_completed", " Tasks completed");
+		book.setDefaultValue("quests.state.cooldown", "&e&lON COOLDOWN");
+		book.setDefaultValue("quests.state.completed", "&2&lCOMPLETED");
+		book.setDefaultValue("quests.state.reward_claimable", "&5&lUNCLAIMED REWARD");
+		book.setDefaultValue("quests.state.reward_claim", "&5&lCLAIM REWARD");
+		book.setDefaultValue("quests.display.cooldown", "&7Cooldown");
+		book.setDefaultValue("quests.display.monetary", "&7Monetary Reward");
+		book.setDefaultValue("quests.display.exp", "&7XP Reward");
+		book.setDefaultValue("quests.display.rewards", "&rRewards");
+		book.setDefaultValue("category.desc.total", " Quests in total");
+		book.setDefaultValue("category.desc.completed", " completed Quests");
+		book.setDefaultValue("category.desc.available", " Quests available for completion");
+		book.setDefaultValue("category.desc.cooldown", " Quests are on Cooldown");
+		book.setDefaultValue("category.desc.claimable_reward", " Quests with unclaimed Reward");
+		book.setDefaultValue("task.locked", "&4&lLOCKED");
+		book.save();
+		
+		sounds = new Config("plugins/QuestWorld/sounds.yml");
+		sounds.setDefaultValue("sounds.quest.click.list", Arrays.asList("ENTITY_PLAYER_LEVELUP", "LEVEL_UP"));
+		sounds.setDefaultValue("sounds.quest.click.pitch", 0.2F);
+		sounds.setDefaultValue("sounds.quest.mission-submit.list", Arrays.asList("ENTITY_EXPERIENCE_ORB_PICKUP"));
+		sounds.setDefaultValue("sounds.quest.mission-submit.pitch", 0.7F);
+		sounds.setDefaultValue("sounds.quest.mission-submit.pitch", 0.3F);
+		sounds.setDefaultValue("sounds.quest.mission-reject.list", Arrays.asList("BLOCK_NOTE_SNARE", "NOTE_SNARE"));
+		sounds.setDefaultValue("sounds.quest.reward.list", Arrays.asList("ENTITY_ITEM_PICKUP", "ITEM_PICKUP"));
+		sounds.setDefaultValue("sounds.editor.click.list", Arrays.asList("UI_BUTTON_CLICK", "CLICK"));
+		sounds.setDefaultValue("sounds.editor.click.pitch", 0.2F);
+		sounds.setDefaultValue("sounds.editor.dialog-add.list", Arrays.asList("ENTITY_PLAYER_LEVELUP", "LEVEL_UP"));
+		sounds.setDefaultValue("sounds.editor.destructive-action-warning.list", Arrays.asList("NOTE_PLING", "BLOCK_NOTE_HARP"));
+		sounds.setDefaultValue("sounds.editor.destructive-action-click.list", Arrays.asList("ENTITY_BAT_DEATH", "BAT_DEATH"));
+		sounds.setDefaultValue("sounds.editor.destructive-action-click.pitch", 0.5F);
+		sounds.setDefaultValue("sounds.editor.destructive-action-click.volume", 0.5F);
+		sounds.setDefaultValue("sounds.party.click.list", Arrays.asList("BLOCK_NOTE_PLING", "NOTE_PLING"));
+		sounds.setDefaultValue("sounds.party.click.pitch", 0.2F);
+		sounds.save();
 	}
 	
 	public void load() {

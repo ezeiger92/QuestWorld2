@@ -111,7 +111,9 @@ public class QuestManager {
 					if (task.getType().getID().equals("PLAY_TIME")) setProgress(task, p.getStatistic(Statistic.PLAY_ONE_TICK) / 20 / 60);
 					else if (task.getType().getID().equals("REACH_LOCATION")) {
 						if (task.getLocation().getWorld().getName().equals(p.getWorld().getName()) && task.getLocation().distance(p.getLocation()) < task.getAmount()) {
-							setProgress(task, 1);
+							// Normally expecting "getAmount" to complete task, "getAmount" in this case is the search radius
+							// Just set the task to done (because it is) rather than increment by 1
+							setProgress(task, task.getAmount());
 						}
 					}
 				}

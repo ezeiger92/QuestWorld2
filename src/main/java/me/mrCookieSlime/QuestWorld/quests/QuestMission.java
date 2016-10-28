@@ -155,7 +155,15 @@ public class QuestMission extends QWObject {
 	public String getProgress(Player p) {
 		StringBuilder progress = new StringBuilder();
 		int amount = QuestWorld.getInstance().getManager(p).getProgress(this);
-		float percentage = Math.round((amount * 100.0f) / this.amount);
+		int total = this.amount;
+		
+		// Location is a one-time thing, we don't want to display "(1/6)" or something silly
+		if(getType().getSubmissionType() == SubmissionType.LOCATION) {
+			amount = Math.min(amount, 1);
+			total = 1;
+		}
+		
+		float percentage = Math.round((amount * 100.0f) / total);
 		
 		if (percentage < 16.0F) progress.append("&4");
 		else if (percentage < 32.0F) progress.append("&c");
@@ -174,10 +182,10 @@ public class QuestMission extends QWObject {
 		progress.append(bar.substring(0, rest));
 		
 		if (getType().getSubmissionType().equals(SubmissionType.TIME)) {
-			int remaining = getAmount() - amount;
+			int remaining = total - amount;
 			progress.append(" - " + percentage + "% (" + (remaining / 60) + "h " + (remaining % 60) + "m remaining)");
 		}
-		else progress.append(" - " + percentage + "% (" + amount + "/" + getAmount() + ")");
+		else progress.append(" - " + percentage + "% (" + amount + "/" + total + ")");
 		
 		return Text.colorize(progress.toString());
 	}
