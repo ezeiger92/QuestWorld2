@@ -71,158 +71,158 @@ public class QuestWorld extends JavaPlugin implements Listener {
 	
 	Localization local;
 	Economy economy;
-	
 	Sounds eventSounds;
-	
-	boolean citizens;
 	
 	@SuppressWarnings("deprecation")
 	@Override
 	public void onEnable() {
-		CSCoreLibLoader loader = new CSCoreLibLoader(this);
-		if (loader.load()) {
-			guide = new ItemBuilder(Material.ENCHANTED_BOOK)
+		// Initialize all we can before we need CSCoreLib
+		categories = new ArrayList<Category>();
+		categoryIDs = new HashMap<Integer, Category>();
+		managers = new HashSet<QuestManager>();
+		profiles = new HashMap<UUID, QuestManager>();
+		inputs = new HashMap<UUID, Input>();
+		instance = this;
+		
+		guide = new ItemBuilder(Material.ENCHANTED_BOOK)
 				.display("&eQuest Book &7(Right Click)")
 				.lore("", "&rYour basic Guide for Quests", "&rIn case you lose it, simply place a", "&rWorkbench into your Crafting Grid")
 				.get();
+
+		if (getServer().getPluginManager().isPluginEnabled("Vault")) setupEconomy();
+		
+		// Attempt to load Core to continue
+		CSCoreLibLoader loader = new CSCoreLibLoader(this);
+		if(!loader.load())
+			return;
+		
+		if (!new File("data-storage/Quest World").exists()) new File("data-storage/Quest World").mkdirs();
+		if (!new File("plugins/QuestWorld/quests").exists()) new File("plugins/QuestWorld/quests").mkdirs();
+		if (!new File("plugins/QuestWorld/dialogues").exists()) new File("plugins/QuestWorld/dialogues").mkdirs();
+		if (!new File("plugins/QuestWorld/presets").exists()) new File("plugins/QuestWorld/presets").mkdirs();
+		
+		registerMissionType(new CraftMission());
+		registerMissionType(new SubmitMission());
+		registerMissionType(new DetectMission());
+		registerMissionType(new KillMission());
+		registerMissionType(new KillNamedMission());
+		registerMissionType(new FishMission());
+		registerMissionType(new LocationMission());
+		registerMissionType(new JoinMission());
+		registerMissionType(new PlayMission());
+		registerMissionType(new MineMission());
+		registerMissionType(new LevelMission());
+		
+		if (getServer().getPluginManager().isPluginEnabled("Votifier")) {
+			registerMissionType(new MissionType("VOTIFIER_VOTE", true, false, false, SubmissionType.INTEGER, "Vote %s times", new MaterialData(Material.DIAMOND)));
+			new VoteListener(this);
+		}
+		
+		if (getServer().getPluginManager().isPluginEnabled("ChatReaction")) {
+			registerMissionType(new MissionType("CHATREACTION_WIN", true, false, false, SubmissionType.INTEGER, "Win %s Game(s) of ChatReaction", new MaterialData(Material.DIAMOND)));
+			new ChatReactionListener(this);
+		}
+		
+		if (getServer().getPluginManager().isPluginEnabled("ASkyBlock")) {
+			registerMissionType(new MissionType("ASKYBLOCK_REACH_ISLAND_LEVEL", false, false, false, SubmissionType.INTEGER, "Reach Island Level %s", new MaterialData(Material.GRASS)));
+			new ASkyBlockListener(this);
+		}
+		
+		boolean hasCitizens = getServer().getPluginManager().isPluginEnabled("Citizens");
+		
+		if (hasCitizens) {
+			registerMissionType(new MissionType("CITIZENS_INTERACT", false, false, false, SubmissionType.CITIZENS_INTERACT, "Talk to %s", new MaterialData(Material.SKULL_ITEM, (byte) 3)));
+			registerMissionType(new MissionType("CITIZENS_SUBMIT", false, false, false, SubmissionType.CITIZENS_ITEM, "Give %s&7 to %s", new MaterialData(Material.SKULL_ITEM, (byte) 3)));
+			registerMissionType(new MissionType("KILL_NPC", true, true, false, SubmissionType.CITIZENS_KILL, "Kill %s", new MaterialData(Material.SKULL_ITEM, (byte) 3)));
+			registerMissionType(new MissionType("ACCEPT_QUEST_FROM_NPC", false, false, false, SubmissionType.CITIZENS_INTERACT, "Accept this Quest by talking to %s", new MaterialData(Material.SKULL_ITEM, (byte) 3)));
+			new CitizensListener(this);
+		}
+		
+		getServer().getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
 			
-			if (!new File("data-storage/Quest World").exists()) new File("data-storage/Quest World").mkdirs();
-			if (!new File("plugins/QuestWorld/quests").exists()) new File("plugins/QuestWorld/quests").mkdirs();
-			if (!new File("plugins/QuestWorld/dialogues").exists()) new File("plugins/QuestWorld/dialogues").mkdirs();
-			if (!new File("plugins/QuestWorld/presets").exists()) new File("plugins/QuestWorld/presets").mkdirs();
-			
-			instance = this;
-			
-			registerMissionType(new CraftMission());
-			registerMissionType(new SubmitMission());
-			registerMissionType(new DetectMission());
-			registerMissionType(new KillMission());
-			registerMissionType(new KillNamedMission());
-			registerMissionType(new FishMission());
-			registerMissionType(new LocationMission());
-			registerMissionType(new JoinMission());
-			registerMissionType(new PlayMission());
-			registerMissionType(new MineMission());
-			registerMissionType(new LevelMission());
-			
-			if (getServer().getPluginManager().isPluginEnabled("Votifier")) {
-				registerMissionType(new MissionType("VOTIFIER_VOTE", true, false, false, SubmissionType.INTEGER, "Vote %s times", new MaterialData(Material.DIAMOND)));
-				new VoteListener(this);
-			}
-			
-			if (getServer().getPluginManager().isPluginEnabled("ChatReaction")) {
-				registerMissionType(new MissionType("CHATREACTION_WIN", true, false, false, SubmissionType.INTEGER, "Win %s Game(s) of ChatReaction", new MaterialData(Material.DIAMOND)));
-				new ChatReactionListener(this);
-			}
-			
-			if (getServer().getPluginManager().isPluginEnabled("ASkyBlock")) {
-				registerMissionType(new MissionType("ASKYBLOCK_REACH_ISLAND_LEVEL", false, false, false, SubmissionType.INTEGER, "Reach Island Level %s", new MaterialData(Material.GRASS)));
-				new ASkyBlockListener(this);
-			}
-			
-			citizens = getServer().getPluginManager().isPluginEnabled("Citizens");
-			
-			if (citizens) {
-				registerMissionType(new MissionType("CITIZENS_INTERACT", false, false, false, SubmissionType.CITIZENS_INTERACT, "Talk to %s", new MaterialData(Material.SKULL_ITEM, (byte) 3)));
-				registerMissionType(new MissionType("CITIZENS_SUBMIT", false, false, false, SubmissionType.CITIZENS_ITEM, "Give %s&7 to %s", new MaterialData(Material.SKULL_ITEM, (byte) 3)));
-				registerMissionType(new MissionType("KILL_NPC", true, true, false, SubmissionType.CITIZENS_KILL, "Kill %s", new MaterialData(Material.SKULL_ITEM, (byte) 3)));
-				registerMissionType(new MissionType("ACCEPT_QUEST_FROM_NPC", false, false, false, SubmissionType.CITIZENS_INTERACT, "Accept this Quest by talking to %s", new MaterialData(Material.SKULL_ITEM, (byte) 3)));
-				new CitizensListener(this);
-			}
-			
-			categories = new ArrayList<Category>();
-			categoryIDs = new HashMap<Integer, Category>();
-			managers = new HashSet<QuestManager>();
-			profiles = new HashMap<UUID, QuestManager>();
-			inputs = new HashMap<UUID, Input>();
-			
-			getServer().getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
-				
-				@SuppressWarnings("unused")
-				@Override
-				public void run() {
-					System.out.println("[Quest World 2] Retrieving Quest Configuration...");
-					load();
-					int categories = 0, quests = 0;
-					for (Category category: getCategories()) {
-						categories++;
-						for (Quest quest: category.getQuests()) {
-							quests++;
-						}
+			@SuppressWarnings("unused")
+			@Override
+			public void run() {
+				System.out.println("[Quest World 2] Retrieving Quest Configuration...");
+				load();
+				int categories = 0, quests = 0;
+				for (Category category: getCategories()) {
+					categories++;
+					for (Quest quest: category.getQuests()) {
+						quests++;
 					}
-
-					QuestManager.updateTickingTasks();
-					System.out.println("[Quest World 2] Successfully loaded " + categories + " Categories");
-					System.out.println("[Quest World 2] Successfully loaded " + quests + " Quests");
 				}
-			}, 0L);
-			
-			loadConfigs();
-			
-			getCommand("quests").setExecutor(new QuestsCommand());
-			getCommand("questeditor").setExecutor(new EditorCommand());
 
-			new EditorListener(this);
-			new PlayerListener(this);
-			new TaskListener(this);
+				QuestManager.updateTickingTasks();
+				System.out.println("[Quest World 2] Successfully loaded " + categories + " Categories");
+				System.out.println("[Quest World 2] Successfully loaded " + quests + " Quests");
+			}
+		}, 0L);
+		
+		loadConfigs();
+		
+		// Needs sound config loaded
+		eventSounds = new Sounds();
+		
+		getCommand("quests").setExecutor(new QuestsCommand());
+		getCommand("questeditor").setExecutor(new EditorCommand());
+
+		new EditorListener(this);
+		new PlayerListener(this);
+		new TaskListener(this);
+		
+		ShapelessRecipe recipe = new ShapelessRecipe(guide);
+		recipe.addIngredient(Material.WORKBENCH);
+		getServer().addRecipe(recipe);
+		
+		getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
 			
-			if (getServer().getPluginManager().isPluginEnabled("Vault")) setupEconomy();
+			@Override
+			public void run() {
+				for (Player p: Bukkit.getOnlinePlayers()) {
+					getManager(p).update(true);
+				}
+			}
+		}, 0L, cfg.getInt("options.quest-check-delay"));
+		
+		getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
 			
-			ShapelessRecipe recipe = new ShapelessRecipe(guide);
-			recipe.addIngredient(Material.WORKBENCH);
-			getServer().addRecipe(recipe);
-			
+			@Override
+			public void run() {
+				for (Player p: Bukkit.getOnlinePlayers()) {
+					getManager(p).save();
+				}
+			}
+		}, 0L, 5 * 60L * 20L);
+		
+		if (hasCitizens) {
 			getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
 				
 				@Override
 				public void run() {
-					for (Player p: Bukkit.getOnlinePlayers()) {
-						getManager(p).update(true);
-					}
-				}
-			}, 0L, cfg.getInt("options.quest-check-delay"));
-			
-			getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
-				
-				@Override
-				public void run() {
-					for (Player p: Bukkit.getOnlinePlayers()) {
-						getManager(p).save();
-					}
-				}
-			}, 0L, 5 * 60L * 20L);
-			
-			if (citizens) {
-				getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
-					
-					@Override
-					public void run() {
-						for (QuestMission task: QuestManager.getCitizenTasks()) {
-							NPC npc = task.getCitizen();
-							if (npc != null && npc.getEntity() != null) {
-								List<Player> players = new ArrayList<Player>();
-								for (Entity n: npc.getEntity().getNearbyEntities(20D, 8D, 20D)) {
-									if (n instanceof Player) {
-										QuestManager manager = getManager((Player) n);
-										if (manager.getStatus(task.getQuest()).equals(QuestStatus.AVAILABLE) && manager.hasUnlockedTask(task) && !manager.hasCompletedTask(task)) {
-											players.add((Player) n);
-										}
+					for (QuestMission task: QuestManager.getCitizenTasks()) {
+						NPC npc = task.getCitizen();
+						if (npc != null && npc.getEntity() != null) {
+							List<Player> players = new ArrayList<Player>();
+							for (Entity n: npc.getEntity().getNearbyEntities(20D, 8D, 20D)) {
+								if (n instanceof Player) {
+									QuestManager manager = getManager((Player) n);
+									if (manager.getStatus(task.getQuest()).equals(QuestStatus.AVAILABLE) && manager.hasUnlockedTask(task) && !manager.hasCompletedTask(task)) {
+										players.add((Player) n);
 									}
 								}
-								if (!players.isEmpty()) {
-									try {
-										ParticleEffect.VILLAGER_HAPPY.display(npc.getEntity().getLocation().add(0, 1, 0), 0.5F, 0.7F, 0.5F, 0, 20, players);
-									} catch (Exception e) {
-										e.printStackTrace();
-									}
+							}
+							if (!players.isEmpty()) {
+								try {
+									ParticleEffect.VILLAGER_HAPPY.display(npc.getEntity().getLocation().add(0, 1, 0), 0.5F, 0.7F, 0.5F, 0, 20, players);
+								} catch (Exception e) {
+									e.printStackTrace();
 								}
 							}
 						}
 					}
-				}, 0L, 12L);
-			}
-			
-			eventSounds = new Sounds();
+				}
+			}, 0L, 12L);
 		}
 	}
 	

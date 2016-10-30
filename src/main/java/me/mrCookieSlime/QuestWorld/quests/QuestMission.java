@@ -159,9 +159,12 @@ public class QuestMission extends QWObject {
 		
 		// Location is a one-time thing, we don't want to display "(1/6)" or something silly
 		if(getType().getSubmissionType() == SubmissionType.LOCATION) {
-			amount = Math.min(amount, 1);
 			total = 1;
 		}
+		
+		// In the event that amount somehow exceeded total, clamp it.
+		// TODO: Although this fix works, this situation shouldn't happen. Find the real cause.
+		amount = Math.min(amount, total);
 		
 		float percentage = Math.round((amount * 100.0f) / total);
 		
@@ -300,7 +303,7 @@ public class QuestMission extends QWObject {
 	}
 
 	public void setCitizen(int id) {
-		this.citizen = id;;
+		this.citizen = id;
 	}
 
 	public NPC getCitizen() {
