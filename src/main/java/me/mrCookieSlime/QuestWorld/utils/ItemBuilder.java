@@ -95,7 +95,7 @@ public class ItemBuilder {
 		metaResult.setLore(metaHolder.getLore());
 
 		resultStack.setItemMeta(metaResult);
-		resultStack.addEnchantments(metaHolderStack.getEnchantments());
+		resultStack.addUnsafeEnchantments(metaHolderStack.getEnchantments());
 	}
 	
 	/**
