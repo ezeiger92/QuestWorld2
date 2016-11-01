@@ -16,6 +16,7 @@ import me.mrCookieSlime.CSCoreLibPlugin.Configuration.Config;
 import me.mrCookieSlime.CSCoreLibPlugin.Configuration.Variable;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Clock;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
+import me.mrCookieSlime.QuestWorld.quests.MissionType.SubmissionType;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -178,7 +179,7 @@ public class QuestManager {
 	}
 
 	public boolean hasCompletedTask(QuestMission task) {
-		return getProgress(task) >= task.getAmount();
+		return getProgress(task) >= getTotal(task);
 	}
 
 	public boolean hasUnlockedTask(QuestMission task) {
@@ -195,9 +196,16 @@ public class QuestManager {
 		else return cfg.getInt(quest.getCategory().getID() + "." + quest.getID() + ".mission." + task.getID() + ".progress");
 	}
 	
+	public int getTotal(QuestMission task) {
+		if(task.getType().getSubmissionType() == SubmissionType.LOCATION)
+			return 1;
+		
+		return task.getAmount();
+	}
+	
 	public int addProgress(QuestMission task, int amount) {
 		int progress = getProgress(task) + amount;
-		int rest = progress - task.getAmount();
+		int rest = progress - getTotal(task);
 		setProgress(task, rest > 0 ? task.getAmount(): progress);
 		return rest;
 	}
