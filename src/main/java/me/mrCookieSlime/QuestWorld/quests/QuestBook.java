@@ -12,7 +12,6 @@ import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.MenuHelper;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.MenuHelper.ChatHandler;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.Item.CustomItem;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Player.PlayerInventory;
-import me.mrCookieSlime.CSCoreLibPlugin.general.String.StringUtils;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.hooks.CitizensListener;
 import me.mrCookieSlime.QuestWorld.listeners.Input;
@@ -1541,18 +1540,40 @@ public class QuestBook {
 			});
 		}
 		
-		List<String> types = new ArrayList<String>();
-		types.add("");
-		for (String type: QuestWorld.getInstance().getMissionTypes().keySet()) {
-			types.add((type.equals(mission.getType().toString()) ? "§2": "§7") + StringUtils.format(type));
+		int totalMissions = QuestWorld.getInstance().getMissionTypes().size();
+		String[] missionTypes = new String[totalMissions];
+		
+		int i = 0;
+		int missionIndex = -1;
+		
+		final String[] keys = QuestWorld.getInstance().getMissionTypes().keySet().toArray(new String[totalMissions]);
+		
+		for (String type: keys) {
+			if(type.equals(mission.getType().toString()))
+				missionIndex = i;
+			missionTypes[i++] = Text.niceName(type);
 		}
 		
-		menu.addItem(9, new CustomItem(mission.getType().getItem(), "§7" + StringUtils.format(mission.getType().toString()), types.toArray(new String[types.size()])));
+		ItemStack missionSelector = new ItemBuilder(mission.getType().getItem().toItemStack(1))
+				.display("&7" + missionTypes[missionIndex])
+				.selector(missionIndex, missionTypes)
+				.get();
+		
+		final int currentMission = missionIndex;
+		menu.addItem(9, missionSelector);
 		menu.addMenuClickHandler(9, new MenuClickHandler() {
 			
 			@Override
 			public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-				mission.setType(mission.getType().getNextType());
+				int delta = 1;
+				if(action.isRightClicked())
+					delta = -1;
+				
+				int newMission = (currentMission + delta + totalMissions) % totalMissions;
+				
+				mission.setType(QuestWorld.getInstance().getMissionTypes().get(keys[newMission]));
+				
+				//mission.setType(mission.getType().getNextType());
 				QuestManager.updateTickingTasks();
 				openQuestMissionEditor(p, mission);
 				return false;

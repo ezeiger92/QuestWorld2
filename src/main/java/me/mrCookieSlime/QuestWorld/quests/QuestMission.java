@@ -96,8 +96,14 @@ public class QuestMission extends QWObject {
 		if (getCustomName() != null) return getCustomName();
 		return ChatColor.GRAY + type.getFormat(entity, item, location, amount, ChatColor.translateAlternateColorCodes('&', name), citizen, spawners) + (hasTimeframe() ? (" &7within " + (getTimeframe() / 60) + "h " + (getTimeframe() % 60) + "m"): "") + (resetsonDeath() ? " &7without dying": "");
 	}
+	
+	public ItemStack getRawItem() {
+		return item;
+	}
 
 	public ItemStack getItem() {
+		//return type.getQuestItem(this);
+		
 		switch (type.getSubmissionType()) {
 		case ENTITY:
 			return new ItemBuilder(Material.MONSTER_EGG).mob(entity).display("&7Entity Type: &r" + Text.niceName(entity.name())).get();

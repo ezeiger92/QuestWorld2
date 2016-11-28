@@ -240,7 +240,7 @@ public class ItemBuilder {
 		if(resultStack.getType() == Material.INK_SACK)
 			durability(color.getDyeData());
 		else
-			durability(color.getData());
+			durability(color.getWoolData());
 	}
 	
 	@SuppressWarnings("deprecation")
@@ -256,6 +256,9 @@ public class ItemBuilder {
 	
 	public ItemBuilder mob(EntityType mob) {
 		legacyEggData(mob);
+		//resultStack.setData(new SpawnEgg(mob));
+		//resultStack = new SpawnEgg(mob).toItemStack();
+		//return this;
 		return tag(new ItemTag(EntityTag.from(mob)));
 	}
 
@@ -306,6 +309,18 @@ public class ItemBuilder {
 		ItemMeta stackMeta = metaHolderStack.getItemMeta();
 		stackMeta.setLore(Arrays.asList(Text.colorizeList(lore)));
 		metaHolderStack.setItemMeta(stackMeta);
+		return this;
+	}
+	
+	public ItemBuilder selector(int index, String... options) {
+		String[] result = new String[options.length + 1];
+		result[0] = "";
+		
+		for(int i = 0; i < options.length; ++i)
+			result[i + 1] = " &7" + options[i];
+		
+		result[index + 1] = "&2>" + options[index];
+		lore(result);
 		return this;
 	}
 }

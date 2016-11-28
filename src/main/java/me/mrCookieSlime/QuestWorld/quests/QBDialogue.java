@@ -10,6 +10,7 @@ import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu.MenuClickHan
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu.MenuOpeningHandler;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ClickAction;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
+import me.mrCookieSlime.QuestWorld.utils.EntityTools;
 import me.mrCookieSlime.QuestWorld.utils.ItemBuilder;
 import me.mrCookieSlime.QuestWorld.utils.Text;
 
@@ -121,7 +122,34 @@ public class QBDialogue {
 	}
 	
 	public static void openQuestMissionEntityEditor(Player p, final QuestMission mission) {
-		final ChestMenu menu = new ChestMenu(mission.getQuest().getName());
+		openQuestMissionEntityEditor(p, mission, 0, 0);
+	}
+	
+	private static void openQuestMissionEntityEditor(Player p, final QuestMission mission, int page, int mode) {
+		List<EntityType> entities = EntityTools.listAliveEntityTypes();
+		entities.add(0, EntityType.PLAYER);
+		
+		final String[] sortingMethods = {
+				"By Type",
+				"A to Z",
+				"Z to A"
+		};
+		switch(mode) {
+		case 0:
+			// Already sorted this way in initialization
+			break;
+		case 1:
+			entities.sort(EntityTools.NameComp.forward());
+			break;
+		case 2:
+			entities.sort(EntityTools.NameComp.backward());
+			break;
+		}
+		
+		int lastPage = entities.size() / 45; // Double chest size without last row
+		String title = Text.colorize(mission.getQuest().getName() + " &7- &8(Page " + (page+1) + "/" + (lastPage+1) + ")");
+		final ChestMenu menu = new ChestMenu(title);
+		
 		menu.addMenuOpeningHandler(new MenuOpeningHandler() {
 			
 			@Override
@@ -130,18 +158,13 @@ public class QBDialogue {
 			}
 		});
 		
-		List<EntityType> entities = new ArrayList<EntityType>();
-		entities.add(EntityType.PLAYER);
-		
-		for(EntityType ent : EntityType.values()) {
-			if(ent.isAlive() && ent != EntityType.PLAYER && ent != EntityType.ARMOR_STAND)
-				entities.add(ent);
-		}
-
 		ItemBuilder spawnEgg = new ItemBuilder(Material.MONSTER_EGG).lore("", "&e> Click to select");
 		
-		int index = 0;
-		for (final EntityType entity: entities) {
+		int start = page*45;
+		int end = start+45;
+		for(int index = 0, iter = start; iter < end && iter < entities.size(); ++iter, ++index)
+		{
+			EntityType entity = entities.get(iter);
 			menu.addItem(index, spawnEgg.mob(entity).display("&7Entity Type: &r" + Text.niceName(entity.name())).getNew());
 			menu.addMenuClickHandler(index, new MenuClickHandler() {
 				
@@ -152,8 +175,49 @@ public class QBDialogue {
 					return false;
 				}
 			});
-			index++;
 		}
+		
+		int bottomLeftSlot = 45;
+		int bottomRightSlot = 53;
+		
+		ItemBuilder arrow = new ItemBuilder(Material.SKULL_ITEM);
+		
+		menu.addItem(bottomLeftSlot, arrow.skull("MHF_ArrowLeft").display("&7Prev page").getNew());
+		menu.addItem(bottomRightSlot, arrow.skull("MHF_ArrowRight").display("&7Next page").getNew());
+		
+		MenuClickHandler mh = new MenuClickHandler() {
+			
+			@Override
+			public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
+				int delta = 1;
+				if(slot == bottomLeftSlot)
+					delta = -1;
+				
+				int nextPage = (page + delta + lastPage + 1) % (lastPage + 1);
+				openQuestMissionEntityEditor(p, mission, nextPage, mode);
+
+				return false;
+			}
+		};
+		
+		menu.addMenuClickHandler(bottomLeftSlot, mh);
+		menu.addMenuClickHandler(bottomRightSlot, mh);
+
+		menu.addItem(49, arrow.skull("MHF_ArrowUp").display("&7Sorting mode").selector(mode, sortingMethods).getNew());
+		menu.addMenuClickHandler(49, new MenuClickHandler(){
+			@Override
+			public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
+				int delta = 1;
+				if(action.isRightClicked())
+					delta = -1;
+				
+				int newSort = (mode + delta + sortingMethods.length) % sortingMethods.length;
+				openQuestMissionEntityEditor(p, mission, page, newSort);
+				
+				return false;
+			}
+			
+		});
 		
 		menu.open(p);
 	}

@@ -6,7 +6,7 @@ public class EntityTag extends ItemTag {
 	
 	EntityTag(EntityType base) {
 		super("EntityTag");
-		append("id:"+entityNameLookup(base));
+		append("id:minecraft:"+entityNameLookup(base));
 	}
 	
 	EntityTag(EntityType base, String properties) {

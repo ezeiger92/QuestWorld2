@@ -85,14 +85,17 @@ public class Text {
 		return output;
 	}
 	
-	public static String niceName(String INPUT) {
-		String Output = INPUT.replace('_', ' ').trim().toLowerCase();
-		Pattern p = Pattern.compile("\\b[a-z]");
-		Matcher m = p.matcher(Output);
-		StringBuffer sb = new StringBuffer();
-		while (m.find()) {
-			m.appendReplacement(sb, Output.substring(m.start(), m.end()).toUpperCase());
-		}
+	static Pattern firstLetter = Pattern.compile("\\b\\S");
+	
+	public static String niceName(String input) {
+		input = input.replace('_', ' ').trim().toLowerCase();
+
+		StringBuffer sb = new StringBuffer(input.length());
+		
+		Matcher m = firstLetter.matcher(input);
+		while (m.find())
+			m.appendReplacement(sb, m.group().toUpperCase());
+		
 		m.appendTail(sb);
 		
 		return sb.toString();

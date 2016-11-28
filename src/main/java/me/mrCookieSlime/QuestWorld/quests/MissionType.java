@@ -8,6 +8,7 @@ import net.citizensnpcs.api.npc.NPC;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
@@ -99,6 +100,10 @@ public class MissionType {
 
 	public MaterialData getItem() {
 		return item;
+	}
+	
+	public ItemStack getQuestItem(QuestMission qm) {
+		return new ItemStack(Material.COMMAND);
 	}
 
 	public static MissionType valueOf(String id) {
