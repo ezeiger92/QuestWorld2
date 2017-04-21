@@ -14,7 +14,7 @@ public class LocationMission extends MissionType {
 	}
 	
 	@Override
-	public ItemStack getQuestItem(QuestMission qm) {
+	public ItemStack getDisplayItem(QuestMission qm) {
 		return SubmissionItemResolver.location(Material.LEATHER_BOOTS, qm.getLocation());
 	}
 }

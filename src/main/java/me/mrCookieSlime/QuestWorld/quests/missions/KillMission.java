@@ -14,7 +14,12 @@ public class KillMission extends MissionType {
 	}
 	
 	@Override
-	public ItemStack getQuestItem(QuestMission qm) {
+	public ItemStack getDisplayItem(QuestMission qm) {
 		return SubmissionItemResolver.mobEgg(qm.getEntity());
+	}
+	
+	@Override
+	protected String formatMissionDisplay(QuestMission instance) {
+		return "&7Kill" + instance.getAmount() + "x " + (instance.acceptsSpawners() ? "naturally spawned " : "") + instance.getEntity().toString();
 	}
 }

@@ -15,7 +15,12 @@ public class JoinMission extends MissionType {
 	}
 	
 	@Override
-	public ItemStack getQuestItem(QuestMission qm) {
+	public ItemStack getDisplayItem(QuestMission qm) {
 		return new ItemStack(Material.WATCH);
+	}
+	
+	@Override
+	protected String formatMissionDisplay(QuestMission instance) {
+		return "&7Join " + instance.getAmount() + " times";
 	}
 }

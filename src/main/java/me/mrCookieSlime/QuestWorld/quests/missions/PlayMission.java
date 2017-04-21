@@ -13,7 +13,7 @@ public class PlayMission extends MissionType {
 	}
 	
 	@Override
-	public ItemStack getQuestItem(QuestMission qm) {
+	public ItemStack getDisplayItem(QuestMission qm) {
 		return new ItemStack(Material.WATCH);
 	}
 }

@@ -13,7 +13,7 @@ public class SubmitMission extends MissionType {
 	}
 	
 	@Override
-	public ItemStack getQuestItem(QuestMission qm) {
+	public ItemStack getDisplayItem(QuestMission qm) {
 		return qm.getRawItem().clone();
 	}
 }

@@ -45,6 +45,14 @@ public class MissionType {
 		this.ticking = ticking;
 	}
 	
+	public final String formatQuestDisplay(QuestMission instance) {
+		return formatMissionDisplay(instance) + formatTimeframe(instance) + formatDeathReset(instance);
+	}
+	
+	protected String formatMissionDisplay(QuestMission instance) {
+		return instance.getName();
+	}
+	
 	public String getFormat(EntityType entity, ItemStack item, Location location, int amount, String name, int citizenID, boolean spawners) {
 		name = Text.colorize(name);
 		switch (type) {
@@ -83,26 +91,26 @@ public class MissionType {
 		}
 	}
 	
-	public MissionType getNextType() {
-		int index = 0;
-		for (int i = 0; i < values().length - 1; i++) {
-			if (values()[i].toString().equals(this.toString())) {
-				index = i + 1;
-				break;
-			}
-		}
-		return values()[index];
+	private String formatTimeframe(QuestMission quest) {
+		if(!quest.hasTimeframe() || !supportsTimeframes)
+			return "";
+		long duration = quest.getTimeframe();
+		
+		return " &7within " + (duration / 60) + "h " + (duration % 60) + "m";
 	}
-
-	private MissionType[] values() {
-		return QuestWorld.getInstance().getMissionTypes().values().toArray(new MissionType[QuestWorld.getInstance().getMissionTypes().values().size()]);
+	
+	private String formatDeathReset(QuestMission quest) {
+		if(!quest.resetsonDeath() || !supportsDeathReset)
+			return "";
+		
+		return " &7without dying";
 	}
 
 	public MaterialData getItem() {
 		return item;
 	}
 	
-	public ItemStack getQuestItem(QuestMission qm) {
+	public ItemStack getDisplayItem(QuestMission qm) {
 		return new ItemStack(Material.COMMAND);
 	}
 

@@ -94,7 +94,10 @@ public class QuestMission extends QWObject {
 	
 	public String getText() {
 		if (getCustomName() != null) return getCustomName();
-		return ChatColor.GRAY + type.getFormat(entity, item, location, amount, ChatColor.translateAlternateColorCodes('&', name), citizen, spawners) + (hasTimeframe() ? (" &7within " + (getTimeframe() / 60) + "h " + (getTimeframe() % 60) + "m"): "") + (resetsonDeath() ? " &7without dying": "");
+		return ChatColor.GRAY + type.getFormat(entity, item, location, amount, name, citizen, spawners) + (hasTimeframe() ? (" &7within " + (getTimeframe() / 60) + "h " + (getTimeframe() % 60) + "m"): "") + (resetsonDeath() ? " &7without dying": "");
+		
+		//TODO Finish pushing text format to each mission type
+		//return type.formatQuestDisplay(this);
 	}
 	
 	public ItemStack getRawItem() {
@@ -102,6 +105,8 @@ public class QuestMission extends QWObject {
 	}
 
 	public ItemStack getItem() {
+		
+		//TODO Finish pushing item to each mission type
 		//return type.getQuestItem(this);
 		
 		switch (type.getSubmissionType()) {
@@ -127,7 +132,8 @@ public class QuestMission extends QWObject {
 	}
 	
 	public void setItem(ItemStack item) {
-		this.item = new CustomItem(item, 1);
+		this.item = new ItemStack(item);
+		this.item.setAmount(1);
 	}
 	
 	public EntityType getEntity() {

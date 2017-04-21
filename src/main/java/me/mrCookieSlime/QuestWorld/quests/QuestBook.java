@@ -511,7 +511,9 @@ public class QuestBook {
 									success = true;
 									int rest = manager.addProgress(mission, current.getAmount());
 									if (rest > 0) {
-										p.getInventory().setItem(i, new CustomItem(current, rest));
+										ItemStack remaining = new ItemStack(current);
+										remaining.setAmount(rest);
+										p.getInventory().setItem(i, remaining);
 										break;
 									}
 									else p.getInventory().setItem(i, null);
