@@ -296,8 +296,16 @@ public class Quest extends QWObject {
 		this.partysize = size;
 	}
 
-	public long getCooldown() {
+	public long getRawCooldown() {
 		return cooldown;
+	}
+	
+	public void setRawCooldown(long cooldown) {
+		this.cooldown = cooldown;
+	}
+	
+	public long getCooldown() {
+		return this.cooldown / 60 / 1000;
 	}
 
 	public void setCooldown(long cooldown) {
@@ -343,7 +351,13 @@ public class Quest extends QWObject {
 	}
 
 	public String getFormattedCooldown() {
-		long cooldown = this.cooldown / 60 / 1000;
+		long cooldown = getCooldown();
+		if(cooldown == -1)
+			return "Single Use";
+		
+		if(cooldown == 0)
+			return "Repeating";
+		
 		StringBuilder builder = new StringBuilder();
 		builder.append(cooldown / 60);
 		builder.append("h ");
@@ -410,4 +424,8 @@ public class Quest extends QWObject {
 		return !world_blacklist.contains(world);
 	}
 
+	@Override
+	public boolean isValid() {
+		return category.isValid() && (category.getQuest(id) != null);
+	}
 }

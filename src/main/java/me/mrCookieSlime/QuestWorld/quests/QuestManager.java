@@ -277,10 +277,11 @@ public class QuestManager {
 	}
 
 	public void completeQuest(Quest quest) {
-		if (quest.getCooldown() == 0) cfg.setValue(quest.getCategory().getID() + "." + quest.getID() + ".status", QuestStatus.FINISHED.toString());
+		if (quest.getCooldown() == -1) cfg.setValue(quest.getCategory().getID() + "." + quest.getID() + ".status", QuestStatus.FINISHED.toString());
 		else {
-			cfg.setValue(quest.getCategory().getID() + "." + quest.getID() + ".status", QuestStatus.ON_COOLDOWN.toString());
-			cfg.setValue(quest.getCategory().getID() + "." + quest.getID() + ".cooldown", Clock.format(new Date(System.currentTimeMillis() + quest.getCooldown())));
+			if (quest.getCooldown() == 0) cfg.setValue(quest.getCategory().getID() + "." + quest.getID() + ".status", QuestStatus.AVAILABLE.toString());
+			else cfg.setValue(quest.getCategory().getID() + "." + quest.getID() + ".status", QuestStatus.ON_COOLDOWN.toString());
+			cfg.setValue(quest.getCategory().getID() + "." + quest.getID() + ".cooldown", Clock.format(new Date(System.currentTimeMillis() + quest.getRawCooldown())));
 			for (QuestMission task: quest.getMissions()) {
 				 setProgress(task, 0);
 			 }

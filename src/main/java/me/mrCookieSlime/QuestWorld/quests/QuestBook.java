@@ -104,14 +104,26 @@ public class QuestBook {
 	
 	public static void openLastMenu(Player p) {
 		QWObject last = QuestWorld.getInstance().getManager(p).getLastEntry();
-		if (last != null) {
-			if (last instanceof Category)
-				QuestBook.openCategory(p, (Category) last, true);
+		if (last != null) {			
+			if(last instanceof Quest) {
+				Quest q = (Quest)last;
+				
+				if(q.isValid()) {
+					QuestBook.openQuest(p, q, true, true);
+					return;
+				}
+				else
+					last = q.getCategory();
+			}
 			
-			else if (last instanceof Quest)
-				QuestBook.openQuest(p, (Quest) last, true, true);
-			
-			return;
+			if (last instanceof Category) {
+				Category c = (Category)last;
+
+				if(c.isValid()) {
+					QuestBook.openCategory(p, c, true);
+					return;
+				}
+			}
 		}
 		
 		QuestBook.openMainMenu(p);
@@ -421,10 +433,10 @@ public class QuestBook {
 			});
 		}
 		
-		if (quest.getCooldown() > 0) {
+		if (quest.getCooldown() >= 0) {
 			String cooldown = quest.getFormattedCooldown();
 			if (QuestWorld.getInstance().getManager(p).getStatus(quest).equals(QuestStatus.ON_COOLDOWN)) {
-				long remaining = (QuestWorld.getInstance().getManager(p).getCooldownEnd(quest) - System.currentTimeMillis()) / 60 / 1000;
+				long remaining = (QuestWorld.getInstance().getManager(p).getCooldownEnd(quest) - System.currentTimeMillis() + 59999) / 60 / 1000;
 				cooldown = (remaining / 60) + "h " + (remaining % 60) + "m remaining";
 			}
 			menu.addItem(8, new CustomItem(new MaterialData(Material.WATCH), QuestWorld.getInstance().getBookLocal("quests.display.cooldown"), "", "&b" + cooldown));
@@ -905,10 +917,22 @@ public class QuestBook {
 			
 			@Override
 			public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-				long cooldown = quest.getCooldown() / 60 / 1000;
-				if (action.isRightClicked()) cooldown = cooldown - (action.isShiftClicked() ? 60: 1);
-				else cooldown = cooldown + (action.isShiftClicked() ? 60: 1);
-				if (cooldown < 0) cooldown = 0;
+				long cooldown = quest.getCooldown();
+				long delta = action.isShiftClicked() ? 60: 1;
+				if (action.isRightClicked()) delta = -delta;
+
+				// Force a step at 0, so you can't jump from 59 -> -1 or -1 -> 59
+				if(cooldown + delta < 0) {
+					if(cooldown <= 0) 
+						cooldown = -1;
+					else
+						cooldown = 0;
+				}
+				else if(cooldown == -1)
+					cooldown = 0;
+				else
+					cooldown += delta;
+				
 				quest.setCooldown(cooldown);
 				openQuestEditor(p, quest);
 				return false;

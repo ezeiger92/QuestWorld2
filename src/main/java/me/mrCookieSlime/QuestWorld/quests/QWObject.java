@@ -14,5 +14,9 @@ public abstract class QWObject {
 		String permission = getPermission();
 		return permission.equals("") ? true: p.hasPermission(permission);
 	}
+	
+	public boolean isValid() {
+		return false;
+	}
 
 }

@@ -203,4 +203,9 @@ public class Category extends QWObject {
 		if (world_blacklist.contains(world)) world_blacklist.remove(world);
 		else world_blacklist.add(world);
 	}
+	
+	@Override
+	public boolean isValid() {
+		return QuestWorld.getInstance().getCategory(id) != null;
+	}
 }
