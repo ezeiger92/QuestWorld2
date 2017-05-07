@@ -1,6 +1,9 @@
 package me.mrCookieSlime.QuestWorld;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -10,6 +13,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 import me.mrCookieSlime.CSCoreLibPlugin.PluginUtils;
 import me.mrCookieSlime.CSCoreLibPlugin.Configuration.Config;
@@ -44,6 +50,7 @@ import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
@@ -165,7 +172,9 @@ public class QuestWorld extends JavaPlugin implements Listener {
 		eventSounds = new Sounds();
 		
 		getCommand("quests").setExecutor(new QuestsCommand());
-		getCommand("questeditor").setExecutor(new EditorCommand());
+		PluginCommand editorCommand = getCommand("questeditor");
+		editorCommand.setExecutor(new EditorCommand());
+		editorCommand.setAliases(Arrays.asList("qe"));
 
 		new EditorListener(this);
 		new PlayerListener(this);
@@ -223,6 +232,19 @@ public class QuestWorld extends JavaPlugin implements Listener {
 					}
 				}
 			}, 0L, 12L);
+		}
+		
+		int autosave = cfg.getInt("options.autosave-interval");
+		if(autosave > 0) {
+			autosave = autosave * 20 * 60; // minutes to ticks
+			this.getServer().getScheduler().runTaskTimer(this, new Runnable() {
+	
+				@Override
+				public void run() {
+					save();
+				}
+				
+			}, autosave, autosave);
 		}
 	}
 	
@@ -367,6 +389,17 @@ public class QuestWorld extends JavaPlugin implements Listener {
 		QuestManager.ticking_tasks = null;
 	}
 	
+	// Why wasn't this a thing?!
+	public void save() {
+		Iterator<Category> categories = this.categories.iterator();
+		while(categories.hasNext())
+			categories.next().save();
+		
+		Iterator<QuestManager> managers = this.managers.iterator();
+		while(managers.hasNext())
+			managers.next().save();
+	}
+	
 	public void unload() {
 		Iterator<Category> categories = this.categories.iterator();
 		while(categories.hasNext()) {
@@ -379,6 +412,78 @@ public class QuestWorld extends JavaPlugin implements Listener {
 			managers.next().save();
 			managers.remove();
 		}
+	}
+	
+	public boolean importPreset(String fileName) {
+		File file = new File("plugins/QuestWorld/presets/" + fileName);
+		byte[] buffer = new byte[1024];
+		if (!file.exists())
+			return false;
+		
+		QuestWorld.getInstance().unload();
+		try {
+			ZipInputStream input = new ZipInputStream(new FileInputStream(file));
+			ZipEntry entry = input.getNextEntry();
+			
+			for (File f: new File("plugins/QuestWorld/quests").listFiles()) {
+				f.delete();
+			}
+			
+			while (entry != null) {
+				FileOutputStream output = new FileOutputStream(new File("plugins/QuestWorld/quests/" + entry.getName()));
+				
+				int length;
+				while ((length = input.read(buffer)) > 0) {
+					output.write(buffer, 0, length);
+				}
+				
+				output.close();
+				entry = input.getNextEntry();
+			}
+			
+			input.closeEntry();
+			input.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+			return false;
+		}
+		
+		QuestWorld.getInstance().load();
+		return true;
+	}
+	
+	public boolean exportPreset(String fileName) {
+		File file = new File("plugins/QuestWorld/presets/" + fileName);
+		byte[] buffer = new byte[1024];
+		
+		if (file.exists()) file.delete();
+		
+		try {
+			QuestWorld.getInstance().unload();
+			QuestWorld.getInstance().load();
+			file.createNewFile();
+			
+			ZipOutputStream output = new ZipOutputStream(new FileOutputStream(file));
+			for (File f: new File("plugins/QuestWorld/quests").listFiles()) {
+				ZipEntry entry = new ZipEntry(f.getName());
+				output.putNextEntry(entry);
+				FileInputStream input = new FileInputStream(f);
+				
+				int length;
+				while ((length = input.read(buffer)) > 0) {
+					output.write(buffer, 0, length);
+				}
+				
+				input.close();
+				output.closeEntry();
+			}
+			output.close();
+		} catch(IOException e) {
+			e.printStackTrace();
+			return false;
+		}
+
+		return true;
 	}
 
 	public static QuestWorld getInstance() {

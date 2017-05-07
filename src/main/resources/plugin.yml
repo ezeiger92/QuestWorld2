@@ -1,5 +1,5 @@
 name: QuestWorld
-version: 2.6.2
+version: ${pom.version}
 author: mrCookieSlime
 website: http://mrCookieSlime.github.io
 
@@ -13,7 +13,8 @@ commands:
   questeditor:
     description: Opens up the Quest Editor
     usage: /questeditor <gui/import/export>
-
+    aliases: [qe]
+    
 permissions:
   QuestWorld.editor:
     description: Allows you to use /questeditor
