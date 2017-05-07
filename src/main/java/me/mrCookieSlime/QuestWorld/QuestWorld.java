@@ -458,9 +458,9 @@ public class QuestWorld extends JavaPlugin implements Listener {
 		
 		if (file.exists()) file.delete();
 		
+		save(); // Why unload and load in a try/catch block when you can just use a save function?
+		
 		try {
-			QuestWorld.getInstance().unload();
-			QuestWorld.getInstance().load();
 			file.createNewFile();
 			
 			ZipOutputStream output = new ZipOutputStream(new FileOutputStream(file));

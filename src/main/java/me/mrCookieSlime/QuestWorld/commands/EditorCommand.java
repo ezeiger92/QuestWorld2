@@ -4,10 +4,13 @@ package me.mrCookieSlime.QuestWorld.commands;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.listeners.Input;
 import me.mrCookieSlime.QuestWorld.listeners.InputType;
+import me.mrCookieSlime.QuestWorld.quests.Category;
 import me.mrCookieSlime.QuestWorld.quests.QBDialogue;
 import me.mrCookieSlime.QuestWorld.quests.Quest;
 import me.mrCookieSlime.QuestWorld.quests.QuestBook;
 import me.mrCookieSlime.QuestWorld.utils.Text;
+
+import java.util.Iterator;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -17,7 +20,7 @@ import org.bukkit.entity.Player;
 public class EditorCommand implements CommandExecutor {
 	
 	private void help(String label, CommandSender sender) {
-		sender.sendMessage(Text.colorize("&4Usage: &c/", label, " <gui/import <File> /export <File> >"));
+		sender.sendMessage(Text.colorize("&4Usage: &c/", label, " <gui/save/upgrade/import <File>/export <File>/>"));
 	}
 
 	@Override
@@ -65,6 +68,40 @@ public class EditorCommand implements CommandExecutor {
 		else if(param.equals("save")) {
 			QuestWorld.getInstance().save();
 			sender.sendMessage(Text.colorize("&7Saved all quests to disk"));
+		}
+		else if(param.equals("upgrade")) {
+			if(args.length > 1 && args[1].equalsIgnoreCase("confirm")) {
+				int changes = 0;
+				Iterator<Category> categories = QuestWorld.getInstance().getCategories().iterator();
+				while(categories.hasNext()) {
+					Category c = categories.next();
+					Iterator<Quest> quests = c.getQuests().iterator();
+					while(quests.hasNext()) {
+						Quest q = quests.next();
+						if(q.getCooldown() == 0) {
+							q.setCooldown(-1);
+							++changes;
+							String questFile = q.getID() + "-C" + c.getID();
+							System.out.println("[Quest World 2] Upgrading "+c.getName()+"."+q.getName()+" ("+questFile+".quest): Cooldown changed from 0 to -1");
+						}
+					}
+				}
+				String s = "s";
+				if(changes == 1)
+					s = "";
+				
+				String message = "&7Upgrade complete, "+changes+" quest"+s+" were modified";
+				if(changes > 0)
+					message += ", changes printed in console";
+				
+				sender.sendMessage(Text.colorize(message));
+				return true;
+			}
+			sender.sendMessage(Text.colorize("&cWarning! this will change all quests with 0 cooldown to -1 cooldown to match new behavior"));
+			sender.sendMessage(Text.colorize("&cIf you've made any 0 cooldown quests in 2.6.3 or later, they will be affected to!"));
+			sender.sendMessage(Text.colorize("  &7If you wish to continue, type /", label, " upgrade confirm"));
+			
+			return true;
 		}
 		else if (args.length == 4 && param.equals("delete_command") && sender instanceof Player) {
 			Quest quest = QuestWorld.getInstance().getCategory(Integer.parseInt(args[1])).getQuest(Integer.parseInt(args[2]));
