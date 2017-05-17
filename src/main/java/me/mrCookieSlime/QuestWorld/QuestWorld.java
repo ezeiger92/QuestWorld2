@@ -63,6 +63,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class QuestWorld extends JavaPlugin implements Listener {
 	
 	private static QuestWorld instance;
+	private long lastSave;
 	
 	public ItemStack guide;
 	
@@ -379,6 +380,24 @@ public class QuestWorld extends JavaPlugin implements Listener {
 				quest.updateParent(new Config("plugins/QuestWorld/quests/" + quest.getID() + "-C" + category.getID() + ".quest"));
 			}
 		}
+		
+		lastSave = System.currentTimeMillis();
+	}
+	
+	public void reloadQWConfig() {
+		loadConfigs();
+	}
+	
+	public void reloadQuests() {
+		Iterator<Category> categories = this.categories.iterator();
+		while(categories.hasNext())
+			categories.remove();
+		
+		Iterator<QuestManager> managers = this.managers.iterator();
+		while(managers.hasNext())
+			managers.remove();
+		
+		load();
 	}
 	
 	@Override
@@ -389,21 +408,29 @@ public class QuestWorld extends JavaPlugin implements Listener {
 		QuestManager.ticking_tasks = null;
 	}
 	
+	public long getLastSaved() {
+		return lastSave;
+	}
+
 	// Why wasn't this a thing?!
-	public void save() {
+	public void save() { save(false); }
+	public void save(boolean force) {
 		Iterator<Category> categories = this.categories.iterator();
 		while(categories.hasNext())
-			categories.next().save();
+			categories.next().save(force);
 		
 		Iterator<QuestManager> managers = this.managers.iterator();
 		while(managers.hasNext())
 			managers.next().save();
+		
+		lastSave = System.currentTimeMillis();
 	}
 	
 	public void unload() {
 		Iterator<Category> categories = this.categories.iterator();
 		while(categories.hasNext()) {
-			categories.next().save();
+			// Force save for now, change this when 100% sure we've updated all quest/category lastModified times
+			categories.next().save(true);
 			categories.remove();
 		}
 		

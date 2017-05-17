@@ -71,7 +71,7 @@ public class Quest extends QWObject {
 		this.category = QuestWorld.getInstance().getCategory(Integer.parseInt(input.split(" M ")[0]));
 		
 		this.id = Integer.parseInt(input.split(" M ")[1]);
-		this.cooldown = 0;
+		this.cooldown = -1;
 		this.name = Text.colorize(name);
 		this.item = new CustomItem(new MaterialData(Material.BOOK_AND_QUILL).toItemStack(1), name);
 		
@@ -250,6 +250,7 @@ public class Quest extends QWObject {
 	}
 	
 	public void setItemRewards(Player p) {
+		updateLastModified();
 		rewards.clear();
 		for (int i = 0; i < 9; i++) {
 			ItemStack item = p.getInventory().getItem(i);
@@ -258,10 +259,12 @@ public class Quest extends QWObject {
 	}
 
 	public void setItem(ItemStack item) {
+		updateLastModified();
 		this.item = new CustomItem(item, name);
 	}
 
 	public void toggleWorld(String world) {
+		updateLastModified();
 		if (world_blacklist.contains(world)) world_blacklist.remove(world);
 		else world_blacklist.add(world);
 	}
@@ -272,6 +275,7 @@ public class Quest extends QWObject {
 	}
 
 	public void setName(String name) {
+		updateLastModified();
 		this.name = Text.colorize(name);
 		this.item = new CustomItem(item, name);
 	}
@@ -285,14 +289,17 @@ public class Quest extends QWObject {
 	}
 	
 	public void addMission(QuestMission mission) {
+		updateLastModified();
 		this.tasks.add(mission);
 	}
 	
 	public void removeMission(QuestMission mission) {
+		updateLastModified();
 		this.tasks.remove(mission);
 	}
 	
 	public void setPartySize(int size) {
+		updateLastModified();
 		this.partysize = size;
 	}
 
@@ -301,6 +308,7 @@ public class Quest extends QWObject {
 	}
 	
 	public void setRawCooldown(long cooldown) {
+		updateLastModified();
 		this.cooldown = cooldown;
 	}
 	
@@ -309,6 +317,7 @@ public class Quest extends QWObject {
 	}
 
 	public void setCooldown(long cooldown) {
+		updateLastModified();
 		this.cooldown = cooldown * 60 * 1000;
 	}
 	
@@ -325,10 +334,12 @@ public class Quest extends QWObject {
 	}
 	
 	public void setMoney(int money) {
+		updateLastModified();
 		this.money = money;
 	}
 	
 	public void setXP(int xp) {
+		updateLastModified();
 		this.xp = xp;
 	}
 	
@@ -371,6 +382,7 @@ public class Quest extends QWObject {
 	}
 
 	public void setParent(Quest quest) {
+		updateLastModified();
 		this.parent = quest;
 	}
 
@@ -379,10 +391,12 @@ public class Quest extends QWObject {
 	}
 
 	public void removeCommand(int i) {
+		updateLastModified();
 		commands.remove(i);
 	}
 
 	public void addCommand(String command) {
+		updateLastModified();
 		commands.add(command);
 	}
 
@@ -393,6 +407,7 @@ public class Quest extends QWObject {
 
 	@Override
 	public void setPermission(String permission) {
+		updateLastModified();
 		this.permission = permission;
 	}
 
@@ -401,6 +416,7 @@ public class Quest extends QWObject {
 	}
 
 	public void setPartySupport(boolean supportsParties) {
+		updateLastModified();
 		this.disableParties = supportsParties;
 	}
 
@@ -409,6 +425,7 @@ public class Quest extends QWObject {
 	}
 
 	public void setOrdered(boolean ordered) {
+		updateLastModified();
 		this.ordered = ordered;
 	}
 
@@ -417,6 +434,7 @@ public class Quest extends QWObject {
 	}
 
 	public void setAutoClaim(boolean autoclaim) {
+		updateLastModified();
 		this.autoclaim = autoclaim;
 	}
 

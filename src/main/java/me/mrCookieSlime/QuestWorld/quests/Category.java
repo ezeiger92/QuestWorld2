@@ -73,14 +73,24 @@ public class Category extends QWObject {
 	}
 	
 	public void removeQuest(Quest quest) {
+		quest.updateLastModified();
 		quests.remove(quest.getID());
 		new File("plugins/QuestWorld/quests/" + quest.getID() + "-C" + getID() + ".quest").delete();
 	}
 	
-	public void save() {
+	public void save() { save(false); }
+	public void save(boolean force) {
+		long lastSave = QuestWorld.getInstance().getLastSaved();
 		for (Quest quest: quests.values()) {
-			quest.save();
+			// Forcing save or quest appears changed
+			if(force || lastSave < quest.getLastModified())
+				quest.save();
 		}
+		
+		// Not forcing a save and category appears unchanged
+		if(!force && lastSave >= getLastModified())
+			return;
+		
 		Config cfg = new Config(new File("plugins/QuestWorld/quests/" + id + ".category"));
 		cfg.setValue("id", id);
 		cfg.setValue("name", Text.escape(name));
@@ -156,6 +166,7 @@ public class Category extends QWObject {
 	}
 
 	public void setItem(ItemStack item) {
+		updateLastModified();
 		this.item = new CustomItem(item, name);
 	}
 
@@ -165,6 +176,7 @@ public class Category extends QWObject {
 	}
 
 	public void setName(String name) {
+		updateLastModified();
 		this.name = Text.colorize(name);
 		this.item = new CustomItem(item, name);
 	}
@@ -174,6 +186,7 @@ public class Category extends QWObject {
 	}
 
 	public void setParent(Quest quest) {
+		updateLastModified();
 		this.parent = quest;
 	}
 
@@ -184,10 +197,12 @@ public class Category extends QWObject {
 
 	@Override
 	public void setPermission(String permission) {
+		updateLastModified();
 		this.permission = permission;
 	}
 	
 	public void setHidden(boolean hidden) {
+		updateLastModified();
 		this.hidden = hidden;
 	}
 	
@@ -200,6 +215,7 @@ public class Category extends QWObject {
 	}
 
 	public void toggleWorld(String world) {
+		updateLastModified();
 		if (world_blacklist.contains(world)) world_blacklist.remove(world);
 		else world_blacklist.add(world);
 	}

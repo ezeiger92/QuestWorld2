@@ -132,6 +132,7 @@ public class QuestMission extends QWObject {
 	}
 	
 	public void setItem(ItemStack item) {
+		quest.updateLastModified();
 		this.item = new ItemStack(item);
 		this.item.setAmount(1);
 	}
@@ -141,6 +142,7 @@ public class QuestMission extends QWObject {
 	}
 	
 	public void setEntity(EntityType entity) {
+		quest.updateLastModified();
 		this.entity = entity;
 	}
 	
@@ -149,6 +151,7 @@ public class QuestMission extends QWObject {
 	}
 	
 	public void setEntityName(String name) {
+		quest.updateLastModified();
 		this.name = name;
 	}
 
@@ -157,10 +160,12 @@ public class QuestMission extends QWObject {
 	}
 
 	public void setType(MissionType type) {
+		quest.updateLastModified();
 		this.type = type;
 	}
 
 	public void setAmount(int amount) {
+		quest.updateLastModified();
 		this.amount = amount;
 	}
 	
@@ -218,6 +223,7 @@ public class QuestMission extends QWObject {
 	}
 
 	public void setLocation(Player p) {
+		quest.updateLastModified();
 		this.location = p.getLocation().getBlock().getLocation();
 	}
 
@@ -247,6 +253,7 @@ public class QuestMission extends QWObject {
 			@Override
 			public boolean onChat(Player p, String message) {
 				if (message.equalsIgnoreCase("exit()")) {
+					quest.updateLastModified();
 					QuestWorld.getInstance().getLocalization().sendTranslation(p, "editor.set-dialogue", true, new Variable("<path>", path));
 					QuestBook.openQuestMissionEditor(p, mission);
 					
@@ -279,6 +286,7 @@ public class QuestMission extends QWObject {
 	}
 
 	public void setCustomName(String name) {
+		quest.updateLastModified();
 		this.displayName = name;
 	}
 	
@@ -295,6 +303,7 @@ public class QuestMission extends QWObject {
 	}
 	
 	public void setTimeframe(long timeframe) {
+		quest.updateLastModified();
 		this.timeframe = timeframe;
 	}
 
@@ -303,6 +312,7 @@ public class QuestMission extends QWObject {
 	}
 	
 	public void setDeathReset(boolean deathReset) {
+		quest.updateLastModified();
 		this.deathReset = deathReset;
 	}
 
@@ -311,10 +321,12 @@ public class QuestMission extends QWObject {
 	}
 	
 	public void setLore(String lore) {
+		quest.updateLastModified();
 		this.lore = lore;
 	}
 
 	public void setCitizen(int id) {
+		quest.updateLastModified();
 		this.citizen = id;
 	}
 
@@ -331,6 +343,7 @@ public class QuestMission extends QWObject {
 	}
 
 	public void setSpawnerSupport(boolean acceptsSpawners) {
+		quest.updateLastModified();
 		this.spawners = acceptsSpawners;
 	}
 

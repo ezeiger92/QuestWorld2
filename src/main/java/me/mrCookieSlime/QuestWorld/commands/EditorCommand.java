@@ -20,7 +20,7 @@ import org.bukkit.entity.Player;
 public class EditorCommand implements CommandExecutor {
 	
 	private void help(String label, CommandSender sender) {
-		sender.sendMessage(Text.colorize("&4Usage: &c/", label, " <gui/save/upgrade/import <File>/export <File>/>"));
+		sender.sendMessage(Text.colorize("&4Usage: &c/", label, " <gui/save/upgrade/import <File>/export <File>/reload <config/quests/all>"));
 	}
 
 	@Override
@@ -66,8 +66,29 @@ public class EditorCommand implements CommandExecutor {
 				sender.sendMessage(Text.colorize("&4You are not a Player"));
 		}
 		else if(param.equals("save")) {
-			QuestWorld.getInstance().save();
+			// Command, force save, this is probably desired over an incremental save
+			QuestWorld.getInstance().save(true);
 			sender.sendMessage(Text.colorize("&7Saved all quests to disk"));
+		}
+		else if(param.equals("reload")) {
+			if(args.length >= 1 && args[1].equalsIgnoreCase("config")) {
+				QuestWorld.getInstance().reloadQWConfig();
+				sender.sendMessage(Text.colorize("&7Reloaded config from disk"));
+			}
+			else if(args.length >= 1 && args[1].equalsIgnoreCase("quests")) {
+				QuestWorld.getInstance().reloadQuests();
+				sender.sendMessage(Text.colorize("&7Reloaded all quests from disk"));
+			}
+			else if(args.length >= 1 && args[1].equalsIgnoreCase("all")) {
+				QuestWorld.getInstance().reloadQWConfig();
+				QuestWorld.getInstance().reloadQuests();
+				sender.sendMessage(Text.colorize("&7Reloaded config and all quests from disk"));
+			}
+			else {
+				sender.sendMessage(Text.colorize("&7/", label, " reload config - &fReload config files"));
+				sender.sendMessage(Text.colorize("&7/", label, " reload quests - &fReload quest files"));
+				sender.sendMessage(Text.colorize("&7/", label, " reload all - &fReload config and quest files"));
+			}
 		}
 		else if(param.equals("upgrade")) {
 			if(args.length > 1 && args[1].equalsIgnoreCase("confirm")) {
