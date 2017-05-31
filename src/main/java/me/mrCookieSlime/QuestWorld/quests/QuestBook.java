@@ -13,6 +13,8 @@ import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.MenuHelper.ChatHandler
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.Item.CustomItem;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Player.PlayerInventory;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
+import me.mrCookieSlime.QuestWorld.api.CategoryChange;
+import me.mrCookieSlime.QuestWorld.api.QuestChange;
 import me.mrCookieSlime.QuestWorld.hooks.CitizensListener;
 import me.mrCookieSlime.QuestWorld.listeners.Input;
 import me.mrCookieSlime.QuestWorld.listeners.InputType;
@@ -484,7 +486,7 @@ public class QuestBook {
 				else if (mission.getType().getID().equals("SUBMIT")) manual = "Submit";
 				else if (mission.getType().getID().equals("REACH_LOCATION")) manual = "Detect";
 				
-				ItemBuilder entryItem = new ItemBuilder(mission.getItem()).display(mission.getText());
+				ItemBuilder entryItem = new ItemBuilder(mission.getDisplayItem()).display(mission.getText());
 
 				if (manual == null) entryItem.lore("", mission.getProgress(p));
 				else entryItem.lore("", mission.getProgress(p), "", "&r> Click for Manual " + manual);
@@ -509,7 +511,7 @@ public class QuestBook {
 							int amount = 0;
 							for (int i = 0; i < 36; i++) {
 								ItemStack current = p.getInventory().getItem(i);
-								if (QuestWorld.getInstance().isItemSimiliar(current, mission.getItem())) amount = amount + current.getAmount();
+								if (QuestWorld.getInstance().isItemSimiliar(current, mission.getMissionItem())) amount = amount + current.getAmount();
 							}
 							if (amount >= mission.getAmount()) manager.setProgress(mission, mission.getAmount());
 							openQuest(p, quest, categoryBack, back);
@@ -519,7 +521,7 @@ public class QuestBook {
 							
 							for (int i = 0; i < 36; i++) {
 								ItemStack current = p.getInventory().getItem(i);
-								if (QuestWorld.getInstance().isItemSimiliar(current, mission.getItem())) {
+								if (QuestWorld.getInstance().isItemSimiliar(current, mission.getMissionItem())) {
 									success = true;
 									int rest = manager.addProgress(mission, current.getAmount());
 									if (rest > 0) {
@@ -739,6 +741,7 @@ public class QuestBook {
 	@SuppressWarnings("deprecation")
 	public static void openCategoryEditor(Player p, final Category category) {
 		final ChestMenu menu = new ChestMenu("§3Quest Editor");
+		CategoryChange changes = new CategoryChange(category);
 		menu.addMenuOpeningHandler(new MenuOpeningHandler() {
 			
 			@Override
@@ -768,7 +771,9 @@ public class QuestBook {
 			@Override
 			public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
 				if (p.getItemInHand() != null && p.getItemInHand().getType() != null && p.getItemInHand().getType() != Material.AIR) {
-					category.setItem(p.getItemInHand());
+					changes.setItem(p.getItemInHand());
+					if(changes.sendEvent())
+						changes.apply();
 					openCategoryEditor(p, category);
 				}
 				return false;
@@ -793,7 +798,9 @@ public class QuestBook {
 			@Override
 			public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
 				if (action.isRightClicked()) {
-					category.setParent(null);
+					changes.setParent(null);
+					if(changes.sendEvent())
+						changes.apply();
 					openCategoryEditor(p, category);
 				}
 				else QBDialogue.openQuestRequirementChooser(p, category);
@@ -818,7 +825,9 @@ public class QuestBook {
 			
 			@Override
 			public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-				category.setHidden(!category.isHidden());
+				changes.setHidden(!category.isHidden());
+				if(changes.sendEvent())
+					changes.apply();
 				openCategoryEditor(p, category);
 				return false;
 			}
@@ -853,6 +862,7 @@ public class QuestBook {
 	@SuppressWarnings("deprecation")
 	public static void openQuestEditor(Player p, final Quest quest) {
 		final ChestMenu menu = new ChestMenu("§3Quest Editor");
+		QuestChange changes = new QuestChange(quest);
 		menu.addMenuOpeningHandler(new MenuOpeningHandler() {
 			
 			@Override
@@ -882,7 +892,10 @@ public class QuestBook {
 			@Override
 			public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
 				if (p.getItemInHand() != null && p.getItemInHand().getType() != null && p.getItemInHand().getType() != Material.AIR) {
-					quest.setItem(p.getItemInHand());
+					changes.setItem(p.getItemInHand());
+					if(changes.sendEvent())
+						changes.apply();
+					
 					openQuestEditor(p, quest);
 				}
 				return false;
@@ -906,7 +919,10 @@ public class QuestBook {
 			
 			@Override
 			public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-				quest.setItemRewards(p);
+				changes.setItemRewards(p);
+				if(changes.sendEvent())
+					changes.apply();
+				
 				openQuestEditor(p, quest);
 				return false;
 			}
@@ -933,7 +949,9 @@ public class QuestBook {
 				else
 					cooldown += delta;
 				
-				quest.setCooldown(cooldown);
+				changes.setCooldown(cooldown);
+				if(changes.sendEvent())
+					changes.apply();
 				openQuestEditor(p, quest);
 				return false;
 			}
@@ -949,7 +967,9 @@ public class QuestBook {
 					if (action.isRightClicked()) money = money - (action.isShiftClicked() ? 100: 1);
 					else money = money + (action.isShiftClicked() ? 100: 1);
 					if (money < 0) money = 0;
-					quest.setMoney(money);
+					changes.setMoney(money);
+					if(changes.sendEvent())
+						changes.apply();
 					openQuestEditor(p, quest);
 					return false;
 				}
@@ -965,7 +985,9 @@ public class QuestBook {
 				if (action.isRightClicked()) xp = xp - (action.isShiftClicked() ? 10: 1);
 				else xp = xp + (action.isShiftClicked() ? 10: 1);
 				if (xp < 0) xp = 0;
-				quest.setXP(xp);
+				changes.setXP(xp);
+				if(changes.sendEvent())
+					changes.apply();
 				openQuestEditor(p, quest);
 				return false;
 			}
@@ -977,7 +999,9 @@ public class QuestBook {
 			@Override
 			public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
 				if (action.isRightClicked()) {
-					quest.setParent(null);
+					changes.setParent(null);
+					if(changes.sendEvent())
+						changes.apply();
 					openQuestEditor(p, quest);
 				}
 				else QBDialogue.openQuestRequirementChooser(p, quest);
@@ -1013,7 +1037,9 @@ public class QuestBook {
 			
 			@Override
 			public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-				quest.setPartySupport(quest.supportsParties());
+				changes.setPartySupport(quest.supportsParties());
+				if(changes.sendEvent())
+					changes.apply();
 				openQuestEditor(p, quest);
 				return false;
 			}
@@ -1024,7 +1050,9 @@ public class QuestBook {
 			
 			@Override
 			public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-				quest.setOrdered(!quest.isOrdered());
+				changes.setOrdered(!quest.isOrdered());
+				if(changes.sendEvent())
+					changes.apply();
 				openQuestEditor(p, quest);
 				return false;
 			}
@@ -1035,7 +1063,9 @@ public class QuestBook {
 			
 			@Override
 			public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-				quest.setAutoClaim(!quest.isAutoClaiming());
+				changes.setAutoClaim(!changes.isAutoClaiming());
+				if(changes.sendEvent())
+					changes.apply();
 				openQuestEditor(p, quest);
 				return false;
 			}
@@ -1060,7 +1090,9 @@ public class QuestBook {
 				if (action.isRightClicked()) size--;
 				else size++;
 				if (size < 0) size = 0;
-				quest.setPartySize(size);
+				changes.setPartySize(size);
+				if(changes.sendEvent())
+					changes.apply();
 				openQuestEditor(p, quest);
 				return false;
 			}
@@ -1098,7 +1130,9 @@ public class QuestBook {
 					
 					@Override
 					public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-						quest.addMission(new QuestMission(quest, String.valueOf(slot - 36), MissionType.valueOf("SUBMIT"), EntityType.PLAYER, "", new ItemStack(Material.STONE), p.getLocation().getBlock().getLocation(), 1, null, 0, false, 0, false, "Hey there! Do this Quest."));
+						changes.addMission(new QuestMission(quest, String.valueOf(slot - 36), MissionType.valueOf("SUBMIT"), EntityType.PLAYER, "", new ItemStack(Material.STONE), p.getLocation().getBlock().getLocation(), 1, null, 0, false, 0, false, "Hey there! Do this Quest."));
+						if(changes.sendEvent())
+							changes.apply();
 						openQuestEditor(p, quest);
 						return false;
 					}
@@ -1153,7 +1187,10 @@ public class QuestBook {
 				
 				@Override
 				public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-					quest.toggleWorld(world.getName());
+					QuestChange changes = new QuestChange(quest);
+					changes.toggleWorld(world.getName());
+					if(changes.sendEvent())
+						changes.apply();
 					openWorldEditor(p, quest);
 					return false;
 				}
@@ -1192,7 +1229,11 @@ public class QuestBook {
 				
 				@Override
 				public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-					category.toggleWorld(world.getName());
+					CategoryChange changes = new CategoryChange(category);
+					changes.toggleWorld(world.getName());
+					if(changes.sendEvent())
+						changes.apply();
+					
 					openWorldEditor(p, category);
 					return false;
 				}
@@ -1271,7 +1312,7 @@ public class QuestBook {
 		}
 		
 		case ITEM: {
-			ItemStack item = mission.getItem();
+			ItemStack item = mission.getMissionItem();
 			ItemMeta im = item.getItemMeta();
 			im.setLore(Arrays.asList("", "§e> Click to change the Item to", "§ethe Item you are currently holding"));
 			item.setItemMeta(im);
@@ -1307,7 +1348,7 @@ public class QuestBook {
 		}
 		
 		case BLOCK: {
-			ItemStack item = mission.getItem();
+			ItemStack item = mission.getDisplayItem();
 			ItemMeta im = item.getItemMeta();
 			im.setLore(Arrays.asList("", "§e> Click to change the Block to", "§ethe Item you are currently holding"));
 			item.setItemMeta(im);
@@ -1318,7 +1359,7 @@ public class QuestBook {
 				@Override
 				public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
 					if (p.getItemInHand() != null && p.getItemInHand().getType() != null && p.getItemInHand().getType() != Material.AIR && p.getItemInHand().getType().isBlock()) {
-						mission.setItem(new ItemStack(p.getItemInHand().getType()));
+						mission.setItem(new ItemStack(p.getItemInHand().getType(), 1, p.getItemInHand().getDurability()));
 						openQuestMissionEditor(p, mission);
 					}
 					return false;
@@ -1379,7 +1420,7 @@ public class QuestBook {
 		}
 		
 		case LOCATION: {
-			ItemStack item = mission.getItem();
+			ItemStack item = mission.getDisplayItem();
 			ItemMeta im = item.getItemMeta();
 			im.setLore(Arrays.asList("", "§e> Click to change the Location", "§eto your current Position"));
 			item.setItemMeta(im);
@@ -1482,7 +1523,7 @@ public class QuestBook {
 				}
 			});
 			
-			ItemStack item = mission.getItem();
+			ItemStack item = mission.getDisplayItem();
 			ItemMeta im = item.getItemMeta();
 			im.setLore(Arrays.asList("", "§e> Click to change the Item to", "§ethe Item you are currently holding"));
 			item.setItemMeta(im);
@@ -1580,7 +1621,7 @@ public class QuestBook {
 			missionTypes[i++] = Text.niceName(type);
 		}
 		
-		ItemStack missionSelector = new ItemBuilder(mission.getType().getItem().toItemStack(1))
+		ItemStack missionSelector = new ItemBuilder(mission.getType().getSelectorItem().toItemStack(1))
 				.display("&7" + missionTypes[missionIndex])
 				.selector(missionIndex, missionTypes)
 				.get();

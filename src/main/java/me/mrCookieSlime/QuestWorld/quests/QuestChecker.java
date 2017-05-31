@@ -10,6 +10,7 @@ import org.bukkit.event.Event;
 
 public class QuestChecker {
 	
+	//TODO: Holy hell there is so much of this running so frequently, whyyyyyyyyyyyyyy
 	public static void check(Player p, Event event, String type, QuestListener listener) {
 		QuestManager manager = QuestWorld.getInstance().getManager(p);
 		for (Category category: QuestWorld.getInstance().getCategories()) {

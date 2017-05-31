@@ -19,6 +19,7 @@ public class ASkyBlockListener implements Listener {
 		plugin.getServer().getPluginManager().registerEvents(this, plugin);
 	}
 
+	
 	@EventHandler
 	public void onWin(final IslandLevelEvent e) {
 		QuestChecker.check(e.getPlayer(), e, "ASKYBLOCK_REACH_ISLAND_LEVEL", new QuestOfflineListener() {

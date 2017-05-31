@@ -57,6 +57,7 @@ public class CitizensListener implements Listener {
 			pi.setItemInMainHand(is);
 	}
 	
+	//TODO "for for if for if if" KILL IT WITH FIRE
 	@EventHandler
 	public void onInteract(NPCRightClickEvent e) {
 		Player p = e.getClicker();
@@ -102,7 +103,7 @@ public class CitizensListener implements Listener {
 									});
 									new CustomBookOverlay("Quest", "TheBusyBiscuit", lore).open(p);
 								}
-								else if (task.getType().getID().equals("CITIZENS_SUBMIT") && e.getNPC().getId() == task.getCitizenID() && QuestWorld.getInstance().isItemSimiliar(getActiveHandItem(p), task.getItem())) {
+								else if (task.getType().getID().equals("CITIZENS_SUBMIT") && e.getNPC().getId() == task.getCitizenID() && QuestWorld.getInstance().isItemSimiliar(getActiveHandItem(p), task.getMissionItem())) {
 									int rest = QuestWorld.getInstance().getManager(p).addProgress(task, getActiveHandItem(p).getAmount());
 									if (rest > 0) setActiveHandItem(p, new CustomItem(getActiveHandItem(p), rest));
 									else setActiveHandItem(p, null);
@@ -117,7 +118,7 @@ public class CitizensListener implements Listener {
 		}
 	}
 	
-	@EventHandler
+	/*@EventHandler*/ // moved to CitizenKillMission
 	public void onInteract(NPCDeathEvent e) {
 		if (e.getNPC().getEntity().getLastDamageCause() == null) return;
 		Player killer = null;

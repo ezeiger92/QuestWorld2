@@ -40,6 +40,38 @@ public class Quest extends QWObject {
 	Quest parent;
 	String permission;
 	
+	protected Quest(Quest quest) {
+		quest.copyTo(this);
+	}
+	
+	protected void copyTo(Quest dest) {
+		dest.category = category;
+		dest.id       = id;
+		dest.cooldown = cooldown;
+		dest.name     = name;
+		dest.item     = item.clone();
+		
+		dest.tasks = new ArrayList<QuestMission>();
+		dest.tasks.addAll(tasks);
+		dest.commands = new ArrayList<String>();
+		dest.commands.addAll(commands);
+		dest.world_blacklist = new ArrayList<String>();
+		dest.world_blacklist.addAll(world_blacklist);
+		dest.rewards = new ArrayList<ItemStack>();
+		dest.rewards.addAll(rewards);
+		
+		dest.money          = money;
+		dest.xp             = xp;
+		dest.partysize      = partysize;
+		dest.disableParties = disableParties;
+		dest.ordered        = ordered;
+		dest.autoclaim      = autoclaim;
+		dest.parent         = parent;
+		dest.permission     = permission;
+		
+		dest.updateLastModified();
+	}
+	
 	public Quest(Category category, File file) {
 		this.category = category;
 		
@@ -166,7 +198,7 @@ public class Quest extends QWObject {
 		for (QuestMission mission: tasks) {
 			cfg.setValue("missions." + mission.getID() + ".type", mission.getType().toString());
 			cfg.setValue("missions." + mission.getID() + ".amount", mission.getAmount());
-			cfg.setValue("missions." + mission.getID() + ".item", new ItemStack(mission.getItem()));
+			cfg.setValue("missions." + mission.getID() + ".item", new ItemStack(mission.getMissionItem()));
 			cfg.setValue("missions." + mission.getID() + ".entity", mission.getEntity().toString());
 			if (mission.getLocation() != null && mission.getLocation().getWorld() != null) cfg.setValue("missions." + mission.getID() + ".location", mission.getLocation());
 			cfg.setValue("missions." + mission.getID() + ".name", Text.escape(mission.getEntityName()));

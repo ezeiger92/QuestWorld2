@@ -1,0 +1,31 @@
+package me.mrCookieSlime.QuestWorld.events;
+
+import org.bukkit.event.Cancellable;
+import org.bukkit.event.Event;
+
+/**
+ * Simple event base for events that can be cancelled
+ */
+public abstract class CancellableEvent extends Event implements Cancellable {
+	private boolean cancelled;
+	
+	@Override
+	public boolean isCancelled() {
+		return cancelled;
+	}
+
+	@Override
+	public void setCancelled(boolean cancel) {
+		cancelled = cancel;
+	}
+	
+/* COPY PASTE ME INTO OTHER EVENTS :D
+
+	// Boilerplate copy/paste from CancellableEvent
+	@Override
+	public HandlerList getHandlers() { return handlers;	}
+	public static HandlerList getHandlerList() { return handlers; }
+	private static final HandlerList handlers = new HandlerList();
+
+*/
+}

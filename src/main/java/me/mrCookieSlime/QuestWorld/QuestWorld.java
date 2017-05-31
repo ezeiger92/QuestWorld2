@@ -24,23 +24,21 @@ import me.mrCookieSlime.CSCoreLibPlugin.general.Particles.MC_1_8.ParticleEffect;
 import me.mrCookieSlime.CSCoreLibSetup.CSCoreLibLoader;
 import me.mrCookieSlime.QuestWorld.commands.EditorCommand;
 import me.mrCookieSlime.QuestWorld.commands.QuestsCommand;
-import me.mrCookieSlime.QuestWorld.hooks.ASkyBlockListener;
-import me.mrCookieSlime.QuestWorld.hooks.ChatReactionListener;
 import me.mrCookieSlime.QuestWorld.hooks.CitizensListener;
-import me.mrCookieSlime.QuestWorld.hooks.VoteListener;
 import me.mrCookieSlime.QuestWorld.listeners.EditorListener;
 import me.mrCookieSlime.QuestWorld.listeners.Input;
 import me.mrCookieSlime.QuestWorld.listeners.InputType;
 import me.mrCookieSlime.QuestWorld.listeners.PlayerListener;
+import me.mrCookieSlime.QuestWorld.listeners.SelfListener;
 import me.mrCookieSlime.QuestWorld.listeners.TaskListener;
 import me.mrCookieSlime.QuestWorld.quests.Category;
 import me.mrCookieSlime.QuestWorld.quests.MissionType;
-import me.mrCookieSlime.QuestWorld.quests.MissionType.SubmissionType;
 import me.mrCookieSlime.QuestWorld.quests.Quest;
 import me.mrCookieSlime.QuestWorld.quests.QuestManager;
 import me.mrCookieSlime.QuestWorld.quests.QuestMission;
 import me.mrCookieSlime.QuestWorld.quests.QuestStatus;
 import me.mrCookieSlime.QuestWorld.quests.missions.*;
+import me.mrCookieSlime.QuestWorld.quests.pluginmissions.*;
 import me.mrCookieSlime.QuestWorld.utils.ItemBuilder;
 import me.mrCookieSlime.QuestWorld.utils.Sounds;
 import me.mrCookieSlime.QuestWorld.utils.Text;
@@ -56,7 +54,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapelessRecipe;
-import org.bukkit.material.MaterialData;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -122,27 +119,27 @@ public class QuestWorld extends JavaPlugin implements Listener {
 		registerMissionType(new LevelMission());
 		
 		if (getServer().getPluginManager().isPluginEnabled("Votifier")) {
-			registerMissionType(new MissionType("VOTIFIER_VOTE", true, false, false, SubmissionType.INTEGER, "Vote %s times", new MaterialData(Material.DIAMOND)));
-			new VoteListener(this);
+			registerMissionType(new VoteMission());
+			//new VoteListener(this);
 		}
 		
 		if (getServer().getPluginManager().isPluginEnabled("ChatReaction")) {
-			registerMissionType(new MissionType("CHATREACTION_WIN", true, false, false, SubmissionType.INTEGER, "Win %s Game(s) of ChatReaction", new MaterialData(Material.DIAMOND)));
-			new ChatReactionListener(this);
+			registerMissionType(new ChatReactMission());
+			//new ChatReactionListener(this);
 		}
 		
 		if (getServer().getPluginManager().isPluginEnabled("ASkyBlock")) {
-			registerMissionType(new MissionType("ASKYBLOCK_REACH_ISLAND_LEVEL", false, false, false, SubmissionType.INTEGER, "Reach Island Level %s", new MaterialData(Material.GRASS)));
-			new ASkyBlockListener(this);
+			registerMissionType(new ASkyBlockLevelMission());
+			//new ASkyBlockListener(this);
 		}
 		
 		boolean hasCitizens = getServer().getPluginManager().isPluginEnabled("Citizens");
 		
 		if (hasCitizens) {
-			registerMissionType(new MissionType("CITIZENS_INTERACT", false, false, false, SubmissionType.CITIZENS_INTERACT, "Talk to %s", new MaterialData(Material.SKULL_ITEM, (byte) 3)));
-			registerMissionType(new MissionType("CITIZENS_SUBMIT", false, false, false, SubmissionType.CITIZENS_ITEM, "Give %s&7 to %s", new MaterialData(Material.SKULL_ITEM, (byte) 3)));
-			registerMissionType(new MissionType("KILL_NPC", true, true, false, SubmissionType.CITIZENS_KILL, "Kill %s", new MaterialData(Material.SKULL_ITEM, (byte) 3)));
-			registerMissionType(new MissionType("ACCEPT_QUEST_FROM_NPC", false, false, false, SubmissionType.CITIZENS_INTERACT, "Accept this Quest by talking to %s", new MaterialData(Material.SKULL_ITEM, (byte) 3)));
+			registerMissionType(new CitizenInteractMission());
+			registerMissionType(new CitizenSubmitMission());
+			registerMissionType(new CitizenKillMission());
+			registerMissionType(new CitizenAcceptQuestMission());
 			new CitizensListener(this);
 		}
 		
@@ -180,6 +177,7 @@ public class QuestWorld extends JavaPlugin implements Listener {
 		new EditorListener(this);
 		new PlayerListener(this);
 		new TaskListener(this);
+		Bukkit.getPluginManager().registerEvents(new SelfListener(), this);
 		
 		ShapelessRecipe recipe = new ShapelessRecipe(guide);
 		recipe.addIngredient(Material.WORKBENCH);
@@ -571,6 +569,9 @@ public class QuestWorld extends JavaPlugin implements Listener {
 	}
 	
 	public void registerMissionType(MissionType type) {
+		if(type instanceof Listener)
+			getServer().getPluginManager().registerEvents(type, this);
+
 		types.put(type.getID(), type);
 	}
 

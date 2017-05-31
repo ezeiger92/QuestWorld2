@@ -10,16 +10,16 @@ import me.mrCookieSlime.QuestWorld.quests.QuestMission;
 
 public class DetectMission extends MissionType {
 	public DetectMission() {
-		super("DETECT", false, false, false, SubmissionType.ITEM, "Own %s", new MaterialData(Material.COMMAND));
+		super("DETECT", false, false, false, SubmissionType.ITEM, new MaterialData(Material.COMMAND));
 	}
 	
 	@Override
 	public ItemStack getDisplayItem(QuestMission qm) {
-		return qm.getRawItem().clone();
+		return qm.getMissionItem().clone();
 	}
 	
 	@Override
 	protected String formatMissionDisplay(QuestMission instance) {
-		return "&7Own " + instance.getAmount() + "x " + StringUtils.formatItemName(instance.getItem(), false);
+		return "&7Own " + instance.getAmount() + "x " + StringUtils.formatItemName(instance.getDisplayItem(), false);
 	}
 }

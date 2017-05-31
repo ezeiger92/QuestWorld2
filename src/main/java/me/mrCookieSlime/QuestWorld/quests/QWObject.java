@@ -8,6 +8,12 @@ public abstract class QWObject {
 		return lastModified;
 	}
 	
+	private static long s_uniqueId = 0;
+	private long uniqueId = s_uniqueId++;
+	public long getUnique() {
+		return uniqueId;
+	}
+	
 	public void updateLastModified() {
 		lastModified = System.currentTimeMillis();
 	}

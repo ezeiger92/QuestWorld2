@@ -20,7 +20,6 @@ import me.mrCookieSlime.QuestWorld.utils.Text;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
 
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.SkullType;
@@ -94,20 +93,20 @@ public class QuestMission extends QWObject {
 	
 	public String getText() {
 		if (getCustomName() != null) return getCustomName();
-		return ChatColor.GRAY + type.getFormat(entity, item, location, amount, name, citizen, spawners) + (hasTimeframe() ? (" &7within " + (getTimeframe() / 60) + "h " + (getTimeframe() % 60) + "m"): "") + (resetsonDeath() ? " &7without dying": "");
+		//Old way
+		//return ChatColor.GRAY + type.getFormat(entity, item, location, amount, name, citizen, spawners) + (hasTimeframe() ? (" &7within " + (getTimeframe() / 60) + "h " + (getTimeframe() % 60) + "m"): "") + (resetsonDeath() ? " &7without dying": "");
 		
-		//TODO Finish pushing text format to each mission type
-		//return type.formatQuestDisplay(this);
+		return type.formatQuestDisplay(this);
 	}
 	
-	public ItemStack getRawItem() {
+	public ItemStack getMissionItem() {
 		return item;
 	}
 
-	public ItemStack getItem() {
+	public ItemStack getDisplayItem() {
 		
 		//TODO Finish pushing item to each mission type
-		//return type.getQuestItem(this);
+		//return type.getDisplayItem(this);
 		
 		switch (type.getSubmissionType()) {
 		case ENTITY:
@@ -123,7 +122,7 @@ public class QuestMission extends QWObject {
 		case LOCATION:
 			return new CustomItem(Material.LEATHER_BOOTS, "&7X: " + location.getBlockX() + " Y: " + location.getBlockY() + " Z: " + location.getBlockZ(), 0);
 		case CITIZENS_INTERACT:
-			return type.getItem().toItemStack(1);
+			return type.getSelectorItem().toItemStack(1);
 		case CITIZENS_KILL:
 			return new ItemBuilder(Material.SKULL_ITEM).skull(SkullType.PLAYER).get();
 		default:
@@ -330,6 +329,7 @@ public class QuestMission extends QWObject {
 		this.citizen = id;
 	}
 
+	@Deprecated
 	public NPC getCitizen() {
 		return CitizensAPI.getNPCRegistry().getById(citizen);
 	}

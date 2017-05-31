@@ -2,6 +2,8 @@ package me.mrCookieSlime.QuestWorld.listeners;
 
 import me.mrCookieSlime.CSCoreLibPlugin.Configuration.Variable;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
+import me.mrCookieSlime.QuestWorld.api.CategoryChange;
+import me.mrCookieSlime.QuestWorld.api.QuestChange;
 import me.mrCookieSlime.QuestWorld.quests.Category;
 import me.mrCookieSlime.QuestWorld.quests.Party;
 import me.mrCookieSlime.QuestWorld.quests.QBDialogue;
@@ -41,8 +43,13 @@ public class EditorListener implements Listener {
 		
 		case CATEGORY_RENAME: {
 			Category category = (Category) input.getValue();
-			category.setName(e.getMessage());
-			QuestWorld.getInstance().getLocalization().sendTranslation(e.getPlayer(), "editor.renamed-category", true);
+			CategoryChange changes = new CategoryChange(category);
+			changes.setName(e.getMessage());
+			if(changes.sendEvent()) {
+				changes.apply();
+				QuestWorld.getInstance().getLocalization().sendTranslation(e.getPlayer(), "editor.renamed-category", true);
+			}
+			
 			QuestWorld.getInstance().removeInput(e.getPlayer().getUniqueId());
 			e.setCancelled(true);
 			QuestBook.openCategoryEditor(e.getPlayer(), category);
@@ -51,8 +58,13 @@ public class EditorListener implements Listener {
 		
 		case QUEST_RENAME: {
 			Quest quest = (Quest) input.getValue();
-			quest.setName(e.getMessage());
-			QuestWorld.getInstance().getLocalization().sendTranslation(e.getPlayer(), "editor.renamed-quest", true);
+			QuestChange changes = new QuestChange(quest);
+			changes.setName(e.getMessage());
+			if(changes.sendEvent()) {
+				changes.apply();
+				QuestWorld.getInstance().getLocalization().sendTranslation(e.getPlayer(), "editor.renamed-quest", true);
+			}
+			
 			QuestWorld.getInstance().removeInput(e.getPlayer().getUniqueId());
 			e.setCancelled(true);
 			QuestBook.openQuestEditor(e.getPlayer(), quest);
@@ -123,7 +135,11 @@ public class EditorListener implements Listener {
 		
 		case COMMAND_ADD: {
 			Quest quest = (Quest) input.getValue();
-			quest.addCommand(ChatColor.stripColor(e.getMessage()));
+			QuestChange changes = new QuestChange(quest);
+			changes.addCommand(ChatColor.stripColor(e.getMessage()));
+			if(changes.sendEvent())
+				changes.apply();
+
 			QBDialogue.openCommandEditor(e.getPlayer(), quest);
 			e.setCancelled(true);
 			QuestWorld.getInstance().removeInput(e.getPlayer().getUniqueId());
@@ -132,9 +148,14 @@ public class EditorListener implements Listener {
 		
 		case CATEGORY_PERMISSION: {
 			Category category = (Category) input.getValue();
+			CategoryChange changes = new CategoryChange(category);
 			String permission = e.getMessage().equalsIgnoreCase("none") ? "": e.getMessage();
-			category.setPermission(permission);
-			QuestWorld.getInstance().getLocalization().sendTranslation(e.getPlayer(), "editor.permission-set-category", true);
+			changes.setPermission(permission);
+			if(changes.sendEvent()) {
+				changes.apply();
+				QuestWorld.getInstance().getLocalization().sendTranslation(e.getPlayer(), "editor.permission-set-category", true);
+			}
+			
 			QuestWorld.getInstance().removeInput(e.getPlayer().getUniqueId());
 			e.setCancelled(true);
 			QuestBook.openCategoryEditor(e.getPlayer(), category);
@@ -143,9 +164,14 @@ public class EditorListener implements Listener {
 		
 		case QUEST_PERMISSION: {
 			Quest quest = (Quest) input.getValue();
+			QuestChange changes = new QuestChange(quest);
 			String permission = e.getMessage().equalsIgnoreCase("none") ? "": e.getMessage();
-			quest.setPermission(permission);
-			QuestWorld.getInstance().getLocalization().sendTranslation(e.getPlayer(), "editor.permission-set-quest", true);
+			changes.setPermission(permission);
+			if(changes.sendEvent()) {
+				changes.apply();
+				QuestWorld.getInstance().getLocalization().sendTranslation(e.getPlayer(), "editor.permission-set-quest", true);
+			}
+			
 			QuestWorld.getInstance().removeInput(e.getPlayer().getUniqueId());
 			e.setCancelled(true);
 			QuestBook.openQuestEditor(e.getPlayer(), quest);

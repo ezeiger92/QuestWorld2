@@ -31,6 +31,14 @@ public class Category extends QWObject {
 	boolean hidden;
 	List<String> world_blacklist = new ArrayList<String>();
 	
+	protected Category(Category cat) {
+		cat.copyTo(this);
+	}
+	
+	protected void copyTo(Category dest) {
+		
+	}
+	
 	public Category(String name, int id) {
 		this.id = id;
 		this.quests = new HashMap<Integer, Quest>();

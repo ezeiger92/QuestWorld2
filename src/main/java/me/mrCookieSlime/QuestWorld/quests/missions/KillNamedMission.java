@@ -10,7 +10,7 @@ import me.mrCookieSlime.QuestWorld.utils.SubmissionItemResolver;
 
 public class KillNamedMission extends MissionType {
 	public KillNamedMission() {
-		super("KILL_NAMED_MOB", true, true, false, SubmissionType.ENTITY, "Kill %s", new MaterialData(Material.GOLD_SWORD));
+		super("KILL_NAMED_MOB", true, true, false, SubmissionType.ENTITY, new MaterialData(Material.GOLD_SWORD));
 	}
 	
 	@Override

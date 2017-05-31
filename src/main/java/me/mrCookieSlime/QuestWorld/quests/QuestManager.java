@@ -3,6 +3,7 @@ package me.mrCookieSlime.QuestWorld.quests;
 import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -31,6 +32,10 @@ public class QuestManager {
 	private Config cfg;
 	private UUID uuid;
 	private QWObject last;
+
+	private Map<Long, Category> activeCategories;
+	private Map<Long, Quest> activeQuests;
+	private Map<Long, QuestMission> activeMissions;
 
 	public static Set<QuestMission> ticking_tasks = new HashSet<QuestMission>();
 	public static Set<QuestMission> block_breaking_tasks = new HashSet<QuestMission>();
@@ -348,6 +353,29 @@ public class QuestManager {
 		cfg.setValue(quest.getCategory().getID() + "." + quest.getID(), null);
 	}
 	
+	/**
+	 * 
+	 */
+	public Collection<Category> getAvailableCategories() {
+		return activeCategories.values();
+	}
+	
+	public Collection<Quest> getAvailableQuests() {
+		return activeQuests.values();
+	}
+	
+	public Collection<QuestMission> getAvailableMissions() {
+		return activeMissions.values();
+	}
+	
+	public void setQuestAvailable(Quest quest, boolean state) {
+		
+	}
+	
+	public void setCategoryAvailable(Category category, boolean state) {
+		
+	}
+	
 	public static void clearAllQuestData(Quest quest) {
 		for (File file: new File("data-storage/Quest World").listFiles()) {
 			String uuid = file.getName().replace(".yml", "");
@@ -363,6 +391,7 @@ public class QuestManager {
 		}
 	}
 	
+	//TODO remove checks on SubmissionType and maybe ID
 	public static void updateTickingTasks() {
 		Set<QuestMission> ticking = new HashSet<QuestMission>();
 		Set<QuestMission> blockbreaking = new HashSet<QuestMission>();

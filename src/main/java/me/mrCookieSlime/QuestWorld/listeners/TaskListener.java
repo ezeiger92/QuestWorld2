@@ -3,14 +3,11 @@ package me.mrCookieSlime.QuestWorld.listeners;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.quests.Category;
 import me.mrCookieSlime.QuestWorld.quests.Quest;
-import me.mrCookieSlime.QuestWorld.quests.QuestChecker;
-import me.mrCookieSlime.QuestWorld.quests.QuestListener;
 import me.mrCookieSlime.QuestWorld.quests.QuestManager;
 import me.mrCookieSlime.QuestWorld.quests.QuestMission;
 import me.mrCookieSlime.QuestWorld.quests.QuestStatus;
 import me.mrCookieSlime.QuestWorld.utils.Text;
 
-import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
@@ -21,9 +18,6 @@ import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityDeathEvent;
-import org.bukkit.event.inventory.CraftItemEvent;
-import org.bukkit.event.player.PlayerFishEvent;
-import org.bukkit.event.player.PlayerLevelChangeEvent;
 import org.bukkit.metadata.FixedMetadataValue;
 
 public class TaskListener implements Listener {
@@ -31,18 +25,20 @@ public class TaskListener implements Listener {
 	public TaskListener(QuestWorld plugin) {
 		plugin.getServer().getPluginManager().registerEvents(this, plugin);
 	}
-
+/*
+	// Moved to CraftMission
 	@EventHandler
 	public void onCraft(final CraftItemEvent e) {
 		QuestChecker.check((Player) e.getWhoClicked(), e, "CRAFT", new QuestListener() {
 			
 			@Override
 			public void onProgressCheck(Player p, QuestManager manager, QuestMission task, Object event) {
-				if (QuestWorld.getInstance().isItemSimiliar(e.getRecipe().getResult(), task.getItem())) manager.addProgress(task, e.getCurrentItem().getAmount());
+				if (QuestWorld.getInstance().isItemSimiliar(e.getRecipe().getResult(), task.getMissionItem())) manager.addProgress(task, e.getCurrentItem().getAmount());
 			}
 		});
 	}
 	
+	// Moved to FishMission
 	@EventHandler
 	public void onFish(final PlayerFishEvent e) {
 		if (!(e.getCaught() instanceof Item)) return;
@@ -51,11 +47,12 @@ public class TaskListener implements Listener {
 			
 			@Override
 			public void onProgressCheck(Player p, QuestManager manager, QuestMission task, Object event) {
-				if (QuestWorld.getInstance().isItemSimiliar(((Item) e.getCaught()).getItemStack(), task.getItem())) manager.addProgress(task, ((Item) e.getCaught()).getItemStack().getAmount());
+				if (QuestWorld.getInstance().isItemSimiliar(((Item) e.getCaught()).getItemStack(), task.getMissionItem())) manager.addProgress(task, ((Item) e.getCaught()).getItemStack().getAmount());
 			}
 		});
 	}
 	
+	// Moved to LevelMission
 	@EventHandler
 	public void onXPChange(final PlayerLevelChangeEvent e) {
 		QuestChecker.check(e.getPlayer(), e, "REACH_LEVEL", new QuestListener() {
@@ -66,7 +63,7 @@ public class TaskListener implements Listener {
 			}
 		});
 	}
-	
+*/	
 	@EventHandler
 	public void onKill(EntityDeathEvent e) {
 		if (e.getEntity().getLastDamageCause() == null) return;
@@ -99,7 +96,9 @@ public class TaskListener implements Listener {
 									}
 									else if (task.getType().getID().equals("KILL_NAMED_MOB") && e.getEntityType().equals(task.getEntity())) {
 										String name = e.getEntity() instanceof Player ? ((Player) e.getEntity()).getName(): e.getEntity().getCustomName();
-										if (name != null && name.equals(Text.colorize(task.getEntityName()))) {
+										String entity_name = Text.colorize(task.getEntityName());
+										// Succeed if custom name is empty [ezeiger92/QuestWorld2#13]
+										if (name != null && (entity_name.equals("") || entity_name.equals(name))) {
 											if (task.acceptsSpawners()) manager.addProgress(task, 1);
 											else if (!e.getEntity().hasMetadata("spawned_by_spawner")) manager.addProgress(task, 1);
 										}

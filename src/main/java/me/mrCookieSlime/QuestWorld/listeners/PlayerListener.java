@@ -60,13 +60,15 @@ public class PlayerListener implements Listener {
 	public void onJoin(PlayerJoinEvent e) {
 		if (!new File("data-storage/Quest World/" + e.getPlayer().getUniqueId() + ".yml").exists() && QuestWorld.getInstance().getCfg().getBoolean("book.on-first-join")) e.getPlayer().getInventory().addItem(QuestWorld.getInstance().guide);
 		
+		// Moved to JoinMission
+		/*
 		QuestChecker.check(e.getPlayer(), e, "JOIN", new QuestListener() {
 			
 			@Override
 			public void onProgressCheck(Player p, QuestManager manager, QuestMission task, Object event) {
 				manager.addProgress(task, 1);
 			}
-		});
+		});*/
 	}
 	
 	@EventHandler
@@ -74,16 +76,20 @@ public class PlayerListener implements Listener {
 		QuestWorld.getInstance().getManager(e.getPlayer()).unload();
 	}
 	
+	/*
+	// Moved to MineMission
+	@SuppressWarnings("deprecation")
 	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
 	public void onMine(BlockBreakEvent e) {
 		QuestManager manager = QuestWorld.getInstance().getManager(e.getPlayer());
 		for (QuestMission task: QuestManager.block_breaking_tasks) {
-			if (e.getBlock().getType().equals(task.getItem().getType())) {
+			// Check (deprecated D:) block data on block breaks [ezeiger92/QuestWorld2#16]
+			if (e.getBlock().getType().equals(task.getMissionItem().getType()) && e.getBlock().getData() == task.getMissionItem().getDurability()) {
 				if (manager.getStatus(task.getQuest()).equals(QuestStatus.AVAILABLE) && !manager.hasCompletedTask(task) && manager.hasUnlockedTask(task)) {
 					manager.addProgress(task, 1);
 				}
 			}
 		}
-	}
+	}*/
 
 }
