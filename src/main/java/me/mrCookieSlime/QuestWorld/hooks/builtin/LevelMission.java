@@ -1,14 +1,12 @@
-package me.mrCookieSlime.QuestWorld.quests.pluginmissions;
+package me.mrCookieSlime.QuestWorld.hooks.builtin;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerLevelChangeEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
-
-import com.vexsoftware.votifier.model.VotifierEvent;
 
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.Item.CustomItem;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
@@ -18,9 +16,9 @@ import me.mrCookieSlime.QuestWorld.quests.QuestListener;
 import me.mrCookieSlime.QuestWorld.quests.QuestManager;
 import me.mrCookieSlime.QuestWorld.quests.Mission;
 
-public class VoteMission extends MissionType implements Listener {
-	public VoteMission() {
-		super("VOTIFIER_VOTE", true, false, false, SubmissionType.INTEGER, new MaterialData(Material.DIAMOND));
+public class LevelMission extends MissionType implements Listener {
+	public LevelMission() {
+		super("REACH_LEVEL", false, false, false, SubmissionType.INTEGER, new MaterialData(Material.EXP_BOTTLE));
 	}
 	
 	@Override
@@ -30,21 +28,17 @@ public class VoteMission extends MissionType implements Listener {
 	
 	@Override
 	protected String displayString(IMission instance) {
-		return "&7Vote " + instance.getAmount() + " times";
+		return "&7Reach Level " + instance.getAmount();
 	}
 	
 	@EventHandler
-	public void onVote(VotifierEvent e) {
-		@SuppressWarnings("deprecation")
-		Player p = Bukkit.getPlayer(e.getVote().getUsername());
-		if (p != null) {
-			QuestChecker.check(p, e, "VOTIFIER_VOTE", new QuestListener() {
-				
-				@Override
-				public void onProgressCheck(Player p, QuestManager manager, Mission task, Object event) {
-					manager.addProgress(task, 1);
-				}
-			});
-		}
+	public void onXPChange(final PlayerLevelChangeEvent e) {
+		QuestChecker.check(e.getPlayer(), e, "REACH_LEVEL", new QuestListener() {
+			
+			@Override
+			public void onProgressCheck(Player p, QuestManager manager, Mission task, Object event) {
+				manager.setProgress(task, e.getNewLevel());
+			}
+		});
 	}
 }

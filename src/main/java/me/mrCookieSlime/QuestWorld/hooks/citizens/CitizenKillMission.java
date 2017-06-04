@@ -1,4 +1,4 @@
-package me.mrCookieSlime.QuestWorld.quests.pluginmissions;
+package me.mrCookieSlime.QuestWorld.hooks.citizens;
 
 import org.bukkit.Material;
 import org.bukkit.SkullType;
@@ -13,7 +13,6 @@ import org.bukkit.inventory.ItemStack;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.interfaces.IMission;
-import me.mrCookieSlime.QuestWorld.hooks.CitizensHook;
 import me.mrCookieSlime.QuestWorld.quests.Category;
 import me.mrCookieSlime.QuestWorld.quests.Quest;
 import me.mrCookieSlime.QuestWorld.quests.QuestManager;

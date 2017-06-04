@@ -3,6 +3,7 @@ package me.mrCookieSlime.QuestWorld;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
+import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.utils.ItemBuilder;
 
 public class GuideBook {
@@ -24,13 +25,9 @@ public class GuideBook {
 	}
 	
 	private GuideBook() {
-		guide = new ItemBuilder(Material.ENCHANTED_BOOK)
-			.display("&eQuest Book &7(Right Click)")
-			.lore(
-				"",
-				"&rYour basic Guide for Quests",
-				"&rIn case you lose it, simply place a",
-				"&rWorkbench into your Crafting Grid")
-			.get();
+		String display = QuestWorld.translate(Translation.book_display);
+		String[] lore = QuestWorld.translate(Translation.book_lore).split("\n");
+		
+		guide = new ItemBuilder(Material.ENCHANTED_BOOK).display(display).lore(lore).get();
 	}
 }

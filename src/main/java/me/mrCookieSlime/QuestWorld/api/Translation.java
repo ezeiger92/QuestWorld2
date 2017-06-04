@@ -9,6 +9,9 @@ public enum Translation implements Translator {
 	default_mission ("defaults.mission.name"),
 	default_prefix  ("defaults.prefix"),
 	
+	book_display("book.display"),
+	book_lore   ("book.lore"),
+	
 	category_created   ("editor.category.created",     "name"),
 	category_deleted   ("editor.category.deleted",     "name"),
 	category_namechange("editor.category.name-change", "name"),
@@ -41,11 +44,11 @@ public enum Translation implements Translator {
 	location_rename("editor.renamed-location"),
 	// PH
 	
-	notify_timefail("notifications.task-failed-timeframe",  "quest"),
-	notify_timestart("notifications.task-timeframe-started", "task", "time"),
-	notify_completetask("notifications.task-completed", "quest"),
+	notify_timefail    ("notifications.task-failed-timeframe",  "quest"),
+	notify_timestart   ("notifications.task-timeframe-started", "task", "time"),
+	notify_completetask("notifications.task-completed",         "quest"),
 
-	party_errorfull  ("party.full"),
+	party_errorfull  ("party.full",       "max"),
 	party_errorabsent("party.not-online", "name"),
 	party_errormember("party.already",    "name"),
 	party_playerpick ("party.invite"),

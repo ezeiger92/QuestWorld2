@@ -1,4 +1,4 @@
-package me.mrCookieSlime.QuestWorld.quests.missions;
+package me.mrCookieSlime.QuestWorld.hooks.builtin;
 
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;

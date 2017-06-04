@@ -1,4 +1,4 @@
-package me.mrCookieSlime.QuestWorld.hooks;
+package me.mrCookieSlime.QuestWorld.hooks.citizens;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,10 +24,6 @@ import me.mrCookieSlime.QuestWorld.quests.QuestBook;
 import me.mrCookieSlime.QuestWorld.quests.QuestManager;
 import me.mrCookieSlime.QuestWorld.quests.Mission;
 import me.mrCookieSlime.QuestWorld.quests.QuestStatus;
-import me.mrCookieSlime.QuestWorld.quests.pluginmissions.CitizenAcceptQuestMission;
-import me.mrCookieSlime.QuestWorld.quests.pluginmissions.CitizenInteractMission;
-import me.mrCookieSlime.QuestWorld.quests.pluginmissions.CitizenKillMission;
-import me.mrCookieSlime.QuestWorld.quests.pluginmissions.CitizenSubmitMission;
 import me.mrCookieSlime.QuestWorld.utils.PlayerTools;
 import me.mrCookieSlime.QuestWorld.utils.Text;
 import net.citizensnpcs.api.CitizensAPI;

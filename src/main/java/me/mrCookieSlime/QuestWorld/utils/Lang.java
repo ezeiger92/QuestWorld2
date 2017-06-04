@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.bukkit.configuration.Configuration;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import me.mrCookieSlime.QuestWorld.api.Translator;
@@ -18,7 +18,7 @@ import me.mrCookieSlime.QuestWorld.api.Translator;
 public final class Lang implements Reloadable {
 	private String currentLang;
 	private String fallbackLang;
-	private Map<String, Configuration> languages = new HashMap<>();
+	private Map<String, FileConfiguration> languages = new HashMap<>();
 	private File dataFolder;
 	private ClassLoader loader;
 	
@@ -34,7 +34,7 @@ public final class Lang implements Reloadable {
 		return "lang/" + langCode + ".yml";
 	}
 	
-	private Configuration getYaml(String langCode) {
+	private FileConfiguration getYaml(String langCode) {
 		InputStream localStream = loader.getResourceAsStream(langPath(langCode));
 		if(localStream == null)
 			return null;
@@ -42,14 +42,14 @@ public final class Lang implements Reloadable {
 		try { set = Charset.forName("UTF-8"); } catch(Exception e) {}
 		
 		InputStreamReader reader = new InputStreamReader(localStream, set);
-		Configuration result = YamlConfiguration.loadConfiguration(reader);
+		FileConfiguration result = YamlConfiguration.loadConfiguration(reader);
 		try { reader.close(); } catch(IOException e) {}
 		try { localStream.close(); } catch(IOException e) {}
 		return result;
 	}
 	
 	public boolean loadLangDefaults(String langCode) {
-		Configuration yaml = getYaml(langCode);
+		FileConfiguration yaml = getYaml(langCode);
 		if(yaml == null)
 			return false;
 		
@@ -108,6 +108,24 @@ public final class Lang implements Reloadable {
 		return replaceAll(translation, key.placeholders(), replacements);
 	}
 
+	@Override
+	public void save() {
+		File langDir = new File(dataFolder, "/lang");
+		if(!langDir.exists() && !langDir.mkdir()) {
+			Log.severe("Unable to create lang directory in QuestWorld folder, cannot save lang files!");
+			return;
+		}
+		
+		for(Map.Entry<String, FileConfiguration> entry : languages.entrySet()) {
+			File file = new File(langDir, entry.getKey() + ".yml");
+			try {
+				entry.getValue().save(file);
+			} catch (IOException e) {
+				Log.severe("Unable to create lang file \"" + file.getPath() +"\" in QuestWorld folder!");
+			}
+		}
+	}
+	
 	@Override
 	public void reload() {
 		List<String> keys = new ArrayList<>(languages.keySet());

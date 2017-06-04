@@ -1,12 +1,11 @@
-package me.mrCookieSlime.QuestWorld.hooks;
+package me.mrCookieSlime.QuestWorld.hooks.votifier;
 
 import org.bukkit.plugin.Plugin;
 
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.QuestExtension;
-import me.mrCookieSlime.QuestWorld.quests.pluginmissions.ASkyBlockLevelMission;
 
-public class ASkyBlockHook extends QuestExtension {
+public class VotifierHook extends QuestExtension {
 	@Override
 	public String[] getDepends() {
 		return new String[] { "ChatReaction" };
@@ -15,7 +14,7 @@ public class ASkyBlockHook extends QuestExtension {
 	MissionType mission;
 	@Override
 	public void initialize(Plugin parent) {
-		mission = new ASkyBlockLevelMission();
+		mission = new VoteMission();
 	}
 
 	@Override

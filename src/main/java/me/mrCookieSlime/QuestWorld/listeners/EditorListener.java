@@ -4,8 +4,8 @@ import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.CategoryChange;
 import me.mrCookieSlime.QuestWorld.api.QuestChange;
 import me.mrCookieSlime.QuestWorld.api.Translation;
+import me.mrCookieSlime.QuestWorld.parties.Party;
 import me.mrCookieSlime.QuestWorld.quests.Category;
-import me.mrCookieSlime.QuestWorld.quests.Party;
 import me.mrCookieSlime.QuestWorld.quests.QBDialogue;
 import me.mrCookieSlime.QuestWorld.quests.Quest;
 import me.mrCookieSlime.QuestWorld.quests.QuestBook;
@@ -27,7 +27,6 @@ public class EditorListener implements Listener {
 		plugin.getServer().getPluginManager().registerEvents(this, plugin);
 	}
 	
-	@SuppressWarnings("deprecation")
 	@EventHandler(priority=EventPriority.LOWEST)
 	public void onChat(AsyncPlayerChatEvent e) {
 		Input input = QuestWorld.getInstance().getInput(e.getPlayer().getUniqueId());
@@ -86,12 +85,13 @@ public class EditorListener implements Listener {
 		case PARTY_INVITE: {
 			Party party = (Party) input.getValue();
 			String name = Text.decolor(e.getMessage()).replace("@", "");
+			@SuppressWarnings("deprecation")
 			Player player = Bukkit.getPlayer(name);
 			if (player != null) {
 				if (QuestWorld.getInstance().getManager(player).getParty() == null) {
 					PlayerTools.sendTranslation(e.getPlayer(), true, Translation.party_playeradd, name);
 					try {
-						party.invite(player);
+						party.invitePlayer(player);
 					} catch (Exception e1) {
 						e1.printStackTrace();
 					}

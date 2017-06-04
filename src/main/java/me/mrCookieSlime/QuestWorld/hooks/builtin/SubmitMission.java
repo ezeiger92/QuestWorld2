@@ -1,4 +1,4 @@
-package me.mrCookieSlime.QuestWorld.quests.missions;
+package me.mrCookieSlime.QuestWorld.hooks.builtin;
 
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -8,9 +8,9 @@ import me.mrCookieSlime.CSCoreLibPlugin.general.String.StringUtils;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.interfaces.IMission;
 
-public class DetectMission extends MissionType {
-	public DetectMission() {
-		super("DETECT", false, false, false, SubmissionType.ITEM, new MaterialData(Material.COMMAND));
+public class SubmitMission extends MissionType {
+	public SubmitMission() {
+		super("SUBMIT", false, false, false, SubmissionType.ITEM, new MaterialData(Material.CHEST));
 	}
 	
 	@Override
@@ -20,6 +20,6 @@ public class DetectMission extends MissionType {
 	
 	@Override
 	protected String displayString(IMission instance) {
-		return "&7Own " + instance.getAmount() + "x " + StringUtils.formatItemName(instance.getDisplayItem(), false);
+		return "&7Submit " + instance.getAmount() + "x " + StringUtils.formatItemName(instance.getDisplayItem(), false);
 	}
 }

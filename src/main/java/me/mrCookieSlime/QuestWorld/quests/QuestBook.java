@@ -17,9 +17,10 @@ import me.mrCookieSlime.QuestWorld.api.CategoryChange;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.QuestChange;
 import me.mrCookieSlime.QuestWorld.api.Translation;
-import me.mrCookieSlime.QuestWorld.hooks.CitizensHook;
+import me.mrCookieSlime.QuestWorld.hooks.citizens.CitizensHook;
 import me.mrCookieSlime.QuestWorld.listeners.Input;
 import me.mrCookieSlime.QuestWorld.listeners.InputType;
+import me.mrCookieSlime.QuestWorld.parties.Party;
 import me.mrCookieSlime.QuestWorld.utils.ItemBuilder;
 import me.mrCookieSlime.QuestWorld.utils.PlayerTools;
 import me.mrCookieSlime.QuestWorld.utils.Text;
@@ -185,7 +186,7 @@ public class QuestBook {
 		
 		final Party party = QuestWorld.getInstance().getManager(p).getParty();
 		if (party != null) {
-			for (int i = 0; i < party.getPlayers().size(); i++) {
+			for (int i = 0; i < party.getSize(); i++) {
 				final OfflinePlayer player = Bukkit.getOfflinePlayer(party.getPlayers().get(i));
 				if (!party.isLeader(p)) {
 					
@@ -210,7 +211,7 @@ public class QuestBook {
 						@Override
 						public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
 							if (!party.isLeader(player)) {
-								party.removePlayer(player.getName());
+								party.kickPlayer(player.getName());
 								openPartyMembers(p);
 							}
 							return false;
@@ -267,7 +268,7 @@ public class QuestBook {
 					
 					@Override
 					public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-						if (party.getPlayers().size() >= QuestWorld.getInstance().getCfg().getInt("party.max-members"))
+						if (party.getSize() >= QuestWorld.getInstance().getCfg().getInt("party.max-members"))
 							PlayerTools.sendTranslation(p, true, Translation.party_errorfull);
 						else {
 							PlayerTools.sendTranslation(p, true, Translation.party_playerpick);
@@ -295,7 +296,7 @@ public class QuestBook {
 					
 					@Override
 					public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-						party.removePlayer(p.getName());
+						party.kickPlayer(p.getName());
 						openPartyMenu(p);
 						return false;
 					}

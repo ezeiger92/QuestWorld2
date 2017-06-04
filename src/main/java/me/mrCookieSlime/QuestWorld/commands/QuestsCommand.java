@@ -4,8 +4,8 @@ import java.util.UUID;
 
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.Translation;
+import me.mrCookieSlime.QuestWorld.parties.Party;
 import me.mrCookieSlime.QuestWorld.quests.Category;
-import me.mrCookieSlime.QuestWorld.quests.Party;
 import me.mrCookieSlime.QuestWorld.quests.QuestBook;
 import me.mrCookieSlime.QuestWorld.utils.PlayerTools;
 import me.mrCookieSlime.QuestWorld.utils.Text;
@@ -21,15 +21,17 @@ public class QuestsCommand implements CommandExecutor {
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 		if (sender instanceof Player) {
-			if (args.length == 0) QuestBook.openLastMenu((Player) sender);
+			Player p = (Player)sender;
+			if (args.length == 0) QuestBook.openLastMenu(p);
 			else {
 				if (args.length == 2 && args[0].equalsIgnoreCase("accept")) {
 					Party party = QuestWorld.getInstance().getManager(Bukkit.getOfflinePlayer(UUID.fromString(args[1]))).getParty();
-					if (party != null && party.hasInvited((Player) sender)) {
-						if (party.getPlayers().size() >= QuestWorld.getInstance().getCfg().getInt("party.max-members")) {
-							PlayerTools.sendTranslation(sender, true, Translation.party_errorfull);
+					if (party != null && party.hasInvited(p)) {
+						int maxParty = QuestWorld.getInstance().getCfg().getInt("party.max-members");
+						if (party.getSize() >= maxParty) {
+							PlayerTools.sendTranslation(sender, true, Translation.party_errorfull, Integer.toString(maxParty));
 						}
-						else party.addPlayer((Player) sender);
+						else party.playerJoin(p);
 					}
 				}
 				else {

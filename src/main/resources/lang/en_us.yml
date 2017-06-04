@@ -1,9 +1,17 @@
 ---
 defaults:
-    category.name: 'New Category'
-    quest.name:    'New Quest'
-    mission.name:  'New Mission'
-    prefix:        '&4Quest World &7> '
+  category.name: 'New Category'
+  quest.name:    'New Quest'
+  mission.name:  'New Mission'
+  prefix:        '&4Quest World &7> '
+
+book:
+  display: '&eQuest Book &7(Right Click)'
+  lore: |2
+
+    &rYour basic Guide for Quests
+    &rIn case you lose it, simply place a
+    &rWorkbench into your Crafting Grid
 
 editor:
   category.created:     '&aSuccessfully created a category called &r%name%'
@@ -38,7 +46,7 @@ editor:
   misssion-description: '&7Please type in a Description for your Quest'
   
 party:
-  full:       '&4You cannot have more than &c4 &4Party Members!'
+  full:       '&4You cannot have more than &c%max% &4Party Members!'
   invite:     '&7Please type in the Name of the Player you want to invite'
   invited:    '&7Successfully invited &e%name% &7to your Party'
   invitation: '&e%name% &7has invited you to join their Party'

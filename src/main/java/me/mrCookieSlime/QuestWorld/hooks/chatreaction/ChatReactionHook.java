@@ -1,10 +1,9 @@
-package me.mrCookieSlime.QuestWorld.hooks;
+package me.mrCookieSlime.QuestWorld.hooks.chatreaction;
 
 import org.bukkit.plugin.Plugin;
 
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.QuestExtension;
-import me.mrCookieSlime.QuestWorld.quests.pluginmissions.ChatReactMission;
 
 public class ChatReactionHook extends QuestExtension {
 

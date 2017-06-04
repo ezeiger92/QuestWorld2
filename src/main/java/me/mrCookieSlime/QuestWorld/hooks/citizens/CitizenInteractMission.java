@@ -1,4 +1,4 @@
-package me.mrCookieSlime.QuestWorld.quests.pluginmissions;
+package me.mrCookieSlime.QuestWorld.hooks.citizens;
 
 import org.bukkit.Material;
 import org.bukkit.SkullType;
@@ -6,13 +6,12 @@ import org.bukkit.inventory.ItemStack;
 
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.interfaces.IMission;
-import me.mrCookieSlime.QuestWorld.hooks.CitizensHook;
 import me.mrCookieSlime.QuestWorld.utils.ItemBuilder;
 import net.citizensnpcs.api.npc.NPC;
 
-public class CitizenAcceptQuestMission extends MissionType {
-	public CitizenAcceptQuestMission() {
-		super("ACCEPT_QUEST_FROM_NPC", false, false, false, SubmissionType.CITIZENS_INTERACT,
+public class CitizenInteractMission extends MissionType {
+	public CitizenInteractMission() {
+		super("CITIZENS_INTERACT", false, false, false, SubmissionType.CITIZENS_INTERACT,
 				new ItemBuilder(Material.SKULL_ITEM).skull(SkullType.PLAYER).get().getData());
 	}
 	
@@ -28,6 +27,6 @@ public class CitizenAcceptQuestMission extends MissionType {
 		if(npc != null)
 			name = npc.getName();
 		
-		return "&7Accept this Quest by talking to " + name;
+		return "&7Talk to " + name;
 	}
 }

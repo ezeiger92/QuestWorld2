@@ -1,4 +1,4 @@
-package me.mrCookieSlime.QuestWorld.quests.pluginmissions;
+package me.mrCookieSlime.QuestWorld.hooks.askyblock;
 
 import java.util.UUID;
 

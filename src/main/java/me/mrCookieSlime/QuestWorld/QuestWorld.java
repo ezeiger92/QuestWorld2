@@ -27,11 +27,11 @@ import me.mrCookieSlime.QuestWorld.api.QuestExtension;
 import me.mrCookieSlime.QuestWorld.api.Translator;
 import me.mrCookieSlime.QuestWorld.commands.EditorCommand;
 import me.mrCookieSlime.QuestWorld.commands.QuestsCommand;
-import me.mrCookieSlime.QuestWorld.hooks.ASkyBlockHook;
-import me.mrCookieSlime.QuestWorld.hooks.BuiltinHook;
-import me.mrCookieSlime.QuestWorld.hooks.ChatReactionHook;
-import me.mrCookieSlime.QuestWorld.hooks.CitizensHook;
-import me.mrCookieSlime.QuestWorld.hooks.VotifierHook;
+import me.mrCookieSlime.QuestWorld.hooks.askyblock.ASkyBlockHook;
+import me.mrCookieSlime.QuestWorld.hooks.builtin.BuiltinHook;
+import me.mrCookieSlime.QuestWorld.hooks.chatreaction.ChatReactionHook;
+import me.mrCookieSlime.QuestWorld.hooks.citizens.CitizensHook;
+import me.mrCookieSlime.QuestWorld.hooks.votifier.VotifierHook;
 import me.mrCookieSlime.QuestWorld.listeners.EditorListener;
 import me.mrCookieSlime.QuestWorld.listeners.HookInstaller;
 import me.mrCookieSlime.QuestWorld.listeners.Input;
@@ -60,7 +60,7 @@ import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
-	private static QuestWorld instance;
+	private static QuestWorld instance = null;
 	private long lastSave;
 
 	Config cfg, book, sounds;
@@ -82,6 +82,7 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 	public QuestWorld() {
 		instance = this;
 		language = new Lang("en_us", getDataFolder(), getClassLoader());
+		language.save();
 		getServer().getServicesManager().register(QuestLoader.class, this, this, ServicePriority.Normal);
 
 	}
