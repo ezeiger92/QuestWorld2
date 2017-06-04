@@ -1,56 +1,56 @@
 ---
 defaults:
-    category.name: New Category
-    quest.name:    New Quest
-    mission.name:  New Mission
-    prefix: '&4Quest World &7> '
+    category.name: 'New Category'
+    quest.name:    'New Quest'
+    mission.name:  'New Mission'
+    prefix:        '&4Quest World &7> '
 
 editor:
-  category.created:     Successfully created a category called %name%
-  category.deleted:     Successfully deleted the category %name%
-  category.name-change: Please type a new category name for %name% (color codes are supported)
-  category.name-set:    Successfully renamed category %name_old% to %name%
-  category.perm-change: Please type in a new permission node for %name% (use "none" for no node)
-  category.perm-set:    Successfully set permission for %name% to %perm%
-  quest.created:     Successfully created a category called %name%
-  quest.deleted:     Successfully deleted the quest %name%
-  quest.name-change: Please type a new quest name for %name% (color codes are supported)
-  quest.name-set:    Successfully renamed quest %name_old% to %name%
-  quest.perm-change: Please type in a new permission node for %name% (use "none" for no node)
-  quest.perm-set:    Successfully set permission for %name% to %perm%
+  category.created:     '&aSuccessfully created a category called &r%name%'
+  category.deleted:     '&cSuccessfully deleted the category &r%name%'
+  category.name-change: '&7Please type a new category name for &r%name%&8 (color codes are supported)'
+  category.name-set:    '&aSuccessfully renamed category &r%name_old%&a to &r%name%'
+  category.perm-change: '&7Please type in a new permission node for &r%name%&7 (use "&7none&8" for no node)'
+  category.perm-set:    '&aSuccessfully set permission for &r%name%&a to &r%perm%'
+  quest.created:     '&aSuccessfully created a category called &r%name%'
+  quest.deleted:     '&cSuccessfully deleted the quest &r%name%'
+  quest.name-change: '&7Please type a new quest name for &r%name%&8 (color codes are supported)'
+  quest.name-set:    '&aSuccessfully renamed quest &r%name_old%&a to &r%name%'
+  quest.perm-change: '&7Please type in a new permission node for &r%name%&8 (use "&7none&8" for no node)'
+  quest.perm-set:    '&aSuccessfully set permission for &r%name%&a to %perm%'
   
-  renamed-citizen: PLACEHOLDER renamed citizen
-  rename-kill-mission: Please type in the Name of the Mob/Player you want to be killed (Color Code supported)
-  renamed-kill-type: Successfully specified a Name for your Mob/Player
-  link-citizen: Please right click the NPC you want to link with this Quest
-  link-citizen-finished: Successfully linked this NPC
+  renamed-citizen:       'PLACEHOLDER renamed citizen'
+  rename-kill-mission:   '&7Please type in the Name of the Mob/Player you want to be killed &8(Color Code supported)'
+  renamed-kill-type:     '&aSuccessfully specified a Name for your Mob/Player'
+  link-citizen:          '&7Please right click the NPC you want to link with this Quest'
+  link-citizen-finished: '&aSuccessfully linked this NPC'
   rename-location: |
-    Please type in a Name for your Location
-    Example: Awesomeville
-  renamed-location: Successfully given this Location a Name
-  add-dialogue: Please type in the Message you want to add to the Dialogue! You can do this multiple times, simply type exit() when you are done! You can also add Commands! Just type in your command (ex. /say hello) and it will be executed within the Dialogue, use <player> for the Player''s Username
+    &7Please type in a Name for your Location
+    &7Example: Awesomeville
+  renamed-location: '&aSuccessfully given this Location a Name'
+  add-dialogue:     '&7Please type in the Message you want to add to the Dialogue! You can do this multiple times, simply type &eexit() &7when you are done! You can also add Commands! Just type in your command &e(ex. /say hello) &7and it will be executed within the Dialogue, use &e<player> &7for the Player''s Username'
   set-dialogue: |
-    Successfully set a Dialogue!
-    If you want to change something you can edit the Dialogue at any time at:
-    %path%
-  edit-mission-name:    Successfully edited the Mission''s Display Name
-  await-mission-name:   Please type in a Custom Name for this Mission
-  misssion-description: Please type in a Description for your Quest
+    &7Successfully set a Dialogue!
+    &7If you want to change something you can edit the Dialogue at any time at:
+    &e%path%
+  edit-mission-name:    '&aSuccessfully edited the Mission''s Display Name'
+  await-mission-name:   '&7Please type in a Custom Name for this Mission'
+  misssion-description: '&7Please type in a Description for your Quest'
   
 party:
-  full:       You cannot have more than 4 Party Members!
-  invite:     Please type in the Name of the Player you want to invite
-  invited:    Successfully invited %name% to your Party
-  invitation: '%name% has invited you to join their Party'
-  not-online: Player %name% is not online
-  join:       '%name% has accepted your Invitation and joined your Party'
-  joined:     You are now a member of %name%''s Party!
-  kicked:     '%name% has been kicked from the Party'
-  already:    '%name% is already a Member of a Party'
+  full:       '&4You cannot have more than &c4 &4Party Members!'
+  invite:     '&7Please type in the Name of the Player you want to invite'
+  invited:    '&7Successfully invited &e%name% &7to your Party'
+  invitation: '&e%name% &7has invited you to join their Party'
+  not-online: '&cPlayer &4%name% &cis not online'
+  join:       '&e%name% has accepted your Invitation and joined your Party'
+  joined:     '&7You are now a member of &e%name%''s &7Party!'
+  kicked:     '&e%name% &7has been kicked from the Party'
+  already:    '&4%name% &cis already a Member of a Party'
 
 notifications:
   task-completed: |
-    ! You have completed a Task for the Quest %quest%
-    ! Check your Quest Book for more Info
-  task-failed-timeframe:  ! You failed to complete a Task for the Quest %quest% within the given Timeframe
-  task-timeframe-started: ! You have %time% of time to %task%
+    &e&l!&7 You have completed a Task for the Quest &b%quest%
+    &e&l!&7 Check your Quest Book for more Info
+  task-failed-timeframe:  '&c&l!&7 You failed to complete a Task for the Quest &b%quest%&7 within the given Timeframe'
+  task-timeframe-started: '&a&l!&7 You have &b%time%&7 of time to &b%task%'
