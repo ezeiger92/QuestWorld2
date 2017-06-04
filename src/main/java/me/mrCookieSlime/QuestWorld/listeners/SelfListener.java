@@ -13,8 +13,8 @@ public class SelfListener implements Listener {
 		Bukkit.getLogger().info("Changing: " + e.getNextState().getChanges().toString());
 		
 		if(Math.random() > 0.6) {
-			e.setCancelled(true);
-			Bukkit.getLogger().info("Random cancel!");
+			//e.setCancelled(true);
+			//Bukkit.getLogger().info("Random cancel!");
 		}
 	}
 }

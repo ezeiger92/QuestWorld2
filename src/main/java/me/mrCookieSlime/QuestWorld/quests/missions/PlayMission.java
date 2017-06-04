@@ -4,8 +4,8 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
 
-import me.mrCookieSlime.QuestWorld.quests.MissionType;
-import me.mrCookieSlime.QuestWorld.quests.QuestMission;
+import me.mrCookieSlime.QuestWorld.api.MissionType;
+import me.mrCookieSlime.QuestWorld.api.interfaces.IMission;
 
 public class PlayMission extends MissionType {
 	public PlayMission() {
@@ -13,12 +13,12 @@ public class PlayMission extends MissionType {
 	}
 	
 	@Override
-	public ItemStack getDisplayItem(QuestMission qm) {
+	public ItemStack displayItem(IMission instance) {
 		return new ItemStack(Material.WATCH);
 	}
 	
 	@Override
-	protected String formatMissionDisplay(QuestMission instance) {
+	protected String displayString(IMission instance) {
 		return "&7Play for " + (instance.getAmount() / 60) + "h " + (instance.getAmount() % 60) + "m";
 	}
 }

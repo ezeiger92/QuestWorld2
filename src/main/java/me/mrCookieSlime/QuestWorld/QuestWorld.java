@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -19,82 +20,94 @@ import java.util.zip.ZipOutputStream;
 
 import me.mrCookieSlime.CSCoreLibPlugin.PluginUtils;
 import me.mrCookieSlime.CSCoreLibPlugin.Configuration.Config;
-import me.mrCookieSlime.CSCoreLibPlugin.Configuration.Localization;
-import me.mrCookieSlime.CSCoreLibPlugin.general.Particles.MC_1_8.ParticleEffect;
 import me.mrCookieSlime.CSCoreLibSetup.CSCoreLibLoader;
+import me.mrCookieSlime.QuestWorld.api.QuestLoader;
+import me.mrCookieSlime.QuestWorld.api.MissionType;
+import me.mrCookieSlime.QuestWorld.api.QuestExtension;
+import me.mrCookieSlime.QuestWorld.api.Translator;
 import me.mrCookieSlime.QuestWorld.commands.EditorCommand;
 import me.mrCookieSlime.QuestWorld.commands.QuestsCommand;
-import me.mrCookieSlime.QuestWorld.hooks.CitizensListener;
+import me.mrCookieSlime.QuestWorld.hooks.ASkyBlockHook;
+import me.mrCookieSlime.QuestWorld.hooks.BuiltinHook;
+import me.mrCookieSlime.QuestWorld.hooks.ChatReactionHook;
+import me.mrCookieSlime.QuestWorld.hooks.CitizensHook;
+import me.mrCookieSlime.QuestWorld.hooks.VotifierHook;
 import me.mrCookieSlime.QuestWorld.listeners.EditorListener;
+import me.mrCookieSlime.QuestWorld.listeners.HookInstaller;
 import me.mrCookieSlime.QuestWorld.listeners.Input;
 import me.mrCookieSlime.QuestWorld.listeners.InputType;
 import me.mrCookieSlime.QuestWorld.listeners.PlayerListener;
 import me.mrCookieSlime.QuestWorld.listeners.SelfListener;
-import me.mrCookieSlime.QuestWorld.listeners.TaskListener;
 import me.mrCookieSlime.QuestWorld.quests.Category;
-import me.mrCookieSlime.QuestWorld.quests.MissionType;
 import me.mrCookieSlime.QuestWorld.quests.Quest;
 import me.mrCookieSlime.QuestWorld.quests.QuestManager;
-import me.mrCookieSlime.QuestWorld.quests.QuestMission;
-import me.mrCookieSlime.QuestWorld.quests.QuestStatus;
-import me.mrCookieSlime.QuestWorld.quests.missions.*;
-import me.mrCookieSlime.QuestWorld.quests.pluginmissions.*;
-import me.mrCookieSlime.QuestWorld.utils.ItemBuilder;
+import me.mrCookieSlime.QuestWorld.utils.Lang;
+import me.mrCookieSlime.QuestWorld.utils.Log;
 import me.mrCookieSlime.QuestWorld.utils.Sounds;
 import me.mrCookieSlime.QuestWorld.utils.Text;
-import net.citizensnpcs.api.npc.NPC;
 import net.milkbowl.vault.economy.Economy;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.PluginCommand;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.plugin.RegisteredServiceProvider;
+import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class QuestWorld extends JavaPlugin implements Listener {
-	
+public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 	private static QuestWorld instance;
 	private long lastSave;
-	
-	public ItemStack guide;
-	
-	private Map<String, MissionType> types = new HashMap<String, MissionType>();
-	
+
 	Config cfg, book, sounds;
-	List<Category> categories;
-	Map<Integer, Category> categoryIDs;
+	private Map<String, MissionType> types      = new HashMap<>();
+	private Map<Integer, Category>   categories = new HashMap<>();
+	private Map<UUID, QuestManager>  profiles   = new HashMap<>();
+	private Map<UUID, Input>         inputs     = new HashMap<>();
 	
-	Set<QuestManager> managers;
-	Map<UUID, QuestManager> profiles;
-	Map<UUID, Input> inputs;
-	
-	Localization local;
 	Economy economy;
 	Sounds eventSounds;
 	
-	@SuppressWarnings("deprecation")
+	private Lang language;
+	private HookInstaller hookInstaller = null;
+	
+	public static String translate(Translator key, String... replacements) {
+		return getInstance().language.translate(key, replacements);
+	}
+	
+	public QuestWorld() {
+		instance = this;
+		language = new Lang("en_us", getDataFolder(), getClassLoader());
+		getServer().getServicesManager().register(QuestLoader.class, this, this, ServicePriority.Normal);
+
+	}
+	
+	private List<QuestExtension> preEnableHooks = new ArrayList<>();
+	public void attach(QuestExtension hook) {
+		if(hookInstaller == null)
+			preEnableHooks.add(hook);
+		else
+			hookInstaller.add(hook);
+	}
+	
 	@Override
 	public void onEnable() {
 		// Initialize all we can before we need CSCoreLib
-		categories = new ArrayList<Category>();
-		categoryIDs = new HashMap<Integer, Category>();
-		managers = new HashSet<QuestManager>();
-		profiles = new HashMap<UUID, QuestManager>();
-		inputs = new HashMap<UUID, Input>();
-		instance = this;
+		hookInstaller = new HookInstaller(this);
+		hookInstaller.addAll(preEnableHooks);
 		
-		guide = new ItemBuilder(Material.ENCHANTED_BOOK)
-				.display("&eQuest Book &7(Right Click)")
-				.lore("", "&rYour basic Guide for Quests", "&rIn case you lose it, simply place a", "&rWorkbench into your Crafting Grid")
-				.get();
-
-		if (getServer().getPluginManager().isPluginEnabled("Vault")) setupEconomy();
+		if (getServer().getPluginManager().isPluginEnabled("Vault"))
+			setupEconomy();
+		
+		new BuiltinHook();
+		new CitizensHook();
+		new ChatReactionHook();
+		new VotifierHook();
+		new ASkyBlockHook();
 		
 		// Attempt to load Core to continue
 		CSCoreLibLoader loader = new CSCoreLibLoader(this);
@@ -105,62 +118,22 @@ public class QuestWorld extends JavaPlugin implements Listener {
 		if (!new File("plugins/QuestWorld/quests").exists()) new File("plugins/QuestWorld/quests").mkdirs();
 		if (!new File("plugins/QuestWorld/dialogues").exists()) new File("plugins/QuestWorld/dialogues").mkdirs();
 		if (!new File("plugins/QuestWorld/presets").exists()) new File("plugins/QuestWorld/presets").mkdirs();
-		
-		registerMissionType(new CraftMission());
-		registerMissionType(new SubmitMission());
-		registerMissionType(new DetectMission());
-		registerMissionType(new KillMission());
-		registerMissionType(new KillNamedMission());
-		registerMissionType(new FishMission());
-		registerMissionType(new LocationMission());
-		registerMissionType(new JoinMission());
-		registerMissionType(new PlayMission());
-		registerMissionType(new MineMission());
-		registerMissionType(new LevelMission());
-		
-		if (getServer().getPluginManager().isPluginEnabled("Votifier")) {
-			registerMissionType(new VoteMission());
-			//new VoteListener(this);
-		}
-		
-		if (getServer().getPluginManager().isPluginEnabled("ChatReaction")) {
-			registerMissionType(new ChatReactMission());
-			//new ChatReactionListener(this);
-		}
-		
-		if (getServer().getPluginManager().isPluginEnabled("ASkyBlock")) {
-			registerMissionType(new ASkyBlockLevelMission());
-			//new ASkyBlockListener(this);
-		}
-		
-		boolean hasCitizens = getServer().getPluginManager().isPluginEnabled("Citizens");
-		
-		if (hasCitizens) {
-			registerMissionType(new CitizenInteractMission());
-			registerMissionType(new CitizenSubmitMission());
-			registerMissionType(new CitizenKillMission());
-			registerMissionType(new CitizenAcceptQuestMission());
-			new CitizensListener(this);
-		}
-		
+			
 		getServer().getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
 			
-			@SuppressWarnings("unused")
 			@Override
 			public void run() {
-				System.out.println("[Quest World 2] Retrieving Quest Configuration...");
+				Log.info("[Quest World 2] Retrieving Quest Configuration...");
 				load();
 				int categories = 0, quests = 0;
 				for (Category category: getCategories()) {
 					categories++;
-					for (Quest quest: category.getQuests()) {
-						quests++;
-					}
+					quests += category.getQuests().size();
 				}
 
 				QuestManager.updateTickingTasks();
-				System.out.println("[Quest World 2] Successfully loaded " + categories + " Categories");
-				System.out.println("[Quest World 2] Successfully loaded " + quests + " Quests");
+				Log.info("[Quest World 2] Successfully loaded " + categories + " Categories");
+				Log.info("[Quest World 2] Successfully loaded " + quests + " Quests");
 			}
 		}, 0L);
 		
@@ -176,10 +149,9 @@ public class QuestWorld extends JavaPlugin implements Listener {
 
 		new EditorListener(this);
 		new PlayerListener(this);
-		new TaskListener(this);
 		Bukkit.getPluginManager().registerEvents(new SelfListener(), this);
 		
-		ShapelessRecipe recipe = new ShapelessRecipe(guide);
+		ShapelessRecipe recipe = new ShapelessRecipe(GuideBook.get());
 		recipe.addIngredient(Material.WORKBENCH);
 		getServer().addRecipe(recipe);
 		
@@ -203,36 +175,6 @@ public class QuestWorld extends JavaPlugin implements Listener {
 			}
 		}, 0L, 5 * 60L * 20L);
 		
-		if (hasCitizens) {
-			getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
-				
-				@Override
-				public void run() {
-					for (QuestMission task: QuestManager.getCitizenTasks()) {
-						NPC npc = task.getCitizen();
-						if (npc != null && npc.getEntity() != null) {
-							List<Player> players = new ArrayList<Player>();
-							for (Entity n: npc.getEntity().getNearbyEntities(20D, 8D, 20D)) {
-								if (n instanceof Player) {
-									QuestManager manager = getManager((Player) n);
-									if (manager.getStatus(task.getQuest()).equals(QuestStatus.AVAILABLE) && manager.hasUnlockedTask(task) && !manager.hasCompletedTask(task)) {
-										players.add((Player) n);
-									}
-								}
-							}
-							if (!players.isEmpty()) {
-								try {
-									ParticleEffect.VILLAGER_HAPPY.display(npc.getEntity().getLocation().add(0, 1, 0), 0.5F, 0.7F, 0.5F, 0, 20, players);
-								} catch (Exception e) {
-									e.printStackTrace();
-								}
-							}
-						}
-					}
-				}
-			}, 0L, 12L);
-		}
-		
 		int autosave = cfg.getInt("options.autosave-interval");
 		if(autosave > 0) {
 			autosave = autosave * 20 * 60; // minutes to ticks
@@ -249,7 +191,7 @@ public class QuestWorld extends JavaPlugin implements Listener {
 	
 	private boolean setupEconomy() {
 		RegisteredServiceProvider<Economy> economyProvider = getServer().getServicesManager().getRegistration(Economy.class);
-	    if (economyProvider != null) economy = (Economy)economyProvider.getProvider();
+	    if (economyProvider != null) economy = economyProvider.getProvider();
 
 	    return economy != null;
 	}
@@ -260,49 +202,6 @@ public class QuestWorld extends JavaPlugin implements Listener {
 		cfg = utils.getConfig();
 		utils.setupMetrics();
 		utils.setupUpdater(77071, getFile());
-		utils.setupLocalization();
-		local = utils.getLocalization();
-		
-		local.setPrefix("&4Quest World &7> ");
-		local.setDefault("editor.create-category", "&7Please type in the Name of your new Category (Color codes are supported)");
-		local.setDefault("editor.create-quest", "&7Please type in the Name of your new Quest (Color codes are supported)");
-		local.setDefault("editor.new-category", "&aSuccessfully created a new Category called &7\"&r%name%&7\"");
-		local.setDefault("editor.deleted-category", "&cSuccessfully deleted Category");
-		local.setDefault("editor.deleted-quest", "&cSuccessfully deleted Quest");
-		local.setDefault("editor.rename-category", "&7Please type in the Name for your Category (Color codes are supported)");
-		local.setDefault("editor.renamed-category", "&aSuccessfully renamed Category");
-		local.setDefault("editor.rename-quest", "&7Please type in the Name for your Quest (Color codes are supported)");
-		local.setDefault("editor.renamed-quest", "&aSuccessfully renamed Quest");
-		local.setDefault("party.full", "&4You cannot have more than &c4 &4Party Members!");
-		local.setDefault("party.invite", "&7Please type in the Name of the Player you want to invite");
-		local.setDefault("party.invited", "&7Successfully invited &e%name% &7to your Party");
-		local.setDefault("party.invitation", "&e%name% &7has invited you to join their Party");
-		local.setDefault("party.not-online", "&cPlayer &4%name% &cis not online");
-		local.setDefault("party.join", "&e%name% has accepted your Invitation and joined your Party");
-		local.setDefault("party.joined", "&7You are now a member of &e%name%'s &7Party!");
-		local.setDefault("party.kicked", "&e%name% &7has been kicked from the Party");
-		local.setDefault("party.already", "&4%name% &cis already a Member of a Party");
-		local.setDefault("editor.rename-kill-mission", "&7Please type in the Name of the Mob/Player you want to be killed (Color Code supported)");
-		local.setDefault("editor.renamed-kill-type", "&aSuccessfully specified a Name for your Mob/Player");
-		local.setDefault("editor.link-citizen", "&7Please right click the NPC you want to link with this Quest");
-		local.setDefault("editor.link-citizen-finished", "&aSuccessfully linked this NPC");
-		
-		local.setDefault("notifications.task-completed", "&e&l! &7You have completed a Task for the Quest &b<Quest>", "&e&l! &7Check your Quest Book for more Info");
-		local.setDefault("notifications.task-failed-timeframe", "&c&l! &7You failed to complete a Task for the Quest &b<Quest> &7within the given Timeframe.");
-		local.setDefault("notifications.task-timeframe-started", "&a&l! &7You have &b<Timeframe> &7of time to &b<Objective>");
-		
-		local.setDefault("editor.rename-location", "&7Please type in a Name for your Location", "&7Example: Awesomeville");
-		local.setDefault("editor.renamed-location", "&aSuccessfully given this Location a Name");
-		local.setDefault("editor.permission-quest", "&7Please type in a Permission Node for this Quest. Type \"none\" for no Permission Node");
-		local.setDefault("editor.permission-category", "&7Please type in a Permission Node for this Category. Type \"none\" for no Permission Node");
-		local.setDefault("editor.permission-set-quest", "&aSuccessfully set a Permission Node for this Quest");
-		local.setDefault("editor.permission-set-category", "&aSuccessfully set a Permission Node for this Category");
-		local.setDefault("editor.add-dialogue", "&7Please type in the Message you want to add to the Dialogue! You can do this multiple times, simply type &eexit() &7when you are done! You can also add Commands! Just type in your command &e(ex. /say hello) &7and it will be executed within the Dialogue, use &e<player> &7for the Player's Username");
-		local.setDefault("editor.set-dialogue", "&7Successfully set a Dialogue!", "&7If you want to change something you can edit the Dialogue at any time at", "&e<path>");
-		local.setDefault("editor.edit-mission-name", "&aSuccessfully edited the Mission's Display Name");
-		local.setDefault("editor.await-mission-name", "&7Please type in a Custom Name for this Mission.");
-		local.setDefault("editor.misssion-description", "&7Please type in a Description for your Quest");
-		local.save();
 		
 		book = new Config("plugins/QuestWorld/questbook_local.yml");
 		book.setDefaultValue("gui.title", "&e&lQuest Book");
@@ -335,7 +234,7 @@ public class QuestWorld extends JavaPlugin implements Listener {
 		sounds.setDefaultValue("sounds.quest.click.pitch", 0.2F);
 		sounds.setDefaultValue("sounds.quest.mission-submit.list", Arrays.asList("ENTITY_EXPERIENCE_ORB_PICKUP"));
 		sounds.setDefaultValue("sounds.quest.mission-submit.pitch", 0.7F);
-		sounds.setDefaultValue("sounds.quest.mission-submit.pitch", 0.3F);
+		sounds.setDefaultValue("sounds.quest.mission-submit.volume", 0.3F);
 		sounds.setDefaultValue("sounds.quest.mission-reject.list", Arrays.asList("BLOCK_NOTE_SNARE", "NOTE_SNARE"));
 		sounds.setDefaultValue("sounds.quest.reward.list", Arrays.asList("ENTITY_ITEM_PICKUP", "ITEM_PICKUP"));
 		sounds.setDefaultValue("sounds.editor.click.list", Arrays.asList("UI_BUTTON_CLICK", "CLICK"));
@@ -372,7 +271,7 @@ public class QuestWorld extends JavaPlugin implements Listener {
 			new Category(file, files);
 		}
 		
-		for (Category category: this.categories) {
+		for (Category category: this.categories.values()) {
 			category.updateParent(new Config("plugins/QuestWorld/quests/" + category.getID() + ".category"));
 			for (Quest quest: category.getQuests()) {
 				quest.updateParent(new Config("plugins/QuestWorld/quests/" + quest.getID() + "-C" + category.getID() + ".quest"));
@@ -387,11 +286,11 @@ public class QuestWorld extends JavaPlugin implements Listener {
 	}
 	
 	public void reloadQuests() {
-		Iterator<Category> categories = this.categories.iterator();
+		Iterator<Map.Entry<Integer,Category>> categories = this.categories.entrySet().iterator();
 		while(categories.hasNext())
 			categories.remove();
 		
-		Iterator<QuestManager> managers = this.managers.iterator();
+		Iterator<Map.Entry<UUID, QuestManager>> managers = this.profiles.entrySet().iterator();
 		while(managers.hasNext())
 			managers.remove();
 		
@@ -404,6 +303,9 @@ public class QuestWorld extends JavaPlugin implements Listener {
 		
 		instance = null;
 		QuestManager.ticking_tasks = null;
+		
+		getServer().getServicesManager().unregisterAll(this);
+		getServer().getScheduler().cancelTasks(this);
 	}
 	
 	public long getLastSaved() {
@@ -413,28 +315,28 @@ public class QuestWorld extends JavaPlugin implements Listener {
 	// Why wasn't this a thing?!
 	public void save() { save(false); }
 	public void save(boolean force) {
-		Iterator<Category> categories = this.categories.iterator();
+		Iterator<Map.Entry<Integer,Category>> categories = this.categories.entrySet().iterator();
 		while(categories.hasNext())
-			categories.next().save(force);
+			categories.next().getValue().save(force);
 		
-		Iterator<QuestManager> managers = this.managers.iterator();
+		Iterator<Map.Entry<UUID, QuestManager>> managers = this.profiles.entrySet().iterator();
 		while(managers.hasNext())
-			managers.next().save();
+			managers.next().getValue().save();
 		
 		lastSave = System.currentTimeMillis();
 	}
 	
 	public void unload() {
-		Iterator<Category> categories = this.categories.iterator();
+		Iterator<Map.Entry<Integer,Category>> categories = this.categories.entrySet().iterator();
 		while(categories.hasNext()) {
 			// Force save for now, change this when 100% sure we've updated all quest/category lastModified times
-			categories.next().save(true);
+			categories.next().getValue().save(true);
 			categories.remove();
 		}
 		
-		Iterator<QuestManager> managers = this.managers.iterator();
+		Iterator<Map.Entry<UUID, QuestManager>> managers = this.profiles.entrySet().iterator();
 		while(managers.hasNext()) {
-			managers.next().save();
+			managers.next().getValue().save();
 			managers.remove();
 		}
 	}
@@ -515,17 +417,16 @@ public class QuestWorld extends JavaPlugin implements Listener {
 		return instance;
 	}
 	
-	public List<Category> getCategories() {
-		return categories;
+	public Collection<Category> getCategories() {
+		return categories.values();
 	}
 	
 	public Category getCategory(int id) {
-		return categoryIDs.get(id);
+		return categories.get(id);
 	}
 	
 	public void registerCategory(Category category) {
-		categories.add(category);
-		categoryIDs.put(category.getID(), category);
+		categories.put(category.getID(), category);
 	}
 	
 	public void unregisterCategory(Category category) {
@@ -533,23 +434,16 @@ public class QuestWorld extends JavaPlugin implements Listener {
 			QuestManager.clearAllQuestData(quest);
 			new File("plugins/QuestWorld/quests/" + quest.getID() + "-C" + category.getID() + ".quest").delete();
 		}
-		categories.remove(category);
-		categoryIDs.remove(category.getID());
+		categories.remove(category.getID());
 		new File("plugins/QuestWorld/quests/" + category.getID() + ".category").delete();
 	}
 	
 	public void registerManager(QuestManager manager) {
-		this.managers.add(manager);
 		this.profiles.put(manager.getUUID(), manager);
 	}
 	
 	public void unregisterManager(QuestManager manager) {
-		this.managers.remove(manager);
 		this.profiles.remove(manager.getUUID());
-	}
-	
-	public Set<QuestManager> getManagers() {
-		return managers;
 	}
 	
 	public QuestManager getManager(OfflinePlayer p) {
@@ -568,11 +462,19 @@ public class QuestWorld extends JavaPlugin implements Listener {
 		this.inputs.put(uuid, input);
 	}
 	
-	public void registerMissionType(MissionType type) {
-		if(type instanceof Listener)
-			getServer().getPluginManager().registerEvents(type, this);
-
+	public void enable(QuestExtension hook) {
+		for(MissionType type : hook.getMissions())
+			registerMissionType(type);
+	}
+	
+	private void registerMissionType(MissionType type) {
+		Log.info("Storing mission type: " + type.getID());
 		types.put(type.getID(), type);
+		
+		if(type instanceof Listener) {
+			Log.info("Registering events for: " + type.getID());
+			getServer().getPluginManager().registerEvents((Listener)type, this);
+		}
 	}
 
 	public Input getInput(UUID uuid) {
@@ -582,10 +484,6 @@ public class QuestWorld extends JavaPlugin implements Listener {
 	
 	public void removeInput(UUID uuid) {
 		this.inputs.remove(uuid);
-	}
-
-	public Localization getLocalization() {
-		return local;
 	}
 	
 	public boolean isItemSimiliar(ItemStack item, ItemStack SFitem) {

@@ -2,11 +2,12 @@ package me.mrCookieSlime.QuestWorld.quests.pluginmissions;
 
 import org.bukkit.Material;
 import org.bukkit.SkullType;
+import org.bukkit.inventory.ItemStack;
 
-import me.mrCookieSlime.QuestWorld.quests.MissionType;
-import me.mrCookieSlime.QuestWorld.quests.QuestMission;
+import me.mrCookieSlime.QuestWorld.api.MissionType;
+import me.mrCookieSlime.QuestWorld.api.interfaces.IMission;
+import me.mrCookieSlime.QuestWorld.hooks.CitizensHook;
 import me.mrCookieSlime.QuestWorld.utils.ItemBuilder;
-import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
 
 public class CitizenAcceptQuestMission extends MissionType {
@@ -16,9 +17,14 @@ public class CitizenAcceptQuestMission extends MissionType {
 	}
 	
 	@Override
-	protected String formatMissionDisplay(QuestMission instance) {
+	public ItemStack displayItem(IMission instance) {
+		return getSelectorItem().toItemStack(1);
+	}
+	
+	@Override
+	protected String displayString(IMission instance) {
 		String name = "N/A";
-		NPC npc = CitizensAPI.getNPCRegistry().getById(instance.getCitizenID());
+		NPC npc = CitizensHook.npcFrom(instance);
 		if(npc != null)
 			name = npc.getName();
 		

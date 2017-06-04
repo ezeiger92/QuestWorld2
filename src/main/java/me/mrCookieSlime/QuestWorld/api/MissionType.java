@@ -1,14 +1,12 @@
-package me.mrCookieSlime.QuestWorld.quests;
+package me.mrCookieSlime.QuestWorld.api;
 
 import me.mrCookieSlime.QuestWorld.QuestWorld;
+import me.mrCookieSlime.QuestWorld.api.interfaces.IMission;
 
-import org.bukkit.Material;
-import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
 
-public abstract class MissionType implements Listener {
-	
+public abstract class MissionType {
 	public enum SubmissionType {
 		ITEM,
 		ENTITY, 
@@ -20,7 +18,6 @@ public abstract class MissionType implements Listener {
 		CITIZENS_INTERACT,
 		CITIZENS_KILL, 
 		BLOCK;
-		
 	}
 	
 	String id;
@@ -37,13 +34,15 @@ public abstract class MissionType implements Listener {
 		this.ticking = ticking;
 	}
 	
-	public final String formatQuestDisplay(QuestMission instance) {
-		return formatMissionDisplay(instance) + formatTimeframe(instance) + formatDeathReset(instance);
+	public final String defaultDisplayName(IMission instance) {
+		return displayString(instance) + formatTimeframe(instance) + formatDeathReset(instance);
 	}
 	
-	protected abstract String formatMissionDisplay(QuestMission instance);
+	protected abstract String displayString(IMission instance);
 	
-	private String formatTimeframe(QuestMission quest) {
+	public abstract ItemStack displayItem(IMission instance);
+	
+	private String formatTimeframe(IMission quest) {
 		if(!quest.hasTimeframe() || !supportsTimeframes)
 			return "";
 		long duration = quest.getTimeframe();
@@ -51,7 +50,7 @@ public abstract class MissionType implements Listener {
 		return " &7within " + (duration / 60) + "h " + (duration % 60) + "m";
 	}
 	
-	private String formatDeathReset(QuestMission quest) {
+	private String formatDeathReset(IMission quest) {
 		if(!quest.resetsonDeath() || !supportsDeathReset)
 			return "";
 		
@@ -61,13 +60,15 @@ public abstract class MissionType implements Listener {
 	public MaterialData getSelectorItem() {
 		return selectorItem;
 	}
-	
-	public ItemStack getDisplayItem(QuestMission qm) {
-		return new ItemStack(Material.COMMAND);
-	}
 
 	public static MissionType valueOf(String id) {
-		return QuestWorld.getInstance().getMissionTypes().get(id);
+		MissionType result =  QuestWorld.getInstance().getMissionTypes().get(id);
+		
+		if(result == null) {
+			throw new NullPointerException("Tried to fetch mission type:" + id + " that doesn't exist!");
+		}
+		
+		return result;
 	}
 
 	public String getID() {

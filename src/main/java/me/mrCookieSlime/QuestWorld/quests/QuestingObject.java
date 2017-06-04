@@ -2,7 +2,9 @@ package me.mrCookieSlime.QuestWorld.quests;
 
 import org.bukkit.entity.Player;
 
-public abstract class QWObject {
+import me.mrCookieSlime.QuestWorld.api.interfaces.IQuestingObject;
+
+public abstract class QuestingObject implements IQuestingObject {
 	private long lastModified = System.currentTimeMillis();
 	public long getLastModified() {
 		return lastModified;

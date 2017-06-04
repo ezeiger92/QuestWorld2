@@ -2,24 +2,15 @@ package me.mrCookieSlime.QuestWorld.utils;
 
 import org.bukkit.entity.EntityType;
 
-public class EntityTag extends ItemTag {
-	
-	EntityTag(EntityType base) {
-		super("EntityTag");
-		append("id:minecraft:"+entityNameLookup(base));
+public class EntityTag {
+	private String tag;
+	public EntityTag(EntityType base) {
+		tag = "{EntityTag:{id:\"minecraft:" + entityNameLookup(base) + "\"}}";
 	}
 	
-	EntityTag(EntityType base, String properties) {
-		this(base);
-		append(properties);
-	}
-	
-	public static EntityTag from(EntityType base) {
-		return new EntityTag(base);
-	}
-	
-	public static EntityTag from(EntityOther base) {
-		return base.getItemTag();
+	@Override
+	public String toString() {
+		return tag;
 	}
 	
 	/**

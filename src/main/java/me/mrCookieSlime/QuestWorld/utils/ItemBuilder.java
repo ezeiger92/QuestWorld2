@@ -244,22 +244,11 @@ public class ItemBuilder {
 	}
 	
 	@SuppressWarnings("deprecation")
-	public ItemBuilder tag(ItemTag tag) {
-		Bukkit.getUnsafe().modifyItemStack(resultStack, tag.toString());
-		return this;
-	}
-	
-	public ItemBuilder mob(EntityOther mob) {
-		legacyEggData(mob.getEntity());
-		return tag(new ItemTag(EntityTag.from(mob)));
-	}
-	
 	public ItemBuilder mob(EntityType mob) {
 		legacyEggData(mob);
-		//resultStack.setData(new SpawnEgg(mob));
-		//resultStack = new SpawnEgg(mob).toItemStack();
-		//return this;
-		return tag(new ItemTag(EntityTag.from(mob)));
+		EntityTag tag = new EntityTag(mob);
+		Bukkit.getUnsafe().modifyItemStack(resultStack, tag.toString());
+		return this;
 	}
 
 	@SuppressWarnings("deprecation")

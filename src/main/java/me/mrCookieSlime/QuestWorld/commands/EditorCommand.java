@@ -8,6 +8,7 @@ import me.mrCookieSlime.QuestWorld.quests.Category;
 import me.mrCookieSlime.QuestWorld.quests.QBDialogue;
 import me.mrCookieSlime.QuestWorld.quests.Quest;
 import me.mrCookieSlime.QuestWorld.quests.QuestBook;
+import me.mrCookieSlime.QuestWorld.utils.Log;
 import me.mrCookieSlime.QuestWorld.utils.Text;
 
 import java.util.Iterator;
@@ -103,7 +104,7 @@ public class EditorCommand implements CommandExecutor {
 							q.setCooldown(-1);
 							++changes;
 							String questFile = q.getID() + "-C" + c.getID();
-							System.out.println("[Quest World 2] Upgrading "+c.getName()+"."+q.getName()+" ("+questFile+".quest): Cooldown changed from 0 to -1");
+							Log.info("[Quest World 2] Upgrading "+c.getName()+"."+q.getName()+" ("+questFile+".quest): Cooldown changed from 0 to -1");
 						}
 					}
 				}

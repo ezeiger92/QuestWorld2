@@ -10,8 +10,10 @@ import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu.MenuClickHan
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu.MenuOpeningHandler;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ClickAction;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
+import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.utils.EntityTools;
 import me.mrCookieSlime.QuestWorld.utils.ItemBuilder;
+import me.mrCookieSlime.QuestWorld.utils.PlayerTools;
 import me.mrCookieSlime.QuestWorld.utils.Text;
 
 import org.bukkit.DyeColor;
@@ -24,7 +26,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 public class QBDialogue {
 	
 
-	public static void openDeletionConfirmation(Player p, final QWObject q) {
+	public static void openDeletionConfirmation(Player p, final QuestingObject q) {
 		ChestMenu menu = new ChestMenu(Text.colorize("&4&lAre you Sure?"));
 		menu.addMenuOpeningHandler(new MenuOpeningHandler() {
 			
@@ -43,7 +45,7 @@ public class QBDialogue {
 			public boolean onClick(Player p, int arg1, ItemStack arg2, ClickAction arg3) {
 				if (q instanceof Quest) QuestBook.openCategoryEditor(p, ((Quest) q).getCategory());
 				else if (q instanceof Category) QuestBook.openEditor(p);
-				else if (q instanceof QuestMission) QuestBook.openQuestEditor(p, ((QuestMission) q).getQuest());
+				else if (q instanceof Mission) QuestBook.openQuestEditor(p, ((Mission) q).getQuest());
 				return false;
 			}
 		});
@@ -51,7 +53,7 @@ public class QBDialogue {
 		String tag = Text.colorize("&r") ;
 		if (q instanceof Quest) tag += "your Quest \"" + ((Quest) q).getName() + "\"";
 		else if (q instanceof Category) tag += "your Category \"" + ((Category) q).getName() + "\"";
-		else if (q instanceof QuestMission) tag += "your Task";
+		else if (q instanceof Mission) tag += "your Task";
 		
 		menu.addItem(2, wool.color(DyeColor.LIME).display("&aYes I am sure").lore("", "&rThis will delete", tag).getNew());
 		menu.addMenuClickHandler(2, new MenuClickHandler() {
@@ -64,19 +66,19 @@ public class QBDialogue {
 					QuestWorld.getInstance().unregisterCategory((Category) q);
 					p.closeInventory();
 					QuestBook.openEditor(p);
-					QuestWorld.getInstance().getLocalization().sendTranslation(p, "editor.deleted-category", true);
+					PlayerTools.sendTranslation(p, true, Translation.category_deleted, q.getName());
 				}
 				else if (q instanceof Quest) {
 					QuestManager.clearAllQuestData((Quest) q);
 					((Quest) q).getCategory().removeQuest((Quest) q);
 					p.closeInventory();
 					QuestBook.openCategoryQuestEditor(p, ((Quest) q).getCategory());
-					QuestWorld.getInstance().getLocalization().sendTranslation(p, "editor.deleted-quest", true);
+					PlayerTools.sendTranslation(p, true, Translation.quest_deleted, q.getName());
 				}
-				else if (q instanceof QuestMission) {
-					((QuestMission) q).getQuest().removeMission((QuestMission) q);
+				else if (q instanceof Mission) {
+					((Mission) q).getQuest().removeMission((Mission) q);
 					p.closeInventory();
-					QuestBook.openQuestEditor(p, ((QuestMission) q).getQuest());
+					QuestBook.openQuestEditor(p, ((Mission) q).getQuest());
 				}
 				return false;
 			}
@@ -121,11 +123,11 @@ public class QBDialogue {
 		menu.open(p);
 	}
 	
-	public static void openQuestMissionEntityEditor(Player p, final QuestMission mission) {
+	public static void openQuestMissionEntityEditor(Player p, final Mission mission) {
 		openQuestMissionEntityEditor(p, mission, 0, 0);
 	}
 	
-	private static void openQuestMissionEntityEditor(Player p, final QuestMission mission, int page, int mode) {
+	private static void openQuestMissionEntityEditor(Player p, final Mission mission, int page, int mode) {
 		List<EntityType> entities = EntityTools.listAliveEntityTypes();
 		entities.add(0, EntityType.PLAYER);
 		
@@ -236,7 +238,7 @@ public class QBDialogue {
 		}
 	}
 
-	public static void openQuestRequirementChooser(Player p, final QWObject quest) {
+	public static void openQuestRequirementChooser(Player p, final QuestingObject quest) {
 		ChestMenu menu = new ChestMenu("&c&lQuest Editor");
 		
 		menu.addMenuOpeningHandler(new MenuOpeningHandler() {
@@ -270,7 +272,7 @@ public class QBDialogue {
 		menu.open(p);
 	}
 
-	public static void openQuestRequirementChooser2(Player p, final QWObject q, Category category) {
+	public static void openQuestRequirementChooser2(Player p, final QuestingObject q, Category category) {
 		ChestMenu menu = new ChestMenu("&c&lQuest Editor");
 		
 		menu.addMenuOpeningHandler(new MenuOpeningHandler() {

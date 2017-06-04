@@ -8,7 +8,7 @@ import org.bukkit.inventory.ItemStack;
 
 import me.mrCookieSlime.QuestWorld.events.QuestChangeEvent;
 import me.mrCookieSlime.QuestWorld.quests.Quest;
-import me.mrCookieSlime.QuestWorld.quests.QuestMission;
+import me.mrCookieSlime.QuestWorld.quests.Mission;
 import me.mrCookieSlime.QuestWorld.utils.BitFlag;
 import me.mrCookieSlime.QuestWorld.utils.BitFlag.BitString;
 
@@ -111,13 +111,13 @@ public class QuestChange extends Quest {
 	}
 	
 	@Override
-	public void addMission(QuestMission mission) {
+	public void addMission(Mission mission) {
 		super.addMission(mission);
 		changeBits |= BitFlag.getBits(Member.TASKS);
 	}
 	
 	@Override
-	public void removeMission(QuestMission mission) {
+	public void removeMission(Mission mission) {
 		super.removeMission(mission);
 		changeBits |= BitFlag.getBits(Member.TASKS);
 	}

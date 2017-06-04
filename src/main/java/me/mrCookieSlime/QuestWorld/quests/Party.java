@@ -6,11 +6,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import me.mrCookieSlime.CSCoreLibPlugin.Configuration.Variable;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Chat.TellRawMessage;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Chat.TellRawMessage.ClickAction;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Chat.TellRawMessage.HoverAction;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
+import me.mrCookieSlime.QuestWorld.api.Translation;
+import me.mrCookieSlime.QuestWorld.utils.PlayerTools;
 import me.mrCookieSlime.QuestWorld.utils.Text;
 
 import org.bukkit.Bukkit;
@@ -49,11 +50,12 @@ public class Party {
 	public void addPlayer(Player p) {
 		for (UUID member: getPlayers()) {
 			Player player = Bukkit.getPlayer(member);
-			if (player != null) QuestWorld.getInstance().getLocalization().sendTranslation(player, "party.join", true, new Variable("%name%", p.getName()));
+			if (player != null) 
+				PlayerTools.sendTranslation(player, true, Translation.party_playerjoin, p.getName());
 		}
 		
 		this.members.add(p.getUniqueId());
-		QuestWorld.getInstance().getLocalization().sendTranslation(p, "party.joined", true, new Variable("%name%", Bukkit.getOfflinePlayer(leader).getName()));
+		PlayerTools.sendTranslation(p, true, Translation.party_groupjoin, p.getName(), Bukkit.getOfflinePlayer(leader).getName());
 		QuestWorld.getInstance().getManager(p).toConfig().setValue("party.associated", leader.toString());
 		if (pending.contains(p.getUniqueId())) pending.remove(p.getUniqueId());
 		save();
@@ -74,7 +76,7 @@ public class Party {
 		
 		if(target != null) {
 			for(Player p : existingParty) {
-				QuestWorld.getInstance().getLocalization().sendTranslation(p, "party.kicked", true, new Variable("%name%", name));
+				PlayerTools.sendTranslation(p, true, Translation.party_playerkick, name);
 			}
 			
 			members.remove(target.getUniqueId());
@@ -122,9 +124,8 @@ public class Party {
 	}
 
 	public void invite(Player p) throws Exception {
-		p.sendMessage("");
-		QuestWorld.getInstance().getLocalization().sendTranslation(p, "party.invitation", false, new Variable("%name%", Bukkit.getOfflinePlayer(leader).getName()));
-		
+		PlayerTools.sendTranslation(p, true, Translation.party_groupinvite, Bukkit.getOfflinePlayer(leader).getName());
+
 		new TellRawMessage()
 		.addText(Text.colorize("&a&lACCEPT"))
 		.addHoverEvent(HoverAction.SHOW_TEXT, Text.colorize("&7Click to accept this Invitation"))
@@ -132,8 +133,6 @@ public class Party {
 		.addText(Text.colorize(" &4&lDENY"))
 		.addHoverEvent(HoverAction.SHOW_TEXT, Text.colorize("&7Click to deny this Invitation"))
 		.send(p);
-		
-		p.sendMessage("");
 		
 		pending.add(p.getUniqueId());
 		save();

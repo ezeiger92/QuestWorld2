@@ -5,8 +5,8 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
 
-import me.mrCookieSlime.QuestWorld.quests.MissionType;
-import me.mrCookieSlime.QuestWorld.quests.QuestMission;
+import me.mrCookieSlime.QuestWorld.api.MissionType;
+import me.mrCookieSlime.QuestWorld.api.interfaces.IMission;
 import me.mrCookieSlime.QuestWorld.utils.SubmissionItemResolver;
 
 public class LocationMission extends MissionType {
@@ -15,12 +15,12 @@ public class LocationMission extends MissionType {
 	}
 	
 	@Override
-	public ItemStack getDisplayItem(QuestMission qm) {
-		return SubmissionItemResolver.location(Material.LEATHER_BOOTS, qm.getLocation());
+	public ItemStack displayItem(IMission instance) {
+		return SubmissionItemResolver.location(Material.LEATHER_BOOTS, instance.getLocation());
 	}
 	
 	@Override
-	protected String formatMissionDisplay(QuestMission instance) {
+	protected String displayString(IMission instance) {
 		Location loc = instance.getLocation();
 		String locStr = instance.getName();
 		if(locStr.isEmpty())

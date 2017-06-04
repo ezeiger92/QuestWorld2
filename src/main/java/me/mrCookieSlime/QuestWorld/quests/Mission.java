@@ -9,25 +9,24 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import me.mrCookieSlime.CSCoreLibPlugin.Configuration.Variable;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.MenuHelper;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.MenuHelper.ChatHandler;
-import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.Item.CustomItem;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
-import me.mrCookieSlime.QuestWorld.quests.MissionType.SubmissionType;
-import me.mrCookieSlime.QuestWorld.utils.ItemBuilder;
+import me.mrCookieSlime.QuestWorld.api.MissionType;
+import me.mrCookieSlime.QuestWorld.api.Translation;
+import me.mrCookieSlime.QuestWorld.api.MissionType.SubmissionType;
+import me.mrCookieSlime.QuestWorld.api.interfaces.IMission;
+import me.mrCookieSlime.QuestWorld.utils.PlayerTools;
 import me.mrCookieSlime.QuestWorld.utils.Text;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
 
 import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.SkullType;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-public class QuestMission extends QWObject {
+public class Mission extends QuestingObject implements IMission {
 	
 	Quest quest;
 	MissionType type;
@@ -41,12 +40,12 @@ public class QuestMission extends QWObject {
 	long timeframe;
 	boolean deathReset;
 	String lore;
-	int citizen;
+	int custom_int;
 	boolean spawners;
 	
 	List<String> dialogue = new ArrayList<String>();
 	
-	public QuestMission(Quest quest, String id, MissionType type, EntityType entity, String name, ItemStack item, Location location, int amount, String displayName, long timeframe, boolean deathReset, int citizen, boolean spawners, String lore) {
+	public Mission(Quest quest, String id, MissionType type, EntityType entity, String name, ItemStack item, Location location, int amount, String displayName, long timeframe, boolean deathReset, int custom_int, boolean spawners, String lore) {
 		this.quest = quest;
 		this.id = id;
 		this.type = type;
@@ -57,7 +56,7 @@ public class QuestMission extends QWObject {
 		this.location = location;
 		this.displayName = displayName;
 		this.timeframe = timeframe;
-		this.citizen = citizen;
+		this.custom_int = custom_int;
 		this.deathReset = deathReset;
 		this.lore = lore == null ? "": lore;
 		this.spawners = spawners;
@@ -92,11 +91,10 @@ public class QuestMission extends QWObject {
 	}
 	
 	public String getText() {
-		if (getCustomName() != null) return getCustomName();
-		//Old way
-		//return ChatColor.GRAY + type.getFormat(entity, item, location, amount, name, citizen, spawners) + (hasTimeframe() ? (" &7within " + (getTimeframe() / 60) + "h " + (getTimeframe() % 60) + "m"): "") + (resetsonDeath() ? " &7without dying": "");
-		
-		return type.formatQuestDisplay(this);
+		if (getCustomName() != null)
+			return getCustomName();
+
+		return type.defaultDisplayName(this);
 	}
 	
 	public ItemStack getMissionItem() {
@@ -104,30 +102,7 @@ public class QuestMission extends QWObject {
 	}
 
 	public ItemStack getDisplayItem() {
-		
-		//TODO Finish pushing item to each mission type
-		//return type.getDisplayItem(this);
-		
-		switch (type.getSubmissionType()) {
-		case ENTITY:
-			return new ItemBuilder(Material.MONSTER_EGG).mob(entity).display("&7Entity Type: &r" + Text.niceName(entity.name())).get();
-		case ITEM:
-		case BLOCK:
-		case CITIZENS_ITEM:
-			return item.clone();
-		case INTEGER:
-			return new CustomItem(Material.COMMAND, "&7" + amount, 0);
-		case TIME:
-			return new ItemStack(Material.WATCH);
-		case LOCATION:
-			return new CustomItem(Material.LEATHER_BOOTS, "&7X: " + location.getBlockX() + " Y: " + location.getBlockY() + " Z: " + location.getBlockZ(), 0);
-		case CITIZENS_INTERACT:
-			return type.getSelectorItem().toItemStack(1);
-		case CITIZENS_KILL:
-			return new ItemBuilder(Material.SKULL_ITEM).skull(SkullType.PLAYER).get();
-		default:
-			return new ItemStack(Material.COMMAND);
-		}
+		return type.displayItem(this);
 	}
 	
 	public void setItem(ItemStack item) {
@@ -244,16 +219,16 @@ public class QuestMission extends QWObject {
 	}
 	
 	public void addDialogueLine(Player p, final String path) {
-		QuestWorld.getInstance().getLocalization().sendTranslation(p, "editor.add-dialogue", true);
+		PlayerTools.sendTranslation(p, true, Translation.dialog_add);
 		String dprefix = QuestWorld.getInstance().getCfg().getString("dialogue.prefix");
-		final QuestMission mission = this;
+		final Mission mission = this;
 		MenuHelper.awaitChatInput(p, true, new ChatHandler() {
 			
 			@Override
 			public boolean onChat(Player p, String message) {
 				if (message.equalsIgnoreCase("exit()")) {
 					quest.updateLastModified();
-					QuestWorld.getInstance().getLocalization().sendTranslation(p, "editor.set-dialogue", true, new Variable("<path>", path));
+					PlayerTools.sendTranslation(p, true, Translation.dialog_set, path);
 					QuestBook.openQuestMissionEditor(p, mission);
 					
 					File file = new File(path);
@@ -324,18 +299,18 @@ public class QuestMission extends QWObject {
 		this.lore = lore;
 	}
 
-	public void setCitizen(int id) {
+	public void setCustomInt(int val) {
 		quest.updateLastModified();
-		this.citizen = id;
+		this.custom_int = val;
 	}
 
 	@Deprecated
 	public NPC getCitizen() {
-		return CitizensAPI.getNPCRegistry().getById(citizen);
+		return CitizensAPI.getNPCRegistry().getById(custom_int);
 	}
 
-	public int getCitizenID() {
-		return citizen;
+	public int getCustomInt() {
+		return custom_int;
 	}
 
 	public boolean acceptsSpawners() {

@@ -14,10 +14,12 @@ import java.util.Set;
 import java.util.UUID;
 
 import me.mrCookieSlime.CSCoreLibPlugin.Configuration.Config;
-import me.mrCookieSlime.CSCoreLibPlugin.Configuration.Variable;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Clock;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
-import me.mrCookieSlime.QuestWorld.quests.MissionType.SubmissionType;
+import me.mrCookieSlime.QuestWorld.api.Translation;
+import me.mrCookieSlime.QuestWorld.api.MissionType.SubmissionType;
+import me.mrCookieSlime.QuestWorld.utils.PlayerTools;
+import me.mrCookieSlime.QuestWorld.utils.Text;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -31,21 +33,18 @@ public class QuestManager {
 	
 	private Config cfg;
 	private UUID uuid;
-	private QWObject last;
+	private QuestingObject last;
 
 	private Map<Long, Category> activeCategories;
 	private Map<Long, Quest> activeQuests;
-	private Map<Long, QuestMission> activeMissions;
+	private Map<Long, Mission> activeMissions;
 
-	public static Set<QuestMission> ticking_tasks = new HashSet<QuestMission>();
-	public static Set<QuestMission> block_breaking_tasks = new HashSet<QuestMission>();
-	public static Set<QuestMission> citizen_tasks = new HashSet<QuestMission>();
+	public static Set<Mission> ticking_tasks = new HashSet<Mission>();
+	public static Set<Mission> block_breaking_tasks = new HashSet<Mission>();
+	public static Set<Mission> citizen_tasks = new HashSet<Mission>();
 	
 	public QuestManager(OfflinePlayer p) {
-		this.uuid = p.getUniqueId();
-		this.cfg = new Config("data-storage/Quest World/" + uuid + ".yml");
-		
-		QuestWorld.getInstance().registerManager(this);
+		this(p.getUniqueId());
 	}
 	
 	public QuestManager(UUID uuid) {
@@ -78,18 +77,18 @@ public class QuestManager {
 		}
 	}
 	
-	public long getCompletionDate(QuestMission task) {
+	public long getCompletionDate(Mission task) {
 		if (!cfg.contains(task.getQuest().getCategory().getID() + "." + task.getQuest().getID() + ".mission." + task.getID() + ".complete-until")) return 0;
 		return cfg.getLong(task.getQuest().getCategory().getID() + "." + task.getQuest().getID() + ".mission." + task.getID() + ".complete-until");
 	}
 	
-	public boolean isWithinTimeframe(QuestMission task) {
+	public boolean isWithinTimeframe(Mission task) {
 		long date = getCompletionDate(task);
 		if (date == 0) return true;
 		return date > System.currentTimeMillis();
 	}
 	
-	public boolean updateTimeframe(UUID uuid, QuestMission task, int amount) {
+	public boolean updateTimeframe(UUID uuid, Mission task, int amount) {
 		if (task.getTimeframe() == 0) return true;
 		Config cfg = QuestWorld.getInstance().getManager(Bukkit.getOfflinePlayer(uuid)).toConfig();
 		Player p = Bukkit.getPlayer(uuid);
@@ -97,13 +96,14 @@ public class QuestManager {
 			cfg.setValue(task.getQuest().getCategory().getID() + "." + task.getQuest().getID() + ".mission." + task.getID() + ".complete-until", null);
 			cfg.setValue(task.getQuest().getCategory().getID() + "." + task.getQuest().getID() + ".mission." + task.getID() + ".progress", 0);
 			if (p != null) {
-				QuestWorld.getInstance().getLocalization().sendTranslation(p, "notifications.task-failed-timeframe", false, new Variable("<Quest>", task.getQuest().getName()));
+				PlayerTools.sendTranslation(p, false, Translation.notify_timefail, task.getQuest().getName());
 			}
 			return false;
 		}
 		else if (getProgress(task) == 0 && amount > 0) {
 			cfg.setValue(task.getQuest().getCategory().getID() + "." + task.getQuest().getID() + ".mission." + task.getID() + ".complete-until", (long) (System.currentTimeMillis() + (task.getTimeframe() * 60 * 1000)));
-			if (p != null) QuestWorld.getInstance().getLocalization().sendTranslation(p, "notifications.task-timeframe-started", false, new Variable("<Objective>", task.getText()), new Variable("<Timeframe>", (task.getTimeframe() / 60) + "h " + (task.getTimeframe() % 60) + "m"));
+			if (p != null) 
+				PlayerTools.sendTranslation(p, false, Translation.notify_timestart, task.getText(), Text.timeFromNum(task.getTimeframe()));
 		}
 		return true;
 	}
@@ -112,7 +112,7 @@ public class QuestManager {
 		Player p = Bukkit.getPlayer(uuid);
 		
 		if (p != null && quest_check) {
-			for (QuestMission task: getTickingTasks()) {
+			for (Mission task: getTickingTasks()) {
 				if (getStatus(task.getQuest()).equals(QuestStatus.AVAILABLE) && !hasCompletedTask(task) && hasUnlockedTask(task)) {
 					if (task.getType().getID().equals("PLAY_TIME")) setProgress(task, p.getStatistic(Statistic.PLAY_ONE_TICK) / 20 / 60);
 					else if (task.getType().getID().equals("REACH_LOCATION")) {
@@ -130,7 +130,7 @@ public class QuestManager {
 			for (Quest quest: category.getQuests()) {
 				if (getStatus(quest).equals(QuestStatus.AVAILABLE)) {
 					boolean finished = quest.getMissions().size() != 0;
-					for (QuestMission task: quest.getMissions()) {
+					for (Mission task: quest.getMissions()) {
 						updateTimeframe(this.uuid, task, 0);
 						if (!hasCompletedTask(task)) finished = false;
 					}
@@ -158,11 +158,11 @@ public class QuestManager {
 		}
 	}
 	
-	private Set<QuestMission> getTickingTasks() {
+	private Set<Mission> getTickingTasks() {
 		return ticking_tasks;
 	}
 	
-	public static Set<QuestMission> getCitizenTasks() {
+	public static Set<Mission> getCitizenTasks() {
 		return citizen_tasks;
 	}
 
@@ -183,39 +183,39 @@ public class QuestManager {
 		return cfg.getBoolean(quest.getCategory().getID() + "." + quest.getID() + ".finished");
 	}
 
-	public boolean hasCompletedTask(QuestMission task) {
+	public boolean hasCompletedTask(Mission task) {
 		return getProgress(task) >= getTotal(task);
 	}
 
-	public boolean hasUnlockedTask(QuestMission task) {
+	public boolean hasUnlockedTask(Mission task) {
 		if (!task.getQuest().isOrdered()) return true;
-		List<QuestMission> tasks = task.getQuest().getMissions();
+		List<Mission> tasks = task.getQuest().getMissions();
 		int index = tasks.indexOf(task) - 1;
 		if (index < 0) return true;
 		else return hasCompletedTask(tasks.get(index));
 	}
 	
-	public int getProgress(QuestMission task) {
+	public int getProgress(Mission task) {
 		Quest quest = task.getQuest();
 		if (!cfg.contains(quest.getCategory().getID() + "." + quest.getID() + ".mission." + task.getID() + ".progress")) return 0;
 		else return cfg.getInt(quest.getCategory().getID() + "." + quest.getID() + ".mission." + task.getID() + ".progress");
 	}
 	
-	public int getTotal(QuestMission task) {
+	public int getTotal(Mission task) {
 		if(task.getType().getSubmissionType() == SubmissionType.LOCATION)
 			return 1;
 		
 		return task.getAmount();
 	}
 	
-	public int addProgress(QuestMission task, int amount) {
+	public int addProgress(Mission task, int amount) {
 		int progress = getProgress(task) + amount;
 		int rest = progress - getTotal(task);
 		setProgress(task, rest > 0 ? task.getAmount(): progress);
 		return rest;
 	}
 
-	public void setProgress(QuestMission task, int amount) {
+	public void setProgress(Mission task, int amount) {
 		if (!updateTimeframe(this.uuid, task, amount)) return;
 		cfg.setValue(task.getQuest().getCategory().getID() + "." + task.getQuest().getID() + ".mission." + task.getID() + ".progress", amount > task.getAmount() ? task.getAmount(): amount);
 		
@@ -234,7 +234,8 @@ public class QuestManager {
 						updateTimeframe(uuid, task, amount);
 						if (amount >= task.getAmount()) {
 							Player player = Bukkit.getPlayer(uuid);
-							if (player != null) QuestWorld.getInstance().getLocalization().sendTranslation(player, "notifications.task-completed", false, new Variable("<Quest>", task.getQuest().getName()));
+							if (player != null) 
+								PlayerTools.sendTranslation(player, false, Translation.notify_completetask, task.getQuest().getName());
 						}
 						QuestWorld.getInstance().getManager(Bukkit.getOfflinePlayer(uuid)).toConfig().setValue(task.getQuest().getCategory().getID() + "." + task.getQuest().getID() + ".mission." + task.getID() + ".progress", amount);
 					}
@@ -243,17 +244,17 @@ public class QuestManager {
 		}
 	}
 
-	public void sendQuestDialogue(final Player player, final QuestMission task, final Iterator<String> dialogue) {
+	public void sendQuestDialogue(final Player player, final Mission task, final Iterator<String> dialogue) {
 		if (dialogue.hasNext()) {
 			sendDialogueComponent(player, dialogue.next());
 			sendDialogue(player.getUniqueId(), task, dialogue);
 		}
 		else {
-			QuestWorld.getInstance().getLocalization().sendTranslation(player, "notifications.task-completed", false, new Variable("<Quest>", task.getQuest().getName()));
+			PlayerTools.sendTranslation(player, false, Translation.notify_completetask, task.getQuest().getName());
 		}
 	}
 	
-	private void sendDialogue(final UUID uuid, final QuestMission task, final Iterator<String> dialogue) {
+	private void sendDialogue(final UUID uuid, final Mission task, final Iterator<String> dialogue) {
 		if (dialogue.hasNext()) {
 			final String line = dialogue.next();
 			Bukkit.getScheduler().scheduleSyncDelayedTask(QuestWorld.getInstance(), new Runnable() {
@@ -270,7 +271,8 @@ public class QuestManager {
 		}
 		else {
 			Player player = Bukkit.getPlayer(uuid);
-			if (!task.getType().getID().equals("ACCEPT_QUEST_FROM_NPC") && player != null) QuestWorld.getInstance().getLocalization().sendTranslation(player, "notifications.task-completed", false, new Variable("<Quest>", task.getQuest().getName()));
+			if (!task.getType().getID().equals("ACCEPT_QUEST_FROM_NPC") && player != null)
+				PlayerTools.sendTranslation(player, false, Translation.notify_completetask, task.getQuest().getName());
 		}
 	}
 
@@ -287,7 +289,7 @@ public class QuestManager {
 			if (quest.getCooldown() == 0) cfg.setValue(quest.getCategory().getID() + "." + quest.getID() + ".status", QuestStatus.AVAILABLE.toString());
 			else cfg.setValue(quest.getCategory().getID() + "." + quest.getID() + ".status", QuestStatus.ON_COOLDOWN.toString());
 			cfg.setValue(quest.getCategory().getID() + "." + quest.getID() + ".cooldown", Clock.format(new Date(System.currentTimeMillis() + quest.getRawCooldown())));
-			for (QuestMission task: quest.getMissions()) {
+			for (Mission task: quest.getMissions()) {
 				 setProgress(task, 0);
 			 }
 		}
@@ -302,11 +304,11 @@ public class QuestManager {
 		return cfg;
 	}
 	
-	public QWObject getLastEntry() {
+	public QuestingObject getLastEntry() {
 		return last;
 	}
 	
-	public void updateLastEntry(QWObject entry) {
+	public void updateLastEntry(QuestingObject entry) {
 		this.last = entry;
 	}
 	
@@ -364,7 +366,7 @@ public class QuestManager {
 		return activeQuests.values();
 	}
 	
-	public Collection<QuestMission> getAvailableMissions() {
+	public Collection<Mission> getAvailableMissions() {
 		return activeMissions.values();
 	}
 	
@@ -393,13 +395,13 @@ public class QuestManager {
 	
 	//TODO remove checks on SubmissionType and maybe ID
 	public static void updateTickingTasks() {
-		Set<QuestMission> ticking = new HashSet<QuestMission>();
-		Set<QuestMission> blockbreaking = new HashSet<QuestMission>();
-		Set<QuestMission> citizens = new HashSet<QuestMission>();
+		Set<Mission> ticking = new HashSet<Mission>();
+		Set<Mission> blockbreaking = new HashSet<Mission>();
+		Set<Mission> citizens = new HashSet<Mission>();
 		
 		for (Category category: QuestWorld.getInstance().getCategories()) {
 			for (Quest quest: category.getQuests()) {
-				for (QuestMission task: quest.getMissions()) {
+				for (Mission task: quest.getMissions()) {
 					if (task.getType().isTicker()) ticking.add(task);
 					if (task.getType().getID().equals("MINE_BLOCK")) blockbreaking.add(task);
 					if (task.getType().getSubmissionType().toString().startsWith("CITIZENS_")) citizens.add(task);

@@ -19,7 +19,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
 
-public class Category extends QWObject {
+public class Category extends QuestingObject {
 	
 	Map<Integer, Quest> quests;
 	int id;
@@ -36,7 +36,15 @@ public class Category extends QWObject {
 	}
 	
 	protected void copyTo(Category dest) {
+		dest.id         = id;
+		dest.name       = name;
+		dest.item       = item.clone();
+		dest.parent     = parent;
+		dest.permission = permission;
+		dest.hidden     = hidden;
 		
+		dest.world_blacklist = new ArrayList<>();
+		dest.world_blacklist.addAll(world_blacklist);
 	}
 	
 	public Category(String name, int id) {
@@ -175,7 +183,10 @@ public class Category extends QWObject {
 
 	public void setItem(ItemStack item) {
 		updateLastModified();
-		this.item = new CustomItem(item, name);
+		if(name != null)
+			this.item = new CustomItem(item, name);
+		else
+			this.item = item.clone();
 	}
 
 	@Override

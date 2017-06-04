@@ -11,11 +11,12 @@ import org.bukkit.material.MaterialData;
 
 import me.mrCookieSlime.CSCoreLibPlugin.general.String.StringUtils;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
-import me.mrCookieSlime.QuestWorld.quests.MissionType;
+import me.mrCookieSlime.QuestWorld.api.MissionType;
+import me.mrCookieSlime.QuestWorld.api.interfaces.IMission;
 import me.mrCookieSlime.QuestWorld.quests.QuestChecker;
 import me.mrCookieSlime.QuestWorld.quests.QuestListener;
 import me.mrCookieSlime.QuestWorld.quests.QuestManager;
-import me.mrCookieSlime.QuestWorld.quests.QuestMission;
+import me.mrCookieSlime.QuestWorld.quests.Mission;
 
 public class FishMission extends MissionType implements Listener {
 	public FishMission() {
@@ -23,12 +24,12 @@ public class FishMission extends MissionType implements Listener {
 	}
 	
 	@Override
-	public ItemStack getDisplayItem(QuestMission qm) {
-		return qm.getMissionItem().clone();
+	public ItemStack displayItem(IMission instance) {
+		return instance.getMissionItem().clone();
 	}
 	
 	@Override
-	protected String formatMissionDisplay(QuestMission instance) {
+	protected String displayString(IMission instance) {
 		return "&7Fish up " + instance.getAmount() + "x " + StringUtils.formatItemName(instance.getDisplayItem(), false);
 	}
 	
@@ -39,7 +40,7 @@ public class FishMission extends MissionType implements Listener {
 		QuestChecker.check(e.getPlayer(), e, "FISH", new QuestListener() {
 			
 			@Override
-			public void onProgressCheck(Player p, QuestManager manager, QuestMission task, Object event) {
+			public void onProgressCheck(Player p, QuestManager manager, Mission task, Object event) {
 				if (QuestWorld.getInstance().isItemSimiliar(((Item) e.getCaught()).getItemStack(), task.getMissionItem())) manager.addProgress(task, ((Item) e.getCaught()).getItemStack().getAmount());
 			}
 		});

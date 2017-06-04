@@ -14,11 +14,14 @@ import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.Item.CustomItem;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Player.PlayerInventory;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.CategoryChange;
+import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.QuestChange;
-import me.mrCookieSlime.QuestWorld.hooks.CitizensListener;
+import me.mrCookieSlime.QuestWorld.api.Translation;
+import me.mrCookieSlime.QuestWorld.hooks.CitizensHook;
 import me.mrCookieSlime.QuestWorld.listeners.Input;
 import me.mrCookieSlime.QuestWorld.listeners.InputType;
 import me.mrCookieSlime.QuestWorld.utils.ItemBuilder;
+import me.mrCookieSlime.QuestWorld.utils.PlayerTools;
 import me.mrCookieSlime.QuestWorld.utils.Text;
 
 import org.bukkit.Bukkit;
@@ -105,7 +108,7 @@ public class QuestBook {
 	}
 	
 	public static void openLastMenu(Player p) {
-		QWObject last = QuestWorld.getInstance().getManager(p).getLastEntry();
+		QuestingObject last = QuestWorld.getInstance().getManager(p).getLastEntry();
 		if (last != null) {			
 			if(last instanceof Quest) {
 				Quest q = (Quest)last;
@@ -264,9 +267,10 @@ public class QuestBook {
 					
 					@Override
 					public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-						if (party.getPlayers().size() >= QuestWorld.getInstance().getCfg().getInt("party.max-members")) QuestWorld.getInstance().getLocalization().sendTranslation(p, "party.full", true);
+						if (party.getPlayers().size() >= QuestWorld.getInstance().getCfg().getInt("party.max-members"))
+							PlayerTools.sendTranslation(p, true, Translation.party_errorfull);
 						else {
-							QuestWorld.getInstance().getLocalization().sendTranslation(p, "party.invite", true);
+							PlayerTools.sendTranslation(p, true, Translation.party_playerpick);
 							QuestWorld.getInstance().storeInput(p.getUniqueId(), new Input(InputType.PARTY_INVITE, party));
 							p.closeInventory();
 						}
@@ -479,7 +483,7 @@ public class QuestBook {
 		ItemBuilder glassPane = new ItemBuilder(Material.STAINED_GLASS_PANE);
 		
 		int index = 9;
-		for (final QuestMission mission: quest.getMissions()) {
+		for (final Mission mission: quest.getMissions()) {
 			if (QuestWorld.getInstance().getManager(p).hasUnlockedTask(mission)) {
 				String manual = null;
 				if (mission.getType().getID().equals("DETECT")) manual = "Detect";
@@ -663,7 +667,8 @@ public class QuestBook {
 					
 					@Override
 					public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-						QuestWorld.getInstance().getLocalization().sendTranslation(p, "editor.create-category", true);
+						String defaultCategoryName = QuestWorld.translate(Translation.default_category);
+						PlayerTools.sendTranslation(p, true, Translation.category_namechange, defaultCategoryName);
 						QuestWorld.getInstance().storeInput(p.getUniqueId(), new Input(InputType.CATEGORY_CREATION, slot));
 						p.closeInventory();
 						return false;
@@ -727,7 +732,8 @@ public class QuestBook {
 					
 					@Override
 					public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-						QuestWorld.getInstance().getLocalization().sendTranslation(p, "editor.create-quest", true);
+						String defaultQuestName = QuestWorld.translate(Translation.default_quest);
+						PlayerTools.sendTranslation(p, true, Translation.quest_namechange, defaultQuestName);
 						QuestWorld.getInstance().storeInput(p.getUniqueId(), new Input(InputType.QUEST_CREATION, String.valueOf(category.getID()) + " M " + String.valueOf(slot - 9)));
 						p.closeInventory();
 						return false;
@@ -760,7 +766,7 @@ public class QuestBook {
 			}
 		});
 		
-		ItemStack item = category.getItem();
+		ItemStack item = category.getItem().clone();
 		ItemMeta im = item.getItemMeta();
 		im.setLore(Arrays.asList("", "§e> Click to change the Item to", "§ethe Item you are currently holding"));
 		item.setItemMeta(im);
@@ -770,8 +776,9 @@ public class QuestBook {
 			
 			@Override
 			public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-				if (p.getItemInHand() != null && p.getItemInHand().getType() != null && p.getItemInHand().getType() != Material.AIR) {
-					changes.setItem(p.getItemInHand());
+				ItemStack hand = PlayerTools.getActiveHandItem(p);
+				if (hand != null) {
+					changes.setItem(hand);
 					if(changes.sendEvent())
 						changes.apply();
 					openCategoryEditor(p, category);
@@ -786,7 +793,7 @@ public class QuestBook {
 			@Override
 			public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
 				QuestWorld.getInstance().storeInput(p.getUniqueId(), new Input(InputType.CATEGORY_RENAME, category));
-				QuestWorld.getInstance().getLocalization().sendTranslation(p, "editor.rename-category", true);
+				PlayerTools.sendTranslation(p, true, Translation.category_namechange, category.getName());
 				p.closeInventory();
 				return false;
 			}
@@ -814,7 +821,7 @@ public class QuestBook {
 			@Override
 			public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
 				QuestWorld.getInstance().storeInput(p.getUniqueId(), new Input(InputType.CATEGORY_PERMISSION, category));
-				QuestWorld.getInstance().getLocalization().sendTranslation(p, "editor.permission-category", true);
+				PlayerTools.sendTranslation(p, true, Translation.category_permchange, category.getName(), category.getPermission());
 				p.closeInventory();
 				return false;
 			}
@@ -881,7 +888,7 @@ public class QuestBook {
 			}
 		});
 		
-		ItemStack item = quest.getItem();
+		ItemStack item = quest.getItem().clone();
 		ItemMeta im = item.getItemMeta();
 		im.setLore(Arrays.asList("", "§e> Click to change the Item to", "§ethe Item you are currently holding"));
 		item.setItemMeta(im);
@@ -908,7 +915,7 @@ public class QuestBook {
 			@Override
 			public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
 				QuestWorld.getInstance().storeInput(p.getUniqueId(), new Input(InputType.QUEST_RENAME, quest));
-				QuestWorld.getInstance().getLocalization().sendTranslation(p, "editor.rename-quest", true);
+				PlayerTools.sendTranslation(p, true, Translation.quest_namechange, quest.getName());
 				p.closeInventory();
 				return false;
 			}
@@ -1026,7 +1033,7 @@ public class QuestBook {
 			@Override
 			public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
 				QuestWorld.getInstance().storeInput(p.getUniqueId(), new Input(InputType.QUEST_PERMISSION, quest));
-				QuestWorld.getInstance().getLocalization().sendTranslation(p, "editor.permission-quest", true);
+				PlayerTools.sendTranslation(p, true, Translation.quest_permchange, quest.getName(), quest.getPermission());
 				p.closeInventory();
 				return false;
 			}
@@ -1123,14 +1130,14 @@ public class QuestBook {
 		}
 		
 		for (int i = 0; i < 9; i++) {
-			final QuestMission mission = quest.getMission(i);
+			final Mission mission = quest.getMission(i);
 			if (mission == null) {
 				menu.addItem(45 + i, new CustomItem(new MaterialData(Material.PAPER), "&7&o> New Task"));
 				menu.addMenuClickHandler(45 + i, new MenuClickHandler() {
 					
 					@Override
 					public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-						changes.addMission(new QuestMission(quest, String.valueOf(slot - 36), MissionType.valueOf("SUBMIT"), EntityType.PLAYER, "", new ItemStack(Material.STONE), p.getLocation().getBlock().getLocation(), 1, null, 0, false, 0, false, "Hey there! Do this Quest."));
+						changes.addMission(new Mission(quest, String.valueOf(slot - 36), MissionType.valueOf("SUBMIT"), EntityType.PLAYER, "", new ItemStack(Material.STONE), p.getLocation().getBlock().getLocation(), 1, null, 0, false, 0, false, "Hey there! Do this Quest."));
 						if(changes.sendEvent())
 							changes.apply();
 						openQuestEditor(p, quest);
@@ -1245,7 +1252,7 @@ public class QuestBook {
 	}
 
 	@SuppressWarnings("deprecation")
-	public static void openQuestMissionEditor(Player p, final QuestMission mission) {
+	public static void openQuestMissionEditor(Player p, final Mission mission) {
 		final ChestMenu menu = new ChestMenu("§3Quest Editor");
 		menu.addMenuOpeningHandler(new MenuOpeningHandler() {
 			
@@ -1312,7 +1319,7 @@ public class QuestBook {
 		}
 		
 		case ITEM: {
-			ItemStack item = mission.getMissionItem();
+			ItemStack item = mission.getMissionItem().clone();
 			ItemMeta im = item.getItemMeta();
 			im.setLore(Arrays.asList("", "§e> Click to change the Item to", "§ethe Item you are currently holding"));
 			item.setItemMeta(im);
@@ -1442,7 +1449,7 @@ public class QuestBook {
 				@Override
 				public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
 					QuestWorld.getInstance().storeInput(p.getUniqueId(), new Input(InputType.LOCATION_NAME, mission));
-					QuestWorld.getInstance().getLocalization().sendTranslation(p, "editor.rename-location", true);
+					PlayerTools.sendTranslation(p, true, Translation.location_rename);
 					p.closeInventory();
 					return false;
 				}
@@ -1466,13 +1473,13 @@ public class QuestBook {
 		}
 		
 		case CITIZENS_INTERACT: {
-			menu.addItem(10, new CustomItem(new MaterialData(Material.NAME_TAG), "§dCitizen §f#" + mission.getCitizenID(), "§7Name: §r" + (mission.getCitizen() != null ? mission.getCitizen().getName(): "§4N/A"), "", "§e> Click to change the selected NPC"));
+			menu.addItem(10, new CustomItem(new MaterialData(Material.NAME_TAG), "§dCitizen §f#" + mission.getCustomInt(), "§7Name: §r" + (mission.getCitizen() != null ? mission.getCitizen().getName(): "§4N/A"), "", "§e> Click to change the selected NPC"));
 			menu.addMenuClickHandler(10, new MenuClickHandler() {
 				
 				@Override
 				public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-					QuestWorld.getInstance().getLocalization().sendTranslation(p, "editor.link-citizen", true);
-					CitizensListener.link.put(p.getUniqueId(), mission);
+					PlayerTools.sendTranslation(p, true, Translation.citizen_l);
+					CitizensHook.link.put(p.getUniqueId(), mission);
 					p.closeInventory();
 					return false;
 				}
@@ -1481,13 +1488,13 @@ public class QuestBook {
 		}
 		
 		case CITIZENS_KILL: {
-			menu.addItem(10, new CustomItem(new MaterialData(Material.NAME_TAG), "§dCitizen §f#" + mission.getCitizenID(), "§7Name: §r" + (mission.getCitizen() != null ? mission.getCitizen().getName(): "§4N/A"), "", "§e> Click to change the selected NPC"));
+			menu.addItem(10, new CustomItem(new MaterialData(Material.NAME_TAG), "§dCitizen §f#" + mission.getCustomInt(), "§7Name: §r" + (mission.getCitizen() != null ? mission.getCitizen().getName(): "§4N/A"), "", "§e> Click to change the selected NPC"));
 			menu.addMenuClickHandler(10, new MenuClickHandler() {
 				
 				@Override
 				public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-					QuestWorld.getInstance().getLocalization().sendTranslation(p, "editor.link-citizen", true);
-					CitizensListener.link.put(p.getUniqueId(), mission);
+					PlayerTools.sendTranslation(p, true, Translation.citizen_l);
+					CitizensHook.link.put(p.getUniqueId(), mission);
 					p.closeInventory();
 					return false;
 				}
@@ -1511,19 +1518,19 @@ public class QuestBook {
 		}
 		
 		case CITIZENS_ITEM: {
-			menu.addItem(10, new CustomItem(new MaterialData(Material.NAME_TAG), "§dCitizen §f#" + mission.getCitizenID(), "§7Name: §r" + (mission.getCitizen() != null ? mission.getCitizen().getName(): "§4N/A"), "", "§e> Click to change the selected NPC"));
+			menu.addItem(10, new CustomItem(new MaterialData(Material.NAME_TAG), "§dCitizen §f#" + mission.getCustomInt(), "§7Name: §r" + (mission.getCitizen() != null ? mission.getCitizen().getName(): "§4N/A"), "", "§e> Click to change the selected NPC"));
 			menu.addMenuClickHandler(10, new MenuClickHandler() {
 				
 				@Override
 				public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-					QuestWorld.getInstance().getLocalization().sendTranslation(p, "editor.link-citizen", true);
-					CitizensListener.link.put(p.getUniqueId(), mission);
+					PlayerTools.sendTranslation(p, true, Translation.citizen_l);
+					CitizensHook.link.put(p.getUniqueId(), mission);
 					p.closeInventory();
 					return false;
 				}
 			});
 			
-			ItemStack item = mission.getDisplayItem();
+			ItemStack item = mission.getDisplayItem().clone();
 			ItemMeta im = item.getItemMeta();
 			im.setLore(Arrays.asList("", "§e> Click to change the Item to", "§ethe Item you are currently holding"));
 			item.setItemMeta(im);
@@ -1569,7 +1576,7 @@ public class QuestBook {
 				@Override
 				public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
 					QuestWorld.getInstance().storeInput(p.getUniqueId(), new Input(InputType.KILL_NAMED, mission));
-					QuestWorld.getInstance().getLocalization().sendTranslation(p, "editor.rename-kill-mission", true);
+					PlayerTools.sendTranslation(p, true, Translation.killmission_rename);
 					p.closeInventory();
 					return false;
 				}
@@ -1591,7 +1598,7 @@ public class QuestBook {
 				
 				@Override
 				public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-					QuestWorld.getInstance().getLocalization().sendTranslation(p, "editor.misssion-description", true);
+					PlayerTools.sendTranslation(p, true, Translation.mission_desc);
 					MenuHelper.awaitChatInput(p, new ChatHandler() {
 						
 						@Override
@@ -1688,13 +1695,13 @@ public class QuestBook {
 				}
 				else {
 					p.closeInventory();
-					QuestWorld.getInstance().getLocalization().sendTranslation(p, "editor.await-mission-name", true);
+					PlayerTools.sendTranslation(p, true, Translation.mission_await);
 					MenuHelper.awaitChatInput(p, new ChatHandler() {
 						
 						@Override
 						public boolean onChat(Player p, String message) {
 							mission.setCustomName(message);
-							QuestWorld.getInstance().getLocalization().sendTranslation(p, "editor.edit-mission-name", true);
+							PlayerTools.sendTranslation(p, true, Translation.mission_name);
 							openQuestMissionEditor(p, mission);
 							return false;
 						}

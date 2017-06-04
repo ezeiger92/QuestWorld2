@@ -4,6 +4,6 @@ import java.util.UUID;
 
 public interface QuestOfflineListener {
 	
-	void onProgressCheck(UUID uuid, QuestManager manager, QuestMission task, Object event);
+	void onProgressCheck(UUID uuid, QuestManager manager, Mission task, Object event);
 
 }

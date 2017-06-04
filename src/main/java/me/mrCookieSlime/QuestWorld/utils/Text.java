@@ -100,4 +100,11 @@ public class Text {
 		
 		return sb.toString();
 	}
+	
+	public static String timeFromNum(long minutes) {
+		long hours = minutes / 60;
+		minutes = minutes - hours;
+		
+		return hours + "h " + minutes + "m";
+	}
 }

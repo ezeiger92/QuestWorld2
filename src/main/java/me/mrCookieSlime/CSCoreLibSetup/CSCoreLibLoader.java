@@ -16,6 +16,8 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
+import me.mrCookieSlime.QuestWorld.utils.Log;
+
 public class CSCoreLibLoader {
 	
 	Plugin plugin;
@@ -38,20 +40,20 @@ public class CSCoreLibLoader {
 				
 				@Override
 				public void run() {
-					System.err.println(" ");
-					System.err.println("#################### - FATAL ERROR - ####################");
-					System.err.println(" ");
-					System.err.println(plugin.getName() + " could not be properly installed!");
-					System.err.println("It appears that you have not installed CS-CoreLib");
-					System.err.println("And because of that, CS-CoreLib is now going to be");
-					System.err.println("downloaded and installed.");
-					System.err.println("But for the time being " + plugin.getName() + " will remain disabled");
-					System.err.println("After the installation process has finished,");
-					System.err.println("you will be asked to restart your Server.");
-					System.err.println("- mrCookieSlime");
-					System.err.println(" ");
-					System.err.println("#################### - FATAL ERROR - ####################");
-					System.err.println(" ");
+					Log.severe(" ");
+					Log.severe("#################### - FATAL ERROR - ####################");
+					Log.severe(" ");
+					Log.severe(plugin.getName() + " could not be properly installed!");
+					Log.severe("It appears that you have not installed CS-CoreLib");
+					Log.severe("And because of that, CS-CoreLib is now going to be");
+					Log.severe("downloaded and installed.");
+					Log.severe("But for the time being " + plugin.getName() + " will remain disabled");
+					Log.severe("After the installation process has finished,");
+					Log.severe("you will be asked to restart your Server.");
+					Log.severe("- mrCookieSlime");
+					Log.severe(" ");
+					Log.severe("#################### - FATAL ERROR - ####################");
+					Log.severe(" ");
 					if (connect()) install();
 				}
 			}, 0L);

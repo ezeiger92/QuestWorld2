@@ -10,11 +10,12 @@ import org.bukkit.material.MaterialData;
 
 import me.mrCookieSlime.CSCoreLibPlugin.general.String.StringUtils;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
-import me.mrCookieSlime.QuestWorld.quests.MissionType;
+import me.mrCookieSlime.QuestWorld.api.MissionType;
+import me.mrCookieSlime.QuestWorld.api.interfaces.IMission;
 import me.mrCookieSlime.QuestWorld.quests.QuestChecker;
 import me.mrCookieSlime.QuestWorld.quests.QuestListener;
 import me.mrCookieSlime.QuestWorld.quests.QuestManager;
-import me.mrCookieSlime.QuestWorld.quests.QuestMission;
+import me.mrCookieSlime.QuestWorld.quests.Mission;
 
 public class CraftMission extends MissionType implements Listener {
 	public CraftMission() {
@@ -22,12 +23,12 @@ public class CraftMission extends MissionType implements Listener {
 	}
 	
 	@Override
-	public ItemStack getDisplayItem(QuestMission qm) {
-		return qm.getMissionItem().clone();
+	public ItemStack displayItem(IMission instance) {
+		return instance.getMissionItem().clone();
 	}
 	
 	@Override
-	protected String formatMissionDisplay(QuestMission instance) {
+	protected String displayString(IMission instance) {
 		return "&7Craft " + instance.getAmount() + "x " + StringUtils.formatItemName(instance.getDisplayItem(), false);
 	}
 
@@ -36,7 +37,7 @@ public class CraftMission extends MissionType implements Listener {
 		QuestChecker.check((Player) e.getWhoClicked(), e, "CRAFT", new QuestListener() {
 			
 			@Override
-			public void onProgressCheck(Player p, QuestManager manager, QuestMission task, Object event) {
+			public void onProgressCheck(Player p, QuestManager manager, Mission task, Object event) {
 				if (QuestWorld.getInstance().isItemSimiliar(e.getRecipe().getResult(), task.getMissionItem())) manager.addProgress(task, e.getCurrentItem().getAmount());
 			}
 		});

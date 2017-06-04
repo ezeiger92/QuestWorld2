@@ -9,6 +9,7 @@ import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.InvUtils;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.Item.CustomItem;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Player.PlayerInventory;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
+import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.utils.Text;
 
 import org.bukkit.Bukkit;
@@ -19,14 +20,14 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
 
-public class Quest extends QWObject {
+public class Quest extends QuestingObject {
 	
 	Category category;
 	int id;
 	long cooldown;
 	String name;
 	ItemStack item;
-	List<QuestMission> tasks;
+	List<Mission> tasks;
 	
 	List<String> commands = new ArrayList<String>();
 	List<String> world_blacklist = new ArrayList<String>();
@@ -51,7 +52,7 @@ public class Quest extends QWObject {
 		dest.name     = name;
 		dest.item     = item.clone();
 		
-		dest.tasks = new ArrayList<QuestMission>();
+		dest.tasks = new ArrayList<Mission>();
 		dest.tasks.addAll(tasks);
 		dest.commands = new ArrayList<String>();
 		dest.commands.addAll(commands);
@@ -107,7 +108,7 @@ public class Quest extends QWObject {
 		this.name = Text.colorize(name);
 		this.item = new CustomItem(new MaterialData(Material.BOOK_AND_QUILL).toItemStack(1), name);
 		
-		this.tasks = new ArrayList<QuestMission>();
+		this.tasks = new ArrayList<Mission>();
 		this.rewards = new ArrayList<ItemStack>();
 		this.money = 0;
 		this.xp = 0;
@@ -130,14 +131,14 @@ public class Quest extends QWObject {
 		}
 	}
 
-	private List<QuestMission> loadMissions(Config cfg) {
-		if (!cfg.contains("missions")) return new ArrayList<QuestMission>();
-		List<QuestMission> missions = new ArrayList<QuestMission>();
+	private List<Mission> loadMissions(Config cfg) {
+		if (!cfg.contains("missions")) return new ArrayList<Mission>();
+		List<Mission> missions = new ArrayList<Mission>();
 		for (String key: cfg.getKeys("missions")) {
 			if (!cfg.contains("missions." + key + ".location.world")) {
 				cfg.setValue("missions." + key + ".location", new Location(Bukkit.getWorlds().get(0), 0, 0, 0));
 				cfg.save();
-				missions.add(new QuestMission(this, key,
+				missions.add(new Mission(this, key,
 						MissionType.valueOf(cfg.getString("missions." + key + ".type")),
 						EntityType.valueOf(cfg.getString("missions." + key + ".entity")),
 						Text.colorize(cfg.getString("missions." + key + ".name")),
@@ -151,7 +152,7 @@ public class Quest extends QWObject {
 						cfg.getBoolean("missions." + key + ".exclude-spawners"),
 						Text.colorize(cfg.getString("missions." + key + ".lore"))));
 			}
-			else missions.add(new QuestMission(this, key,
+			else missions.add(new Mission(this, key,
 					MissionType.valueOf(cfg.getString("missions." + key + ".type")),
 					EntityType.valueOf(cfg.getString("missions." + key + ".entity")),
 					Text.colorize(cfg.getString("missions." + key + ".name")),
@@ -195,7 +196,7 @@ public class Quest extends QWObject {
 				index++;
 			}
 		}
-		for (QuestMission mission: tasks) {
+		for (Mission mission: tasks) {
 			cfg.setValue("missions." + mission.getID() + ".type", mission.getType().toString());
 			cfg.setValue("missions." + mission.getID() + ".amount", mission.getAmount());
 			cfg.setValue("missions." + mission.getID() + ".item", new ItemStack(mission.getMissionItem()));
@@ -206,7 +207,9 @@ public class Quest extends QWObject {
 			cfg.setValue("missions." + mission.getID() + ".timeframe", mission.getTimeframe());
 			cfg.setValue("missions." + mission.getID() + ".reset-on-death", mission.resetsonDeath());
 			cfg.setValue("missions." + mission.getID() + ".lore", Text.escape(mission.getLore()));
-			cfg.setValue("missions." + mission.getID() + ".citizen", mission.getCitizenID());
+			
+			// TODO move citizen tag to custom_int tag
+			cfg.setValue("missions." + mission.getID() + ".citizen", mission.getCustomInt());
 			cfg.setValue("missions." + mission.getID() + ".exclude-spawners", mission.acceptsSpawners());
 		}
 		if (parent != null) cfg.setValue("parent", String.valueOf(parent.getCategory().getID() + "-C" + parent.getID()));
@@ -231,9 +234,9 @@ public class Quest extends QWObject {
 		return QuestWorld.getInstance().getManager(p).getStatus(this);
 	}
 	
-	public List<QuestMission> getFinishedTasks(Player p) {
-		List<QuestMission> list = new ArrayList<QuestMission>();
-		for (QuestMission task: getMissions()) {
+	public List<Mission> getFinishedTasks(Player p) {
+		List<Mission> list = new ArrayList<Mission>();
+		for (Mission task: getMissions()) {
 			if (QuestWorld.getInstance().getManager(p).hasCompletedTask(task)) list.add(task);
 		}
 		return list;
@@ -267,7 +270,7 @@ public class Quest extends QWObject {
 		return Text.colorize(progress.toString());
 	}
 
-	public List<QuestMission> getMissions() {
+	public List<Mission> getMissions() {
 		return tasks;
 	}
 	
@@ -316,16 +319,16 @@ public class Quest extends QWObject {
 		return rewards;
 	}
 	
-	public QuestMission getMission(int i) {
+	public Mission getMission(int i) {
 		return tasks.size() > i ? tasks.get(i): null;
 	}
 	
-	public void addMission(QuestMission mission) {
+	public void addMission(Mission mission) {
 		updateLastModified();
 		this.tasks.add(mission);
 	}
 	
-	public void removeMission(QuestMission mission) {
+	public void removeMission(Mission mission) {
 		updateLastModified();
 		this.tasks.remove(mission);
 	}

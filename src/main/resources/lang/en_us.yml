@@ -1,0 +1,56 @@
+---
+defaults:
+    category.name: New Category
+    quest.name:    New Quest
+    mission.name:  New Mission
+    prefix: '&4Quest World &7> '
+
+editor:
+  category.created:     Successfully created a category called %name%
+  category.deleted:     Successfully deleted the category %name%
+  category.name-change: Please type a new category name for %name% (color codes are supported)
+  category.name-set:    Successfully renamed category %name_old% to %name%
+  category.perm-change: Please type in a new permission node for %name% (use "none" for no node)
+  category.perm-set:    Successfully set permission for %name% to %perm%
+  quest.created:     Successfully created a category called %name%
+  quest.deleted:     Successfully deleted the quest %name%
+  quest.name-change: Please type a new quest name for %name% (color codes are supported)
+  quest.name-set:    Successfully renamed quest %name_old% to %name%
+  quest.perm-change: Please type in a new permission node for %name% (use "none" for no node)
+  quest.perm-set:    Successfully set permission for %name% to %perm%
+  
+  renamed-citizen: PLACEHOLDER renamed citizen
+  rename-kill-mission: Please type in the Name of the Mob/Player you want to be killed (Color Code supported)
+  renamed-kill-type: Successfully specified a Name for your Mob/Player
+  link-citizen: Please right click the NPC you want to link with this Quest
+  link-citizen-finished: Successfully linked this NPC
+  rename-location: |
+    Please type in a Name for your Location
+    Example: Awesomeville
+  renamed-location: Successfully given this Location a Name
+  add-dialogue: Please type in the Message you want to add to the Dialogue! You can do this multiple times, simply type exit() when you are done! You can also add Commands! Just type in your command (ex. /say hello) and it will be executed within the Dialogue, use <player> for the Player''s Username
+  set-dialogue: |
+    Successfully set a Dialogue!
+    If you want to change something you can edit the Dialogue at any time at:
+    %path%
+  edit-mission-name:    Successfully edited the Mission''s Display Name
+  await-mission-name:   Please type in a Custom Name for this Mission
+  misssion-description: Please type in a Description for your Quest
+  
+party:
+  full:       You cannot have more than 4 Party Members!
+  invite:     Please type in the Name of the Player you want to invite
+  invited:    Successfully invited %name% to your Party
+  invitation: '%name% has invited you to join their Party'
+  not-online: Player %name% is not online
+  join:       '%name% has accepted your Invitation and joined your Party'
+  joined:     You are now a member of %name%''s Party!
+  kicked:     '%name% has been kicked from the Party'
+  already:    '%name% is already a Member of a Party'
+
+notifications:
+  task-completed: |
+    ! You have completed a Task for the Quest %quest%
+    ! Check your Quest Book for more Info
+  task-failed-timeframe:  ! You failed to complete a Task for the Quest %quest% within the given Timeframe
+  task-timeframe-started: ! You have %time% of time to %task%

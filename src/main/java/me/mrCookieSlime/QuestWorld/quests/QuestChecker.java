@@ -17,7 +17,7 @@ public class QuestChecker {
 			if (category.isWorldEnabled(p.getWorld().getName())) {
 				for (Quest quest: category.getQuests()) {
 					if (manager.getStatus(quest).equals(QuestStatus.AVAILABLE) && quest.isWorldEnabled(p.getWorld().getName())) {
-						for (QuestMission task: quest.getMissions()) {
+						for (Mission task: quest.getMissions()) {
 							if (!manager.hasCompletedTask(task) && manager.hasUnlockedTask(task)) {
 								if (task.getType().getID().equals(type)) listener.onProgressCheck(p, manager, task, event);
 							}
@@ -33,7 +33,7 @@ public class QuestChecker {
 		for (Category category: QuestWorld.getInstance().getCategories()) {
 			for (Quest quest: category.getQuests()) {
 				if (manager.getStatus(quest).equals(QuestStatus.AVAILABLE)) {
-					for (QuestMission task: quest.getMissions()) {
+					for (Mission task: quest.getMissions()) {
 						if (!manager.hasCompletedTask(task) && manager.hasUnlockedTask(task)) {
 							if (task.getType().getID().equals(type)) listener.onProgressCheck(uuid, manager, task, event);
 						}

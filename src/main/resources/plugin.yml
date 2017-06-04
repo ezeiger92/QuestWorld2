@@ -4,7 +4,7 @@ author: mrCookieSlime
 website: http://mrCookieSlime.github.io
 
 main: me.mrCookieSlime.QuestWorld.QuestWorld
-softdepend: [CS-CoreLib, Vault, Citizens, Votifier, ChatReaction, ASkyBlock]
+softdepend: [CS-CoreLib, Vault]
 
 commands:
   quests:

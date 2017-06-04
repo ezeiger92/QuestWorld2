@@ -8,11 +8,12 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
 
-import me.mrCookieSlime.QuestWorld.quests.MissionType;
+import me.mrCookieSlime.QuestWorld.api.MissionType;
+import me.mrCookieSlime.QuestWorld.api.interfaces.IMission;
 import me.mrCookieSlime.QuestWorld.quests.QuestChecker;
 import me.mrCookieSlime.QuestWorld.quests.QuestListener;
 import me.mrCookieSlime.QuestWorld.quests.QuestManager;
-import me.mrCookieSlime.QuestWorld.quests.QuestMission;
+import me.mrCookieSlime.QuestWorld.quests.Mission;
 import me.mrCookieSlime.QuestWorld.utils.ItemBuilder;
 
 public class JoinMission extends MissionType implements Listener {
@@ -22,12 +23,12 @@ public class JoinMission extends MissionType implements Listener {
 	}
 	
 	@Override
-	public ItemStack getDisplayItem(QuestMission qm) {
+	public ItemStack displayItem(IMission instance) {
 		return new ItemStack(Material.WATCH);
 	}
 	
 	@Override
-	protected String formatMissionDisplay(QuestMission instance) {
+	protected String displayString(IMission instance) {
 		return "&7Join " + instance.getAmount() + " times";
 	}
 	
@@ -36,7 +37,7 @@ public class JoinMission extends MissionType implements Listener {
 		QuestChecker.check(e.getPlayer(), e, "JOIN", new QuestListener() {
 			
 			@Override
-			public void onProgressCheck(Player p, QuestManager manager, QuestMission task, Object event) {
+			public void onProgressCheck(Player p, QuestManager manager, Mission task, Object event) {
 				manager.addProgress(task, 1);
 			}
 		});

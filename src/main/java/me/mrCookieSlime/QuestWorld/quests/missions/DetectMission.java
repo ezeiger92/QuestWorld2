@@ -5,8 +5,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
 
 import me.mrCookieSlime.CSCoreLibPlugin.general.String.StringUtils;
-import me.mrCookieSlime.QuestWorld.quests.MissionType;
-import me.mrCookieSlime.QuestWorld.quests.QuestMission;
+import me.mrCookieSlime.QuestWorld.api.MissionType;
+import me.mrCookieSlime.QuestWorld.api.interfaces.IMission;
 
 public class DetectMission extends MissionType {
 	public DetectMission() {
@@ -14,12 +14,12 @@ public class DetectMission extends MissionType {
 	}
 	
 	@Override
-	public ItemStack getDisplayItem(QuestMission qm) {
-		return qm.getMissionItem().clone();
+	public ItemStack displayItem(IMission instance) {
+		return instance.getMissionItem().clone();
 	}
 	
 	@Override
-	protected String formatMissionDisplay(QuestMission instance) {
+	protected String displayString(IMission instance) {
 		return "&7Own " + instance.getAmount() + "x " + StringUtils.formatItemName(instance.getDisplayItem(), false);
 	}
 }

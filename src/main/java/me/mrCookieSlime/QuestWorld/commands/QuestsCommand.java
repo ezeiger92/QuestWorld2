@@ -3,9 +3,11 @@ package me.mrCookieSlime.QuestWorld.commands;
 import java.util.UUID;
 
 import me.mrCookieSlime.QuestWorld.QuestWorld;
+import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.quests.Category;
 import me.mrCookieSlime.QuestWorld.quests.Party;
 import me.mrCookieSlime.QuestWorld.quests.QuestBook;
+import me.mrCookieSlime.QuestWorld.utils.PlayerTools;
 import me.mrCookieSlime.QuestWorld.utils.Text;
 
 import org.bukkit.Bukkit;
@@ -25,7 +27,7 @@ public class QuestsCommand implements CommandExecutor {
 					Party party = QuestWorld.getInstance().getManager(Bukkit.getOfflinePlayer(UUID.fromString(args[1]))).getParty();
 					if (party != null && party.hasInvited((Player) sender)) {
 						if (party.getPlayers().size() >= QuestWorld.getInstance().getCfg().getInt("party.max-members")) {
-							QuestWorld.getInstance().getLocalization().sendTranslation(sender, "party.full", true);
+							PlayerTools.sendTranslation(sender, true, Translation.party_errorfull);
 						}
 						else party.addPlayer((Player) sender);
 					}
