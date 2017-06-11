@@ -50,7 +50,8 @@ public class PlayerTools {
 	private static class Reflector implements IReflector {
 		@Override
 		public ItemStack pickBlock(Block block) throws Exception {
-			World w = block.getWorld();
+			// Need main world, maybe there's a better way than this
+			World w = Bukkit.getWorlds().get(0);
 			Chunk c = block.getChunk();
 			Class<?> serverClass = Bukkit.getServer().getClass();
 			String CBS = serverClass.getName().replaceFirst("[^.]+$", "");
