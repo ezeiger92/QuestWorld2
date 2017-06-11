@@ -40,7 +40,7 @@ public class PlayerTools {
 		if(prefixed)
 			text = QuestWorld.translate(Translation.default_prefix) + text;
 		
-		p.sendMessage(text);
+		p.sendMessage(Text.colorize(text));
 	}
 	
 	private interface IReflector {

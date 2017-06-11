@@ -32,8 +32,9 @@ public enum Translation implements Translator {
 	
 	dialog_add("editor.add-dialogue"),
 	dialog_set("editor.set-dialogue", "path"),
-	
+	@Deprecated
 	citizen_l("editor.link-citizen"),
+	@Deprecated
 	citizen_link("editor.link-citizen-finished"),
 	
 	mission_desc("editor.misssion-description"),

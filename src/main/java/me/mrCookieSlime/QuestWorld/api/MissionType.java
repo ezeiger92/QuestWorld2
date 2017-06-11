@@ -7,6 +7,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
 
 public abstract class MissionType {
+	@Deprecated
 	public enum SubmissionType {
 		ITEM,
 		ENTITY, 
@@ -71,10 +72,12 @@ public abstract class MissionType {
 		return result;
 	}
 
+	@Deprecated
 	public String getID() {
 		return id;
 	}
 	
+	@Deprecated
 	public SubmissionType getSubmissionType() {
 		return type;
 	}
@@ -94,5 +97,14 @@ public abstract class MissionType {
 
 	public boolean isTicker() {
 		return this.ticking;
+	}
+	
+	@Deprecated
+	protected void setId(String id) {
+		this.id = id;
+	}
+	
+	protected void setSelectorMaterial(MaterialData material) {
+		selectorItem = material;
 	}
 }

@@ -20,6 +20,8 @@ public class GuideBook {
 	public static boolean isSimilar(ItemStack stack) {
 		if(instance == null)
 			instance = new GuideBook();
+		if(stack == null)
+			return false;
 		
 		return stack.isSimilar(instance.guide);
 	}

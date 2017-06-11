@@ -15,7 +15,7 @@ import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.api.MissionType.SubmissionType;
-import me.mrCookieSlime.QuestWorld.api.interfaces.IMission;
+import me.mrCookieSlime.QuestWorld.api.interfaces.IMissionWrite;
 import me.mrCookieSlime.QuestWorld.utils.PlayerTools;
 import me.mrCookieSlime.QuestWorld.utils.Text;
 import net.citizensnpcs.api.CitizensAPI;
@@ -26,7 +26,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-public class Mission extends QuestingObject implements IMission {
+public class Mission extends QuestingObject implements IMissionWrite {
 	
 	Quest quest;
 	MissionType type;
