@@ -72,15 +72,15 @@ public class EditorCommand implements CommandExecutor {
 			sender.sendMessage(Text.colorize("&7Saved all quests to disk"));
 		}
 		else if(param.equals("reload")) {
-			if(args.length >= 1 && args[1].equalsIgnoreCase("config")) {
+			if(args.length > 1 && args[1].equalsIgnoreCase("config")) {
 				QuestWorld.getInstance().reloadQWConfig();
 				sender.sendMessage(Text.colorize("&7Reloaded config from disk"));
 			}
-			else if(args.length >= 1 && args[1].equalsIgnoreCase("quests")) {
+			else if(args.length > 1 && args[1].equalsIgnoreCase("quests")) {
 				QuestWorld.getInstance().reloadQuests();
 				sender.sendMessage(Text.colorize("&7Reloaded all quests from disk"));
 			}
-			else if(args.length >= 1 && args[1].equalsIgnoreCase("all")) {
+			else if(args.length > 1 && args[1].equalsIgnoreCase("all")) {
 				QuestWorld.getInstance().reloadQWConfig();
 				QuestWorld.getInstance().reloadQuests();
 				sender.sendMessage(Text.colorize("&7Reloaded config and all quests from disk"));

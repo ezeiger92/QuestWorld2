@@ -11,14 +11,16 @@ public class VotifierHook extends QuestExtension {
 		return new String[] { "ChatReaction" };
 	}
 
-	MissionType mission;
+	MissionType[] missions = null;
 	@Override
 	public void initialize(Plugin parent) {
-		mission = new VoteMission();
+		missions = new MissionType[] {
+			new VoteMission()
+		}; 
 	}
 
 	@Override
 	public MissionType[] getMissions() {
-		return new MissionType[] { mission };
+		return missions;
 	}
 }

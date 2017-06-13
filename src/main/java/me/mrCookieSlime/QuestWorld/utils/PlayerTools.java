@@ -82,8 +82,7 @@ public class PlayerTools {
 	private static class Reflector implements IReflector {
 		@Override
 		public ItemStack pickBlock(Block block) throws Exception {
-			// Need main world, maybe there's a better way than this
-			World w = Bukkit.getWorlds().get(0);
+			World w = block.getWorld();
 			Chunk c = block.getChunk();
 			Class<?> serverClass = Bukkit.getServer().getClass();
 			String CBS = serverClass.getName().replaceFirst("[^.]+$", "");
@@ -97,11 +96,11 @@ public class PlayerTools {
 					.newInstance(block.getX(), block.getY(), block.getZ());
 			Object iblockdata = chunk.getClass().getMethod("getBlockData", blockposition.getClass()).invoke(chunk, blockposition);
 			
-			Class.forName(CBS + "util.CraftMagicNumbers");
+			Class<?> worldClass = Class.forName(NMS + "World");
 			@SuppressWarnings("deprecation")
 			Object rawblock = Bukkit.getUnsafe().getClass().getMethod("getBlock", Block.class).invoke(null, block);
 			Class<?> iblockclass = Class.forName(NMS + "IBlockData");
-			Object rawitemstack = rawblock.getClass().getMethod("a", world.getClass().getSuperclass(), blockposition.getClass(), iblockclass)
+			Object rawitemstack = rawblock.getClass().getMethod("a", worldClass, blockposition.getClass(), iblockclass)
 				.invoke(rawblock, world, blockposition, iblockdata);
 
 			return (ItemStack)Class.forName(CBS + "inventory.CraftItemStack").getMethod("asCraftMirror", rawitemstack.getClass()).invoke(null, rawitemstack);
@@ -138,7 +137,13 @@ public class PlayerTools {
 				Log.severe("Lost ability to reflect \"pickBlock\" method when we previously could!");
 				e.printStackTrace();
 				Log.severe("Block was: " + block.getState().getData().toItemStack(1).serialize().toString());
-				Log.severe("I did not know this was possible, falling back to MaterialData comparison this time");
+				
+				String data = "";
+				for(World w : Bukkit.getWorlds()) {
+					data += w.getName() + " [" + w.getEnvironment().toString() + "] ";
+				}
+				
+				Log.severe("Worlds: " + data);
 			}
 		
 		if(res == null)
