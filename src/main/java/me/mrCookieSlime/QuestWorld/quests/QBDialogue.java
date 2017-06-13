@@ -1,6 +1,7 @@
 package me.mrCookieSlime.QuestWorld.quests;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import me.mrCookieSlime.CSCoreLibPlugin.general.Chat.TellRawMessage;
@@ -18,6 +19,7 @@ import me.mrCookieSlime.QuestWorld.utils.Text;
 
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
+import org.bukkit.SkullType;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -160,14 +162,18 @@ public class QBDialogue {
 			}
 		});
 		
-		ItemBuilder spawnEgg = new ItemBuilder(Material.MONSTER_EGG).lore("", "&e> Click to select");
+		String[] lore = {"", "&e> Click to select"};
 		
 		int start = page*45;
 		int end = start+45;
 		for(int index = 0, iter = start; iter < end && iter < entities.size(); ++iter, ++index)
 		{
 			EntityType entity = entities.get(iter);
-			menu.addItem(index, spawnEgg.mob(entity).display("&7Entity Type: &r" + Text.niceName(entity.name())).getNew());
+			ItemBuilder builder = new ItemBuilder(EntityTools.getEgg(entity))
+					.lore(lore)
+					.display("&7Entity Type: &r" + Text.niceName(entity.name()));
+			
+			menu.addItem(index, builder.get());
 			menu.addMenuClickHandler(index, new MenuClickHandler() {
 				
 				@Override

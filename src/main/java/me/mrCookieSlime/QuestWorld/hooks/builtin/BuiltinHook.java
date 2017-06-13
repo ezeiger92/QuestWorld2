@@ -5,7 +5,6 @@ import org.bukkit.plugin.Plugin;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.QuestExtension;
 import me.mrCookieSlime.QuestWorld.listeners.TaskListener;
-import me.mrCookieSlime.QuestWorld.utils.Log;
 
 public class BuiltinHook extends QuestExtension {
 	private MissionType[] missions;
@@ -17,7 +16,6 @@ public class BuiltinHook extends QuestExtension {
 
 	@Override
 	public void initialize(Plugin parent) {
-		Log.info("Creating built-in missions");
 		missions = new MissionType[] {
 			new CraftMission(),
 			new SubmitMission(),

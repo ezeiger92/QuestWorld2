@@ -14,7 +14,6 @@ import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.MenuHelper.ChatHandler
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.Translation;
-import me.mrCookieSlime.QuestWorld.api.MissionType.SubmissionType;
 import me.mrCookieSlime.QuestWorld.api.interfaces.IMissionWrite;
 import me.mrCookieSlime.QuestWorld.utils.PlayerTools;
 import me.mrCookieSlime.QuestWorld.utils.Text;
@@ -41,11 +40,11 @@ public class Mission extends QuestingObject implements IMissionWrite {
 	boolean deathReset;
 	String lore;
 	int custom_int;
-	boolean spawners;
+	boolean spawnersAllowed;
 	
 	List<String> dialogue = new ArrayList<String>();
 	
-	public Mission(Quest quest, String id, MissionType type, EntityType entity, String name, ItemStack item, Location location, int amount, String displayName, long timeframe, boolean deathReset, int custom_int, boolean spawners, String lore) {
+	public Mission(Quest quest, String id, MissionType type, EntityType entity, String name, ItemStack item, Location location, int amount, String displayName, long timeframe, boolean deathReset, int custom_int, boolean spawnersAllowed, String lore) {
 		this.quest = quest;
 		this.id = id;
 		this.type = type;
@@ -59,7 +58,7 @@ public class Mission extends QuestingObject implements IMissionWrite {
 		this.custom_int = custom_int;
 		this.deathReset = deathReset;
 		this.lore = lore == null ? "": lore;
-		this.spawners = spawners;
+		this.spawnersAllowed = spawnersAllowed;
 
 		File file = new File("plugins/QuestWorld/dialogues/" + quest.getCategory().getID() + "+" + quest.getID() + "+" + getID() + ".txt");
 		if (file.exists()) {
@@ -76,6 +75,9 @@ public class Mission extends QuestingObject implements IMissionWrite {
 		}
 		
 		if (this.name == null) this.name = "";
+		
+		// Repair any quests that would have been broken by updates, namely location quests
+		type.attemptUpgrade(this);
 	}
 	
 	public String getID() {
@@ -148,38 +150,37 @@ public class Mission extends QuestingObject implements IMissionWrite {
 		int amount = QuestWorld.getInstance().getManager(p).getProgress(this);
 		int total = this.amount;
 		
-		// Location is a one-time thing, we don't want to display "(1/6)" or something silly
+		// Moved location radius to "customInt" variable, rather than "amount"
+		/* // Location is a one-time thing, we don't want to display "(1/6)" or something silly
 		if(getType().getSubmissionType() == SubmissionType.LOCATION) {
 			total = 1;
-		}
+		}*/
 		
 		// In the event that amount somehow exceeded total, clamp it.
 		// TODO: Although this fix works, this situation shouldn't happen. Find the real cause.
 		amount = Math.min(amount, total);
 		
-		float percentage = Math.round((amount * 100.0f) / total);
+		//float percentage = Math.round((amount * 100.0f) / total);
+		float percentage = amount / (float)total;
 		
-		if (percentage < 16.0F) progress.append("&4");
-		else if (percentage < 32.0F) progress.append("&c");
-		else if (percentage < 48.0F) progress.append("&6");
-		else if (percentage < 64.0F) progress.append("&e");
-		else if (percentage < 80.0F) progress.append("&2");
+		if (percentage < .16f) progress.append("&4");
+		else if (percentage < .32f) progress.append("&c");
+		else if (percentage < .48f) progress.append("&6");
+		else if (percentage < .64f) progress.append("&e");
+		else if (percentage < .80f) progress.append("&2");
 		else progress = progress.append("&a");
 		
 		String bar = "::::::::::::::::::::";
-		int prog = ((int)percentage) / 5;
+		int prog = (int)(percentage * 20.f);
 		int rest = 20 - prog;
 		
 		progress.append(bar.substring(0, prog));
 		
 		progress.append("&7");
 		progress.append(bar.substring(0, rest));
+		progress.append(" - ");
 		
-		if (getType().getSubmissionType().equals(SubmissionType.TIME)) {
-			int remaining = total - amount;
-			progress.append(" - " + percentage + "% (" + (remaining / 60) + "h " + (remaining % 60) + "m remaining)");
-		}
-		else progress.append(" - " + percentage + "% (" + amount + "/" + total + ")");
+		progress.append(getType().progressString(percentage, amount, total));
 		
 		return Text.colorize(progress.toString());
 	}
@@ -314,12 +315,12 @@ public class Mission extends QuestingObject implements IMissionWrite {
 	}
 
 	public boolean acceptsSpawners() {
-		return !spawners;
+		return spawnersAllowed;
 	}
 
 	public void setSpawnerSupport(boolean acceptsSpawners) {
 		quest.updateLastModified();
-		this.spawners = acceptsSpawners;
+		this.spawnersAllowed = acceptsSpawners;
 	}
 
 }

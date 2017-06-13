@@ -51,6 +51,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.PluginCommand;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
@@ -80,7 +81,16 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 	}
 	
 	public QuestWorld() {
+		Log.setupLogger(getLogger());
 		instance = this;
+		
+		// Try to peek at the log-level, for all logging that happens BEFORE onEnable
+		/*File config = new File(getDataFolder(), "config.yml");
+		if(config.isFile()) {
+			String levelStr = YamlConfiguration.loadConfiguration(config).getString("options.log-level", "INFO");
+			Log.setLevel(levelStr);
+		}*/
+		
 		language = new Lang("en_us", getDataFolder(), getClassLoader());
 		language.save();
 		getServer().getServicesManager().register(QuestLoader.class, this, this, ServicePriority.Normal);
@@ -124,17 +134,15 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 			
 			@Override
 			public void run() {
-				Log.info("[Quest World 2] Retrieving Quest Configuration...");
+				Log.fine("[Quest World 2] Retrieving Quest Configuration...");
 				load();
-				int categories = 0, quests = 0;
-				for (Category category: getCategories()) {
-					categories++;
+				int categories = getCategories().size(), quests = 0;
+				for (Category category: getCategories())
 					quests += category.getQuests().size();
-				}
 
 				QuestManager.updateTickingTasks();
-				Log.info("[Quest World 2] Successfully loaded " + categories + " Categories");
-				Log.info("[Quest World 2] Successfully loaded " + quests + " Quests");
+				Log.fine("[Quest World 2] Successfully loaded " + categories + " Categories");
+				Log.fine("[Quest World 2] Successfully loaded " + quests + " Quests");
 			}
 		}, 0L);
 		
@@ -203,6 +211,9 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 		cfg = utils.getConfig();
 		utils.setupMetrics();
 		utils.setupUpdater(77071, getFile());
+		
+		//TODO make logger info (and other) levels actually work
+		//Log.setLevel(cfg.getString("options.log-level"));
 		
 		book = new Config("plugins/QuestWorld/questbook_local.yml");
 		book.setDefaultValue("gui.title", "&e&lQuest Book");
@@ -284,16 +295,13 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 	
 	public void reloadQWConfig() {
 		loadConfigs();
+		language.reload();
 	}
 	
 	public void reloadQuests() {
-		Iterator<Map.Entry<Integer,Category>> categories = this.categories.entrySet().iterator();
-		while(categories.hasNext())
-			categories.remove();
-		
-		Iterator<Map.Entry<UUID, QuestManager>> managers = this.profiles.entrySet().iterator();
-		while(managers.hasNext())
-			managers.remove();
+		// ... I feel like such a noob to have forgotten Map.clear()
+		categories.clear();
+		profiles.clear();
 		
 		load();
 	}
@@ -332,14 +340,14 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 		while(categories.hasNext()) {
 			// Force save for now, change this when 100% sure we've updated all quest/category lastModified times
 			categories.next().getValue().save(true);
-			categories.remove();
 		}
+		this.categories.clear();
 		
 		Iterator<Map.Entry<UUID, QuestManager>> managers = this.profiles.entrySet().iterator();
 		while(managers.hasNext()) {
 			managers.next().getValue().save();
-			managers.remove();
 		}
+		profiles.clear();
 	}
 	
 	public boolean importPreset(String fileName) {
@@ -469,11 +477,11 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 	}
 	
 	private void registerMissionType(MissionType type) {
-		Log.info("Storing mission type: " + type.getID());
+		Log.fine("Registrar - Storing mission: " + type.getID());
 		types.put(type.getID(), type);
 		
 		if(type instanceof Listener) {
-			Log.info("Registering events for: " + type.getID());
+			Log.fine("Registrar - Registering events: " + type.getID());
 			getServer().getPluginManager().registerEvents((Listener)type, this);
 		}
 	}

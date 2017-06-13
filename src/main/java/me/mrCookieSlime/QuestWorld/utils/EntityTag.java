@@ -20,8 +20,9 @@ public class EntityTag {
 	 * @param ent Enum entity
 	 * @return NMS entity name
 	 */
-	@SuppressWarnings("deprecation")
 	public static String entityNameLookup(EntityType ent) {
-		return ent.getName();
+		@SuppressWarnings("deprecation")
+		String name = ent.getName();
+		return name;
 	}
 }

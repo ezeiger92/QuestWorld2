@@ -7,6 +7,7 @@ import org.bukkit.material.MaterialData;
 
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.interfaces.IMission;
+import me.mrCookieSlime.QuestWorld.api.interfaces.IMissionWrite;
 import me.mrCookieSlime.QuestWorld.utils.SubmissionItemResolver;
 
 public class LocationMission extends MissionType {
@@ -27,5 +28,17 @@ public class LocationMission extends MissionType {
 			locStr = String.format("X: %d, Y: %d, Z: %d", loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
 			
 		return "&7Travel to " + locStr;
+	}
+	
+	@Override
+	public boolean attemptUpgrade(IMissionWrite instance) {
+		int oldStyleRadius = instance.getAmount();
+		if(oldStyleRadius > 1) {
+			instance.setAmount(1);
+			instance.setCustomInt(oldStyleRadius);
+			return true;
+		}
+		
+		return false;
 	}
 }

@@ -13,7 +13,6 @@ import me.mrCookieSlime.QuestWorld.quests.Mission;
 import me.mrCookieSlime.QuestWorld.utils.PlayerTools;
 import me.mrCookieSlime.QuestWorld.utils.Text;
 
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -85,8 +84,8 @@ public class EditorListener implements Listener {
 		case PARTY_INVITE: {
 			Party party = (Party) input.getValue();
 			String name = Text.decolor(e.getMessage()).replace("@", "");
-			@SuppressWarnings("deprecation")
-			Player player = Bukkit.getPlayer(name);
+
+			Player player = PlayerTools.getPlayer(name);
 			if (player != null) {
 				if (QuestWorld.getInstance().getManager(player).getParty() == null) {
 					PlayerTools.sendTranslation(e.getPlayer(), true, Translation.party_playeradd, name);

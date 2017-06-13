@@ -149,7 +149,8 @@ public class Quest extends QuestingObject {
 						cfg.contains("missions." + key + ".timeframe") ? cfg.getLong("missions." + key + ".timeframe"): 0,
 						cfg.getBoolean("missions." + key + ".reset-on-death"),
 						cfg.getInt("missions." + key + ".citizen"),
-						cfg.getBoolean("missions." + key + ".exclude-spawners"),
+						// not exclude = allow, what we want
+						!cfg.getBoolean("missions." + key + ".exclude-spawners"),
 						Text.colorize(cfg.getString("missions." + key + ".lore"))));
 			}
 			else missions.add(new Mission(this, key,
@@ -163,7 +164,8 @@ public class Quest extends QuestingObject {
 					cfg.contains("missions." + key + ".timeframe") ? cfg.getLong("missions." + key + ".timeframe"): 0,
 					cfg.getBoolean("missions." + key + ".reset-on-death"),
 					cfg.getInt("missions." + key + ".citizen"),
-					cfg.getBoolean("missions." + key + ".exclude-spawners"),
+					// not exclude = allow, what we want
+					!cfg.getBoolean("missions." + key + ".exclude-spawners"),
 					Text.colorize(cfg.getString("missions." + key + ".lore"))));
 			
 		}
@@ -210,7 +212,7 @@ public class Quest extends QuestingObject {
 			
 			// TODO move citizen tag to custom_int tag
 			cfg.setValue("missions." + mission.getID() + ".citizen", mission.getCustomInt());
-			cfg.setValue("missions." + mission.getID() + ".exclude-spawners", mission.acceptsSpawners());
+			cfg.setValue("missions." + mission.getID() + ".exclude-spawners", !mission.acceptsSpawners());
 		}
 		if (parent != null) cfg.setValue("parent", String.valueOf(parent.getCategory().getID() + "-C" + parent.getID()));
 		else cfg.setValue("parent", null);

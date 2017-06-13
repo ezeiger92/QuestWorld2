@@ -6,6 +6,8 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.CraftingInventory;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import me.mrCookieSlime.QuestWorld.QuestWorld;
@@ -19,6 +21,30 @@ public class PlayerTools {
 		ItemStack result = pi.getItemInMainHand();
 		if(result == null)
 			result = pi.getItemInOffHand();
+		
+		return result;
+	}
+	
+	public static int getMaxCraftAmount(CraftingInventory inv) {
+		int resultCount = inv.getResult().getAmount();
+		int materialCount = Integer.MAX_VALUE;
+		
+		for(ItemStack is : inv.getMatrix())
+			if(is != null && is.getAmount() < materialCount)
+				materialCount = is.getAmount();
+
+		return resultCount * materialCount;
+	}
+	
+	public static int fits(ItemStack stack, Inventory inv) {
+		ItemStack[] contents = inv.getStorageContents();
+		int result = 0;
+		
+		for(ItemStack is : contents)
+			if(is == null)
+				result += stack.getMaxStackSize();
+			else if(is.isSimilar(stack))
+				result += Math.max(stack.getMaxStackSize() - is.getAmount(), 0);
 		
 		return result;
 	}
@@ -41,6 +67,12 @@ public class PlayerTools {
 			text = QuestWorld.translate(Translation.default_prefix) + text;
 		
 		p.sendMessage(Text.colorize(text));
+	}
+	
+	public static Player getPlayer(String name) {
+		@SuppressWarnings("deprecation")
+		Player p = Bukkit.getPlayer(name);
+		return p;
 	}
 	
 	private interface IReflector {

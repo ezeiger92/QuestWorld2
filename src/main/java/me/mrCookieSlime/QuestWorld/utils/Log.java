@@ -3,10 +3,15 @@ package me.mrCookieSlime.QuestWorld.utils;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import me.mrCookieSlime.QuestWorld.QuestWorld;
-
 public class Log {
-	private static Logger activeLogger = QuestWorld.getInstance().getLogger();
+	private static Logger activeLogger = null;
+	
+	public static void setupLogger(Logger logger) {
+		if(activeLogger != null)
+			return;
+		
+		activeLogger = logger;
+	}
 	
 	public static void log(Level level, String message) {
 		activeLogger.log(level, message);

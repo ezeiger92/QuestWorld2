@@ -21,4 +21,10 @@ public class PlayMission extends MissionType {
 	protected String displayString(IMission instance) {
 		return "&7Play for " + (instance.getAmount() / 60) + "h " + (instance.getAmount() % 60) + "m";
 	}
+	
+	@Override
+	public String progressString(float percent, int current, int total) {
+		int remaining = total - current;
+		return Math.round(percent * 100) + "% (" + (remaining / 60) + "h " + (remaining % 60) + "m remaining)";
+	}
 }

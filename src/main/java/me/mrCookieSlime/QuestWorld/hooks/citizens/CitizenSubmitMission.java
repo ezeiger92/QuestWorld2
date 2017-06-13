@@ -18,7 +18,7 @@ public class CitizenSubmitMission extends MissionType {
 	
 	@Override
 	public ItemStack displayItem(IMission instance) {
-		return new ItemBuilder(Material.SKULL_ITEM).skull(SkullType.PLAYER).get();
+		return instance.getMissionItem().clone();
 	}
 	
 	@Override

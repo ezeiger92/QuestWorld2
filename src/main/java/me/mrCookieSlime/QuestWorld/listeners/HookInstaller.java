@@ -24,26 +24,27 @@ public class HookInstaller implements Listener {
 		manager.registerEvents(this, parent);
 	}
 	
-	@SuppressWarnings("deprecation")
 	public void add(QuestExtension hook) {
 		PluginManager manager = parent.getServer().getPluginManager();
 		
-		Log.info("Adding hook " + hook.getName());
+		Log.fine("Installer - Adding hook: " + hook.getName());
 		
 		String[] reqs = hook.getDepends();
 		if(reqs != null)
 			for(int i = 0; i < reqs.length; ++i) {
 				Plugin p = manager.getPlugin(reqs[i]);
-				if(p != null && p.isEnabled())
-					hook.directEnablePlugin(p, i);
+				if(p != null && p.isEnabled()) {
+					@SuppressWarnings("deprecation")
+					boolean res = hook.directEnablePlugin(p, i);
+				}
 			}
 		
 		if(hook.isReady()) {
-			Log.info("Dependencies found, initializing");
+			Log.fine("Installer - Dependencies found: " + hook.getName());
 			initialize(hook);
 		}
 		else {
-			Log.info("Pusing to listener for dependencies");
+			Log.fine("Installer - Listening for dependencies: " + hook.getName());
 			hooks.add(hook);
 		}
 	}
@@ -54,20 +55,22 @@ public class HookInstaller implements Listener {
 	}
 	
 	private void initialize(QuestExtension hook) {
+		Log.fine("Installer - Initializing hook: " + hook.getName());
 		hook.init(parent);
 		//parent.registerHook(hook);
 	}
 	
-	@SuppressWarnings("deprecation")
 	@EventHandler
 	public void onPluginEnable(PluginEnableEvent event) {
 		Iterator<QuestExtension> iterator = hooks.iterator();
 		
 		while(iterator.hasNext()) {
 			QuestExtension hook = iterator.next();
-			hook.enablePlugin(event.getPlugin());
+			@SuppressWarnings("deprecation")
+			boolean res = hook.enablePlugin(event.getPlugin());
+			
 			if(hook.isReady()) {
-				Log.info("Found dependencies for hook " + hook.getName() + ", initializing");
+				Log.fine("Installer - Dependencies loaded: " + hook.getName());
 				initialize(hook);
 				iterator.remove();
 			}

@@ -549,7 +549,7 @@ public class QuestBook {
 								QuestWorld.getSounds().MissionReject().playTo(p);
 						}
 						else if (mission.getType().getID().equals("REACH_LOCATION")) {
-							if (mission.getLocation().getWorld().getName().equals(p.getWorld().getName()) && mission.getLocation().distance(p.getLocation()) < mission.getAmount()) {
+							if (mission.getLocation().getWorld().getName().equals(p.getWorld().getName()) && mission.getLocation().distanceSquared(p.getLocation()) < mission.getCustomInt() * mission.getCustomInt()) {
 								QuestWorld.getInstance().getManager(p).setProgress(mission, 1);
 								openQuest(p, quest, categoryBack, back);
 							}
@@ -621,7 +621,6 @@ public class QuestBook {
 	 */
 	
 	
-	@SuppressWarnings("deprecation")
 	public static void openEditor(Player p) {
 		final ChestMenu menu = new ChestMenu("§3Quest Editor");
 		menu.addMenuOpeningHandler(new MenuOpeningHandler() {
@@ -659,10 +658,16 @@ public class QuestBook {
 				});
 			}
 			else {
-				ItemStack item = new CustomItem(new MaterialData(Material.STAINED_GLASS_PANE, (byte) 14), "&7&o> New Category");
-				ItemMeta im = item.getItemMeta();
-				im.setLore(lore);
-				item.setItemMeta(im);
+				ItemBuilder ib = new ItemBuilder(Material.STAINED_GLASS_PANE)
+						.color(DyeColor.RED)
+						.display("&7&o> New Category")
+						.lore(lore.toArray(new String[lore.size()]));
+				
+				ItemStack item = ib.get();
+				//ItemStack item = new CustomItem(new MaterialData(Material.STAINED_GLASS_PANE, (byte) 14), "&7&o> New Category");
+				//ItemMeta im = item.getItemMeta();
+				//im.setLore(lore);
+				//item.setItemMeta(im);
 				menu.addItem(i, item);
 				menu.addMenuClickHandler(i, new MenuClickHandler() {
 					
@@ -677,10 +682,9 @@ public class QuestBook {
 				});
 			}
 		}
-		menu.build().open(p);
+		menu.open(p);
 	}
 
-	@SuppressWarnings("deprecation")
 	public static void openCategoryQuestEditor(Player p, final Category category) {
 		final ChestMenu menu = new ChestMenu("§3Quest Editor");
 		menu.addMenuOpeningHandler(new MenuOpeningHandler() {
@@ -742,10 +746,9 @@ public class QuestBook {
 				});
 			}
 		}
-		menu.build().open(p);
+		menu.open(p);
 	}
 
-	@SuppressWarnings("deprecation")
 	public static void openCategoryEditor(Player p, final Category category) {
 		final ChestMenu menu = new ChestMenu("§3Quest Editor");
 		CategoryChange changes = new CategoryChange(category);
@@ -867,7 +870,6 @@ public class QuestBook {
 		menu.open(p);
 	}
 
-	@SuppressWarnings("deprecation")
 	public static void openQuestEditor(Player p, final Quest quest) {
 		final ChestMenu menu = new ChestMenu("§3Quest Editor");
 		QuestChange changes = new QuestChange(quest);
@@ -1138,7 +1140,7 @@ public class QuestBook {
 					
 					@Override
 					public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-						changes.addMission(new Mission(quest, String.valueOf(slot - 36), MissionType.valueOf("SUBMIT"), EntityType.PLAYER, "", new ItemStack(Material.STONE), p.getLocation().getBlock().getLocation(), 1, null, 0, false, 0, false, "Hey there! Do this Quest."));
+						changes.addMission(new Mission(quest, String.valueOf(slot - 36), MissionType.valueOf("SUBMIT"), EntityType.PLAYER, "", new ItemStack(Material.STONE), p.getLocation().getBlock().getLocation(), 1, null, 0, false, 0, true, "Hey there! Do this Quest."));
 						if(changes.sendEvent())
 							changes.apply();
 						openQuestEditor(p, quest);
@@ -1252,7 +1254,6 @@ public class QuestBook {
 		menu.open(p);
 	}
 
-	@SuppressWarnings("deprecation")
 	public static void openQuestMissionEditor(Player p, final Mission mission) {
 		final ChestMenu menu = new ChestMenu("§3Quest Editor");
 		menu.addMenuOpeningHandler(new MenuOpeningHandler() {
@@ -1296,7 +1297,7 @@ public class QuestBook {
 				
 				@Override
 				public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-					mission.setSpawnerSupport(mission.acceptsSpawners());
+					mission.setSpawnerSupport(!mission.acceptsSpawners());
 					openQuestMissionEditor(p, mission);
 					return false;
 				}
@@ -1456,16 +1457,18 @@ public class QuestBook {
 				}
 			});
 			
-			menu.addItem(17, new CustomItem(new MaterialData(Material.COMPASS), "§7Radius: §a" + mission.getAmount(), "", "§rLeft Click: §e+1", "§rRight Click: §e-1", "§rShift + Left Click: §e+16", "§rShift + Right Click: §e-16"));
+			menu.addItem(17, new CustomItem(new MaterialData(Material.COMPASS), "§7Radius: §a" + mission.getCustomInt(), "", "§rLeft Click: §e+1", "§rRight Click: §e-1", "§rShift + Left Click: §e+16", "§rShift + Right Click: §e-16"));
 			menu.addMenuClickHandler(17, new MenuClickHandler() {
 				
 				@Override
 				public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-					int amount = mission.getAmount();
+					int amount = mission.getCustomInt();
 					if (action.isRightClicked()) amount = amount - (action.isShiftClicked() ? 16: 1);
 					else amount = amount + (action.isShiftClicked() ? 16: 1);
 					if (amount < 1) amount = 1;
-					mission.setAmount(amount);
+					
+					mission.setCustomInt(amount);
+					//mission.setAmount(amount);
 					openQuestMissionEditor(p, mission);
 					return false;
 				}

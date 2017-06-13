@@ -1,6 +1,5 @@
 package me.mrCookieSlime.QuestWorld.hooks.votifier;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -16,6 +15,7 @@ import me.mrCookieSlime.QuestWorld.api.interfaces.IMission;
 import me.mrCookieSlime.QuestWorld.quests.QuestChecker;
 import me.mrCookieSlime.QuestWorld.quests.QuestListener;
 import me.mrCookieSlime.QuestWorld.quests.QuestManager;
+import me.mrCookieSlime.QuestWorld.utils.PlayerTools;
 import me.mrCookieSlime.QuestWorld.quests.Mission;
 
 public class VoteMission extends MissionType implements Listener {
@@ -35,8 +35,7 @@ public class VoteMission extends MissionType implements Listener {
 	
 	@EventHandler
 	public void onVote(VotifierEvent e) {
-		@SuppressWarnings("deprecation")
-		Player p = Bukkit.getPlayer(e.getVote().getUsername());
+		Player p = PlayerTools.getPlayer(e.getVote().getUsername());
 		if (p != null) {
 			QuestChecker.check(p, e, "VOTIFIER_VOTE", new QuestListener() {
 				

@@ -2,7 +2,6 @@ package me.mrCookieSlime.QuestWorld.utils;
 
 import java.util.Arrays;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
@@ -14,10 +13,12 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.inventory.meta.SpawnEggMeta;
 import org.bukkit.material.Colorable;
+import org.bukkit.material.MaterialData;
+import org.bukkit.material.Wool;
 
 public class ItemBuilder {
-	private ItemStack metaHolderStack;
 	private ItemStack resultStack;
 	
 	/**
@@ -27,7 +28,6 @@ public class ItemBuilder {
      */
 	public ItemBuilder(ItemStack stack) {
 		resultStack = new ItemStack(stack);
-		metaHolderStack = resultStack.clone();
 	}
 	
 	/**
@@ -37,7 +37,6 @@ public class ItemBuilder {
      */
 	public ItemBuilder(Material type) {
 		resultStack = new ItemStack(type);
-		metaHolderStack = resultStack.clone();
 	}
 	
 	/**
@@ -48,7 +47,6 @@ public class ItemBuilder {
      */
 	public ItemBuilder(Material type, int amount) {
 		resultStack = new ItemStack(type, amount);
-		metaHolderStack = resultStack.clone();
 	}
 	
 	
@@ -62,7 +60,6 @@ public class ItemBuilder {
      */
 	public ItemBuilder(Material type, int amount, short durability) {
 		resultStack = new ItemStack(type, amount, durability);
-		metaHolderStack = resultStack.clone();
 	}
 	
 	public ItemBuilder(Material type, int amount, int durability) {
@@ -73,7 +70,7 @@ public class ItemBuilder {
 		this(Material.SKULL_ITEM);
 		skull(type);
 	}
-	
+	/*
 	private void build() {
 		ItemMeta metaHolder = metaHolderStack.getItemMeta();
 		ItemMeta metaResult = resultStack.getItemMeta();
@@ -96,7 +93,7 @@ public class ItemBuilder {
 
 		resultStack.setItemMeta(metaResult);
 		resultStack.addUnsafeEnchantments(metaHolderStack.getEnchantments());
-	}
+	}*/
 	
 	/**
      * Returns a reference to our ItemStack so our builder can tweak later
@@ -104,7 +101,6 @@ public class ItemBuilder {
      * @return stack
      */
 	public ItemStack get() {
-		build();
 		return resultStack;
 	}
 	
@@ -114,7 +110,6 @@ public class ItemBuilder {
      * @return stack
      */
 	public ItemStack getNew() {
-		build();
 		return resultStack.clone();
 	}
 	
@@ -127,7 +122,7 @@ public class ItemBuilder {
      * @return this, for chaining
      */
 	public ItemBuilder enchant(Enchantment ench, int level) {
-		metaHolderStack.addEnchantment(ench, level);
+		resultStack.addEnchantment(ench, level);
 		return this;
 	}
 	
@@ -140,7 +135,7 @@ public class ItemBuilder {
      * @return this, for chaining
      */
 	public ItemBuilder forceEnchant(Enchantment ench, int level) {
-		metaHolderStack.addUnsafeEnchantment(ench, level);
+		resultStack.addUnsafeEnchantment(ench, level);
 		return this;
 	}
 	
@@ -152,7 +147,7 @@ public class ItemBuilder {
      * @return this, for chaining
      */
 	public ItemBuilder disenchant(Enchantment ench) {
-		metaHolderStack.removeEnchantment(ench);
+		resultStack.removeEnchantment(ench);
 		return this;
 	}
 	
@@ -193,7 +188,6 @@ public class ItemBuilder {
      */
 	public ItemBuilder type(Material type) {
 		resultStack.setType(type);
-		metaHolderStack.setType(type);
 		return this;
 	}
 	
@@ -206,19 +200,14 @@ public class ItemBuilder {
      * @return this, for chaining
      */
 	public ItemBuilder color(DyeColor color) {
-		if(resultStack.getData() instanceof Colorable) {
-			Colorable c = (Colorable)resultStack.getData();
-			c.setColor(color);
-		}
+		legacyColor(color);
 		
-		legacyMaterialData(color);
 		return this;
 	}
 	
 	public ItemBuilder skull(SkullType type) {
-		if(resultStack.getType() == Material.SKULL_ITEM) {
+		if(resultStack.getType() == Material.SKULL_ITEM)
 			durability(type.ordinal());
-		}
 		
 		return this;
 	}
@@ -226,35 +215,37 @@ public class ItemBuilder {
 	public ItemBuilder skull(String playerName) {
 		skull(SkullType.PLAYER);
 		
-		if(metaHolderStack.getItemMeta() instanceof SkullMeta) {
-			SkullMeta smHolder = (SkullMeta)metaHolderStack.getItemMeta();
+		if(resultStack.getItemMeta() instanceof SkullMeta) {
+			SkullMeta smHolder = (SkullMeta)resultStack.getItemMeta();
 			smHolder.setOwner(playerName);
-			metaHolderStack.setItemMeta(smHolder);
+			resultStack.setItemMeta(smHolder);
 		}
 		
 		return this;
 	}
 
 	@SuppressWarnings("deprecation")
-	private void legacyMaterialData(DyeColor color) {
+	private void legacyColor(DyeColor color) {
 		if(resultStack.getType() == Material.INK_SACK)
 			durability(color.getDyeData());
 		else
 			durability(color.getWoolData());
 	}
 	
-	@SuppressWarnings("deprecation")
 	public ItemBuilder mob(EntityType mob) {
-		legacyEggData(mob);
-		EntityTag tag = new EntityTag(mob);
-		Bukkit.getUnsafe().modifyItemStack(resultStack, tag.toString());
+		if(resultStack.getItemMeta() instanceof SpawnEggMeta) {
+			SpawnEggMeta meta = (SpawnEggMeta) resultStack.getItemMeta();
+			meta.setSpawnedType(mob);
+			resultStack.setItemMeta(meta);
+		}
+		
 		return this;
 	}
 
-	@SuppressWarnings("deprecation")
+	/*@SuppressWarnings("deprecation")
 	private void legacyEggData(EntityType entity) {
 		durability(entity.getTypeId());
-	}
+	}*/
 	
 	/**
      * Sets leather armor color
@@ -264,40 +255,40 @@ public class ItemBuilder {
      * @return this, for chaining
      */
 	public ItemBuilder leather(Color color) {
-		if(metaHolderStack.getItemMeta() instanceof LeatherArmorMeta) {
-			LeatherArmorMeta meta = (LeatherArmorMeta)metaHolderStack.getItemMeta();
+		if(resultStack.getItemMeta() instanceof LeatherArmorMeta) {
+			LeatherArmorMeta meta = (LeatherArmorMeta)resultStack.getItemMeta();
 			meta.setColor(color);
-			metaHolderStack.setItemMeta(meta);
+			resultStack.setItemMeta(meta);
 		}
 		return this;
 	}
 	
 
 	public ItemBuilder flag(ItemFlag... flags) {
-		ItemMeta stackMeta = metaHolderStack.getItemMeta();
+		ItemMeta stackMeta = resultStack.getItemMeta();
 		stackMeta.addItemFlags(flags);
-		metaHolderStack.setItemMeta(stackMeta);
+		resultStack.setItemMeta(stackMeta);
 		return this;
 	}
 	
 	public ItemBuilder unflag(ItemFlag... flags) {
-		ItemMeta stackMeta = metaHolderStack.getItemMeta();
+		ItemMeta stackMeta = resultStack.getItemMeta();
 		stackMeta.removeItemFlags(flags);
-		metaHolderStack.setItemMeta(stackMeta);
+		resultStack.setItemMeta(stackMeta);
 		return this;
 	}
 	
 	public ItemBuilder display(String displayName) {
-		ItemMeta stackMeta = metaHolderStack.getItemMeta();
+		ItemMeta stackMeta = resultStack.getItemMeta();
 		stackMeta.setDisplayName(Text.colorize(displayName));
-		metaHolderStack.setItemMeta(stackMeta);
+		resultStack.setItemMeta(stackMeta);
 		return this;
 	}
 	
 	public ItemBuilder lore(String... lore) {
-		ItemMeta stackMeta = metaHolderStack.getItemMeta();
+		ItemMeta stackMeta = resultStack.getItemMeta();
 		stackMeta.setLore(Arrays.asList(Text.colorizeList(lore)));
-		metaHolderStack.setItemMeta(stackMeta);
+		resultStack.setItemMeta(stackMeta);
 		return this;
 	}
 	

@@ -22,6 +22,6 @@ public class KillMission extends MissionType {
 	@Override
 	protected String displayString(IMission instance) {
 		String type = Text.niceName(instance.getEntity().toString());
-		return "&7Kill " + instance.getAmount() + "x " + (instance.acceptsSpawners() ? "naturally spawned " : "") + type;
+		return "&7Kill " + instance.getAmount() + "x " + (!instance.acceptsSpawners() ? "naturally spawned " : "") + type;
 	}
 }

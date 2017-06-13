@@ -2,6 +2,8 @@ package me.mrCookieSlime.QuestWorld.api;
 
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.interfaces.IMission;
+import me.mrCookieSlime.QuestWorld.api.interfaces.IMissionWrite;
+import me.mrCookieSlime.QuestWorld.utils.Log;
 
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
@@ -27,12 +29,14 @@ public abstract class MissionType {
 	boolean supportsTimeframes, supportsDeathReset, ticking;
 
 	public MissionType(String name, boolean supportsTimeframes, boolean supportsDeathReset, boolean ticking, SubmissionType type, MaterialData item) {
+		Log.fine("MissionType - Creating: " + name);
 		this.id = name;
 		this.selectorItem = item;
 		this.type = type;
 		this.supportsTimeframes = supportsTimeframes;
 		this.supportsDeathReset = supportsDeathReset;
 		this.ticking = ticking;
+		
 	}
 	
 	public final String defaultDisplayName(IMission instance) {
@@ -104,7 +108,15 @@ public abstract class MissionType {
 		this.id = id;
 	}
 	
+	public boolean attemptUpgrade(IMissionWrite instance) {
+		return false;
+	}
+	
 	protected void setSelectorMaterial(MaterialData material) {
 		selectorItem = material;
+	}
+	
+	public String progressString(float percent, int current, int total) {
+		return Math.round(percent * 100) + "% (" + current + "/" + total + ")";
 	}
 }
