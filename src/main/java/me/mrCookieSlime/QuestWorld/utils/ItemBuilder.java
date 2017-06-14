@@ -19,6 +19,14 @@ import org.bukkit.material.MaterialData;
 import org.bukkit.material.Wool;
 
 public class ItemBuilder {
+	public static ItemStack clone(ItemStack source) {
+		if(source != null)
+			return source.clone();
+		
+		return null;
+	}
+	
+	
 	private ItemStack resultStack;
 	
 	/**

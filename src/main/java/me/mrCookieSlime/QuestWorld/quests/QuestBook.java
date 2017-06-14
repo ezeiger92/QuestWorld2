@@ -17,10 +17,13 @@ import me.mrCookieSlime.QuestWorld.api.CategoryChange;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.QuestChange;
 import me.mrCookieSlime.QuestWorld.api.Translation;
+import me.mrCookieSlime.QuestWorld.containers.PageList;
+import me.mrCookieSlime.QuestWorld.containers.PagedMapping;
 import me.mrCookieSlime.QuestWorld.hooks.citizens.CitizensHook;
 import me.mrCookieSlime.QuestWorld.listeners.Input;
 import me.mrCookieSlime.QuestWorld.listeners.InputType;
 import me.mrCookieSlime.QuestWorld.parties.Party;
+import me.mrCookieSlime.QuestWorld.utils.EntityTools;
 import me.mrCookieSlime.QuestWorld.utils.ItemBuilder;
 import me.mrCookieSlime.QuestWorld.utils.PlayerTools;
 import me.mrCookieSlime.QuestWorld.utils.Text;
@@ -55,12 +58,13 @@ public class QuestBook {
 		
 		addPartyMenuButton(menu, p);
 		
-		for (final Category category: QuestWorld.getInstance().getCategories()) {
+		PagedMapping view = new PagedMapping(45, 9);
+		for(Category category : QuestWorld.getInstance().getCategories()) {
 			if (!category.isHidden()) {
 				if (category.isWorldEnabled(p.getWorld().getName())) {
 					if ((category.getParent() != null && !QuestWorld.getInstance().getManager(p).hasFinished(category.getParent())) || !category.hasPermission(p)) {
-						menu.addItem(category.getID() + 9, new CustomItem(new MaterialData(Material.BARRIER), category.getName(), "", QuestWorld.getInstance().getBookLocal("quests.locked")));
-						menu.addMenuClickHandler(category.getID() + 9, new MenuClickHandler() {
+						view.addItem(category.getID(), new CustomItem(new MaterialData(Material.BARRIER), category.getName(), "", QuestWorld.getInstance().getBookLocal("quests.locked")));
+						view.addButton(category.getID(), new MenuClickHandler() {
 							
 							@Override
 							public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
@@ -82,8 +86,8 @@ public class QuestBook {
 						lore.add(Text.colorize("&5" + category.getQuests(p, QuestStatus.REWARD_CLAIMABLE).size() + QuestWorld.getInstance().getBookLocal("category.desc.claimable_reward")));
 						im.setLore(lore);
 						item.setItemMeta(im);
-						menu.addItem(category.getID() + 9, item);
-						menu.addMenuClickHandler(category.getID() + 9, new MenuClickHandler() {
+						view.addItem(category.getID(), item);
+						view.addButton(category.getID(), new MenuClickHandler() {
 							
 							@Override
 							public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
@@ -94,8 +98,8 @@ public class QuestBook {
 					}
 				}
 				else {
-					menu.addItem(category.getID() + 9, new CustomItem(new MaterialData(Material.BARRIER), category.getName(), "", QuestWorld.getInstance().getBookLocal("quests.locked-in-world")));
-					menu.addMenuClickHandler(category.getID() + 9, new MenuClickHandler() {
+					view.addItem(category.getID(), new CustomItem(new MaterialData(Material.BARRIER), category.getName(), "", QuestWorld.getInstance().getBookLocal("quests.locked-in-world")));
+					view.addButton(category.getID(), new MenuClickHandler() {
 						
 						@Override
 						public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
@@ -105,6 +109,7 @@ public class QuestBook {
 				}
 			}
 		}
+		view.build(menu, 0);
 		menu.open(p);
 	}
 	
@@ -619,8 +624,6 @@ public class QuestBook {
 	 * 			Quest Editor
 	 * 
 	 */
-	
-	
 	public static void openEditor(Player p) {
 		final ChestMenu menu = new ChestMenu("§3Quest Editor");
 		menu.addMenuOpeningHandler(new MenuOpeningHandler() {
@@ -629,59 +632,55 @@ public class QuestBook {
 				QuestWorld.getSounds().EditorClick().playTo(p);
 			}
 		});
-		for (int i = 0; i < 45; i++) {
-			final Category category = QuestWorld.getInstance().getCategory(i);
-			List<String> lore = new ArrayList<String>();
-			if (category != null) {
-				ItemStack item = category.getItem();
-				lore.add("");
-				lore.add("§c§oLeft Click to edit");
-				lore.add("§c§oShift + Left Click to open");
-				lore.add("§c§oRight Click to delete");
-				ItemMeta im = item.getItemMeta();
-				im.setLore(lore);
-				item.setItemMeta(im);
-				menu.addItem(i, item);
-				menu.addMenuClickHandler(i, new MenuClickHandler() {
-					
+		
+		String[] lore = {
+				"",
+				"&c&oLeft Click to edit",
+				"&c&oShift + Left Click to open",
+				"&c&oRight Click to delete"
+		};
+
+		PagedMapping view = new PagedMapping(45);
+		
+		for(Category category : QuestWorld.getInstance().getCategories()) {
+			view.addItem(category.getID(), new ItemBuilder(category.getItem()).lore(lore).get());
+			view.addButton(category.getID(), new MenuClickHandler() {
 					@Override
 					public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-						if (!action.isRightClicked() && action.isShiftClicked()) openCategoryQuestEditor(p, category);
-						else if (!action.isRightClicked() && !action.isShiftClicked()) {
-							openCategoryEditor(p, category);
-						}
-						else if (action.isRightClicked()) {
+						if(action.isRightClicked())
 							QBDialogue.openDeletionConfirmation(p, category);
-						}
+						else if(action.isShiftClicked())
+							openCategoryQuestEditor(p, category);
+						else
+							openCategoryEditor(p, category);
 						return false;
 					}
 				});
-			}
-			else {
-				ItemBuilder ib = new ItemBuilder(Material.STAINED_GLASS_PANE)
-						.color(DyeColor.RED)
-						.display("&7&o> New Category")
-						.lore(lore.toArray(new String[lore.size()]));
-				
-				ItemStack item = ib.get();
-				//ItemStack item = new CustomItem(new MaterialData(Material.STAINED_GLASS_PANE, (byte) 14), "&7&o> New Category");
-				//ItemMeta im = item.getItemMeta();
-				//im.setLore(lore);
-				//item.setItemMeta(im);
-				menu.addItem(i, item);
-				menu.addMenuClickHandler(i, new MenuClickHandler() {
-					
+		}
+		// Force only if no pages exist, temporary hack for old behavior
+		//if(view.getCapacity() == 0)
+		view.getButton(view.getCapacity()); // Force 1 extra page
+		
+		ItemBuilder defaultItem = new ItemBuilder(Material.STAINED_GLASS_PANE)
+				.color(DyeColor.RED).display("&7&o> New Category");
+		
+		for(int i = 0; i < view.getCapacity(); ++i) {
+			final int i_final = i;
+			if(view.getItem(i) == null) {
+				view.addItem(i, defaultItem.get());
+				view.addButton(i, new MenuClickHandler() {
 					@Override
 					public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
 						String defaultCategoryName = QuestWorld.translate(Translation.default_category);
 						PlayerTools.sendTranslation(p, true, Translation.category_namechange, defaultCategoryName);
-						QuestWorld.getInstance().storeInput(p.getUniqueId(), new Input(InputType.CATEGORY_CREATION, slot));
+						QuestWorld.getInstance().storeInput(p.getUniqueId(), new Input(InputType.CATEGORY_CREATION, i_final));
 						p.closeInventory();
 						return false;
 					}
 				});
 			}
 		}
+		view.build(menu, 0);
 		menu.open(p);
 	}
 
@@ -1278,7 +1277,7 @@ public class QuestBook {
 		
 		case ENTITY: {
 			EntityType entity = mission.getEntity();
-			ItemBuilder egg = new ItemBuilder(Material.MONSTER_EGG).mob(entity);
+			ItemBuilder egg = new ItemBuilder(EntityTools.getEntityDisplay(entity));
 			egg.display("&7Entity Type: &r" + Text.niceName(entity.name()));
 			egg.lore("", "&e> Click to change the Entity");
 
