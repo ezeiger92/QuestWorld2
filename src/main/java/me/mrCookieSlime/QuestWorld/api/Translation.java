@@ -12,6 +12,13 @@ public enum Translation implements Translator {
 	book_display("book.display"),
 	book_lore   ("book.lore"),
 	
+	nav_display("navigation.display", "page",     "pages"),
+	nav_lore(   "navigation.lore",    "pre-next", "pre-last"),
+	nav_next(   "navigation.prefix-next"),
+	nav_prev(   "navigation.prefix-last"),
+	nav_nextbad("navigation.prefix-next-inactive"),
+	nav_prevbad("navigation.prefix-last-inactive"),
+	
 	category_created   ("editor.category.created",     "name"),
 	category_deleted   ("editor.category.deleted",     "name"),
 	category_namechange("editor.category.name-change", "name"),

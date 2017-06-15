@@ -13,6 +13,17 @@ book:
     &rIn case you lose it, simply place a
     &rWorkbench into your Crafting Grid
 
+navigation:
+  display: '&7Page %page%/%pages%'
+  lore: |
+    %pre-next%Next page (left-click)
+    %pre-last%Prev page (right-click)
+    &6&oHold shift to jump to the end
+  prefix-next: '&3'
+  prefix-last: '&c'
+  prefix-next-inactive: '&7&o'
+  prefix-last-inactive: '&7&o'
+
 editor:
   category.created:     '&aSuccessfully created a category called &r%name%'
   category.deleted:     '&cSuccessfully deleted the category &r%name%'

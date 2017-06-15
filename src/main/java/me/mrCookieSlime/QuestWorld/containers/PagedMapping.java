@@ -11,6 +11,8 @@ import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ClickAction;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.Maps;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu.MenuClickHandler;
+import me.mrCookieSlime.QuestWorld.QuestWorld;
+import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.utils.ItemBuilder;
 
 public class PagedMapping {
@@ -103,23 +105,15 @@ public class PagedMapping {
 		
 		pages.get(page).build(menu, 9, activeSize);
 		
-		//ItemBuilder arrow = new ItemBuilder(Material.SKULL_ITEM);
-		
-		//menu.addItem(0, arrow.skull("MHF_ArrowLeft").display("&7Prev page").getNew());
-		//menu.addItem(2, arrow.skull("MHF_ArrowRight").display("&7Next page").getNew());
+		String display = QuestWorld.translate(Translation.nav_display, String.valueOf(page + 1), String.valueOf(pages.size()));
+
+		String nextPre = QuestWorld.translate(page < pages.size() - 1 ? Translation.nav_next : Translation.nav_nextbad);
+		String prevPre = QuestWorld.translate(page > 0 ? Translation.nav_prev : Translation.nav_prevbad);
+		String[] lore = QuestWorld.translate(Translation.nav_lore, nextPre, prevPre).split("\n");
 		
 		ItemBuilder navigation = new ItemBuilder(Material.PAPER)
 				.amount(page + 1)
-				.display("&7Page " + (page + 1) + "/" + pages.size());
-
-		String prevColor = page > 0 ? "&c" : "&7&o";
-		String nextColor = page < pages.size() - 1 ? "&3" : "&7&o";
-		
-		navigation.lore(
-				nextColor + "Next page (left-click)",
-				prevColor + "Prev page (right-click)",
-				"&6&oHold shift to jump to the end"
-				);
+				.display(display).lore(lore);
 
 		menu.addItem(1, navigation.getNew());
 		menu.addMenuClickHandler(1, new MenuClickHandler() {
@@ -135,11 +129,10 @@ public class PagedMapping {
 				
 				int nextPage = Math.max(Math.min(pages.size() - 1, page + delta), 0);
 				
-				//int nextPage = (page + delta + pages.size() + 1) % (pages.size() + 1);
 				ChestMenu self = Maps.getInstance().menus.get(p.getUniqueId());
 				build(self, nextPage);
 				self.reset(true);
-				//self.open(p);
+				//self.open(p); // This isn't needed because we just modify the current inventory
 				return false;
 			}
 		});
