@@ -17,7 +17,7 @@ import me.mrCookieSlime.QuestWorld.api.CategoryChange;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.QuestChange;
 import me.mrCookieSlime.QuestWorld.api.Translation;
-import me.mrCookieSlime.QuestWorld.containers.PageList;
+import me.mrCookieSlime.QuestWorld.api.menu.Buttons;
 import me.mrCookieSlime.QuestWorld.containers.PagedMapping;
 import me.mrCookieSlime.QuestWorld.hooks.citizens.CitizensHook;
 import me.mrCookieSlime.QuestWorld.listeners.Input;
@@ -641,45 +641,27 @@ public class QuestBook {
 		};
 
 		PagedMapping view = new PagedMapping(45);
-		
-		for(Category category : QuestWorld.getInstance().getCategories()) {
-			view.addItem(category.getID(), new ItemBuilder(category.getItem()).lore(lore).get());
-			view.addButton(category.getID(), new MenuClickHandler() {
-					@Override
-					public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-						if(action.isRightClicked())
-							QBDialogue.openDeletionConfirmation(p, category);
-						else if(action.isShiftClicked())
-							openCategoryQuestEditor(p, category);
-						else
-							openCategoryEditor(p, category);
-						return false;
-					}
-				});
-		}
-		// Force only if no pages exist, temporary hack for old behavior
-		//if(view.getCapacity() == 0)
-		view.getButton(view.getCapacity()); // Force 1 extra page
-		
+		view.getItem(0); // Dummy, force a page to exist
 		ItemBuilder defaultItem = new ItemBuilder(Material.STAINED_GLASS_PANE)
 				.color(DyeColor.RED).display("&7&o> New Category");
 		
-		for(int i = 0; i < view.getCapacity(); ++i) {
-			final int i_final = i;
-			if(view.getItem(i) == null) {
+		int categoryCount = QuestWorld.getInstance().getCategories().size();
+		for(int i = 0, found = 0; i < view.getCapacity(); ++i) {
+			if(i % view.getPageCapacity() == 0 && found < categoryCount)
+				view.getItem(i + view.getPageCapacity()); // Dummy, force next page to exist
+			
+			Category category = QuestWorld.getInstance().getCategory(i);
+			if(category != null) {
+				++found;
+				view.addItem(i, new ItemBuilder(category.getItem()).lore(lore).get());
+				view.addButton(i, Buttons.onCategory(category));
+			}
+			else {
 				view.addItem(i, defaultItem.get());
-				view.addButton(i, new MenuClickHandler() {
-					@Override
-					public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-						String defaultCategoryName = QuestWorld.translate(Translation.default_category);
-						PlayerTools.sendTranslation(p, true, Translation.category_namechange, defaultCategoryName);
-						QuestWorld.getInstance().storeInput(p.getUniqueId(), new Input(InputType.CATEGORY_CREATION, i_final));
-						p.closeInventory();
-						return false;
-					}
-				});
+				view.addButton(i, Buttons.newCategory(i));
 			}
 		}
+
 		view.build(menu, 0);
 		menu.open(p);
 	}

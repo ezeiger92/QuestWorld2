@@ -51,6 +51,10 @@ public class PagedMapping {
 		return pages.size() * pageSize;
 	}
 	
+	public int getPageCapacity() {
+		return pageSize;
+	}
+	
 	private PageList findPage(int index) {
 		activeSize = Math.max(1 + (index % pageSize), activeSize);
 		
