@@ -65,6 +65,14 @@ public class PagedMapping {
 		return pages.get(index);
 	}
 	
+	public void touch(int index) {
+		findPage(index);
+	}
+	
+	public void touchPage(int page) {
+		findPage(page * pageSize);
+	}
+	
 	public ItemStack getItem(int index) {
 		return findPage(index).getItem(index % pageSize);
 	}
@@ -100,7 +108,9 @@ public class PagedMapping {
 		//menu.addItem(0, arrow.skull("MHF_ArrowLeft").display("&7Prev page").getNew());
 		//menu.addItem(2, arrow.skull("MHF_ArrowRight").display("&7Next page").getNew());
 		
-		ItemBuilder navigation = new ItemBuilder(Material.PAPER).display("&7Page " + (page + 1) + "/" + pages.size());
+		ItemBuilder navigation = new ItemBuilder(Material.PAPER)
+				.amount(page + 1)
+				.display("&7Page " + (page + 1) + "/" + pages.size());
 
 		String prevColor = page > 0 ? "&c" : "&7&o";
 		String nextColor = page < pages.size() - 1 ? "&3" : "&7&o";

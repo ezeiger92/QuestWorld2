@@ -351,11 +351,12 @@ public class QuestBook {
 		
 		ItemBuilder glassPane = new ItemBuilder(Material.STAINED_GLASS_PANE).color(DyeColor.RED);
 		
+		PagedMapping view = new PagedMapping(45, 9);
 		for (final Quest quest: category.getQuests()) {
 			glassPane.display(quest.getName());
 			if (QuestWorld.getInstance().getManager(p).getStatus(quest).equals(QuestStatus.LOCKED) || !quest.isWorldEnabled(p.getWorld().getName())) {
-				menu.addItem(quest.getID() + 9, glassPane.lore("", QuestWorld.getInstance().getBookLocal("quests.locked")).getNew());
-				menu.addMenuClickHandler(quest.getID() + 9, new MenuClickHandler() {
+				view.addItem(quest.getID(), glassPane.lore("", QuestWorld.getInstance().getBookLocal("quests.locked")).getNew());
+				view.addButton(quest.getID(), new MenuClickHandler() {
 					
 					@Override
 					public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
@@ -364,8 +365,8 @@ public class QuestBook {
 				});
 			}
 			else if (QuestWorld.getInstance().getManager(p).getStatus(quest).equals(QuestStatus.LOCKED_NO_PARTY)) {
-				menu.addItem(quest.getID() + 9, glassPane.lore("", "&4You need to leave your current Party").getNew());
-				menu.addMenuClickHandler(quest.getID() + 9, new MenuClickHandler() {
+				view.addItem(quest.getID(), glassPane.lore("", "&4You need to leave your current Party").getNew());
+				view.addButton(quest.getID(), new MenuClickHandler() {
 					
 					@Override
 					public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
@@ -374,8 +375,8 @@ public class QuestBook {
 				});
 			}
 			else if (QuestWorld.getInstance().getManager(p).getStatus(quest).equals(QuestStatus.LOCKED_PARTY_SIZE)) {
-				menu.addItem(quest.getID() + 9, glassPane.lore("", "&4You can only do this Quest in a Party", "&4with at least &c" + quest.getPartySize() + " &4Members").getNew());
-				menu.addMenuClickHandler(quest.getID() + 9, new MenuClickHandler() {
+				view.addItem(quest.getID(), glassPane.lore("", "&4You can only do this Quest in a Party", "&4with at least &c" + quest.getPartySize() + " &4Members").getNew());
+				view.addButton(quest.getID(), new MenuClickHandler() {
 					
 					@Override
 					public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
@@ -405,8 +406,8 @@ public class QuestBook {
 				}
 				im.setLore(lore);
 				item.setItemMeta(im);
-				menu.addItem(quest.getID() + 9, item);
-				menu.addMenuClickHandler(quest.getID() + 9, new MenuClickHandler() {
+				view.addItem(quest.getID(), item);
+				view.addButton(quest.getID(), new MenuClickHandler() {
 					
 					@Override
 					public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
@@ -416,6 +417,7 @@ public class QuestBook {
 				});
 			}
 		}
+		view.build(menu, 0);
 		menu.open(p);
 	}
 	
@@ -639,16 +641,17 @@ public class QuestBook {
 				"&c&oShift + Left Click to open",
 				"&c&oRight Click to delete"
 		};
-
-		PagedMapping view = new PagedMapping(45);
-		view.getItem(0); // Dummy, force a page to exist
+		
 		ItemBuilder defaultItem = new ItemBuilder(Material.STAINED_GLASS_PANE)
 				.color(DyeColor.RED).display("&7&o> New Category");
+
+		PagedMapping view = new PagedMapping(45);
+		view.touch(0); // Dummy, force a page to exist
 		
-		int categoryCount = QuestWorld.getInstance().getCategories().size();
-		for(int i = 0, found = 0; i < view.getCapacity(); ++i) {
-			if(i % view.getPageCapacity() == 0 && found < categoryCount)
-				view.getItem(i + view.getPageCapacity()); // Dummy, force next page to exist
+		int found = 0, categoryCount = QuestWorld.getInstance().getCategories().size();
+		for(int i = 0; i < view.getCapacity(); ++i) {
+			if(found < categoryCount)
+				view.touch(i + view.getPageCapacity());
 			
 			Category category = QuestWorld.getInstance().getCategory(i);
 			if(category != null) {
@@ -686,47 +689,35 @@ public class QuestBook {
 			}
 		});
 		
-		for (int i = 0; i < 45; i++) {
-			final Quest quest = category.getQuest(i);
-			List<String> lore = new ArrayList<String>();
+		String[] lore = {
+			"",
+			"&c&oLeft Click to edit",
+			"&c&oRight Click to delete"
+		};
+		
+		ItemBuilder defaultItem = new ItemBuilder(Material.STAINED_GLASS_PANE)
+				.color(DyeColor.RED).display("&7&o> New Quest");
+		
+		PagedMapping view = new PagedMapping(45);
+		view.touch(0); // Dummy, force a page to exist
+		
+		int found = 0, questCount = category.getQuests().size();
+		for (int i = 0; i < view.getCapacity(); ++i) {
+			if(found < questCount)
+				view.touch(i + view.getPageCapacity());
+			
+			Quest quest = category.getQuest(i);
 			if (quest != null) {
-				ItemStack item = quest.getItem();
-				lore.add("");
-				lore.add("§c§oLeft Click to edit");
-				lore.add("§c§oRight Click to delete");
-				ItemMeta im = item.getItemMeta();
-				im.setLore(lore);
-				item.setItemMeta(im);
-				menu.addItem(i + 9, item);
-				menu.addMenuClickHandler(i + 9, new MenuClickHandler() {
-					
-					@Override
-					public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-						if (!action.isRightClicked()) openQuestEditor(p, quest);
-						else QBDialogue.openDeletionConfirmation(p, quest);
-						return false;
-					}
-				});
+				++found;
+				view.addItem(i, new ItemBuilder(quest.getItem()).lore(lore).get());
+				view.addButton(i, Buttons.onQuest(quest));
 			}
 			else {
-				ItemStack item = new CustomItem(new MaterialData(Material.STAINED_GLASS_PANE, (byte) 14), "&7&o> New Quest");
-				ItemMeta im = item.getItemMeta();
-				im.setLore(lore);
-				item.setItemMeta(im);
-				menu.addItem(i + 9, item);
-				menu.addMenuClickHandler(i + 9, new MenuClickHandler() {
-					
-					@Override
-					public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-						String defaultQuestName = QuestWorld.translate(Translation.default_quest);
-						PlayerTools.sendTranslation(p, true, Translation.quest_namechange, defaultQuestName);
-						QuestWorld.getInstance().storeInput(p.getUniqueId(), new Input(InputType.QUEST_CREATION, String.valueOf(category.getID()) + " M " + String.valueOf(slot - 9)));
-						p.closeInventory();
-						return false;
-					}
-				});
+				view.addItem(i, defaultItem.getNew());
+				view.addButton(i, Buttons.newQuest(category.getID(), i));
 			}
 		}
+		view.build(menu, 0);
 		menu.open(p);
 	}
 
