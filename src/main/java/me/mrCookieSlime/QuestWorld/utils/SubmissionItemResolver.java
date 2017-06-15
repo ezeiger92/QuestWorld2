@@ -10,7 +10,7 @@ import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.Item.CustomItem;
 public class SubmissionItemResolver {
 
 	public static ItemStack mobEgg(EntityType entity) {
-		return new ItemBuilder(Material.MONSTER_EGG).mob(entity).display("&7Entity Type: &r" + Text.niceName(entity.name())).get();
+		return new ItemBuilder(EntityTools.getEntityDisplay(entity)).display("&7Entity Type: &r" + Text.niceName(entity.name())).get();
 	}
 	
 	public static ItemStack location(Material mat, Location location) {
