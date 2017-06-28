@@ -169,15 +169,6 @@ public class PlayerManager {
 			for (Mission task: QuestWorld.getInstance().getTickingMissions()) {
 				if (getStatus(task.getQuest()).equals(QuestStatus.AVAILABLE) && !hasCompletedTask(task) && hasUnlockedTask(task)) {
 					((Ticking) task.getType()).onTick(this, task);
-					/*
-					if (task.getType().getID().equals("PLAY_TIME")) setProgress(task, p.getStatistic(Statistic.PLAY_ONE_TICK) / 20 / 60);
-					else if (task.getType().getID().equals("REACH_LOCATION")) {
-						if (task.getLocation().getWorld().getName().equals(p.getWorld().getName()) && task.getLocation().distanceSquared(p.getLocation()) < task.getCustomInt() * task.getCustomInt()) {
-							// Normally expecting "getAmount" to complete task, "getAmount" in this case is the search radius
-							// Just set the task to done (because it is) rather than increment by 1
-							setProgress(task, task.getAmount());
-						}
-					}*/
 				}
 			}
 		}
@@ -219,7 +210,7 @@ public class PlayerManager {
 		if (quest.getParent() != null && !hasFinished(quest.getParent())) return QuestStatus.LOCKED;
 		if (p != null && !quest.hasPermission(p)) return QuestStatus.LOCKED;
 		if (quest.getPartySize() == 0 && getParty() != null) return QuestStatus.LOCKED_NO_PARTY;
-		if (quest.getPartySize() > 1 && getParty() != null && getParty().getSize() < quest.getPartySize()) return QuestStatus.LOCKED_PARTY_SIZE;
+		if (quest.getPartySize() > 1 && (getParty() == null || getParty().getSize() < quest.getPartySize())) return QuestStatus.LOCKED_PARTY_SIZE;
 		if (!cfg.contains(quest.getCategory().getID() + "." + quest.getID() + ".status")) {
 			cfg.setValue(quest.getCategory().getID() + "." + quest.getID() + ".status", QuestStatus.AVAILABLE.toString());
 			return QuestStatus.AVAILABLE;
@@ -271,6 +262,7 @@ public class PlayerManager {
 			}
 		}
 		// TODO check !task.getType().getID().equals("ACCEPT_QUEST_FROM_NPC") && 
+		// OH! This was done to keep quests quiet when interacting with citizens, should do something for this
 		if (task.getQuest().supportsParties()) {
 			Party party = getParty();
 			if (party != null) {
