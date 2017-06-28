@@ -2,9 +2,9 @@ package me.mrCookieSlime.QuestWorld.api;
 
 import java.util.List;
 
-import org.bukkit.Bukkit;
 import org.bukkit.inventory.ItemStack;
 
+import me.mrCookieSlime.QuestWorld.events.CancellableEvent;
 import me.mrCookieSlime.QuestWorld.events.CategoryChangeEvent;
 import me.mrCookieSlime.QuestWorld.quests.Category;
 import me.mrCookieSlime.QuestWorld.quests.Quest;
@@ -67,10 +67,7 @@ public class CategoryChange extends Category {
 	 * @return false if the event is cancelled, otherwise true
 	 */
 	public boolean sendEvent() {
-		CategoryChangeEvent event = new CategoryChangeEvent(this);
-		Bukkit.getPluginManager().callEvent(event);
-		
-		return !event.isCancelled();
+		return CancellableEvent.send(new CategoryChangeEvent(this));
 	}
 	
 	// Modify "setX" methods

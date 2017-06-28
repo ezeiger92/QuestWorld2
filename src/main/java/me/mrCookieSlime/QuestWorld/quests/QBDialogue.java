@@ -1,7 +1,5 @@
 package me.mrCookieSlime.QuestWorld.quests;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import me.mrCookieSlime.CSCoreLibPlugin.general.Chat.TellRawMessage;
@@ -12,7 +10,13 @@ import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu.MenuOpeningH
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ClickAction;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.Translation;
+import me.mrCookieSlime.QuestWorld.api.menu.Buttons;
 import me.mrCookieSlime.QuestWorld.containers.PagedMapping;
+import me.mrCookieSlime.QuestWorld.events.CancellableEvent;
+import me.mrCookieSlime.QuestWorld.events.CategoryDeleteEvent;
+import me.mrCookieSlime.QuestWorld.events.MissionDeleteEvent;
+import me.mrCookieSlime.QuestWorld.events.QuestDeleteEvent;
+import me.mrCookieSlime.QuestWorld.managers.PlayerManager;
 import me.mrCookieSlime.QuestWorld.utils.EntityTools;
 import me.mrCookieSlime.QuestWorld.utils.ItemBuilder;
 import me.mrCookieSlime.QuestWorld.utils.PlayerTools;
@@ -20,11 +24,9 @@ import me.mrCookieSlime.QuestWorld.utils.Text;
 
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
-import org.bukkit.SkullType;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 
 public class QBDialogue {
 	
@@ -66,22 +68,31 @@ public class QBDialogue {
 				QuestWorld.getSounds().DestructiveClick().playTo(p);
 				QuestWorld.getSounds().muteNext();
 				if (q instanceof Category) {
-					QuestWorld.getInstance().unregisterCategory((Category) q);
-					p.closeInventory();
-					QuestBook.openEditor(p);
-					PlayerTools.sendTranslation(p, true, Translation.category_deleted, q.getName());
+					Category category = (Category)q;
+					if(CancellableEvent.send(new CategoryDeleteEvent(category))) {
+						QuestWorld.getInstance().unregisterCategory(category);
+						p.closeInventory();
+						QuestBook.openEditor(p);
+						PlayerTools.sendTranslation(p, true, Translation.category_deleted, q.getName());
+					}
 				}
 				else if (q instanceof Quest) {
-					QuestManager.clearAllQuestData((Quest) q);
-					((Quest) q).getCategory().removeQuest((Quest) q);
-					p.closeInventory();
-					QuestBook.openCategoryQuestEditor(p, ((Quest) q).getCategory());
-					PlayerTools.sendTranslation(p, true, Translation.quest_deleted, q.getName());
+					Quest quest = (Quest)q;
+					if(CancellableEvent.send(new QuestDeleteEvent(quest))) {
+						PlayerManager.clearAllQuestData(quest);
+						quest.getCategory().removeQuest(quest);
+						p.closeInventory();
+						QuestBook.openCategoryQuestEditor(p, quest.getCategory());
+						PlayerTools.sendTranslation(p, true, Translation.quest_deleted, q.getName());
+					}
 				}
 				else if (q instanceof Mission) {
-					((Mission) q).getQuest().removeMission((Mission) q);
-					p.closeInventory();
-					QuestBook.openQuestEditor(p, ((Mission) q).getQuest());
+					Mission mission = (Mission)q;
+					if(CancellableEvent.send(new MissionDeleteEvent(mission))) {
+						mission.getQuest().removeMission(mission);
+						p.closeInventory();
+						QuestBook.openQuestEditor(p, mission.getQuest());
+					}
 				}
 				return false;
 			}
@@ -117,7 +128,7 @@ public class QBDialogue {
 			
 			@Override
 			public boolean onClick(Player p, int arg1, ItemStack arg2, ClickAction arg3) {
-				QuestManager.clearAllQuestData(q);
+				PlayerManager.clearAllQuestData(q);
 				QuestBook.openQuestEditor(p, q);
 				return false;
 			}
@@ -132,7 +143,7 @@ public class QBDialogue {
 	
 	private static void openQuestMissionEntityEditor(Player p, final Mission mission, int page, int mode) {
 		List<EntityType> entities = EntityTools.listAliveEntityTypes();
-		
+		/*
 		final String[] sortingMethods = {
 				"By Type",
 				"A to Z",
@@ -151,6 +162,7 @@ public class QBDialogue {
 		}
 		
 		int lastPage = entities.size() / 45; // Double chest size without last row
+		*/
 		//String title = Text.colorize(mission.getQuest().getName() + " &7- &8(Page " + (page+1) + "/" + (lastPage+1) + ")");
 		String title = mission.getQuest().getName();
 		final ChestMenu menu = new ChestMenu(title);
@@ -173,7 +185,7 @@ public class QBDialogue {
 					.lore(lore)
 					.display("&7Entity Type: &r" + Text.niceName(entity.name()));
 			pager.addItem(i, builder.get());
-			pager.addButton(i, new MenuClickHandler() {
+			pager.addNavButton(i, new MenuClickHandler() {
 				@Override
 				public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
 					mission.setEntity(entity);
@@ -182,8 +194,8 @@ public class QBDialogue {
 				}
 			});
 		}
-		
-		pager.build(menu, 0);
+		pager.setBackButton(Buttons.simpleHandler(event -> QuestBook.openQuestMissionEditor(p, mission)));
+		pager.build(menu, p);
 		menu.open(p);
 	}
 
@@ -211,27 +223,32 @@ public class QBDialogue {
 			}
 		});
 		
-		for (int i = 0; i < 45; i++) {
-			final Category category = QuestWorld.getInstance().getCategory(i);
-			List<String> lore = new ArrayList<String>();
-			if (category != null) {
-				ItemStack item = category.getItem();
-				lore.add("");
-				lore.add(Text.colorize("&7&oLeft Click to open"));
-				ItemMeta im = item.getItemMeta();
-				im.setLore(lore);
-				item.setItemMeta(im);
-				menu.addItem(i, item);
-				menu.addMenuClickHandler(i, new MenuClickHandler() {
-					
-					@Override
-					public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-						openQuestRequirementChooser2(p, quest, category);
-						return false;
-					}
-				});
-			}
+
+		PagedMapping pager = new PagedMapping(45, 9);
+		for(Category category : QuestWorld.getInstance().getCategories()) {
+			int i = category.getID();
+			ItemStack item = new ItemBuilder(category.getItem()).lore(
+					"",
+					"&7&oLeft Click to open").get();
+			pager.addItem(i, item);
+			pager.addNavButton(i, new MenuClickHandler() {
+				
+				@Override
+				public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
+
+					QuestWorld.getInstance().getManager(p).putPage(0);
+					openQuestRequirementChooser2(p, quest, category);
+					return false;
+				}
+			});
 		}
+		pager.setBackButton(Buttons.simpleHandler(event -> {
+			if(quest instanceof Quest)
+				QuestBook.openQuestEditor(p, (Quest)quest);
+			else
+				QuestBook.openCategoryEditor(p, (Category)quest);
+		}));
+		pager.build(menu, p);
 		menu.open(p);
 	}
 
@@ -246,31 +263,29 @@ public class QBDialogue {
 			}
 		});
 		
-		for (int i = 0; i < 45; i++) {
-			final Quest quest = category.getQuest(i);
-			List<String> lore = new ArrayList<String>();
-			if (quest != null) {
-				ItemStack item = quest.getItem();
-				lore.add("");
-				lore.add(Text.colorize("&7&oClick to select it as a Requirement"));
-				lore.add(Text.colorize("&7&ofor the Quest:"));
-				lore.add(Text.colorize("&r" + q.getName()));
-				ItemMeta im = item.getItemMeta();
-				im.setLore(lore);
-				item.setItemMeta(im);
-				menu.addItem(i, item);
-				menu.addMenuClickHandler(i, new MenuClickHandler() {
-					
-					@Override
-					public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-						q.setParent(quest);
-						if (q instanceof Quest) QuestBook.openQuestEditor(p, (Quest) q);
-						else QuestBook.openCategoryEditor(p, (Category) q);
-						return false;
-					}
-				});
-			}
+		PagedMapping pager = new PagedMapping(45, 9);
+		for(Quest quest : category.getQuests()) {
+			int i = quest.getID();
+			ItemStack item = new ItemBuilder(quest.getItem()).lore(
+					"",
+					"&7&oClick to select it as a Requirement",
+					"&7&ofor the Quest:",
+					"&r" + q.getName()).get();
+			pager.addItem(i, item);
+			pager.addButton(i, new MenuClickHandler() {
+				
+				@Override
+				public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
+					QuestWorld.getInstance().getManager(p).popPage();
+					q.setParent(quest);
+					if (q instanceof Quest) QuestBook.openQuestEditor(p, (Quest) q);
+					else QuestBook.openCategoryEditor(p, (Category) q);
+					return false;
+				}
+			});
 		}
+		pager.setBackButton(Buttons.simpleHandler(event -> openQuestRequirementChooser(p, q)));
+		pager.build(menu, p);
 		menu.open(p);
 	}
 

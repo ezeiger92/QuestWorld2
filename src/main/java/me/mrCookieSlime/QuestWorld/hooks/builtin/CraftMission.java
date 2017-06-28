@@ -11,17 +11,15 @@ import org.bukkit.material.MaterialData;
 
 import me.mrCookieSlime.CSCoreLibPlugin.general.String.StringUtils;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
+import me.mrCookieSlime.QuestWorld.api.MissionChange;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.interfaces.IMission;
-import me.mrCookieSlime.QuestWorld.quests.QuestChecker;
-import me.mrCookieSlime.QuestWorld.quests.QuestListener;
-import me.mrCookieSlime.QuestWorld.quests.QuestManager;
+import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
 import me.mrCookieSlime.QuestWorld.utils.PlayerTools;
-import me.mrCookieSlime.QuestWorld.quests.Mission;
 
 public class CraftMission extends MissionType implements Listener {
 	public CraftMission() {
-		super("CRAFT", true, true, false, SubmissionType.ITEM, new MaterialData(Material.WORKBENCH));
+		super("CRAFT", true, true, new MaterialData(Material.WORKBENCH));
 	}
 	
 	@Override
@@ -79,12 +77,17 @@ public class CraftMission extends MissionType implements Listener {
 		
 		test.setAmount(recipeAmount);
 		
-		QuestChecker.check((Player) e.getWhoClicked(), e, "CRAFT", new QuestListener() {
-			
-			@Override
-			public void onProgressCheck(Player p, QuestManager manager, Mission task, Object event) {
-				if (QuestWorld.getInstance().isItemSimiliar(test, task.getMissionItem())) manager.addProgress(task, e.getCurrentItem().getAmount());
-			}
-		});
+		Player player = (Player)e.getWhoClicked();
+
+		QuestWorld.getInstance().getManager(player).forEachTaskOf(this, mission -> {
+			return QuestWorld.getInstance().isItemSimiliar(test, mission.getMissionItem());
+		}, test.getAmount(), false);
+	}
+	
+	@Override
+	protected void layoutMenu(MissionChange changes) {
+		super.layoutMenu(changes);
+		putButton(10, MissionButton.item(changes));
+		putButton(17, MissionButton.amount(changes));
 	}
 }

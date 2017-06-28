@@ -25,6 +25,10 @@ public class PlayerTools {
 		return result;
 	}
 	
+	public static ItemStack getMainHandItem(Player p) {
+		return p.getInventory().getItemInMainHand();
+	}
+	
 	public static int getMaxCraftAmount(CraftingInventory inv) {
 		int resultCount = inv.getResult().getAmount();
 		int materialCount = Integer.MAX_VALUE;

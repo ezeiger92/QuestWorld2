@@ -7,10 +7,10 @@ import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.Maps;
 import me.mrCookieSlime.QuestWorld.GuideBook;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
+import me.mrCookieSlime.QuestWorld.managers.PlayerManager;
 import me.mrCookieSlime.QuestWorld.quests.Category;
 import me.mrCookieSlime.QuestWorld.quests.Quest;
 import me.mrCookieSlime.QuestWorld.quests.QuestBook;
-import me.mrCookieSlime.QuestWorld.quests.QuestManager;
 import me.mrCookieSlime.QuestWorld.quests.Mission;
 import me.mrCookieSlime.QuestWorld.quests.QuestStatus;
 
@@ -41,7 +41,7 @@ public class PlayerListener implements Listener {
 	public void onDie(EntityDeathEvent e) {
 		if (!(e.getEntity() instanceof Player)) return;
 		Player p = (Player) e.getEntity();
-		QuestManager manager = QuestWorld.getInstance().getManager(p);
+		PlayerManager manager = QuestWorld.getInstance().getManager(p);
 		for (Category category: QuestWorld.getInstance().getCategories()) {
 			if (category.isWorldEnabled(p.getWorld().getName())) {
 				for (Quest quest: category.getQuests()) {

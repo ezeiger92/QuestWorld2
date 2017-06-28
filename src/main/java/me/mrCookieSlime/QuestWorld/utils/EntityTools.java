@@ -7,8 +7,12 @@ import java.util.List;
 
 import org.bukkit.Material;
 import org.bukkit.SkullType;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.metadata.FixedMetadataValue;
+
+import me.mrCookieSlime.QuestWorld.QuestWorld;
 
 public class EntityTools {
 	private static EntityType[] alive;
@@ -84,5 +88,16 @@ public class EntityTools {
 		}
 		
 		return ib.get();
+	}
+	
+	public static void setFromSpawner(Entity entity, boolean state) {
+		if(state)
+			entity.setMetadata("spawned_by_spawner", new FixedMetadataValue(QuestWorld.getInstance(), "QuestWorld"));
+		else
+			entity.removeMetadata("spawned_by_spawner", QuestWorld.getInstance());
+	}
+	
+	public static boolean fromSpawner(Entity entity) {
+		return entity.hasMetadata("spawned_by_spawner");
 	}
 }

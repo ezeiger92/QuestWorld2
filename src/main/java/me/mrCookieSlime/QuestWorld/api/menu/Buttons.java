@@ -1,9 +1,13 @@
 package me.mrCookieSlime.QuestWorld.api.menu;
 
+import java.util.function.Consumer;
+
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ClickAction;
+import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu.AdvancedMenuClickHandler;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu.MenuClickHandler;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.Translation;
@@ -22,10 +26,13 @@ public class Buttons {
 			public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
 				if(action.isRightClicked())
 					QBDialogue.openDeletionConfirmation(p, category);
-				else if(action.isShiftClicked())
-					QuestBook.openCategoryQuestEditor(p, category);
-				else
+				else if(action.isShiftClicked()) {
 					QuestBook.openCategoryEditor(p, category);
+				}
+				else {
+					QuestWorld.getInstance().getManager(p).putPage(0);
+					QuestBook.openCategoryQuestEditor(p, category);
+				}
 				return false;
 			}
 		};
@@ -50,8 +57,13 @@ public class Buttons {
 			public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
 				if(action.isRightClicked())
 					QBDialogue.openDeletionConfirmation(p, quest);
-				else
-					QuestBook.openQuestEditor(p, quest); 
+				else if(action.isShiftClicked()) {
+					QuestBook.openQuestEditor(p, quest);
+				}
+				else {
+					// TODO Open missions 
+					QuestBook.openQuestEditor(p, quest);
+				}
 				return false;
 			}
 		};
@@ -67,6 +79,21 @@ public class Buttons {
 				p.closeInventory();
 				return false;
 			}
+		};
+	}
+	
+	public static MenuClickHandler simpleHandler(Consumer<InventoryClickEvent> action) {
+		return new AdvancedMenuClickHandler() {
+			// Unused in advanced click
+			@Override
+			public boolean onClick(Player p, int arg1, ItemStack arg2, ClickAction arg3) { return true; }
+
+			@Override
+			public boolean onClick(InventoryClickEvent event, Player p, int arg2, ItemStack arg3, ClickAction arg4) {
+				action.accept(event);
+				return false;
+			}
+			
 		};
 	}
 }

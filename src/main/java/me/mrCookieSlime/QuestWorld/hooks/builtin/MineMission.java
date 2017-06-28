@@ -1,6 +1,7 @@
 package me.mrCookieSlime.QuestWorld.hooks.builtin;
 
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -10,16 +11,17 @@ import org.bukkit.material.MaterialData;
 
 import me.mrCookieSlime.CSCoreLibPlugin.general.String.StringUtils;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
+import me.mrCookieSlime.QuestWorld.api.MissionChange;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.interfaces.IMission;
-import me.mrCookieSlime.QuestWorld.quests.QuestManager;
-import me.mrCookieSlime.QuestWorld.quests.Mission;
-import me.mrCookieSlime.QuestWorld.quests.QuestStatus;
+import me.mrCookieSlime.QuestWorld.api.menu.MenuData;
+import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
+import me.mrCookieSlime.QuestWorld.utils.ItemBuilder;
 import me.mrCookieSlime.QuestWorld.utils.PlayerTools;
 
 public class MineMission extends MissionType implements Listener {
 	public MineMission() {
-		super("MINE_BLOCK", true, true, false, SubmissionType.BLOCK, new MaterialData(Material.IRON_PICKAXE));
+		super("MINE_BLOCK", true, true, new MaterialData(Material.IRON_PICKAXE));
 	}
 	
 	@Override
@@ -34,14 +36,31 @@ public class MineMission extends MissionType implements Listener {
 	
 	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
 	public void onMine(BlockBreakEvent e) {
-		QuestManager manager = QuestWorld.getInstance().getManager(e.getPlayer());
-		for (Mission task: QuestManager.block_breaking_tasks) {
+		QuestWorld.getInstance().getManager(e.getPlayer()).forEachTaskOf(this, mission -> {
 			ItemStack is = PlayerTools.getStackOf(e.getBlock());
-			if (is.isSimilar(task.getMissionItem())) {
-				if (manager.getStatus(task.getQuest()).equals(QuestStatus.AVAILABLE) && !manager.hasCompletedTask(task) && manager.hasUnlockedTask(task)) {
-					manager.addProgress(task, 1);
-				}
-			}
-		}
+			return is.isSimilar(mission.getMissionItem());
+		});
+	}
+	
+	@Override
+	protected void layoutMenu(MissionChange changes) {
+		super.layoutMenu(changes);
+		putButton(10, new MenuData(
+				new ItemBuilder(changes.getDisplayItem()).lore(
+						"",
+						"&e> Click to change the Block to",
+						"&ethe Item you are currently holding").get(),
+				MissionButton.simpleHandler(changes, event -> {
+					Player p = (Player)event.getWhoClicked();
+					ItemStack mainItem = p.getInventory().getItemInMainHand();
+					if(mainItem != null && mainItem.getType().isBlock()) {
+						mainItem = mainItem.clone();
+						mainItem.setAmount(1);
+						changes.setItem(mainItem);
+					}
+						
+				})
+		));
+		putButton(17, MissionButton.amount(changes));
 	}
 }

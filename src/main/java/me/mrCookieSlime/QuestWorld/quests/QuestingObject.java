@@ -35,4 +35,8 @@ public abstract class QuestingObject implements IQuestingObject {
 		return false;
 	}
 
+	@Override
+	public int hashCode() {
+		return (int)getUnique();
+	}
 }

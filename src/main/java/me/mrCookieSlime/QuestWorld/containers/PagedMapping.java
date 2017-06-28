@@ -16,12 +16,15 @@ import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.utils.ItemBuilder;
 
 public class PagedMapping {
+	private int currentPage = 0;
 	private final int pageSize;
 	private final List<PageList> pages = new ArrayList<>();
 
 	private int activeSize;
 	private ItemStack defaultItem = null;
 	private MenuClickHandler defaultButton = null;
+	
+	private MenuClickHandler backButton = null;
 	
 	public PagedMapping(int elementsPerPage) {
 		pageSize = elementsPerPage;
@@ -47,6 +50,10 @@ public class PagedMapping {
 		defaultButton = button;
 		for(PageList page : pages)
 			page.setDefaultButton(button);
+	}
+	
+	public void setBackButton(MenuClickHandler button) {
+		backButton = button;
 	}
 	
 	public int getCapacity() {
@@ -91,6 +98,29 @@ public class PagedMapping {
 		findPage(index).addButton(index % pageSize, button);
 	}
 	
+	// TODO this is all to handle party buttons NOT being part of the nav frame
+	boolean[] hacked = {
+			false,false,false,
+			false,false,false,
+			false,false,false,
+	};
+	public void hackNav(int index) {
+		hacked[index] = true;
+	}
+	
+	public void addNavButton(int index, MenuClickHandler button) {
+
+		findPage(index).addButton(index % pageSize, new MenuClickHandler() {
+
+			@Override
+			public boolean onClick(Player arg0, int arg1, ItemStack arg2, ClickAction arg3) {
+				QuestWorld.getInstance().getManager(arg0).putPage(currentPage);
+				return button.onClick(arg0, arg1, arg2, arg3);
+			}
+			
+		});
+	}
+	
 	public void removeItem(int index) {
 		findPage(index).removeItem(index % pageSize);
 	}
@@ -99,9 +129,31 @@ public class PagedMapping {
 		findPage(index).removeButton(index % pageSize);
 	}
 	
-	public void build(ChestMenu menu, int page) {
+	public void build(ChestMenu menu, Player p) {
+		int page = QuestWorld.getInstance().getManager(p).popPage();
+		build(menu, page);
+	}
+
+	private void build(ChestMenu menu, int page) {
 		if(page < 0 || page >= pages.size())
 			return;
+		currentPage = page;
+		
+		// TODO same as above, hack made for party button
+		for(int i = 0; i < 9; ++i) {
+			if(hacked[i]) {
+				MenuClickHandler old = menu.getMenuClickHandler(i);
+				menu.addMenuClickHandler(i, new MenuClickHandler() {
+
+					@Override
+					public boolean onClick(Player arg0, int arg1, ItemStack arg2, ClickAction arg3) {
+						QuestWorld.getInstance().getManager(arg0).clearPages();
+						return old.onClick(arg0, arg1, arg2, arg3);
+					}
+					
+				});
+			}
+		}
 		
 		pages.get(page).build(menu, 9, activeSize);
 		
@@ -132,9 +184,14 @@ public class PagedMapping {
 				ChestMenu self = Maps.getInstance().menus.get(p.getUniqueId());
 				build(self, nextPage);
 				self.reset(true);
-				//self.open(p); // This isn't needed because we just modify the current inventory
+				self.open(p); // This isn't really needed, but it forces items to appear correct
 				return false;
 			}
 		});
+		
+		if(backButton != null) {
+			display = QuestWorld.getInstance().getBookLocal("button.back.general");
+			menu.addItem(0, new ItemBuilder(Material.MAP).display(display).get(), backButton);
+		}
 	}
 }

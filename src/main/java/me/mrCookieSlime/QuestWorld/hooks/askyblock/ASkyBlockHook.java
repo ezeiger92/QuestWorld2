@@ -8,7 +8,7 @@ import me.mrCookieSlime.QuestWorld.api.QuestExtension;
 public class ASkyBlockHook extends QuestExtension {
 	@Override
 	public String[] getDepends() {
-		return new String[] { "ChatReaction" };
+		return new String[] { "ASkyBlock" };
 	}
 
 	MissionType mission;

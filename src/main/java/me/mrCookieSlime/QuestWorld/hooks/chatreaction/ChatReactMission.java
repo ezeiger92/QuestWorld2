@@ -9,16 +9,15 @@ import org.bukkit.material.MaterialData;
 
 import me.clip.chatreaction.events.ReactionWinEvent;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.Item.CustomItem;
+import me.mrCookieSlime.QuestWorld.QuestWorld;
+import me.mrCookieSlime.QuestWorld.api.MissionChange;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.interfaces.IMission;
-import me.mrCookieSlime.QuestWorld.quests.QuestChecker;
-import me.mrCookieSlime.QuestWorld.quests.QuestListener;
-import me.mrCookieSlime.QuestWorld.quests.QuestManager;
-import me.mrCookieSlime.QuestWorld.quests.Mission;
+import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
 
 public class ChatReactMission extends MissionType implements Listener {
 	public ChatReactMission() {
-		super("CHATREACTION_WIN", true, false, false, SubmissionType.INTEGER, new MaterialData(Material.DIAMOND));
+		super("CHATREACTION_WIN", true, false, new MaterialData(Material.DIAMOND));
 	}
 	
 	@Override
@@ -38,13 +37,12 @@ public class ChatReactMission extends MissionType implements Listener {
 	@EventHandler
 	public void onWin(ReactionWinEvent e) {
 		Player p = e.getWinner();
-		
-		QuestChecker.check(p, e, "CHATREACTION_WIN", new QuestListener() {
-			
-			@Override
-			public void onProgressCheck(Player p, QuestManager manager, Mission task, Object event) {
-				manager.addProgress(task, 1);
-			}
-		});
+		QuestWorld.getInstance().getManager(p).forEachTaskOf(this, mission -> true);
+	}
+	
+	@Override
+	protected void layoutMenu(MissionChange changes) {
+		super.layoutMenu(changes);
+		putButton(17, MissionButton.amount(changes));
 	}
 }

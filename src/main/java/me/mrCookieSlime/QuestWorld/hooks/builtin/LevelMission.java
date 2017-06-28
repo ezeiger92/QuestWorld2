@@ -1,7 +1,6 @@
 package me.mrCookieSlime.QuestWorld.hooks.builtin;
 
 import org.bukkit.Material;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerLevelChangeEvent;
@@ -9,16 +8,15 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
 
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.Item.CustomItem;
+import me.mrCookieSlime.QuestWorld.QuestWorld;
+import me.mrCookieSlime.QuestWorld.api.MissionChange;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.interfaces.IMission;
-import me.mrCookieSlime.QuestWorld.quests.QuestChecker;
-import me.mrCookieSlime.QuestWorld.quests.QuestListener;
-import me.mrCookieSlime.QuestWorld.quests.QuestManager;
-import me.mrCookieSlime.QuestWorld.quests.Mission;
+import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
 
 public class LevelMission extends MissionType implements Listener {
 	public LevelMission() {
-		super("REACH_LEVEL", false, false, false, SubmissionType.INTEGER, new MaterialData(Material.EXP_BOTTLE));
+		super("REACH_LEVEL", false, false, new MaterialData(Material.EXP_BOTTLE));
 	}
 	
 	@Override
@@ -33,12 +31,12 @@ public class LevelMission extends MissionType implements Listener {
 	
 	@EventHandler
 	public void onXPChange(final PlayerLevelChangeEvent e) {
-		QuestChecker.check(e.getPlayer(), e, "REACH_LEVEL", new QuestListener() {
-			
-			@Override
-			public void onProgressCheck(Player p, QuestManager manager, Mission task, Object event) {
-				manager.setProgress(task, e.getNewLevel());
-			}
-		});
+		QuestWorld.getInstance().getManager(e.getPlayer()).forEachTaskOf(this, mission -> true);
+	}
+	
+	@Override
+	protected void layoutMenu(MissionChange changes) {
+		super.layoutMenu(changes);
+		putButton(17, MissionButton.amount(changes));
 	}
 }

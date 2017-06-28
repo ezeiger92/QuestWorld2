@@ -61,8 +61,10 @@ public class EditorCommand implements CommandExecutor {
 				sender.sendMessage(Text.colorize("&cCould not save Preset &a", args[1]));
 		}
 		else if (param.equals("gui")) {
-			if (sender instanceof Player)
+			if (sender instanceof Player) {
+				QuestWorld.getInstance().getManager((Player)sender).clearPages();
 				QuestBook.openEditor((Player) sender);
+			}
 			else
 				sender.sendMessage(Text.colorize("&4You are not a Player"));
 		}

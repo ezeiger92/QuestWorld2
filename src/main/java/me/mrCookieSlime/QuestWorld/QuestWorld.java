@@ -38,9 +38,11 @@ import me.mrCookieSlime.QuestWorld.listeners.Input;
 import me.mrCookieSlime.QuestWorld.listeners.InputType;
 import me.mrCookieSlime.QuestWorld.listeners.PlayerListener;
 import me.mrCookieSlime.QuestWorld.listeners.SelfListener;
+import me.mrCookieSlime.QuestWorld.managers.MissionViewer;
+import me.mrCookieSlime.QuestWorld.managers.PlayerManager;
 import me.mrCookieSlime.QuestWorld.quests.Category;
+import me.mrCookieSlime.QuestWorld.quests.Mission;
 import me.mrCookieSlime.QuestWorld.quests.Quest;
-import me.mrCookieSlime.QuestWorld.quests.QuestManager;
 import me.mrCookieSlime.QuestWorld.utils.Lang;
 import me.mrCookieSlime.QuestWorld.utils.Log;
 import me.mrCookieSlime.QuestWorld.utils.Sounds;
@@ -51,7 +53,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.PluginCommand;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
@@ -65,9 +66,10 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 	private long lastSave;
 
 	Config cfg, book, sounds;
+	private MissionViewer missionViewer = new MissionViewer();
 	private Map<String, MissionType> types      = new HashMap<>();
 	private Map<Integer, Category>   categories = new HashMap<>();
-	private Map<UUID, QuestManager>  profiles   = new HashMap<>();
+	private Map<UUID, PlayerManager>  profiles   = new HashMap<>();
 	private Map<UUID, Input>         inputs     = new HashMap<>();
 	
 	Economy economy;
@@ -105,6 +107,14 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 			hookInstaller.add(hook);
 	}
 	
+	public Set<Mission> getMissionsOf(MissionType type) {
+		return missionViewer.getMissionsOf(type);
+	}
+	
+	public Set<Mission> getTickingMissions() {
+		return missionViewer.getTickingMissions();
+	}
+	
 	@Override
 	public void onEnable() {
 		// Initialize all we can before we need CSCoreLib
@@ -140,7 +150,6 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 				for (Category category: getCategories())
 					quests += category.getQuests().size();
 
-				QuestManager.updateTickingTasks();
 				Log.fine("[Quest World 2] Successfully loaded " + categories + " Categories");
 				Log.fine("[Quest World 2] Successfully loaded " + quests + " Quests");
 			}
@@ -158,6 +167,7 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 
 		new EditorListener(this);
 		new PlayerListener(this);
+		Bukkit.getPluginManager().registerEvents(missionViewer, this);
 		Bukkit.getPluginManager().registerEvents(new SelfListener(), this);
 		
 		ShapelessRecipe recipe = new ShapelessRecipe(GuideBook.get());
@@ -311,7 +321,6 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 		unload();
 		
 		instance = null;
-		QuestManager.ticking_tasks = null;
 		
 		getServer().getServicesManager().unregisterAll(this);
 		getServer().getScheduler().cancelTasks(this);
@@ -328,7 +337,7 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 		while(categories.hasNext())
 			categories.next().getValue().save(force);
 		
-		Iterator<Map.Entry<UUID, QuestManager>> managers = this.profiles.entrySet().iterator();
+		Iterator<Map.Entry<UUID, PlayerManager>> managers = this.profiles.entrySet().iterator();
 		while(managers.hasNext())
 			managers.next().getValue().save();
 		
@@ -343,7 +352,7 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 		}
 		this.categories.clear();
 		
-		Iterator<Map.Entry<UUID, QuestManager>> managers = this.profiles.entrySet().iterator();
+		Iterator<Map.Entry<UUID, PlayerManager>> managers = this.profiles.entrySet().iterator();
 		while(managers.hasNext()) {
 			managers.next().getValue().save();
 		}
@@ -440,27 +449,27 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 	
 	public void unregisterCategory(Category category) {
 		for (Quest quest: category.getQuests()) {
-			QuestManager.clearAllQuestData(quest);
+			PlayerManager.clearAllQuestData(quest);
 			new File("plugins/QuestWorld/quests/" + quest.getID() + "-C" + category.getID() + ".quest").delete();
 		}
 		categories.remove(category.getID());
 		new File("plugins/QuestWorld/quests/" + category.getID() + ".category").delete();
 	}
 	
-	public void registerManager(QuestManager manager) {
+	public void registerManager(PlayerManager manager) {
 		this.profiles.put(manager.getUUID(), manager);
 	}
 	
-	public void unregisterManager(QuestManager manager) {
+	public void unregisterManager(PlayerManager manager) {
 		this.profiles.remove(manager.getUUID());
 	}
 	
-	public QuestManager getManager(OfflinePlayer p) {
-		return profiles.containsKey(p.getUniqueId()) ? profiles.get(p.getUniqueId()): new QuestManager(p);
+	public PlayerManager getManager(OfflinePlayer p) {
+		return profiles.containsKey(p.getUniqueId()) ? profiles.get(p.getUniqueId()): new PlayerManager(p);
 	}
 	
-	public QuestManager getManager(String uuid) {
-		return profiles.containsKey(UUID.fromString(uuid)) ? profiles.get(UUID.fromString(uuid)): new QuestManager(UUID.fromString(uuid));
+	public PlayerManager getManager(String uuid) {
+		return profiles.containsKey(UUID.fromString(uuid)) ? profiles.get(UUID.fromString(uuid)): new PlayerManager(UUID.fromString(uuid));
 	}
 	
 	public boolean isManagerLoaded(String uuid) {
@@ -477,11 +486,11 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 	}
 	
 	private void registerMissionType(MissionType type) {
-		Log.fine("Registrar - Storing mission: " + type.getID());
-		types.put(type.getID(), type);
+		Log.fine("Registrar - Storing mission: " + type.getName());
+		types.put(type.getName(), type);
 		
 		if(type instanceof Listener) {
-			Log.fine("Registrar - Registering events: " + type.getID());
+			Log.fine("Registrar - Registering events: " + type.getName());
 			getServer().getPluginManager().registerEvents((Listener)type, this);
 		}
 	}

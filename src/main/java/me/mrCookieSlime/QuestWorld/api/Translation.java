@@ -33,24 +33,20 @@ public enum Translation implements Translator {
 	quest_permchange("editor.quest.perm-change", "name", "perm"),
 	quest_permset   ("editor.quest.perm-set",    "name", "perm", "perm_old"),
 	
-	// PH
+	// TODO better names, PH
 	mission_await("editor.await-mission-name"),
 	mission_name("editor.edit-mission-name"),
 	
 	dialog_add("editor.add-dialogue"),
 	dialog_set("editor.set-dialogue", "path"),
-	@Deprecated
-	citizen_l("editor.link-citizen"),
-	@Deprecated
-	citizen_link("editor.link-citizen-finished"),
 	
 	mission_desc("editor.misssion-description"),
 	
 	killmission_rename("editor.rename-kill-mission"),
 	killtype_rename("editor.renamed-kill-type"),
-	citizen_rename("editor.renamed-citizen"), // What the hell this was never set? Why?
+	citizen_rename("editor.renamed-citizen"),
 	location_rename("editor.renamed-location"),
-	// PH
+	// End PH
 	
 	notify_timefail    ("notifications.task-failed-timeframe",  "quest"),
 	notify_timestart   ("notifications.task-timeframe-started", "task", "time"),
@@ -90,7 +86,7 @@ public enum Translation implements Translator {
 		return name() + " {path: " + path() + ", placeholders: " + Arrays.asList(placeholders()).toString() + "}";
 	}
 	
-	public static void forEach(Consumer<Translation> func) {
+	public static void forEach(Consumer<Translator> func) {
 		for(Translation t : values())
 			func.accept(t);
 	}

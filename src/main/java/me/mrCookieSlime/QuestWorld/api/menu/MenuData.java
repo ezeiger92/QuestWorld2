@@ -1,16 +1,42 @@
 package me.mrCookieSlime.QuestWorld.api.menu;
 
-import java.util.HashMap;
-import java.util.Map;
+import org.bukkit.inventory.ItemStack;
+
+import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu;
+import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu.MenuClickHandler;
 
 public class MenuData {
-	private Map<Integer, MenuAction> actions = new HashMap<>();
+	private MenuClickHandler handler;
+	private ItemStack item;
 	
-	public MenuAction getAction(int index) {
-		return actions.get(index);
+	public MenuData(ItemStack item, MenuClickHandler handler) {
+		setItem(item);
+		setHandler(handler);
 	}
 	
-	public MenuAction putAction(int index, MenuAction action) {
-		return actions.put(index, action);
+	public MenuClickHandler getHandler() {
+		return handler;
+	}
+	
+	public ItemStack getItem() {
+		return item.clone();
+	}
+	
+	public void setHandler(MenuClickHandler handler) {
+		if(handler == null)
+			throw new NullPointerException("Handler cannot be null!");
+		
+		this.handler = handler;
+	}
+	
+	public void setItem(ItemStack item) {
+		if(item == null)
+			throw new NullPointerException("Item cannot be null!");
+		
+		this.item = item.clone();
+	}
+	
+	public void attach(int slot, ChestMenu menu) {
+		menu.addItem(slot, item, handler);
 	}
 }

@@ -1,5 +1,6 @@
 package me.mrCookieSlime.QuestWorld.events;
 
+import org.bukkit.Bukkit;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 
@@ -19,13 +20,19 @@ public abstract class CancellableEvent extends Event implements Cancellable {
 		cancelled = cancel;
 	}
 	
-/* COPY PASTE ME INTO OTHER EVENTS :D
+	public static boolean send(CancellableEvent event) {
+		Bukkit.getPluginManager().callEvent(event);
+		
+		return !event.isCancelled();
+	}
+	
+/*
+	COPY PASTE ME INTO OTHER EVENTS :D
 
 	// Boilerplate copy/paste from CancellableEvent
 	@Override
 	public HandlerList getHandlers() { return handlers;	}
 	public static HandlerList getHandlerList() { return handlers; }
 	private static final HandlerList handlers = new HandlerList();
-
 */
 }

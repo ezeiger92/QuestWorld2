@@ -33,10 +33,8 @@ public class HookInstaller implements Listener {
 		if(reqs != null)
 			for(int i = 0; i < reqs.length; ++i) {
 				Plugin p = manager.getPlugin(reqs[i]);
-				if(p != null && p.isEnabled()) {
-					@SuppressWarnings("deprecation")
-					boolean res = hook.directEnablePlugin(p, i);
-				}
+				if(p != null && p.isEnabled())
+					hook.directEnablePlugin(p, i);
 			}
 		
 		if(hook.isReady()) {
@@ -66,8 +64,7 @@ public class HookInstaller implements Listener {
 		
 		while(iterator.hasNext()) {
 			QuestExtension hook = iterator.next();
-			@SuppressWarnings("deprecation")
-			boolean res = hook.enablePlugin(event.getPlugin());
+			hook.enablePlugin(event.getPlugin());
 			
 			if(hook.isReady()) {
 				Log.fine("Installer - Dependencies loaded: " + hook.getName());

@@ -91,7 +91,6 @@ public abstract class QuestExtension {
 	 * @param plugin The plugin matching a dependency
 	 * @param index The index of the match
 	 */
-	@Deprecated
 	public final boolean directEnablePlugin(Plugin plugin, int index) {
 		if(!plugin.getName().equals(requirements[index]) || found[index] != null)
 			return false;
@@ -108,7 +107,6 @@ public abstract class QuestExtension {
 	 * 
 	 * @param plugin The plugin we are attempting to match
 	 */
-	@Deprecated
 	public final boolean enablePlugin(Plugin plugin) {
 		for(int i = 0; i < requirements.length; ++i)
 			if(directEnablePlugin(plugin, i))

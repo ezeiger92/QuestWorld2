@@ -14,11 +14,21 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.inventory.meta.SpawnEggMeta;
-import org.bukkit.material.Colorable;
-import org.bukkit.material.MaterialData;
-import org.bukkit.material.Wool;
 
 public class ItemBuilder {
+	public static enum Proto {
+		RED_WOOL(new ItemBuilder(Material.WOOL).color(DyeColor.RED).get()),
+		;
+		private ItemStack item;
+		Proto(ItemStack item) {
+			this.item = item;
+		}
+		
+		public ItemBuilder get() {
+			return new ItemBuilder(item);
+		}
+	}
+	
 	public static ItemStack clone(ItemStack source) {
 		if(source != null)
 			return source.clone();
@@ -249,11 +259,6 @@ public class ItemBuilder {
 		
 		return this;
 	}
-
-	/*@SuppressWarnings("deprecation")
-	private void legacyEggData(EntityType entity) {
-		durability(entity.getTypeId());
-	}*/
 	
 	/**
      * Sets leather armor color

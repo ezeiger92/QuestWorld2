@@ -39,7 +39,7 @@ public class Mission extends QuestingObject implements IMissionWrite {
 	long timeframe;
 	boolean deathReset;
 	String lore;
-	int custom_int;
+	int customInt;
 	boolean spawnersAllowed;
 	
 	List<String> dialogue = new ArrayList<String>();
@@ -55,7 +55,7 @@ public class Mission extends QuestingObject implements IMissionWrite {
 		this.location = location;
 		this.displayName = displayName;
 		this.timeframe = timeframe;
-		this.custom_int = custom_int;
+		this.customInt = custom_int;
 		this.deathReset = deathReset;
 		this.lore = lore == null ? "": lore;
 		this.spawnersAllowed = spawnersAllowed;
@@ -80,6 +80,30 @@ public class Mission extends QuestingObject implements IMissionWrite {
 		type.attemptUpgrade(this);
 	}
 	
+	protected Mission(Mission copy) {
+		copy.copyTo(this);
+	}
+	
+	protected void copyTo(Mission dest) {
+		dest.quest = quest;
+		dest.type = type;
+		dest.item = item.clone();
+		dest.amount = amount;
+		dest.id = id;
+		dest.entity = entity;
+		dest.location = location.clone();
+		dest.name = name;
+		dest.displayName = displayName;
+		dest.timeframe = timeframe;
+		dest.deathReset = deathReset;
+		dest.lore = lore;
+		dest.customInt = customInt;
+		dest.spawnersAllowed = spawnersAllowed;
+		
+		dest.dialogue = new ArrayList<String>();
+		dest.dialogue.addAll(dialogue);
+	}
+
 	public String getID() {
 		return id;
 	}
@@ -269,6 +293,8 @@ public class Mission extends QuestingObject implements IMissionWrite {
 		return this.displayName;
 	}
 	
+	// TODO This is the time for mission completion in minutes... 
+	// Consider using int, fits in nicer and max time is 4083 years
 	public long getTimeframe() {
 		return this.timeframe;
 	}
@@ -302,16 +328,16 @@ public class Mission extends QuestingObject implements IMissionWrite {
 
 	public void setCustomInt(int val) {
 		quest.updateLastModified();
-		this.custom_int = val;
+		this.customInt = val;
 	}
 
 	@Deprecated
 	public NPC getCitizen() {
-		return CitizensAPI.getNPCRegistry().getById(custom_int);
+		return CitizensAPI.getNPCRegistry().getById(customInt);
 	}
 
 	public int getCustomInt() {
-		return custom_int;
+		return customInt;
 	}
 
 	public boolean acceptsSpawners() {

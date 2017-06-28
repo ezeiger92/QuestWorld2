@@ -38,6 +38,7 @@ public class QuestsCommand implements CommandExecutor {
 					try {
 						Category category = QuestWorld.getInstance().getCategory(Integer.parseInt(args[0]));
 						if (category != null)  {
+							QuestWorld.getInstance().getManager((Player)sender).clearPages();
 							if (args.length == 2) QuestBook.openQuest((Player) sender, category.getQuest(Integer.parseInt(args[1])), false, false);
 							else QuestBook.openCategory((Player) sender, category, false);
 						}

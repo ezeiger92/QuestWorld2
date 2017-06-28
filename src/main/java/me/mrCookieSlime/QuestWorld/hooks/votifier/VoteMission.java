@@ -10,17 +10,16 @@ import org.bukkit.material.MaterialData;
 import com.vexsoftware.votifier.model.VotifierEvent;
 
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.Item.CustomItem;
+import me.mrCookieSlime.QuestWorld.QuestWorld;
+import me.mrCookieSlime.QuestWorld.api.MissionChange;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.interfaces.IMission;
-import me.mrCookieSlime.QuestWorld.quests.QuestChecker;
-import me.mrCookieSlime.QuestWorld.quests.QuestListener;
-import me.mrCookieSlime.QuestWorld.quests.QuestManager;
+import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
 import me.mrCookieSlime.QuestWorld.utils.PlayerTools;
-import me.mrCookieSlime.QuestWorld.quests.Mission;
 
 public class VoteMission extends MissionType implements Listener {
 	public VoteMission() {
-		super("VOTIFIER_VOTE", true, false, false, SubmissionType.INTEGER, new MaterialData(Material.DIAMOND));
+		super("VOTIFIER_VOTE", true, false, new MaterialData(Material.PAPER));
 	}
 	
 	@Override
@@ -36,14 +35,13 @@ public class VoteMission extends MissionType implements Listener {
 	@EventHandler
 	public void onVote(VotifierEvent e) {
 		Player p = PlayerTools.getPlayer(e.getVote().getUsername());
-		if (p != null) {
-			QuestChecker.check(p, e, "VOTIFIER_VOTE", new QuestListener() {
-				
-				@Override
-				public void onProgressCheck(Player p, QuestManager manager, Mission task, Object event) {
-					manager.addProgress(task, 1);
-				}
-			});
-		}
+		if (p != null)
+			QuestWorld.getInstance().getManager(p).forEachTaskOf(this, mission -> true);
+	}
+	
+	@Override
+	protected void layoutMenu(MissionChange changes) {
+		super.layoutMenu(changes);
+		putButton(17, MissionButton.amount(changes));
 	}
 }

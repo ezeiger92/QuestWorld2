@@ -11,7 +11,7 @@ import me.mrCookieSlime.CSCoreLibPlugin.general.Chat.TellRawMessage.ClickAction;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Chat.TellRawMessage.HoverAction;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.Translation;
-import me.mrCookieSlime.QuestWorld.quests.QuestManager;
+import me.mrCookieSlime.QuestWorld.managers.PlayerManager;
 import me.mrCookieSlime.QuestWorld.utils.PlayerTools;
 import me.mrCookieSlime.QuestWorld.utils.Text;
 
@@ -23,7 +23,7 @@ public class Party {
 	
 	UUID leader;
 	Set<UUID> members;
-	QuestManager manager;
+	PlayerManager manager;
 	Set<UUID> pending;
 
 	public Party(UUID uuid) {
@@ -107,10 +107,10 @@ public class Party {
 	}
 	
 	public void abandon() {
-		for (UUID member: members) {
-			members.remove(member);
+		for (UUID member: members)
 			QuestWorld.getInstance().getManager(Bukkit.getOfflinePlayer(member)).toConfig().setValue("party.associated", null);
-		}
+		
+		members.clear();
 		manager.toConfig().setValue("party.associated", null);
 		save();
 	}

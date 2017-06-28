@@ -1,22 +1,24 @@
-package me.mrCookieSlime.QuestWorld.hooks.votifier;
+package me.mrCookieSlime.QuestWorld.hooks.money;
 
 import org.bukkit.plugin.Plugin;
 
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.QuestExtension;
 
-public class VotifierHook extends QuestExtension {
+public class MoneyHook extends QuestExtension {
+
+	private MissionType[] missions = null;
+	
 	@Override
 	public String[] getDepends() {
-		return new String[] { "Votifier" };
+		return new String[] { "Vault" };
 	}
 
-	MissionType[] missions = null;
 	@Override
-	public void initialize(Plugin parent) {
+	protected void initialize(Plugin parent) {
 		missions = new MissionType[] {
-			new VoteMission()
-		}; 
+				
+		};
 	}
 
 	@Override

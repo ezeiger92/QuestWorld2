@@ -1,24 +1,13 @@
 package me.mrCookieSlime.QuestWorld.listeners;
 
-import me.mrCookieSlime.QuestWorld.QuestWorld;
-import me.mrCookieSlime.QuestWorld.quests.Category;
-import me.mrCookieSlime.QuestWorld.quests.Quest;
-import me.mrCookieSlime.QuestWorld.quests.QuestManager;
-import me.mrCookieSlime.QuestWorld.quests.Mission;
-import me.mrCookieSlime.QuestWorld.quests.QuestStatus;
-import me.mrCookieSlime.QuestWorld.utils.Text;
+import me.mrCookieSlime.QuestWorld.utils.EntityTools;
 
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
-import org.bukkit.event.entity.EntityDeathEvent;
-import org.bukkit.metadata.FixedMetadataValue;
+
 import org.bukkit.plugin.Plugin;
 
 public class TaskListener implements Listener {
@@ -26,7 +15,7 @@ public class TaskListener implements Listener {
 	public TaskListener(Plugin plugin) {
 		plugin.getServer().getPluginManager().registerEvents(this, plugin);
 	}
-
+	/*
 	@EventHandler
 	public void onKill(EntityDeathEvent e) {
 		if (e.getEntity().getLastDamageCause() == null) return;
@@ -46,7 +35,7 @@ public class TaskListener implements Listener {
 		}
 		
 		if (killer != null) {
-			QuestManager manager = QuestWorld.getInstance().getManager(killer);
+			PlayerManager manager = QuestWorld.getInstance().getManager(killer);
 			for (Category category: QuestWorld.getInstance().getCategories()) {
 				for (Quest quest: category.getQuests()) {
 					if (category.isWorldEnabled(killer.getWorld().getName())) {
@@ -74,9 +63,11 @@ public class TaskListener implements Listener {
 			}
 		}
 	}
+*/
 	
 	@EventHandler(priority=EventPriority.MONITOR,ignoreCancelled=true)
 	public void onCreatureSpawn(CreatureSpawnEvent e) {
-		if (e.getSpawnReason().equals(SpawnReason.SPAWNER)) e.getEntity().setMetadata("spawned_by_spawner", new FixedMetadataValue(QuestWorld.getInstance(), "QuestWorld"));
+		if (e.getSpawnReason().equals(SpawnReason.SPAWNER))
+			EntityTools.setFromSpawner(e.getEntity(), true);
 	}
 }

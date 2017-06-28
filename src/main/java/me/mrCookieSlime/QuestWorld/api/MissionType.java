@@ -1,42 +1,32 @@
 package me.mrCookieSlime.QuestWorld.api;
 
+import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.interfaces.IMission;
 import me.mrCookieSlime.QuestWorld.api.interfaces.IMissionWrite;
+import me.mrCookieSlime.QuestWorld.api.menu.MenuData;
+import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
 import me.mrCookieSlime.QuestWorld.utils.Log;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
 
 public abstract class MissionType {
-	@Deprecated
-	public enum SubmissionType {
-		ITEM,
-		ENTITY, 
-		UNKNOWN, 
-		CITIZENS_ITEM,
-		LOCATION,
-		INTEGER,
-		TIME,
-		CITIZENS_INTERACT,
-		CITIZENS_KILL, 
-		BLOCK;
-	}
-	
-	String id;
+	String name;
 	MaterialData selectorItem;
-	SubmissionType type;
-	boolean supportsTimeframes, supportsDeathReset, ticking;
-
-	public MissionType(String name, boolean supportsTimeframes, boolean supportsDeathReset, boolean ticking, SubmissionType type, MaterialData item) {
+	boolean supportsTimeframes, supportsDeathReset;
+	private Map<Integer, MenuData> menuData;
+	
+	public MissionType(String name, boolean supportsTimeframes, boolean supportsDeathReset, MaterialData item) {
 		Log.fine("MissionType - Creating: " + name);
-		this.id = name;
+		this.name = name;
 		this.selectorItem = item;
-		this.type = type;
 		this.supportsTimeframes = supportsTimeframes;
 		this.supportsDeathReset = supportsDeathReset;
-		this.ticking = ticking;
-		
+		menuData = new HashMap<>();
 	}
 	
 	public final String defaultDisplayName(IMission instance) {
@@ -75,15 +65,9 @@ public abstract class MissionType {
 		
 		return result;
 	}
-
-	@Deprecated
-	public String getID() {
-		return id;
-	}
 	
-	@Deprecated
-	public SubmissionType getSubmissionType() {
-		return type;
+	public String getName() {
+		return name;
 	}
 	
 	public boolean supportsTimeframes() {
@@ -92,20 +76,15 @@ public abstract class MissionType {
 	
 	@Override
 	public String toString() {
-		return id;
+		return getName();
 	}
 
 	public boolean supportsDeathReset() {
 		return this.supportsDeathReset;
 	}
 
-	public boolean isTicker() {
-		return this.ticking;
-	}
-	
-	@Deprecated
-	protected void setId(String id) {
-		this.id = id;
+	protected void setName(String newName) {
+		name = newName;
 	}
 	
 	public boolean attemptUpgrade(IMissionWrite instance) {
@@ -118,5 +97,35 @@ public abstract class MissionType {
 	
 	public String progressString(float percent, int current, int total) {
 		return Math.round(percent * 100) + "% (" + current + "/" + total + ")";
+	}
+	
+	public final MenuData getButton(int index) {
+		return menuData.get(index);
+	}
+	
+	public final MenuData putButton(int index, MenuData data) {
+		return menuData.put(index, data);
+	}
+	
+	public final MenuData removeButton(int index) {
+		return menuData.remove(index);
+	}
+	 
+	public final void buildMenu(MissionChange changes, ChestMenu menu) {
+		layoutMenu(changes);
+		for(Map.Entry<Integer, MenuData> entry : menuData.entrySet())
+			menu.addItem(entry.getKey(), entry.getValue().getItem(), entry.getValue().getHandler());
+	}
+	
+	protected void layoutMenu(MissionChange changes) {
+		if(supportsDeathReset()) putButton(5, MissionButton.deathReset(changes));
+		if(supportsTimeframes()) putButton(6, MissionButton.timeframe(changes));
+		putButton(7, MissionButton.missionName(changes));
+		putButton(8, MissionButton.dialogue(changes));
+	}
+	
+	@Override
+	public int hashCode() {
+		return getName().hashCode();
 	}
 }

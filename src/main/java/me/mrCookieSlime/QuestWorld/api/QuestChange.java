@@ -2,10 +2,10 @@ package me.mrCookieSlime.QuestWorld.api;
 
 import java.util.List;
 
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import me.mrCookieSlime.QuestWorld.events.CancellableEvent;
 import me.mrCookieSlime.QuestWorld.events.QuestChangeEvent;
 import me.mrCookieSlime.QuestWorld.quests.Quest;
 import me.mrCookieSlime.QuestWorld.quests.Mission;
@@ -79,10 +79,7 @@ public class QuestChange extends Quest {
 	 * @return false if the event is cancelled, otherwise true
 	 */
 	public boolean sendEvent() {
-		QuestChangeEvent event = new QuestChangeEvent(this);
-		Bukkit.getPluginManager().callEvent(event);
-		
-		return !event.isCancelled();
+		return CancellableEvent.send(new QuestChangeEvent(this));
 	}
 	
 	// Modify "setX" methods

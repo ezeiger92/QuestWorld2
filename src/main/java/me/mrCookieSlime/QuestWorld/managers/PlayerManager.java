@@ -1,4 +1,4 @@
-package me.mrCookieSlime.QuestWorld.quests;
+package me.mrCookieSlime.QuestWorld.managers;
 
 import java.io.File;
 import java.text.ParseException;
@@ -6,29 +6,35 @@ import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.Stack;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 import me.mrCookieSlime.CSCoreLibPlugin.Configuration.Config;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Clock;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.Translation;
-import me.mrCookieSlime.QuestWorld.api.MissionType.SubmissionType;
+import me.mrCookieSlime.QuestWorld.api.interfaces.IMission;
+import me.mrCookieSlime.QuestWorld.api.MissionType;
+import me.mrCookieSlime.QuestWorld.api.Ticking;
 import me.mrCookieSlime.QuestWorld.parties.Party;
+import me.mrCookieSlime.QuestWorld.quests.Category;
+import me.mrCookieSlime.QuestWorld.quests.Mission;
+import me.mrCookieSlime.QuestWorld.quests.Quest;
+import me.mrCookieSlime.QuestWorld.quests.QuestStatus;
+import me.mrCookieSlime.QuestWorld.quests.QuestingObject;
 import me.mrCookieSlime.QuestWorld.utils.PlayerTools;
 import me.mrCookieSlime.QuestWorld.utils.Text;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.Statistic;
 import org.bukkit.entity.Player;
 
-public class QuestManager {
+public class PlayerManager {
 	
 	public static Map<UUID, Quest> autoclaim = new HashMap<UUID, Quest>();
 	
@@ -39,20 +45,67 @@ public class QuestManager {
 	private Map<Long, Category> activeCategories;
 	private Map<Long, Quest> activeQuests;
 	private Map<Long, Mission> activeMissions;
-
-	public static Set<Mission> ticking_tasks = new HashSet<Mission>();
-	public static Set<Mission> block_breaking_tasks = new HashSet<Mission>();
-	public static Set<Mission> citizen_tasks = new HashSet<Mission>();
 	
-	public QuestManager(OfflinePlayer p) {
+	private Stack<Integer> pages = new Stack<>();
+	
+	public PlayerManager(OfflinePlayer p) {
 		this(p.getUniqueId());
 	}
 	
-	public QuestManager(UUID uuid) {
+	public PlayerManager(UUID uuid) {
 		this.uuid = uuid;
 		this.cfg = new Config("data-storage/Quest World/" + uuid + ".yml");
 		
 		QuestWorld.getInstance().registerManager(this);
+	}
+	
+	public void putPage(int pageNum) {
+		pages.add(pageNum);
+	}
+	
+	public int popPage() {
+		if(pages.isEmpty())
+			return 0;
+		
+		return pages.pop();
+	}
+	
+	public void clearPages() {
+		pages.clear();
+	}
+	
+	public void forEachTaskOf(MissionType type, Predicate<IMission> condition) {
+		forEachTaskOf(type, condition, 1, false);
+	}
+	
+	public void forEachTaskOf(MissionType type, Predicate<IMission> condition, int amount, boolean overwriteProgress) {
+		
+		Player player = Bukkit.getPlayer(uuid);
+		String worldName = player.getWorld().getName();
+		
+		for(Mission task : QuestWorld.getInstance().getMissionsOf(type)) {
+			Quest quest = task.getQuest();
+			if(quest == null)
+				continue;
+			
+			Category category = quest.getCategory();
+			//TODO This (and the null above) *shouldn't* ever happen, but there are some crazy things in this code
+			// Check to make sure this ACTUALY never happens, prevent it from being possible, and remove checks
+			if(category == null)
+				continue;
+			
+			if (category.isWorldEnabled(worldName) && quest.isWorldEnabled(worldName)) {
+				if (!hasCompletedTask(task) && hasUnlockedTask(task)) {
+					if (getStatus(quest).equals(QuestStatus.AVAILABLE)) {
+						if(condition.test(task))
+							if(overwriteProgress)
+								setProgress(task, amount);
+							else
+								addProgress(task, amount);
+					}
+				}
+			}
+		}
 	}
 	
 	public void unload() {
@@ -78,18 +131,18 @@ public class QuestManager {
 		}
 	}
 	
-	public long getCompletionDate(Mission task) {
+	public long getCompletionDate(IMission task) {
 		if (!cfg.contains(task.getQuest().getCategory().getID() + "." + task.getQuest().getID() + ".mission." + task.getID() + ".complete-until")) return 0;
 		return cfg.getLong(task.getQuest().getCategory().getID() + "." + task.getQuest().getID() + ".mission." + task.getID() + ".complete-until");
 	}
 	
-	public boolean isWithinTimeframe(Mission task) {
+	public boolean isWithinTimeframe(IMission task) {
 		long date = getCompletionDate(task);
 		if (date == 0) return true;
 		return date > System.currentTimeMillis();
 	}
 	
-	public boolean updateTimeframe(UUID uuid, Mission task, int amount) {
+	public boolean updateTimeframe(UUID uuid, IMission task, int amount) {
 		if (task.getTimeframe() == 0) return true;
 		Config cfg = QuestWorld.getInstance().getManager(Bukkit.getOfflinePlayer(uuid)).toConfig();
 		Player p = Bukkit.getPlayer(uuid);
@@ -113,8 +166,10 @@ public class QuestManager {
 		Player p = Bukkit.getPlayer(uuid);
 		
 		if (p != null && quest_check) {
-			for (Mission task: getTickingTasks()) {
+			for (Mission task: QuestWorld.getInstance().getTickingMissions()) {
 				if (getStatus(task.getQuest()).equals(QuestStatus.AVAILABLE) && !hasCompletedTask(task) && hasUnlockedTask(task)) {
+					((Ticking) task.getType()).onTick(this, task);
+					/*
 					if (task.getType().getID().equals("PLAY_TIME")) setProgress(task, p.getStatistic(Statistic.PLAY_ONE_TICK) / 20 / 60);
 					else if (task.getType().getID().equals("REACH_LOCATION")) {
 						if (task.getLocation().getWorld().getName().equals(p.getWorld().getName()) && task.getLocation().distanceSquared(p.getLocation()) < task.getCustomInt() * task.getCustomInt()) {
@@ -122,7 +177,7 @@ public class QuestManager {
 							// Just set the task to done (because it is) rather than increment by 1
 							setProgress(task, task.getAmount());
 						}
-					}
+					}*/
 				}
 			}
 		}
@@ -158,14 +213,6 @@ public class QuestManager {
 			}
 		}
 	}
-	
-	private Set<Mission> getTickingTasks() {
-		return ticking_tasks;
-	}
-	
-	public static Set<Mission> getCitizenTasks() {
-		return citizen_tasks;
-	}
 
 	public QuestStatus getStatus(Quest quest) {
 		Player p = Bukkit.getPlayer(uuid);
@@ -196,24 +243,24 @@ public class QuestManager {
 		else return hasCompletedTask(tasks.get(index));
 	}
 	
-	public int getProgress(Mission task) {
+	public int getProgress(IMission task) {
 		Quest quest = task.getQuest();
 		if (!cfg.contains(quest.getCategory().getID() + "." + quest.getID() + ".mission." + task.getID() + ".progress")) return 0;
 		else return cfg.getInt(quest.getCategory().getID() + "." + quest.getID() + ".mission." + task.getID() + ".progress");
 	}
 	
-	public int getTotal(Mission task) {
+	public int getTotal(IMission task) {
 		return task.getAmount();
 	}
 	
-	public int addProgress(Mission task, int amount) {
+	public int addProgress(IMission task, int amount) {
 		int progress = getProgress(task) + amount;
 		int rest = progress - getTotal(task);
 		setProgress(task, rest > 0 ? task.getAmount(): progress);
 		return rest;
 	}
 
-	public void setProgress(Mission task, int amount) {
+	public void setProgress(IMission task, int amount) {
 		if (!updateTimeframe(this.uuid, task, amount)) return;
 		cfg.setValue(task.getQuest().getCategory().getID() + "." + task.getQuest().getID() + ".mission." + task.getID() + ".progress", amount > task.getAmount() ? task.getAmount(): amount);
 		
@@ -223,8 +270,8 @@ public class QuestManager {
 				sendQuestDialogue(player, task, task.getDialogue().iterator());
 			}
 		}
-		
-		if (!task.getType().getID().equals("ACCEPT_QUEST_FROM_NPC") && task.getQuest().supportsParties()) {
+		// TODO check !task.getType().getID().equals("ACCEPT_QUEST_FROM_NPC") && 
+		if (task.getQuest().supportsParties()) {
 			Party party = getParty();
 			if (party != null) {
 				for (UUID uuid: party.getPlayers()) {
@@ -242,7 +289,7 @@ public class QuestManager {
 		}
 	}
 
-	public void sendQuestDialogue(final Player player, final Mission task, final Iterator<String> dialogue) {
+	public void sendQuestDialogue(final Player player, final IMission task, final Iterator<String> dialogue) {
 		if (dialogue.hasNext()) {
 			sendDialogueComponent(player, dialogue.next());
 			sendDialogue(player.getUniqueId(), task, dialogue);
@@ -252,7 +299,7 @@ public class QuestManager {
 		}
 	}
 	
-	private void sendDialogue(final UUID uuid, final Mission task, final Iterator<String> dialogue) {
+	private void sendDialogue(final UUID uuid, final IMission task, final Iterator<String> dialogue) {
 		if (dialogue.hasNext()) {
 			final String line = dialogue.next();
 			Bukkit.getScheduler().scheduleSyncDelayedTask(QuestWorld.getInstance(), new Runnable() {
@@ -269,7 +316,8 @@ public class QuestManager {
 		}
 		else {
 			Player player = Bukkit.getPlayer(uuid);
-			if (!task.getType().getID().equals("ACCEPT_QUEST_FROM_NPC") && player != null)
+			// TODO check !task.getType().getID().equals("ACCEPT_QUEST_FROM_NPC") && 
+			if (player != null)
 				PlayerTools.sendTranslation(player, false, Translation.notify_completetask, task.getQuest().getName());
 		}
 	}
@@ -390,26 +438,4 @@ public class QuestManager {
 			}
 		}
 	}
-	
-	//TODO remove checks on SubmissionType and maybe ID
-	public static void updateTickingTasks() {
-		Set<Mission> ticking = new HashSet<Mission>();
-		Set<Mission> blockbreaking = new HashSet<Mission>();
-		Set<Mission> citizens = new HashSet<Mission>();
-		
-		for (Category category: QuestWorld.getInstance().getCategories()) {
-			for (Quest quest: category.getQuests()) {
-				for (Mission task: quest.getMissions()) {
-					if (task.getType().isTicker()) ticking.add(task);
-					if (task.getType().getID().equals("MINE_BLOCK")) blockbreaking.add(task);
-					if (task.getType().getSubmissionType().toString().startsWith("CITIZENS_")) citizens.add(task);
-				}
-			}
-		}
-		
-		ticking_tasks = ticking;
-		block_breaking_tasks = blockbreaking;
-		citizen_tasks = citizens;
-	}
-
 }

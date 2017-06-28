@@ -7,33 +7,35 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
 
 import me.mrCookieSlime.QuestWorld.api.MissionType;
+import me.mrCookieSlime.QuestWorld.quests.Quest;
 
 public interface IMission extends IQuestingObject {
-	public String getID();
-	public int getAmount();
-	public String getText();
+	String getID();
+	int getAmount();
+	String getText();
 	
-	public ItemStack getMissionItem();
-	public ItemStack getDisplayItem();
+	ItemStack getMissionItem();
+	ItemStack getDisplayItem();
 	
-	public EntityType getEntity();
-	public String getEntityName();
-	public MissionType getType();
+	EntityType getEntity();
+	String getEntityName();
+	MissionType getType();
 
-	public Location getLocation();
+	Location getLocation();
 
-	public List<String> getDialogue();
-	public String getCustomName();
+	List<String> getDialogue();
+	String getCustomName();
 	
-	public long getTimeframe();
+	long getTimeframe();
 	
-	public boolean hasTimeframe();
+	boolean hasTimeframe();
 
-	public boolean resetsonDeath();
+	boolean resetsonDeath();
 
-	public String getLore();
+	String getLore();
 
-	public int getCustomInt();
+	int getCustomInt();
 
-	public boolean acceptsSpawners();
+	boolean acceptsSpawners();
+	Quest getQuest();
 }
