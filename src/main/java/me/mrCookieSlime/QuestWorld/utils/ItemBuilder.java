@@ -306,6 +306,12 @@ public class ItemBuilder {
 	}
 	
 	public ItemBuilder selector(int index, String... options) {
+		if(options == null || options.length == 0)
+			return this;
+		
+		if(index < 0 || index >= options.length)
+			index = 0;
+		
 		String[] result = new String[options.length + 1];
 		result[0] = "";
 		

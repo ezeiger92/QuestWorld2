@@ -89,8 +89,8 @@ public class MissionButton {
 				"",
 				"&rLeft Click: &e+1",
 				"&rRight Click: &e-1",
-				"&rShift + Left Click: &e+16",
-				"&rShift + Right Click: &e-16").get();
+				"&rShift + Left Click: &e+"+groupSize,
+				"&rShift + Right Click: &e-"+groupSize).get();
 		
 		MenuClickHandler handler = simpleHandler(changes, event -> {
 			int amt = clickNumber(changes.getAmount(), groupSize, event);
@@ -175,12 +175,8 @@ public class MissionButton {
 		
 		return new MenuData(item, handler);
 	}
-	
+
 	public static MenuData timeframe(MissionChange changes) {
-		return timeframe(changes, 60);
-	}
-	
-	public static MenuData timeframe(MissionChange changes, int shiftSize) {
 		ItemStack item = new ItemBuilder(Material.WATCH).display("&7Complete Mission within: &b" + (changes.getTimeframe() / 60) + "h " + (changes.getTimeframe() % 60) + "m").lore(
 				"",
 				"&rLeft Click: &e+1m",
@@ -189,7 +185,7 @@ public class MissionButton {
 				"&rShift + Right Click: &e-1h").get();
 		
 		MenuClickHandler handler = simpleHandler(changes, event -> {
-			int amt = clickNumber((int)changes.getTimeframe(), shiftSize, event);
+			int amt = clickNumber((int)changes.getTimeframe(), 60, event);
 			changes.setTimeframe(Math.max(amt, 0));
 		});
 		
@@ -279,10 +275,10 @@ public class MissionButton {
 	
 	public static int clickNumber(int initial, int groupSize, InventoryClickEvent event) {
 		switch(event.getClick()) {
-		case RIGHT: initial += 1; break;
-		case SHIFT_RIGHT: initial += groupSize; break;
-		case LEFT: initial -= 1; break;
-		case SHIFT_LEFT: initial -= groupSize; break;
+		case RIGHT: initial -= 1; break;
+		case SHIFT_RIGHT: initial -= groupSize; break;
+		case LEFT: initial += 1; break;
+		case SHIFT_LEFT: initial += groupSize; break;
 		case NUMBER_KEY: initial = initial * 10 + event.getHotbarButton() + 1; break;
 		case DROP: initial /= 10; break;
 		default: break;

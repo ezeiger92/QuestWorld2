@@ -31,6 +31,7 @@ import me.mrCookieSlime.QuestWorld.hooks.askyblock.ASkyBlockHook;
 import me.mrCookieSlime.QuestWorld.hooks.builtin.BuiltinHook;
 import me.mrCookieSlime.QuestWorld.hooks.chatreaction.ChatReactionHook;
 import me.mrCookieSlime.QuestWorld.hooks.citizens.CitizensHook;
+import me.mrCookieSlime.QuestWorld.hooks.money.MoneyHook;
 import me.mrCookieSlime.QuestWorld.hooks.votifier.VotifierHook;
 import me.mrCookieSlime.QuestWorld.listeners.EditorListener;
 import me.mrCookieSlime.QuestWorld.listeners.HookInstaller;
@@ -43,6 +44,7 @@ import me.mrCookieSlime.QuestWorld.managers.PlayerManager;
 import me.mrCookieSlime.QuestWorld.quests.Category;
 import me.mrCookieSlime.QuestWorld.quests.Mission;
 import me.mrCookieSlime.QuestWorld.quests.Quest;
+import me.mrCookieSlime.QuestWorld.utils.DummyEconomy;
 import me.mrCookieSlime.QuestWorld.utils.Lang;
 import me.mrCookieSlime.QuestWorld.utils.Log;
 import me.mrCookieSlime.QuestWorld.utils.Sounds;
@@ -72,10 +74,11 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 	private Map<UUID, PlayerManager>  profiles   = new HashMap<>();
 	private Map<UUID, Input>         inputs     = new HashMap<>();
 	
-	Economy economy;
+	Economy economy = null;
 	Sounds eventSounds;
 	
 	private Lang language;
+	private ExtensionLoader extLoader = null;
 	private HookInstaller hookInstaller = null;
 	
 	public static String translate(Translator key, String... replacements) {
@@ -86,6 +89,7 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 		Log.setupLogger(getLogger());
 		instance = this;
 		
+		extLoader = new ExtensionLoader(this.getClassLoader(), new File(this.getDataFolder(), "extensions"));
 		// Try to peek at the log-level, for all logging that happens BEFORE onEnable
 		/*File config = new File(getDataFolder(), "config.yml");
 		if(config.isFile()) {
@@ -116,6 +120,11 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 	}
 	
 	@Override
+	public void onLoad() {
+		extLoader.loadLocal();
+	}
+	
+	@Override
 	public void onEnable() {
 		// Initialize all we can before we need CSCoreLib
 		hookInstaller = new HookInstaller(this);
@@ -129,6 +138,7 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 		new ChatReactionHook();
 		new VotifierHook();
 		new ASkyBlockHook();
+		new MoneyHook();
 		
 		// Attempt to load Core to continue
 		CSCoreLibLoader loader = new CSCoreLibLoader(this);
@@ -209,10 +219,18 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 	}
 	
 	private boolean setupEconomy() {
-		RegisteredServiceProvider<Economy> economyProvider = getServer().getServicesManager().getRegistration(Economy.class);
-	    if (economyProvider != null) economy = economyProvider.getProvider();
-
-	    return economy != null;
+		if(getServer().getPluginManager().getPlugin("Vault") != null) {
+			RegisteredServiceProvider<Economy> economyProvider = getServer().getServicesManager().getRegistration(Economy.class);
+		    if (economyProvider != null)
+		    	economy = economyProvider.getProvider();
+		}
+		
+		if(economy == null) {
+			Log.severe("No economy was found! Falling back to dummy (no-op) economy, no money will be transfered!");
+			economy = new DummyEconomy();
+		}
+		
+	    return true;
 	}
 	
 	public void loadConfigs() {

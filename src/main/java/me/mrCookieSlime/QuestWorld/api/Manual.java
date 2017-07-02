@@ -6,5 +6,7 @@ import me.mrCookieSlime.QuestWorld.managers.PlayerManager;
 public interface Manual {
 	public static int FAIL = -1;
 	int onManual(PlayerManager manager, IMission mission);
-	String getLabel();
+	default String getLabel() {
+		return "Check";
+	};
 }

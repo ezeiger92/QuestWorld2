@@ -34,11 +34,11 @@ public class Log {
 	}
 	
 	public static void fine(String message) {
-		activeLogger.fine(message);
+		activeLogger.info(message);
 	}
 	
 	public static void finer(String message) {
-		activeLogger.finer(message);
+		activeLogger.info(message);
 	}
 	
 	public static void finest(String message) {

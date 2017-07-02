@@ -4,6 +4,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
+import me.mrCookieSlime.QuestWorld.utils.Log;
+
 public abstract class QuestExtension {
 	private String[] requirements;
 	private int remaining;
@@ -68,7 +70,14 @@ public abstract class QuestExtension {
 		if(initialized)
 			return;
 		
-		initialize(parent);
+		try {
+			initialize(parent);
+		}
+		catch(RuntimeException e) {
+			Log.warning("Failed to initialize hook " + getName());
+			e.printStackTrace();
+			return;
+		}
 		loader.enable(this);
 		initialized = true;
 	}
