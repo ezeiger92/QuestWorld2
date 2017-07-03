@@ -5,7 +5,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityDeathEvent;
-import org.bukkit.material.MaterialData;
+import org.bukkit.inventory.ItemStack;
 
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.MissionChange;
@@ -16,12 +16,12 @@ import me.mrCookieSlime.QuestWorld.utils.EntityTools;
 public class KillNamedMission extends KillMission {
 	public KillNamedMission() {
 		setName("KILL_NAMED_MOB");
-		setSelectorMaterial(new MaterialData(Material.GOLD_SWORD));
+		setSelectorItem(new ItemStack(Material.GOLD_SWORD));
 	}
 	
 	@Override
-	protected String displayString(IMission instance) {
-		return super.displayString(instance) + " named &r" + instance.getName();
+	protected String userInstanceDescription(IMission instance) {
+		return super.userInstanceDescription(instance) + " named &r" + instance.getName();
 	}
 	
 	@Override

@@ -4,7 +4,6 @@ import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.MaterialData;
 
 import com.wasteofplastic.askyblock.events.IslandLevelEvent;
 
@@ -17,16 +16,16 @@ import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
 
 public class ASkyBlockLevelMission extends MissionType implements Listener {
 	public ASkyBlockLevelMission() {
-		super("ASKYBLOCK_REACH_ISLAND_LEVEL", false, false, new MaterialData(Material.GRASS));
+		super("ASKYBLOCK_REACH_ISLAND_LEVEL", false, false, new ItemStack(Material.GRASS));
 	}
 	
 	@Override
-	public ItemStack displayItem(IMission instance) {
+	public ItemStack userDisplayItem(IMission instance) {
 		return new CustomItem(Material.COMMAND, "&7" + instance.getAmount(), 0);
 	}
 	
 	@Override
-	protected String displayString(IMission instance) {
+	protected String userInstanceDescription(IMission instance) {
 		return "&7Reach Island Level " + instance.getAmount();
 	}
 	

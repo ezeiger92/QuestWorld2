@@ -12,15 +12,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.MaterialData;
 
 public abstract class MissionType {
 	String name;
-	MaterialData selectorItem;
+	ItemStack selectorItem;
 	boolean supportsTimeframes, supportsDeathReset;
 	private Map<Integer, MenuData> menuData;
 	
-	public MissionType(String name, boolean supportsTimeframes, boolean supportsDeathReset, MaterialData item) {
+	public MissionType(String name, boolean supportsTimeframes, boolean supportsDeathReset, ItemStack item) {
 		Log.fine("MissionType - Creating: " + name);
 		this.name = name;
 		this.selectorItem = item;
@@ -29,30 +28,30 @@ public abstract class MissionType {
 		menuData = new HashMap<>();
 	}
 	
-	public final String defaultDisplayName(IMission instance) {
-		return displayString(instance) + formatTimeframe(instance) + formatDeathReset(instance);
+	public final String userDescription(IMission instance) {
+		return userInstanceDescription(instance) + formatTimeframe(instance) + formatDeathReset(instance);
 	}
 	
-	protected abstract String displayString(IMission instance);
+	protected abstract String userInstanceDescription(IMission instance);
 	
-	public abstract ItemStack displayItem(IMission instance);
+	public abstract ItemStack userDisplayItem(IMission instance);
 	
-	private String formatTimeframe(IMission quest) {
-		if(!quest.hasTimeframe() || !supportsTimeframes)
+	private String formatTimeframe(IMission instance) {
+		if(!instance.hasTimeframe() || !supportsTimeframes)
 			return "";
-		long duration = quest.getTimeframe();
+		long duration = instance.getTimeframe();
 		
 		return " &7within " + (duration / 60) + "h " + (duration % 60) + "m";
 	}
 	
-	private String formatDeathReset(IMission quest) {
-		if(!quest.resetsonDeath() || !supportsDeathReset)
+	private String formatDeathReset(IMission instance) {
+		if(!instance.resetsonDeath() || !supportsDeathReset)
 			return "";
 		
 		return " &7without dying";
 	}
 
-	public MaterialData getSelectorItem() {
+	public ItemStack getSelectorItem() {
 		return selectorItem;
 	}
 
@@ -71,7 +70,7 @@ public abstract class MissionType {
 	}
 	
 	public boolean supportsTimeframes() {
-		return this.supportsTimeframes;
+		return supportsTimeframes;
 	}
 	
 	@Override
@@ -80,7 +79,7 @@ public abstract class MissionType {
 	}
 
 	public boolean supportsDeathReset() {
-		return this.supportsDeathReset;
+		return supportsDeathReset;
 	}
 
 	protected void setName(String newName) {
@@ -91,7 +90,7 @@ public abstract class MissionType {
 		return false;
 	}
 	
-	protected void setSelectorMaterial(MaterialData material) {
+	protected void setSelectorItem(ItemStack material) {
 		selectorItem = material;
 	}
 	
@@ -124,8 +123,12 @@ public abstract class MissionType {
 		putButton(8, MissionButton.dialogue(changes));
 	}
 	
+	protected boolean validateTypeChange(MissionChange changes) {
+		return false;
+	}
+	
 	@Override
 	public int hashCode() {
-		return getName().hashCode();
+		return name.hashCode();
 	}
 }

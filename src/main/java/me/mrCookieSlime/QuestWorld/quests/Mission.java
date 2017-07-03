@@ -17,8 +17,6 @@ import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.api.interfaces.IMissionWrite;
 import me.mrCookieSlime.QuestWorld.utils.PlayerTools;
 import me.mrCookieSlime.QuestWorld.utils.Text;
-import net.citizensnpcs.api.CitizensAPI;
-import net.citizensnpcs.api.npc.NPC;
 
 import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
@@ -120,7 +118,7 @@ public class Mission extends QuestingObject implements IMissionWrite {
 		if (getCustomName() != null)
 			return getCustomName();
 
-		return type.defaultDisplayName(this);
+		return type.userDescription(this);
 	}
 	
 	public ItemStack getMissionItem() {
@@ -128,7 +126,7 @@ public class Mission extends QuestingObject implements IMissionWrite {
 	}
 
 	public ItemStack getDisplayItem() {
-		return type.displayItem(this);
+		return type.userDisplayItem(this);
 	}
 	
 	public void setItem(ItemStack item) {
@@ -173,13 +171,7 @@ public class Mission extends QuestingObject implements IMissionWrite {
 		StringBuilder progress = new StringBuilder();
 		int amount = QuestWorld.getInstance().getManager(p).getProgress(this);
 		int total = this.amount;
-		
-		// Moved location radius to "customInt" variable, rather than "amount"
-		/* // Location is a one-time thing, we don't want to display "(1/6)" or something silly
-		if(getType().getSubmissionType() == SubmissionType.LOCATION) {
-			total = 1;
-		}*/
-		
+
 		// In the event that amount somehow exceeded total, clamp it.
 		// TODO: Although this fix works, this situation shouldn't happen. Find the real cause.
 		amount = Math.min(amount, total);
@@ -329,11 +321,6 @@ public class Mission extends QuestingObject implements IMissionWrite {
 	public void setCustomInt(int val) {
 		quest.updateLastModified();
 		this.customInt = val;
-	}
-
-	@Deprecated
-	public NPC getCitizen() {
-		return CitizensAPI.getNPCRegistry().getById(customInt);
 	}
 
 	public int getCustomInt() {

@@ -1,10 +1,8 @@
 package me.mrCookieSlime.QuestWorld.hooks.money;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.MaterialData;
 
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.Manual;
@@ -14,7 +12,6 @@ import me.mrCookieSlime.QuestWorld.api.Ticking;
 import me.mrCookieSlime.QuestWorld.api.interfaces.IMission;
 import me.mrCookieSlime.QuestWorld.api.menu.MenuData;
 import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
-import me.mrCookieSlime.QuestWorld.managers.PlayerManager;
 import me.mrCookieSlime.QuestWorld.utils.ItemBuilder;
 import me.mrCookieSlime.QuestWorld.utils.Text;
 import net.milkbowl.vault.economy.Economy;
@@ -48,11 +45,11 @@ public class BalanceMission extends MissionType implements Manual, Ticking {
 	}
 	
 	public BalanceMission() {
-		super("HAVE_MONEY", false, false, new MaterialData(Material.GOLD_INGOT));
+		super("HAVE_MONEY", false, false, new ItemStack(Material.GOLD_INGOT));
 	}
 	
 	@Override
-	protected String displayString(IMission instance) {
+	protected String userInstanceDescription(IMission instance) {
 		String currency = "dollars,1:dollar";
 		if(instance.getName() != null && instance.getName().length() != 0)
 			currency = instance.getName();
@@ -64,8 +61,8 @@ public class BalanceMission extends MissionType implements Manual, Ticking {
 	}
 
 	@Override
-	public ItemStack displayItem(IMission instance) {
-		return getSelectorItem().toItemStack(1);
+	public ItemStack userDisplayItem(IMission instance) {
+		return getSelectorItem().clone();
 	}
 	
 	@Override
@@ -97,21 +94,17 @@ public class BalanceMission extends MissionType implements Manual, Ticking {
 	}
 
 	@Override
-	public boolean onTick(PlayerManager manager, IMission mission) {
-		Player p = Bukkit.getPlayer(manager.getUUID());
+	public int onTick(Player p, IMission mission) {
 		Economy e = QuestWorld.getInstance().getEconomy();
 		if(!e.hasAccount(p))
-			return false;
+			return FAIL;
 		
 		
-		return e.getBalance(p) >= mission.getAmount();
+		return (int)e.getBalance(p);
 	}
 
 	@Override
-	public int onManual(PlayerManager manager, IMission mission) {
-		if(onTick(manager, mission))
-			return mission.getAmount();
-		
-		return FAIL;
+	public int onManual(Player p, IMission mission) {
+		return onTick(p, mission);
 	}
 }

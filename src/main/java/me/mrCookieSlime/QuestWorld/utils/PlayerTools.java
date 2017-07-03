@@ -73,10 +73,9 @@ public class PlayerTools {
 		p.sendMessage(Text.colorize(text));
 	}
 	
+	@SuppressWarnings("deprecation")
 	public static Player getPlayer(String name) {
-		@SuppressWarnings("deprecation")
-		Player p = Bukkit.getPlayer(name);
-		return p;
+		return Bukkit.getPlayerExact(name);
 	}
 	
 	private interface IReflector {

@@ -7,7 +7,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.material.MaterialData;
+import org.bukkit.inventory.ItemStack;
 
 import me.mrCookieSlime.CSCoreLibPlugin.PlayerRunnable;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Chat.TellRawMessage;
@@ -32,11 +32,11 @@ import net.citizensnpcs.api.npc.NPC;
 public class CitizenAcceptQuestMission extends CitizenInteractMission {
 	public CitizenAcceptQuestMission() {
 		setName("ACCEPT_QUEST_FROM_NPC");
-		this.setSelectorMaterial(new MaterialData(Material.BOOK_AND_QUILL));
+		this.setSelectorItem(new ItemStack(Material.BOOK_AND_QUILL));
 	}
 
 	@Override
-	protected String displayString(IMission instance) {
+	protected String userInstanceDescription(IMission instance) {
 		String name = "N/A";
 		NPC npc = CitizensHook.npcFrom(instance);
 		if(npc != null)

@@ -44,7 +44,7 @@ public class MissionButton {
 		}
 		final int currentMission = missionIndex;
 		
-		ItemStack item = new ItemBuilder(changes.getType().getSelectorItem().toItemStack(1))
+		ItemStack item = new ItemBuilder(changes.getType().getSelectorItem())
 				.display("&7" + missionTypes[missionIndex])
 				.selector(missionIndex, missionTypes)
 				.get();

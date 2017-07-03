@@ -1,10 +1,8 @@
 package me.mrCookieSlime.QuestWorld.hooks.money;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.MaterialData;
 
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.Manual;
@@ -12,18 +10,17 @@ import me.mrCookieSlime.QuestWorld.api.MissionChange;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.interfaces.IMission;
 import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
-import me.mrCookieSlime.QuestWorld.managers.PlayerManager;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
 
 public class PayMission extends MissionType implements Manual {
 
 	public PayMission() {
-		super("GIVE_MONEY", false, false, new MaterialData(Material.GOLD_INGOT));
+		super("GIVE_MONEY", false, false, new ItemStack(Material.GOLD_INGOT));
 	}
 
 	@Override
-	protected String displayString(IMission instance) {
+	protected String userInstanceDescription(IMission instance) {
 		String currency = "dollars,1:dollar";
 		if(instance.getName() != null)
 			currency = instance.getName();
@@ -34,8 +31,8 @@ public class PayMission extends MissionType implements Manual {
 	}
 
 	@Override
-	public ItemStack displayItem(IMission instance) {
-		return getSelectorItem().toItemStack(1);
+	public ItemStack userDisplayItem(IMission instance) {
+		return getSelectorItem().clone();
 	}
 	
 	@Override
@@ -44,8 +41,7 @@ public class PayMission extends MissionType implements Manual {
 	}
 
 	@Override
-	public int onManual(PlayerManager manager, IMission mission) {
-		Player p = Bukkit.getPlayer(manager.getUUID());
+	public int onManual(Player p, IMission mission) {
 		Economy e = QuestWorld.getInstance().getEconomy();
 		if(e.hasAccount(p)) {
 			double d = e.getBalance(p);

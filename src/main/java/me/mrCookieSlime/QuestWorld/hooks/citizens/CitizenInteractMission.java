@@ -5,7 +5,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.MaterialData;
 
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.MissionChange;
@@ -20,16 +19,16 @@ import net.citizensnpcs.api.npc.NPC;
 
 public class CitizenInteractMission extends MissionType implements Listener {
 	public CitizenInteractMission() {
-		super("CITIZENS_INTERACT", false, false, new MaterialData(Material.ITEM_FRAME));
+		super("CITIZENS_INTERACT", false, false, new ItemStack(Material.ITEM_FRAME));
 	}
 	
 	@Override
-	public ItemStack displayItem(IMission instance) {
-		return getSelectorItem().toItemStack(1);
+	public ItemStack userDisplayItem(IMission instance) {
+		return getSelectorItem().clone();
 	}
 	
 	@Override
-	protected String displayString(IMission instance) {
+	protected String userInstanceDescription(IMission instance) {
 		String name = "N/A";
 		NPC npc = CitizensHook.npcFrom(instance);
 		if(npc != null)

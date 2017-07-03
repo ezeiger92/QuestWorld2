@@ -1,10 +1,8 @@
 package me.mrCookieSlime.QuestWorld.hooks.builtin;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.MaterialData;
 
 import me.mrCookieSlime.CSCoreLibPlugin.general.String.StringUtils;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
@@ -13,27 +11,25 @@ import me.mrCookieSlime.QuestWorld.api.MissionChange;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.interfaces.IMission;
 import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
-import me.mrCookieSlime.QuestWorld.managers.PlayerManager;
 
 public class SubmitMission extends MissionType implements Manual {
 	public SubmitMission() {
-		super("SUBMIT", false, false, new MaterialData(Material.CHEST));
+		super("SUBMIT", false, false, new ItemStack(Material.CHEST));
 	}
 	
 	@Override
-	public ItemStack displayItem(IMission instance) {
+	public ItemStack userDisplayItem(IMission instance) {
 		return instance.getMissionItem().clone();
 	}
 	
 	@Override
-	protected String displayString(IMission instance) {
+	protected String userInstanceDescription(IMission instance) {
 		return "&7Submit " + instance.getAmount() + "x " + StringUtils.formatItemName(instance.getDisplayItem(), false);
 	}
 
 	@Override
-	public int onManual(PlayerManager manager, IMission mission) {
-		Player p = Bukkit.getPlayer(manager.getUUID());
-		int current =  manager.getProgress(mission);
+	public int onManual(Player p, IMission mission) {
+		int current =  QuestWorld.getInstance().getManager(p).getProgress(mission);
 		int needed = mission.getAmount() - current;
 		int found = needed;
 		

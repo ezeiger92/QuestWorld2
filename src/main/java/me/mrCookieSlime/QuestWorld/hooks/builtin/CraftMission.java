@@ -7,7 +7,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.MaterialData;
 
 import me.mrCookieSlime.CSCoreLibPlugin.general.String.StringUtils;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
@@ -19,17 +18,17 @@ import me.mrCookieSlime.QuestWorld.utils.PlayerTools;
 
 public class CraftMission extends MissionType implements Listener {
 	public CraftMission() {
-		super("CRAFT", true, true, new MaterialData(Material.WORKBENCH));
+		super("CRAFT", true, true, new ItemStack(Material.WORKBENCH));
 	}
 	
 	@Override
-	public ItemStack displayItem(IMission instance) {
+	public ItemStack userDisplayItem(IMission instance) {
 		
 		return instance.getMissionItem().clone();
 	}
 	
 	@Override
-	protected String displayString(IMission instance) {
+	protected String userInstanceDescription(IMission instance) {
 		return "&7Craft " + instance.getAmount() + "x " + StringUtils.formatItemName(instance.getDisplayItem(), false);
 	}
 

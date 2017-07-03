@@ -7,7 +7,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.MaterialData;
 
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.MissionChange;
@@ -22,16 +21,16 @@ import net.citizensnpcs.api.npc.NPC;
 
 public class CitizenKillMission extends MissionType implements Listener {
 	public CitizenKillMission() {
-		super("KILL_NPC", true, true, new MaterialData(Material.IRON_AXE));
+		super("KILL_NPC", true, true, new ItemStack(Material.IRON_AXE));
 	}
 	
 	@Override
-	public ItemStack displayItem(IMission instance) {
+	public ItemStack userDisplayItem(IMission instance) {
 		return new ItemBuilder(Material.SKULL_ITEM).skull(SkullType.PLAYER).get();
 	}
 	
 	@Override
-	protected String displayString(IMission instance) {
+	protected String userInstanceDescription(IMission instance) {
 		String name = "N/A";
 		NPC npc = CitizensHook.npcFrom(instance);
 		if(npc != null)

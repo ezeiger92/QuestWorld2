@@ -5,7 +5,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerLevelChangeEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.MaterialData;
 
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.Item.CustomItem;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
@@ -16,16 +15,16 @@ import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
 
 public class LevelMission extends MissionType implements Listener {
 	public LevelMission() {
-		super("REACH_LEVEL", false, false, new MaterialData(Material.EXP_BOTTLE));
+		super("REACH_LEVEL", false, false, new ItemStack(Material.EXP_BOTTLE));
 	}
 	
 	@Override
-	public ItemStack displayItem(IMission instance) {
+	public ItemStack userDisplayItem(IMission instance) {
 		return new CustomItem(Material.COMMAND, "&7" + instance.getAmount(), 0);
 	}
 	
 	@Override
-	protected String displayString(IMission instance) {
+	protected String userInstanceDescription(IMission instance) {
 		return "&7Reach Level " + instance.getAmount();
 	}
 	

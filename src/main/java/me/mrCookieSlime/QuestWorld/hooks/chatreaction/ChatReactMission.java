@@ -5,7 +5,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.MaterialData;
 
 import me.clip.chatreaction.events.ReactionWinEvent;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.Item.CustomItem;
@@ -17,16 +16,16 @@ import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
 
 public class ChatReactMission extends MissionType implements Listener {
 	public ChatReactMission() {
-		super("CHATREACTION_WIN", true, false, new MaterialData(Material.DIAMOND));
+		super("CHATREACTION_WIN", true, false, new ItemStack(Material.DIAMOND));
 	}
 	
 	@Override
-	public ItemStack displayItem(IMission instance) {
+	public ItemStack userDisplayItem(IMission instance) {
 		return new CustomItem(Material.COMMAND, "&7" + instance.getAmount(), 0);
 	}
 	
 	@Override
-	protected String displayString(IMission instance) {
+	protected String userInstanceDescription(IMission instance) {
 		String games = " Games";
 		if(instance.getAmount() == 1)
 			games = " Game";

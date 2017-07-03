@@ -523,55 +523,12 @@ public class QuestBook {
 						
 						if(mission.getType() instanceof Manual) {
 							Manual m = (Manual) mission.getType();
-							int progress = m.onManual(manager, mission);
+							int progress = m.onManual(p, mission);
 							if(progress != Manual.FAIL) {
 								manager.setProgress(mission, progress);
 								openQuest(p, quest, categoryBack, back);
 							}
 						}
-						
-						/*if (mission.getType().getID().equals("DETECT")) {
-							int amount = 0;
-							for (int i = 0; i < 36; i++) {
-								ItemStack current = p.getInventory().getItem(i);
-								if (QuestWorld.getInstance().isItemSimiliar(current, mission.getMissionItem())) amount = amount + current.getAmount();
-							}
-							if (amount >= mission.getAmount()) manager.setProgress(mission, mission.getAmount());
-							openQuest(p, quest, categoryBack, back);
-						}
-						else if (mission.getType().getID().equals("SUBMIT")) {
-							boolean success = false;
-							
-							for (int i = 0; i < 36; i++) {
-								ItemStack current = p.getInventory().getItem(i);
-								if (QuestWorld.getInstance().isItemSimiliar(current, mission.getMissionItem())) {
-									success = true;
-									int rest = manager.addProgress(mission, current.getAmount());
-									if (rest > 0) {
-										ItemStack remaining = new ItemStack(current);
-										remaining.setAmount(rest);
-										p.getInventory().setItem(i, remaining);
-										break;
-									}
-									else p.getInventory().setItem(i, null);
-								}
-							}
-							
-							if(success) {
-								QuestWorld.getSounds().MissionSubmit().playTo(p);
-								PlayerInventory.update(p);
-								QuestWorld.getSounds().muteNext();
-								openQuest(p, quest, categoryBack, back);
-							}
-							else
-								QuestWorld.getSounds().MissionReject().playTo(p);
-						}
-						else if (mission.getType().getID().equals("REACH_LOCATION")) {
-							if (mission.getLocation().getWorld().getName().equals(p.getWorld().getName()) && mission.getLocation().distanceSquared(p.getLocation()) < mission.getCustomInt() * mission.getCustomInt()) {
-								QuestWorld.getInstance().getManager(p).setProgress(mission, 1);
-								openQuest(p, quest, categoryBack, back);
-							}
-						}*/
 					}
 					return false;
 				}
@@ -1324,7 +1281,7 @@ public class QuestBook {
 			missionTypes[i++] = Text.niceName(type);
 		}
 		
-		ItemStack missionSelector = new ItemBuilder(mission.getType().getSelectorItem().toItemStack(1))
+		ItemStack missionSelector = new ItemBuilder(mission.getType().getSelectorItem())
 				.display("&7" + missionTypes[missionIndex])
 				.selector(missionIndex, missionTypes)
 				.get();
@@ -1381,7 +1338,7 @@ public class QuestBook {
 		int i = 0;
 		for(MissionType type : QuestWorld.getInstance().getMissionTypes().values()) {
 			String name = Text.niceName(type.getName());
-			view.addItem(i, new ItemBuilder(type.getSelectorItem().toItemStack(1)).display("&f" + name).get());
+			view.addItem(i, new ItemBuilder(type.getSelectorItem()).display("&f" + name).get());
 			view.addButton(i, MissionButton.simpleHandler(changes, event -> changes.setType(type) ));
 			++i;
 		}

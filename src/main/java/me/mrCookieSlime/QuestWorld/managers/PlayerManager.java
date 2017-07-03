@@ -18,6 +18,7 @@ import me.mrCookieSlime.CSCoreLibPlugin.general.Clock;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.api.interfaces.IMission;
+import me.mrCookieSlime.QuestWorld.api.Manual;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.Ticking;
 import me.mrCookieSlime.QuestWorld.parties.Party;
@@ -168,7 +169,10 @@ public class PlayerManager {
 		if (p != null && quest_check) {
 			for (Mission task: QuestWorld.getInstance().getTickingMissions()) {
 				if (getStatus(task.getQuest()).equals(QuestStatus.AVAILABLE) && !hasCompletedTask(task) && hasUnlockedTask(task)) {
-					((Ticking) task.getType()).onTick(this, task);
+					Ticking t = (Ticking) task.getType();
+					int progress = t.onTick(p, task);
+					if(progress != Manual.FAIL)
+						setProgress(task, progress);
 				}
 			}
 		}

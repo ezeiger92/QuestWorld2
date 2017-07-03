@@ -1,8 +1,9 @@
 package me.mrCookieSlime.QuestWorld.api;
 
-import me.mrCookieSlime.QuestWorld.api.interfaces.IMission;
-import me.mrCookieSlime.QuestWorld.managers.PlayerManager;
+import org.bukkit.entity.Player;
 
-public interface Ticking {
-	boolean onTick(PlayerManager manager, IMission mission);
+import me.mrCookieSlime.QuestWorld.api.interfaces.IMission;
+
+public interface Ticking extends Manual {
+	int onTick(Player player, IMission mission);
 }

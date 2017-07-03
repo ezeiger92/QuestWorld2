@@ -6,7 +6,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.MaterialData;
 
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.MissionChange;
@@ -19,16 +18,16 @@ import me.mrCookieSlime.QuestWorld.utils.Text;
 
 public class KillMission extends MissionType implements Listener {
 	public KillMission() {
-		super("KILL", true, true, new MaterialData(Material.IRON_SWORD));
+		super("KILL", true, true, new ItemStack(Material.IRON_SWORD));
 	}
 	
 	@Override
-	public ItemStack displayItem(IMission instance) {
+	public ItemStack userDisplayItem(IMission instance) {
 		return SubmissionItemResolver.mobEgg(instance.getEntity());
 	}
 	
 	@Override
-	protected String displayString(IMission instance) {
+	protected String userInstanceDescription(IMission instance) {
 		String type = Text.niceName(instance.getEntity().toString());
 		return "&7Kill " + instance.getAmount() + "x " + (!instance.acceptsSpawners() ? "naturally spawned " : "") + type;
 	}

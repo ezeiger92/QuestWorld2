@@ -7,7 +7,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.MaterialData;
 
 import me.mrCookieSlime.CSCoreLibPlugin.general.String.StringUtils;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
@@ -21,16 +20,16 @@ import me.mrCookieSlime.QuestWorld.utils.PlayerTools;
 
 public class MineMission extends MissionType implements Listener {
 	public MineMission() {
-		super("MINE_BLOCK", true, true, new MaterialData(Material.IRON_PICKAXE));
+		super("MINE_BLOCK", true, true, new ItemStack(Material.IRON_PICKAXE));
 	}
 	
 	@Override
-	public ItemStack displayItem(IMission instance) {
+	public ItemStack userDisplayItem(IMission instance) {
 		return instance.getMissionItem().clone();
 	}
 	
 	@Override
-	protected String displayString(IMission instance) {
+	protected String userInstanceDescription(IMission instance) {
 		return "&7Mine " + instance.getAmount() + "x " + StringUtils.formatItemName(instance.getDisplayItem(), false);
 	}
 	

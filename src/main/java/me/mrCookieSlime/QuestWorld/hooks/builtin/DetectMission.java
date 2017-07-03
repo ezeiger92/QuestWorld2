@@ -1,10 +1,8 @@
 package me.mrCookieSlime.QuestWorld.hooks.builtin;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.MaterialData;
 
 import me.mrCookieSlime.CSCoreLibPlugin.general.String.StringUtils;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
@@ -13,27 +11,24 @@ import me.mrCookieSlime.QuestWorld.api.MissionChange;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.interfaces.IMission;
 import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
-import me.mrCookieSlime.QuestWorld.managers.PlayerManager;
 
 public class DetectMission extends MissionType implements Manual {
 	public DetectMission() {
-		super("DETECT", false, false, new MaterialData(Material.OBSERVER));
+		super("DETECT", false, false, new ItemStack(Material.OBSERVER));
 	}
 	
 	@Override
-	public ItemStack displayItem(IMission instance) {
+	public ItemStack userDisplayItem(IMission instance) {
 		return instance.getMissionItem().clone();
 	}
 	
 	@Override
-	protected String displayString(IMission instance) {
+	protected String userInstanceDescription(IMission instance) {
 		return "&7Own " + instance.getAmount() + "x " + StringUtils.formatItemName(instance.getDisplayItem(), false);
 	}
 
 	@Override
-	public int onManual(PlayerManager manager, IMission mission) {
-		Player p = Bukkit.getPlayer(manager.getUUID());
-		
+	public int onManual(Player p, IMission mission) {
 		int amount = 0;
 		for (int i = 0; i < 36; i++) {
 			ItemStack current = p.getInventory().getItem(i);

@@ -1,11 +1,9 @@
 package me.mrCookieSlime.QuestWorld.hooks.builtin;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.MaterialData;
 
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.Manual;
@@ -19,23 +17,22 @@ import me.mrCookieSlime.QuestWorld.api.menu.MenuData;
 import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
 import me.mrCookieSlime.QuestWorld.listeners.Input;
 import me.mrCookieSlime.QuestWorld.listeners.InputType;
-import me.mrCookieSlime.QuestWorld.managers.PlayerManager;
 import me.mrCookieSlime.QuestWorld.utils.ItemBuilder;
 import me.mrCookieSlime.QuestWorld.utils.PlayerTools;
 import me.mrCookieSlime.QuestWorld.utils.SubmissionItemResolver;
 
 public class LocationMission extends MissionType implements Ticking, Manual {
 	public LocationMission() {
-		super("REACH_LOCATION", false, false, new MaterialData(Material.LEATHER_BOOTS));
+		super("REACH_LOCATION", false, false, new ItemStack(Material.LEATHER_BOOTS));
 	}
 	
 	@Override
-	public ItemStack displayItem(IMission instance) {
+	public ItemStack userDisplayItem(IMission instance) {
 		return SubmissionItemResolver.location(Material.LEATHER_BOOTS, instance.getLocation());
 	}
 	
 	@Override
-	protected String displayString(IMission instance) {
+	protected String userInstanceDescription(IMission instance) {
 		Location loc = instance.getLocation();
 		String locStr = instance.getName();
 		if(locStr.isEmpty())
@@ -61,20 +58,17 @@ public class LocationMission extends MissionType implements Ticking, Manual {
 	}
 
 	@Override
-	public boolean onTick(PlayerManager manager, IMission mission) {
-		Player p = Bukkit.getPlayer(manager.getUUID());
+	public int onTick(Player p, IMission mission) {
 		if (mission.getLocation().getWorld().getName().equals(p.getWorld().getName())
 				&& mission.getLocation().distanceSquared(p.getLocation()) < mission.getCustomInt() * mission.getCustomInt()) {
-			manager.setProgress(mission, 1);
-			return true;
+			return 1;
 		}
 		
-		return false;
+		return FAIL;
 	}
 	
 	@Override
-	public int onManual(PlayerManager manager, IMission mission) {
-		Player p = Bukkit.getPlayer(manager.getUUID());
+	public int onManual(Player p, IMission mission) {
 		if (mission.getLocation().getWorld().getName().equals(p.getWorld().getName())
 				&& mission.getLocation().distanceSquared(p.getLocation()) < mission.getCustomInt() * mission.getCustomInt()) {
 			return 1;

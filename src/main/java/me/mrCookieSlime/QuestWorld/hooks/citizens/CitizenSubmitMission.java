@@ -5,7 +5,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.MaterialData;
 
 import me.mrCookieSlime.CSCoreLibPlugin.general.String.StringUtils;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
@@ -21,16 +20,16 @@ import net.citizensnpcs.api.npc.NPC;
 
 public class CitizenSubmitMission extends MissionType implements Listener {
 	public CitizenSubmitMission() {
-		super("CITIZENS_SUBMIT", false, false, new MaterialData(Material.EMERALD));
+		super("CITIZENS_SUBMIT", false, false, new ItemStack(Material.EMERALD));
 	}
 	
 	@Override
-	public ItemStack displayItem(IMission instance) {
+	public ItemStack userDisplayItem(IMission instance) {
 		return instance.getMissionItem().clone();
 	}
 	
 	@Override
-	protected String displayString(IMission instance) {
+	protected String userInstanceDescription(IMission instance) {
 		String name = "N/A";
 		NPC npc = CitizensHook.npcFrom(instance);
 		if(npc != null)

@@ -15,7 +15,18 @@ import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.inventory.meta.SpawnEggMeta;
 
+/**
+ * This class provides a builder for ItemStacks. It is exactly what you expect,
+ * nothing special.
+ * 
+ * @author ezeiger92
+ */
 public class ItemBuilder {
+	/**
+	 * 
+	 * @author erik
+	 *
+	 */
 	public static enum Proto {
 		RED_WOOL(new ItemBuilder(Material.WOOL).color(DyeColor.RED).get()),
 		;
@@ -35,7 +46,6 @@ public class ItemBuilder {
 		
 		return null;
 	}
-	
 	
 	private ItemStack resultStack;
 	
@@ -67,8 +77,6 @@ public class ItemBuilder {
 		resultStack = new ItemStack(type, amount);
 	}
 	
-	
-	
 	/**
      * Constructs an ItemBuilder.
      *
@@ -88,30 +96,6 @@ public class ItemBuilder {
 		this(Material.SKULL_ITEM);
 		skull(type);
 	}
-	/*
-	private void build() {
-		ItemMeta metaHolder = metaHolderStack.getItemMeta();
-		ItemMeta metaResult = resultStack.getItemMeta();
-		
-		if(metaHolder instanceof LeatherArmorMeta) {
-			LeatherArmorMeta lamHolder = (LeatherArmorMeta)metaHolder;
-			LeatherArmorMeta lamResult = (LeatherArmorMeta)metaResult;
-			lamResult.setColor(lamHolder.getColor());
-		}
-		
-		if(metaHolder instanceof SkullMeta) {
-			SkullMeta smHolder = (SkullMeta)metaHolder;
-			SkullMeta smResult = (SkullMeta)metaResult;
-			smResult.setOwner(smHolder.getOwner());
-		}
-		
-		metaResult.addItemFlags(metaHolder.getItemFlags().toArray(new ItemFlag[0]));
-		metaResult.setDisplayName(metaHolder.getDisplayName());
-		metaResult.setLore(metaHolder.getLore());
-
-		resultStack.setItemMeta(metaResult);
-		resultStack.addUnsafeEnchantments(metaHolderStack.getEnchantments());
-	}*/
 	
 	/**
      * Returns a reference to our ItemStack so our builder can tweak later
@@ -217,8 +201,12 @@ public class ItemBuilder {
      * 
      * @return this, for chaining
      */
+	@SuppressWarnings("deprecation")
 	public ItemBuilder color(DyeColor color) {
-		legacyColor(color);
+		if(resultStack.getType() == Material.INK_SACK)
+			durability(color.getDyeData());
+		else
+			durability(color.getWoolData());
 		
 		return this;
 	}
@@ -240,14 +228,6 @@ public class ItemBuilder {
 		}
 		
 		return this;
-	}
-
-	@SuppressWarnings("deprecation")
-	private void legacyColor(DyeColor color) {
-		if(resultStack.getType() == Material.INK_SACK)
-			durability(color.getDyeData());
-		else
-			durability(color.getWoolData());
 	}
 	
 	public ItemBuilder mob(EntityType mob) {

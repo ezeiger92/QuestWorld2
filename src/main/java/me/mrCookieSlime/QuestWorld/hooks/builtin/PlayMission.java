@@ -1,11 +1,9 @@
 package me.mrCookieSlime.QuestWorld.hooks.builtin;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Statistic;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.MaterialData;
 
 import me.mrCookieSlime.QuestWorld.api.MissionChange;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
@@ -13,21 +11,20 @@ import me.mrCookieSlime.QuestWorld.api.Ticking;
 import me.mrCookieSlime.QuestWorld.api.interfaces.IMission;
 import me.mrCookieSlime.QuestWorld.api.menu.MenuData;
 import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
-import me.mrCookieSlime.QuestWorld.managers.PlayerManager;
 import me.mrCookieSlime.QuestWorld.utils.ItemBuilder;
 
 public class PlayMission extends MissionType implements Ticking {
 	public PlayMission() {
-		super("PLAY_TIME", false, false, new MaterialData(Material.WATCH));
+		super("PLAY_TIME", false, false, new ItemStack(Material.WATCH));
 	}
 	
 	@Override
-	public ItemStack displayItem(IMission instance) {
-		return new ItemStack(Material.WATCH);
+	public ItemStack userDisplayItem(IMission instance) {
+		return getSelectorItem().clone();
 	}
 	
 	@Override
-	protected String displayString(IMission instance) {
+	protected String userInstanceDescription(IMission instance) {
 		return "&7Play for " + (instance.getAmount() / 60) + "h " + (instance.getAmount() % 60) + "m";
 	}
 	
@@ -38,10 +35,13 @@ public class PlayMission extends MissionType implements Ticking {
 	}
 
 	@Override
-	public boolean onTick(PlayerManager manager, IMission mission) {
-		Player p = Bukkit.getPlayer(manager.getUUID());
-		manager.setProgress(mission, p.getStatistic(Statistic.PLAY_ONE_TICK) / 20 / 60);
-		return false;
+	public int onTick(Player p, IMission mission) {
+		return p.getStatistic(Statistic.PLAY_ONE_TICK) / 20 / 60;
+	}
+	
+	@Override
+	public int onManual(Player player, IMission mission) {
+		return onTick(player, mission);
 	}
 	
 	@Override
