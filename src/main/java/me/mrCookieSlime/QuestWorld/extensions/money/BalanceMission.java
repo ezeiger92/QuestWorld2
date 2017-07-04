@@ -4,7 +4,6 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import me.mrCookieSlime.QuestWorld.api.Manual;
 import me.mrCookieSlime.QuestWorld.api.MissionChange;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.Ticking;
@@ -15,7 +14,7 @@ import me.mrCookieSlime.QuestWorld.utils.ItemBuilder;
 import me.mrCookieSlime.QuestWorld.utils.Text;
 import net.milkbowl.vault.economy.Economy;
 
-public class BalanceMission extends MissionType implements Manual, Ticking {
+public class BalanceMission extends MissionType implements Ticking {
 
 	private enum CheckType {
 		AT_LEAST,
@@ -93,17 +92,11 @@ public class BalanceMission extends MissionType implements Manual, Ticking {
 	}
 
 	@Override
-	public int onTick(Player p, IMission mission) {
+	public int onManual(Player player, IMission mission) {
 		Economy e = Money.getEcon();
-		if(!e.hasAccount(p))
+		if(!e.hasAccount(player))
 			return FAIL;
 		
-		
-		return (int)e.getBalance(p);
-	}
-
-	@Override
-	public int onManual(Player p, IMission mission) {
-		return onTick(p, mission);
+		return (int)e.getBalance(player);
 	}
 }

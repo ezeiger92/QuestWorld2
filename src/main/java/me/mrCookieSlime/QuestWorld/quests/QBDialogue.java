@@ -138,10 +138,6 @@ public class QBDialogue {
 	}
 	
 	public static void openQuestMissionEntityEditor(Player p, final Mission mission) {
-		openQuestMissionEntityEditor(p, mission, 0, 0);
-	}
-	
-	private static void openQuestMissionEntityEditor(Player p, final Mission mission, int page, int mode) {
 		List<EntityType> entities = EntityTools.listAliveEntityTypes();
 		/*
 		final String[] sortingMethods = {
@@ -164,7 +160,7 @@ public class QBDialogue {
 		int lastPage = entities.size() / 45; // Double chest size without last row
 		*/
 		//String title = Text.colorize(mission.getQuest().getName() + " &7- &8(Page " + (page+1) + "/" + (lastPage+1) + ")");
-		String title = mission.getQuest().getName();
+		String title = Text.colorize("&3Entity Selector: " + mission.getQuest().getName());
 		final ChestMenu menu = new ChestMenu(title);
 		
 		menu.addMenuOpeningHandler(new MenuOpeningHandler() {

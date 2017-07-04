@@ -176,7 +176,6 @@ public class Mission extends QuestingObject implements IMissionWrite {
 
 	public void setType(MissionType type) {
 		quest.updateLastModified();
-		
 		this.type = type;
 	}
 
@@ -194,7 +193,6 @@ public class Mission extends QuestingObject implements IMissionWrite {
 		// TODO: Although this fix works, this situation shouldn't happen. Find the real cause.
 		amount = Math.min(amount, total);
 		
-		//float percentage = Math.round((amount * 100.0f) / total);
 		float percentage = amount / (float)total;
 		
 		if (percentage < .16f) progress.append("&4");
@@ -356,5 +354,4 @@ public class Mission extends QuestingObject implements IMissionWrite {
 		quest.updateLastModified();
 		this.spawnersAllowed = acceptsSpawners;
 	}
-
 }

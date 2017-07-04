@@ -7,6 +7,7 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
 import me.mrCookieSlime.QuestWorld.api.interfaces.IMission;
+import me.mrCookieSlime.QuestWorld.utils.Log;
 
 public class UnknownMission extends MissionType {
 	
@@ -18,7 +19,8 @@ public class UnknownMission extends MissionType {
 			result = new UnknownMission(name);
 			cache.put(name, result);
 		}
-		
+		Log.warning("Tried to fetch unknown mission type: " + name + ". Did an extension fail to load?");
+		Log.warning("Supplying dummy mission for " + name);
 		return result;
 	}
 
@@ -28,7 +30,7 @@ public class UnknownMission extends MissionType {
 
 	@Override
 	protected String userInstanceDescription(IMission instance) {
-		return "Unknown mission type: " + getName() + "! Contact an admin!";
+		return "&rUnknown mission type: " + getName() + "! Contact an admin!";
 	}
 
 	@Override

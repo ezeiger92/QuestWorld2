@@ -1267,45 +1267,18 @@ public class QuestBook {
 		// Mission types now handle their own menu data!
 		mission.getType().buildMenu(changes, menu);
 		
-		int totalMissions = QuestWorld.getInstance().getMissionTypes().size();
-		String[] missionTypes = new String[totalMissions];
-		
-		int i = 0;
-		int missionIndex = -1;
-		
-		final String[] keys = QuestWorld.getInstance().getMissionTypes().keySet().toArray(new String[totalMissions]);
-		
-		for (String type: keys) {
-			if(type.equals(mission.getType().toString()))
-				missionIndex = i;
-			missionTypes[i++] = Text.niceName(type);
-		}
-		
 		ItemStack missionSelector = new ItemBuilder(mission.getType().getSelectorItem())
-				.display("&7" + missionTypes[missionIndex])
-				.selector(missionIndex, missionTypes)
-				.get();
+				.display("&7" + mission.getType().toString())
+				.lore(
+						"",
+						"&e> Click to change the Mission Type").get();
 		
-		final int currentMission = missionIndex;
 		menu.addItem(9, missionSelector);
 		menu.addMenuClickHandler(9, new MenuClickHandler() {
 			
 			@Override
 			public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-				int delta = 1;
-				if(action.isRightClicked()) {
-					delta = -1;
-					openMissionSelector(p, changes.getSource());
-					return false;
-				}
-				
-				int newMission = (currentMission + delta + totalMissions) % totalMissions;
-				
-				changes.setType(QuestWorld.getInstance().getMissionTypes().get(keys[newMission]));
-				if(changes.sendEvent())
-					changes.apply();
-				
-				openQuestMissionEditor(p, mission);
+				openMissionSelector(p, changes.getSource());
 				return false;
 			}
 		});
@@ -1314,7 +1287,7 @@ public class QuestBook {
 	}
 
 	public static void openMissionSelector(Player p, Mission mission) {
-		final ChestMenu menu = new ChestMenu("§3Mission Selector");
+		final ChestMenu menu = new ChestMenu(Text.colorize("&3Mission Selector: " + mission.getQuest().getName()));
 		MissionChange changes = new MissionChange(mission);
 		menu.addMenuOpeningHandler(new MenuOpeningHandler() {
 			

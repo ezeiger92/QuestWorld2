@@ -33,15 +33,10 @@ public class PlayMission extends MissionType implements Ticking {
 		int remaining = total - current;
 		return Math.round(percent * 100) + "% (" + (remaining / 60) + "h " + (remaining % 60) + "m remaining)";
 	}
-
-	@Override
-	public int onTick(Player p, IMission mission) {
-		return p.getStatistic(Statistic.PLAY_ONE_TICK) / 20 / 60;
-	}
 	
 	@Override
 	public int onManual(Player player, IMission mission) {
-		return onTick(player, mission);
+		return player.getStatistic(Statistic.PLAY_ONE_TICK) / 20 / 60;
 	}
 	
 	@Override

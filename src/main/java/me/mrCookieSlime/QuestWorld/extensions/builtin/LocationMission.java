@@ -6,7 +6,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import me.mrCookieSlime.QuestWorld.QuestWorld;
-import me.mrCookieSlime.QuestWorld.api.Manual;
 import me.mrCookieSlime.QuestWorld.api.MissionChange;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.Ticking;
@@ -20,7 +19,7 @@ import me.mrCookieSlime.QuestWorld.listeners.InputType;
 import me.mrCookieSlime.QuestWorld.utils.ItemBuilder;
 import me.mrCookieSlime.QuestWorld.utils.PlayerTools;
 
-public class LocationMission extends MissionType implements Ticking, Manual {
+public class LocationMission extends MissionType implements Ticking {
 	public LocationMission() {
 		super("REACH_LOCATION", false, false, new ItemStack(Material.LEATHER_BOOTS));
 	}
@@ -62,16 +61,6 @@ public class LocationMission extends MissionType implements Ticking, Manual {
 			instance.setCustomInt(1);
 		
 		return false;
-	}
-
-	@Override
-	public int onTick(Player p, IMission mission) {
-		if (mission.getLocation().getWorld().getName().equals(p.getWorld().getName())
-				&& mission.getLocation().distanceSquared(p.getLocation()) < mission.getCustomInt() * mission.getCustomInt()) {
-			return 1;
-		}
-		
-		return FAIL;
 	}
 	
 	@Override
