@@ -107,7 +107,7 @@ public class EditorListener implements Listener {
 		
 		case KILL_NAMED: {
 			Mission mission = (Mission) input.getValue();
-			mission.setEntityName(Text.colorize(e.getMessage()));
+			mission.setCustomString(Text.colorize(e.getMessage()));
 			PlayerTools.sendTranslation(e.getPlayer(), true, Translation.killtype_rename);
 			QuestWorld.getInstance().removeInput(e.getPlayer().getUniqueId());
 			e.setCancelled(true);
@@ -117,7 +117,7 @@ public class EditorListener implements Listener {
 		
 		case CITIZEN: {
 			Mission mission = (Mission) input.getValue();
-			mission.setEntityName(Text.colorize(e.getMessage()));
+			mission.setCustomString(Text.colorize(e.getMessage()));
 			PlayerTools.sendTranslation(e.getPlayer(), true, Translation.citizen_rename);
 			QuestWorld.getInstance().removeInput(e.getPlayer().getUniqueId());
 			e.setCancelled(true);
@@ -127,7 +127,7 @@ public class EditorListener implements Listener {
 		
 		case LOCATION_NAME: {
 			Mission mission = (Mission) input.getValue();
-			mission.setEntityName(Text.colorize(e.getMessage()));
+			mission.setCustomString(Text.colorize(e.getMessage()));
 			PlayerTools.sendTranslation(e.getPlayer(), true, Translation.location_rename);
 			QuestWorld.getInstance().removeInput(e.getPlayer().getUniqueId());
 			e.setCancelled(true);

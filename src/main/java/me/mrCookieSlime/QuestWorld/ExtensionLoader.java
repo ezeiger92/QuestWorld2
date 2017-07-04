@@ -27,7 +27,7 @@ public class ExtensionLoader {
 			throw new NullPointerException("'loader' and 'folder' must not be null, but " + args + " null!");
 		}
 		else if(!folder.isDirectory()) {
-			throw new IllegalArgumentException("'folder' must be a directory!");
+			//throw new IllegalArgumentException("'folder' must be a directory!");
 		}
 	}
 	
@@ -36,6 +36,10 @@ public class ExtensionLoader {
 			// TODO check for jar files the best way, because it's probably not
 			return name.endsWith(".jar");
 		});
+		
+		// Not a directory or unable to list files for some reason
+		if(extensions == null)
+			return;
 		
 		// Could be parallel, but not worth it yet
 		for(File f : extensions)
@@ -76,6 +80,7 @@ public class ExtensionLoader {
 			try { extensionClass.getConstructor().newInstance(); }
 			catch (InstantiationException | IllegalAccessException | IllegalArgumentException
 					| InvocationTargetException | NoSuchMethodException | SecurityException e) {
+				// TODO better messages for exceptions during construction
 				e.printStackTrace();
 			}
 		

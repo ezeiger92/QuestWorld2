@@ -130,7 +130,7 @@ public class MissionButton {
 	}
 	
 	public static MenuData entityName(MissionChange changes) {
-		ItemStack item = new ItemBuilder(Material.NAME_TAG).display("&r" + changes.getEntityName()).lore(
+		ItemStack item = new ItemBuilder(Material.NAME_TAG).display("&r" + changes.getCustomString()).lore(
 				"",
 				"&e> Click to change the Name").get();
 		
@@ -155,7 +155,7 @@ public class MissionButton {
 			Player p = (Player)event.getWhoClicked();
 			
 			if(event.getClick().isRightClick()) {
-				changes.setCustomName(null);
+				changes.setDisplayName(null);
 			}
 			else {
 				p.closeInventory();
@@ -164,7 +164,7 @@ public class MissionButton {
 					
 					@Override
 					public boolean onChat(Player p, String message) {
-						changes.getSource().setCustomName(message);
+						changes.getSource().setDisplayName(message);
 						PlayerTools.sendTranslation(p, true, Translation.mission_name);
 						QuestBook.openQuestMissionEditor(p, changes.getSource());
 						return false;
@@ -185,7 +185,7 @@ public class MissionButton {
 				"&rShift + Right Click: &e-1h").get();
 		
 		MenuClickHandler handler = simpleHandler(changes, event -> {
-			int amt = clickNumber((int)changes.getTimeframe(), 60, event);
+			int amt = clickNumber(changes.getTimeframe(), 60, event);
 			changes.setTimeframe(Math.max(amt, 0));
 		});
 		

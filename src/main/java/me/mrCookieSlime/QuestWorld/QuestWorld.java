@@ -27,12 +27,12 @@ import me.mrCookieSlime.QuestWorld.api.QuestExtension;
 import me.mrCookieSlime.QuestWorld.api.Translator;
 import me.mrCookieSlime.QuestWorld.commands.EditorCommand;
 import me.mrCookieSlime.QuestWorld.commands.QuestsCommand;
-import me.mrCookieSlime.QuestWorld.hooks.askyblock.ASkyBlockHook;
-import me.mrCookieSlime.QuestWorld.hooks.builtin.BuiltinHook;
-import me.mrCookieSlime.QuestWorld.hooks.chatreaction.ChatReactionHook;
-import me.mrCookieSlime.QuestWorld.hooks.citizens.CitizensHook;
-import me.mrCookieSlime.QuestWorld.hooks.money.MoneyHook;
-import me.mrCookieSlime.QuestWorld.hooks.votifier.VotifierHook;
+import me.mrCookieSlime.QuestWorld.extensions.askyblock.ASkyBlock;
+import me.mrCookieSlime.QuestWorld.extensions.builtin.Builtin;
+import me.mrCookieSlime.QuestWorld.extensions.chatreaction.ChatReaction;
+import me.mrCookieSlime.QuestWorld.extensions.citizens.Citizens;
+import me.mrCookieSlime.QuestWorld.extensions.money.Money;
+import me.mrCookieSlime.QuestWorld.extensions.votifier.Votifier;
 import me.mrCookieSlime.QuestWorld.listeners.EditorListener;
 import me.mrCookieSlime.QuestWorld.listeners.HookInstaller;
 import me.mrCookieSlime.QuestWorld.listeners.Input;
@@ -86,21 +86,13 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 	}
 	
 	public QuestWorld() {
-		Log.setupLogger(getLogger());
 		instance = this;
+		Log.setLogger(getLogger());
 		
 		extLoader = new ExtensionLoader(this.getClassLoader(), new File(this.getDataFolder(), "extensions"));
-		// Try to peek at the log-level, for all logging that happens BEFORE onEnable
-		/*File config = new File(getDataFolder(), "config.yml");
-		if(config.isFile()) {
-			String levelStr = YamlConfiguration.loadConfiguration(config).getString("options.log-level", "INFO");
-			Log.setLevel(levelStr);
-		}*/
-		
 		language = new Lang("en_us", getDataFolder(), getClassLoader());
 		language.save();
 		getServer().getServicesManager().register(QuestLoader.class, this, this, ServicePriority.Normal);
-
 	}
 	
 	private List<QuestExtension> preEnableHooks = new ArrayList<>();
@@ -133,12 +125,12 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 		if (getServer().getPluginManager().isPluginEnabled("Vault"))
 			setupEconomy();
 		
-		new BuiltinHook();
-		new CitizensHook();
-		new ChatReactionHook();
-		new VotifierHook();
-		new ASkyBlockHook();
-		new MoneyHook();
+		new Builtin();
+		new Citizens();
+		new ChatReaction();
+		new Votifier();
+		new ASkyBlock();
+		new Money();
 		
 		// Attempt to load Core to continue
 		CSCoreLibLoader loader = new CSCoreLibLoader(this);
@@ -154,14 +146,14 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 			
 			@Override
 			public void run() {
-				Log.fine("[Quest World 2] Retrieving Quest Configuration...");
+				Log.fine("Retrieving Quest Configuration...");
 				load();
 				int categories = getCategories().size(), quests = 0;
 				for (Category category: getCategories())
 					quests += category.getQuests().size();
 
-				Log.fine("[Quest World 2] Successfully loaded " + categories + " Categories");
-				Log.fine("[Quest World 2] Successfully loaded " + quests + " Quests");
+				Log.fine("Successfully loaded " + categories + " Categories");
+				Log.fine("Successfully loaded " + quests + " Quests");
 			}
 		}, 0L);
 		
@@ -338,6 +330,7 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 	public void onDisable() {
 		unload();
 		
+		Log.setLogger(null);
 		instance = null;
 		
 		getServer().getServicesManager().unregisterAll(this);

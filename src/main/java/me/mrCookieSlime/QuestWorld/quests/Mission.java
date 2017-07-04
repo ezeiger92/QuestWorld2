@@ -18,7 +18,9 @@ import me.mrCookieSlime.QuestWorld.api.interfaces.IMissionWrite;
 import me.mrCookieSlime.QuestWorld.utils.PlayerTools;
 import me.mrCookieSlime.QuestWorld.utils.Text;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -32,33 +34,43 @@ public class Mission extends QuestingObject implements IMissionWrite {
 	String id;
 	EntityType entity;
 	Location location;
-	String name;
+	String customString;
 	String displayName;
-	long timeframe;
+	int timeframe;
 	boolean deathReset;
-	String lore;
+	String description;
 	int customInt;
 	boolean spawnersAllowed;
 	
 	List<String> dialogue = new ArrayList<String>();
 	
-	public Mission(Quest quest, String id, MissionType type, EntityType entity, String name, ItemStack item, Location location, int amount, String displayName, long timeframe, boolean deathReset, int custom_int, boolean spawnersAllowed, String lore) {
+	public Mission(Quest quest, String id, MissionType type, EntityType entity, String customString,
+			ItemStack item, Location location, int amount, String displayName, int timeframe,
+			boolean deathReset, int customInt, boolean spawnersAllowed, String description) {
 		this.quest = quest;
 		this.id = id;
 		this.type = type;
 		this.item = item;
 		this.amount = amount;
 		this.entity = entity;
-		this.name = name;
+		this.customString = customString;
 		this.location = location;
 		this.displayName = displayName;
 		this.timeframe = timeframe;
-		this.customInt = custom_int;
+		this.customInt = customInt;
 		this.deathReset = deathReset;
-		this.lore = lore == null ? "": lore;
+		this.description = description == null ? "": description;
 		this.spawnersAllowed = spawnersAllowed;
-
-		File file = new File("plugins/QuestWorld/dialogues/" + quest.getCategory().getID() + "+" + quest.getID() + "+" + getID() + ".txt");
+		loadDialogue();
+		if (this.customString == null) this.customString = "";
+		
+		// Repair any quests that would have been broken by updates, namely location quests
+		type.attemptUpgrade(this);
+	}
+	
+	private void loadDialogue() {
+		String fileName = quest.getCategory().getID() + "+" + quest.getID() + "+" + getID() + ".txt";
+		File file = new File("plugins/QuestWorld/dialogues/" + fileName);
 		if (file.exists()) {
 			try {
 				BufferedReader br = new BufferedReader(new FileReader(file));
@@ -71,11 +83,20 @@ public class Mission extends QuestingObject implements IMissionWrite {
 				e.printStackTrace();
 			}
 		}
-		
-		if (this.name == null) this.name = "";
-		
-		// Repair any quests that would have been broken by updates, namely location quests
-		type.attemptUpgrade(this);
+	}
+	
+	protected void loadDefaults() {
+		item = new ItemStack(Material.STONE);
+		amount = 1;
+		entity = EntityType.PLAYER;
+		customString = "";
+		location = new Location(Bukkit.getWorlds().get(0), 0, 64, 0);
+		displayName = null;
+		timeframe = 0;
+		deathReset = false;
+		customInt = 0;
+		spawnersAllowed = true;
+		description = "Hey there! Do this Quest.";
 	}
 	
 	protected Mission(Mission copy) {
@@ -90,11 +111,11 @@ public class Mission extends QuestingObject implements IMissionWrite {
 		dest.id = id;
 		dest.entity = entity;
 		dest.location = location.clone();
-		dest.name = name;
+		dest.customString = customString;
 		dest.displayName = displayName;
 		dest.timeframe = timeframe;
 		dest.deathReset = deathReset;
-		dest.lore = lore;
+		dest.description = description;
 		dest.customInt = customInt;
 		dest.spawnersAllowed = spawnersAllowed;
 		
@@ -115,8 +136,8 @@ public class Mission extends QuestingObject implements IMissionWrite {
 	}
 	
 	public String getText() {
-		if (getCustomName() != null)
-			return getCustomName();
+		if (getDisplayName() != null)
+			return getDisplayName();
 
 		return type.userDescription(this);
 	}
@@ -144,13 +165,9 @@ public class Mission extends QuestingObject implements IMissionWrite {
 		this.entity = entity;
 	}
 	
-	public String getEntityName() {
-		return name;
-	}
-	
-	public void setEntityName(String name) {
+	public void setCustomString(String customString) {
 		quest.updateLastModified();
-		this.name = name;
+		this.customString = customString;
 	}
 
 	public MissionType getType() {
@@ -159,6 +176,7 @@ public class Mission extends QuestingObject implements IMissionWrite {
 
 	public void setType(MissionType type) {
 		quest.updateLastModified();
+		
 		this.type = type;
 	}
 
@@ -200,10 +218,14 @@ public class Mission extends QuestingObject implements IMissionWrite {
 		
 		return Text.colorize(progress.toString());
 	}
+	
+	public String getCustomString() {
+		return customString;
+	}
 
 	@Override
 	public String getName() {
-		return name;
+		return getText();
 	}
 
 	@Override
@@ -228,7 +250,8 @@ public class Mission extends QuestingObject implements IMissionWrite {
 	
 	public void setupDialogue(Player p) {
 		this.dialogue = new ArrayList<String>();
-		String path = "plugins/QuestWorld/dialogues/" + quest.getCategory().getID() + "+" + quest.getID() + "+" + getID() + ".txt";
+		String fileName = quest.getCategory().getID() + "+" + quest.getID() + "+" + getID() + ".txt";
+		String path = "plugins/QuestWorld/dialogues/" + fileName;
 		File file = new File(path);
 		if (file.exists()) file.delete();
 		
@@ -276,26 +299,24 @@ public class Mission extends QuestingObject implements IMissionWrite {
 		return this.dialogue;
 	}
 
-	public void setCustomName(String name) {
+	public void setDisplayName(String name) {
 		quest.updateLastModified();
 		this.displayName = name;
 	}
 	
-	public String getCustomName() {
+	public String getDisplayName() {
 		return this.displayName;
 	}
 	
-	// TODO This is the time for mission completion in minutes... 
-	// Consider using int, fits in nicer and max time is 4083 years
-	public long getTimeframe() {
-		return this.timeframe;
+	public int getTimeframe() {
+		return timeframe;
 	}
 	
 	public boolean hasTimeframe() {
 		return this.timeframe > 0;
 	}
 	
-	public void setTimeframe(long timeframe) {
+	public void setTimeframe(int timeframe) {
 		quest.updateLastModified();
 		this.timeframe = timeframe;
 	}
@@ -309,13 +330,13 @@ public class Mission extends QuestingObject implements IMissionWrite {
 		this.deathReset = deathReset;
 	}
 
-	public String getLore() {
-		return this.lore;
+	public String getDescription() {
+		return this.description;
 	}
 	
-	public void setLore(String lore) {
+	public void setDescription(String description) {
 		quest.updateLastModified();
-		this.lore = lore;
+		this.description = description;
 	}
 
 	public void setCustomInt(int val) {

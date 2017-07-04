@@ -12,16 +12,17 @@ public abstract class QuestExtension {
 	private Plugin[] found;
 	private QuestLoader loader = null;
 	
-	private boolean setupLink() {
-		RegisteredServiceProvider<QuestLoader> questLoaderService = Bukkit.getServer().getServicesManager().getRegistration(QuestLoader.class);
-	    if (questLoaderService != null) loader = questLoaderService.getProvider();
-
-	    return loader != null;
+	public final <T> T getService(Class<T> clazz) {
+		RegisteredServiceProvider<T> service = Bukkit.getServer().getServicesManager().getRegistration(clazz);
+		if(service != null)
+			return service.getProvider();
+		
+		return null;
 	}
 	
 	public QuestExtension() {
 		setup();
-		setupLink();
+		loader = getService(QuestLoader.class);
 		
 		requirements = getDepends();
 		if(requirements == null)

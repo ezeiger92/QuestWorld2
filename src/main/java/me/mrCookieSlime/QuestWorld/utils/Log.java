@@ -6,10 +6,7 @@ import java.util.logging.Logger;
 public class Log {
 	private static Logger activeLogger = null;
 	
-	public static void setupLogger(Logger logger) {
-		if(activeLogger != null)
-			return;
-		
+	public static void setLogger(Logger logger) {
 		activeLogger = logger;
 	}
 	

@@ -58,9 +58,8 @@ public abstract class MissionType {
 	public static MissionType valueOf(String id) {
 		MissionType result =  QuestWorld.getInstance().getMissionTypes().get(id);
 		
-		if(result == null) {
-			throw new NullPointerException("Tried to fetch mission type:" + id + " that doesn't exist!");
-		}
+		if(result == null)
+			result = UnknownMission.get(id);
 		
 		return result;
 	}
@@ -123,7 +122,7 @@ public abstract class MissionType {
 		putButton(8, MissionButton.dialogue(changes));
 	}
 	
-	protected boolean validateTypeChange(MissionChange changes) {
+	protected boolean migrateFrom(MissionChange changes) {
 		return false;
 	}
 	

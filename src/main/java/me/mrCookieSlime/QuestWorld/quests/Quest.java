@@ -146,7 +146,7 @@ public class Quest extends QuestingObject {
 						new Location(Bukkit.getWorlds().get(0), 0, 0, 0),
 						cfg.getInt("missions." + key + ".amount"),
 						Text.colorize(cfg.getString("missions." + key + ".display-name")),
-						cfg.contains("missions." + key + ".timeframe") ? cfg.getLong("missions." + key + ".timeframe"): 0,
+						cfg.contains("missions." + key + ".timeframe") ? cfg.getInt("missions." + key + ".timeframe"): 0,
 						cfg.getBoolean("missions." + key + ".reset-on-death"),
 						cfg.getInt("missions." + key + ".citizen"),
 						// not exclude = allow, what we want
@@ -161,7 +161,7 @@ public class Quest extends QuestingObject {
 					cfg.getLocation("missions." + key + ".location"),
 					cfg.getInt("missions." + key + ".amount"),
 					Text.colorize(cfg.getString("missions." + key + ".display-name")),
-					cfg.contains("missions." + key + ".timeframe") ? cfg.getLong("missions." + key + ".timeframe"): 0,
+					cfg.contains("missions." + key + ".timeframe") ? cfg.getInt("missions." + key + ".timeframe"): 0,
 					cfg.getBoolean("missions." + key + ".reset-on-death"),
 					cfg.getInt("missions." + key + ".citizen"),
 					// not exclude = allow, what we want
@@ -204,11 +204,11 @@ public class Quest extends QuestingObject {
 			cfg.setValue("missions." + mission.getID() + ".item", new ItemStack(mission.getMissionItem()));
 			cfg.setValue("missions." + mission.getID() + ".entity", mission.getEntity().toString());
 			if (mission.getLocation() != null && mission.getLocation().getWorld() != null) cfg.setValue("missions." + mission.getID() + ".location", mission.getLocation());
-			cfg.setValue("missions." + mission.getID() + ".name", Text.escape(mission.getEntityName()));
-			cfg.setValue("missions." + mission.getID() + ".display-name", Text.escape(mission.getCustomName()));
+			cfg.setValue("missions." + mission.getID() + ".name", Text.escape(mission.getCustomString()));
+			cfg.setValue("missions." + mission.getID() + ".display-name", Text.escape(mission.getDisplayName()));
 			cfg.setValue("missions." + mission.getID() + ".timeframe", mission.getTimeframe());
 			cfg.setValue("missions." + mission.getID() + ".reset-on-death", mission.resetsonDeath());
-			cfg.setValue("missions." + mission.getID() + ".lore", Text.escape(mission.getLore()));
+			cfg.setValue("missions." + mission.getID() + ".lore", Text.escape(mission.getDescription()));
 			
 			// TODO move citizen tag to custom_int tag
 			cfg.setValue("missions." + mission.getID() + ".citizen", mission.getCustomInt());

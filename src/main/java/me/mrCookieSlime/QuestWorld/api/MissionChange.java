@@ -77,14 +77,17 @@ public class MissionChange extends Mission {
 	}
 
 	@Override
-	public void setEntityName(String name) {
-		super.setEntityName(name);
+	public void setCustomString(String customString) {
+		super.setCustomString(customString);
 		changeBits |= BitFlag.getBits(Member.NAME);
 	}
 
 	@Override
 	public void setType(MissionType type) {
 		super.setType(type);
+		if(!type.migrateFrom(this))
+			// TODO This does not flag any changes made by migrateFrom or loadDefaults
+			loadDefaults();
 		changeBits |= BitFlag.getBits(Member.TYPE);
 	}
 
@@ -107,13 +110,13 @@ public class MissionChange extends Mission {
 	}
 	
 	@Override
-	public void setCustomName(String name) {
-		super.setCustomName(name);
+	public void setDisplayName(String name) {
+		super.setDisplayName(name);
 		changeBits |= BitFlag.getBits(Member.NAME);
 	}
 
 	@Override
-	public void setTimeframe(long timeframe) {
+	public void setTimeframe(int timeframe) {
 		super.setTimeframe(timeframe);
 		changeBits |= BitFlag.getBits(Member.TIMEFRAME);
 	}
@@ -125,8 +128,8 @@ public class MissionChange extends Mission {
 	}
 
 	@Override
-	public void setLore(String lore) {
-		super.setLore(lore);
+	public void setDescription(String description) {
+		super.setDescription(description);
 		changeBits |= BitFlag.getBits(Member.LORE);
 	}
 

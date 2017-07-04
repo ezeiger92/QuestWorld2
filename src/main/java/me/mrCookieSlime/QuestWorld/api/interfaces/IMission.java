@@ -18,23 +18,23 @@ public interface IMission extends IQuestingObject {
 	ItemStack getDisplayItem();
 	
 	EntityType getEntity();
-	String getEntityName();
 	MissionType getType();
 
 	Location getLocation();
 
 	List<String> getDialogue();
-	String getCustomName();
+	String getDisplayName();
 	
-	long getTimeframe();
+	int getTimeframe();
 	
 	boolean hasTimeframe();
 
 	boolean resetsonDeath();
 
-	String getLore();
+	String getDescription();
 
 	int getCustomInt();
+	String getCustomString();
 
 	boolean acceptsSpawners();
 	Quest getQuest();
