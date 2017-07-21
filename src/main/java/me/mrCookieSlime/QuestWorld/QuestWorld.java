@@ -130,7 +130,9 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 		new ChatReaction();
 		new Votifier();
 		new ASkyBlock();
-		new Money();
+		
+		@SuppressWarnings("unused") Class<Money> dummy = Money.class;
+		//new Money(); - Incomplete
 		
 		// Attempt to load Core to continue
 		CSCoreLibLoader loader = new CSCoreLibLoader(this);
