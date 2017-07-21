@@ -47,7 +47,17 @@ public class ItemBuilder {
 		return null;
 	}
 	
+	public static ItemBuilder edit(ItemStack stack) {
+		ItemBuilder res = new ItemBuilder();
+		res.resultStack = stack;
+		
+		return res;
+	}
+	
 	private ItemStack resultStack;
+	
+	private ItemBuilder() {
+	}
 	
 	/**
      * Constructs an ItemBuilder.

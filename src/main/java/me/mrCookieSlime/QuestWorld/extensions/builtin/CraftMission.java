@@ -57,6 +57,10 @@ public class CraftMission extends MissionType implements Listener {
 			
 		case SHIFT_RIGHT:
 		case SHIFT_LEFT:
+			// Fixes ezeiger92/QuestWorld2#40
+			if(recipeAmount == 0)
+				break;
+			
 			int maxCraftable = PlayerTools.getMaxCraftAmount(e.getInventory());
 			int capacity = PlayerTools.fits(test, e.getView().getBottomInventory());
 			

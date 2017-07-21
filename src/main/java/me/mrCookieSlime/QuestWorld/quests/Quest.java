@@ -6,10 +6,10 @@ import java.util.List;
 
 import me.mrCookieSlime.CSCoreLibPlugin.Configuration.Config;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.InvUtils;
-import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.Item.CustomItem;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Player.PlayerInventory;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
+import me.mrCookieSlime.QuestWorld.utils.ItemBuilder;
 import me.mrCookieSlime.QuestWorld.utils.Text;
 
 import org.bukkit.Bukkit;
@@ -18,7 +18,6 @@ import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.MaterialData;
 
 public class Quest extends QuestingObject {
 	
@@ -83,7 +82,7 @@ public class Quest extends QuestingObject {
 		this.ordered = cfg.getBoolean("in-order");
 		this.autoclaim = cfg.getBoolean("auto-claim");
 		this.name = Text.colorize(cfg.getString("name"));
-		this.item = new CustomItem(cfg.getItem("item"), name);
+		this.item = new ItemBuilder(cfg.getItem("item")).display(name).get();
 		this.tasks = loadMissions(cfg);
 		this.rewards = loadRewards(cfg);
 		this.money = cfg.getInt("rewards.money");
@@ -106,7 +105,7 @@ public class Quest extends QuestingObject {
 		this.id = Integer.parseInt(input.split(" M ")[1]);
 		this.cooldown = -1;
 		this.name = Text.colorize(name);
-		this.item = new CustomItem(new MaterialData(Material.BOOK_AND_QUILL).toItemStack(1), name);
+		this.item = new ItemBuilder(Material.BOOK_AND_QUILL).display(name).get();
 		
 		this.tasks = new ArrayList<Mission>();
 		this.rewards = new ArrayList<ItemStack>();
@@ -297,7 +296,7 @@ public class Quest extends QuestingObject {
 
 	public void setItem(ItemStack item) {
 		updateLastModified();
-		this.item = new CustomItem(item, name);
+		this.item = new ItemBuilder(item).display(name).get();
 	}
 
 	public void toggleWorld(String world) {
@@ -314,7 +313,7 @@ public class Quest extends QuestingObject {
 	public void setName(String name) {
 		updateLastModified();
 		this.name = Text.colorize(name);
-		this.item = new CustomItem(item, name);
+		ItemBuilder.edit(this.item).display(name);
 	}
 
 	public List<ItemStack> getRewards() {

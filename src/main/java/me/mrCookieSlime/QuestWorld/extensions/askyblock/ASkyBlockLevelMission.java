@@ -7,12 +7,12 @@ import org.bukkit.inventory.ItemStack;
 
 import com.wasteofplastic.askyblock.events.IslandLevelEvent;
 
-import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.Item.CustomItem;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.MissionChange;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.interfaces.IMission;
 import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
+import me.mrCookieSlime.QuestWorld.utils.ItemBuilder;
 
 public class ASkyBlockLevelMission extends MissionType implements Listener {
 	public ASkyBlockLevelMission() {
@@ -21,7 +21,7 @@ public class ASkyBlockLevelMission extends MissionType implements Listener {
 	
 	@Override
 	public ItemStack userDisplayItem(IMission instance) {
-		return new CustomItem(Material.COMMAND, "&7" + instance.getAmount(), 0);
+		return new ItemBuilder(Material.COMMAND).display("&7" + instance.getAmount()).get();
 	}
 	
 	@Override

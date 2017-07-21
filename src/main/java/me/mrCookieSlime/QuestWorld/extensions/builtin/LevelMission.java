@@ -6,12 +6,12 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerLevelChangeEvent;
 import org.bukkit.inventory.ItemStack;
 
-import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.Item.CustomItem;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.MissionChange;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.interfaces.IMission;
 import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
+import me.mrCookieSlime.QuestWorld.utils.ItemBuilder;
 
 public class LevelMission extends MissionType implements Listener {
 	public LevelMission() {
@@ -20,7 +20,7 @@ public class LevelMission extends MissionType implements Listener {
 	
 	@Override
 	public ItemStack userDisplayItem(IMission instance) {
-		return new CustomItem(Material.COMMAND, "&7" + instance.getAmount(), 0);
+		return new ItemBuilder(Material.COMMAND).display("&7" + instance.getAmount()).get();
 	}
 	
 	@Override

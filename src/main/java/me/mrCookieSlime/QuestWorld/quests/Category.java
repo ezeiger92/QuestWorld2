@@ -10,14 +10,13 @@ import java.util.Map;
 import java.util.Set;
 
 import me.mrCookieSlime.CSCoreLibPlugin.Configuration.Config;
-import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.Item.CustomItem;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
+import me.mrCookieSlime.QuestWorld.utils.ItemBuilder;
 import me.mrCookieSlime.QuestWorld.utils.Text;
 
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.MaterialData;
 
 public class Category extends QuestingObject {
 	
@@ -51,7 +50,7 @@ public class Category extends QuestingObject {
 		this.id = id;
 		this.quests = new HashMap<Integer, Quest>();
 		this.name = Text.colorize(name);
-		this.item = new CustomItem(new MaterialData(Material.BOOK_AND_QUILL).toItemStack(1), name);
+		this.item = new ItemBuilder(Material.BOOK_AND_QUILL).display(name).get();
 		this.world_blacklist = new ArrayList<String>();
 		this.permission = "";
 		this.hidden = false;
@@ -68,7 +67,7 @@ public class Category extends QuestingObject {
 		Config cfg = new Config(file);
 		this.name = Text.colorize(cfg.getString("name"));
 		this.item = cfg.getItem("item");
-		this.item = new CustomItem(item, name);
+		this.item = new ItemBuilder(item).display(name).get();
 		this.hidden = cfg.getBoolean("hidden");
 		if (cfg.contains("permission")) this.permission = cfg.getString("permission");
 		if (cfg.contains("world-blacklist")) world_blacklist = cfg.getStringList("world-blacklist");
@@ -184,7 +183,7 @@ public class Category extends QuestingObject {
 	public void setItem(ItemStack item) {
 		updateLastModified();
 		if(name != null)
-			this.item = new CustomItem(item, name);
+			this.item = new ItemBuilder(item).display(name).get();
 		else
 			this.item = item.clone();
 	}
@@ -197,7 +196,7 @@ public class Category extends QuestingObject {
 	public void setName(String name) {
 		updateLastModified();
 		this.name = Text.colorize(name);
-		this.item = new CustomItem(item, name);
+		ItemBuilder.edit(this.item).display(name);
 	}
 	
 	public Quest getParent() {

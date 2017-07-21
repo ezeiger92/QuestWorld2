@@ -157,7 +157,9 @@ public class QuestBook {
 			});
 		}
 		else {
-			menu.addItem(4, new CustomItem(new MaterialData(Material.ENCHANTED_BOOK), "&eQuest Book", "", QuestWorld.getInstance().getManager(p).getProgress()));
+			menu.addItem(4, new ItemBuilder(Material.ENCHANTED_BOOK)
+					.display("&eQuest Book")
+					.lore("", QuestWorld.getInstance().getManager(p).getProgress()).get());
 			menu.addMenuClickHandler(4, new MenuClickHandler() {
 				
 				@Override
@@ -338,7 +340,7 @@ public class QuestBook {
 		addPartyMenuButton(menu, p);
 		
 		if (back) {
-			menu.addItem(0, new CustomItem(new MaterialData(Material.MAP), QuestWorld.getInstance().getBookLocal("button.back.general")));
+			menu.addItem(0, new ItemBuilder(Material.MAP).display(QuestWorld.getInstance().getBookLocal("button.back.general")).get());
 			menu.addMenuClickHandler(0, new MenuClickHandler() {
 				
 				@Override
