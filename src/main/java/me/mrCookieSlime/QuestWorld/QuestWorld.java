@@ -131,7 +131,7 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 		new Votifier();
 		new ASkyBlock();
 		
-		@SuppressWarnings("unused") Class<Money> dummy = Money.class;
+		// TODO
 		//new Money(); - Incomplete
 		
 		// Attempt to load Core to continue

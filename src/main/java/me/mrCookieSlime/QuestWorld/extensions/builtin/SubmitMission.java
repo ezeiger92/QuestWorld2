@@ -38,9 +38,9 @@ public class SubmitMission extends MissionType implements Manual {
 		
 		ItemStack missing = p.getInventory().removeItem(search).get(0);
 		if(missing != null)
-			found = needed - missing.getAmount();
+			found -= missing.getAmount();
 		
-		if(found > needed) {
+		if(found > 0) {
 			QuestWorld.getSounds().MissionSubmit().playTo(p);
 			QuestWorld.getSounds().muteNext();
 			
