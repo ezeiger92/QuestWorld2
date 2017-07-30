@@ -76,8 +76,9 @@ public class MissionViewer implements Listener {
 			// TODO Mission already in set, ideally impossible. TEST ME
 		}
 		
-		if(type instanceof Ticking)
+		if(type instanceof Ticking) {
 			ticking_missions.add(mission);
+		}
 	}
 	
 	private void update(Mission mission, MissionType newType) {
@@ -106,7 +107,8 @@ public class MissionViewer implements Listener {
 			// TODO Mission not in set, ideally impossible. TEST ME
 		}
 		
-		if(type instanceof Ticking)
+		if(type instanceof Ticking) {
 			ticking_missions.remove(mission);
+		}
 	}
 }

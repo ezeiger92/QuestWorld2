@@ -9,6 +9,7 @@ import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.InvUtils;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Player.PlayerInventory;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
+import me.mrCookieSlime.QuestWorld.api.QuestChange;
 import me.mrCookieSlime.QuestWorld.utils.ItemBuilder;
 import me.mrCookieSlime.QuestWorld.utils.Text;
 
@@ -26,11 +27,11 @@ public class Quest extends QuestingObject {
 	long cooldown;
 	String name;
 	ItemStack item;
-	List<Mission> tasks;
+	List<Mission> tasks = new ArrayList<>();
 	
-	List<String> commands = new ArrayList<String>();
-	List<String> world_blacklist = new ArrayList<String>();
-	List<ItemStack> rewards;
+	List<String> commands = new ArrayList<>();
+	List<String> world_blacklist = new ArrayList<>();
+	List<ItemStack> rewards = new ArrayList<>();
 	int money;
 	int xp;
 	int partysize;
@@ -83,7 +84,7 @@ public class Quest extends QuestingObject {
 		this.autoclaim = cfg.getBoolean("auto-claim");
 		this.name = Text.colorize(cfg.getString("name"));
 		this.item = new ItemBuilder(cfg.getItem("item")).display(name).get();
-		this.tasks = loadMissions(cfg);
+		loadMissions(cfg);
 		this.rewards = loadRewards(cfg);
 		this.money = cfg.getInt("rewards.money");
 		this.xp = cfg.getInt("rewards.xp");
@@ -130,29 +131,17 @@ public class Quest extends QuestingObject {
 		}
 	}
 
-	private List<Mission> loadMissions(Config cfg) {
-		if (!cfg.contains("missions")) return new ArrayList<Mission>();
-		List<Mission> missions = new ArrayList<Mission>();
+	private void loadMissions(Config cfg) {
+		if (!cfg.contains("missions"))
+			return;
+
 		for (String key: cfg.getKeys("missions")) {
 			if (!cfg.contains("missions." + key + ".location.world")) {
 				cfg.setValue("missions." + key + ".location", new Location(Bukkit.getWorlds().get(0), 0, 0, 0));
 				cfg.save();
-				missions.add(new Mission(this, key,
-						MissionType.valueOf(cfg.getString("missions." + key + ".type")),
-						EntityType.valueOf(cfg.getString("missions." + key + ".entity")),
-						Text.colorize(cfg.getString("missions." + key + ".name")),
-						cfg.getItem("missions." + key + ".item"),
-						new Location(Bukkit.getWorlds().get(0), 0, 0, 0),
-						cfg.getInt("missions." + key + ".amount"),
-						Text.colorize(cfg.getString("missions." + key + ".display-name")),
-						cfg.contains("missions." + key + ".timeframe") ? cfg.getInt("missions." + key + ".timeframe"): 0,
-						cfg.getBoolean("missions." + key + ".reset-on-death"),
-						cfg.getInt("missions." + key + ".citizen"),
-						// not exclude = allow, what we want
-						!cfg.getBoolean("missions." + key + ".exclude-spawners"),
-						Text.colorize(cfg.getString("missions." + key + ".lore"))));
 			}
-			else missions.add(new Mission(this, key,
+			QuestChange changes = new QuestChange(this);
+			changes.addMission(new Mission(this, key,
 					MissionType.valueOf(cfg.getString("missions." + key + ".type")),
 					EntityType.valueOf(cfg.getString("missions." + key + ".entity")),
 					Text.colorize(cfg.getString("missions." + key + ".name")),
@@ -167,8 +156,9 @@ public class Quest extends QuestingObject {
 					!cfg.getBoolean("missions." + key + ".exclude-spawners"),
 					Text.colorize(cfg.getString("missions." + key + ".lore"))));
 			
+			if(changes.sendEvent())
+				changes.apply();
 		}
-		return missions;
 	}
 	
 	public void save() {

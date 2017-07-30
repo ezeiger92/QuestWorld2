@@ -101,7 +101,7 @@ public class LocationMission extends MissionType implements Ticking {
 						"&rShift + Left Click: &e+16",
 						"&rShift + Right Click: &e-16").get(),
 				MissionButton.simpleHandler(changes, event -> {
-					int amount = MissionButton.clickNumber(changes.getAmount(), 16, event);
+					int amount = MissionButton.clickNumber(changes.getCustomInt(), 16, event);
 					changes.setCustomInt(Math.max(amount, 1));
 				})
 		));
