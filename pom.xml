@@ -56,43 +56,11 @@
 			<scope>provided</scope>
 			<optional>true</optional>
 		</dependency>
-		<!-- Citizens dep -->
-		<dependency>
-			<groupId>net.citizensnpcs</groupId>
-			<artifactId>citizensapi</artifactId>
-			<version>2.0.19-SNAPSHOT</version>
-			<scope>provided</scope>
-			<optional>true</optional>
-		</dependency>
 		<!-- CS CoreLib dep -->
 		<dependency>
 			<groupId>me.mrcookieslime</groupId>
 			<artifactId>CS-CoreLib</artifactId>
 			<version>1.5.9</version>
-			<scope>provided</scope>
-			<optional>true</optional>
-		</dependency>
-		<!-- A skyblock dep -->
-		<dependency>
-			<groupId>com.wasteofplastic</groupId>
-			<artifactId>askyblock</artifactId>
-			<version>3.0.1.1</version>
-			<scope>provided</scope>
-			<optional>true</optional>
-		</dependency>
-		<!-- ChatReaction dep -->
-		<dependency>
-			<groupId>me.clip</groupId>
-			<artifactId>chatreaction</artifactId>
-			<version>1.6.2</version>
-			<scope>provided</scope>
-			<optional>true</optional>
-		</dependency>
-		<!-- Votifier dep -->
-		<dependency>
-			<groupId>com.vexsoftware</groupId>
-			<artifactId>votifier</artifactId>
-			<version>1.9</version>
 			<scope>provided</scope>
 			<optional>true</optional>
 		</dependency>
