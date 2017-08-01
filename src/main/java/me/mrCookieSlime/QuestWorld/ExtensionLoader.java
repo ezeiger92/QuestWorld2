@@ -48,7 +48,7 @@ public class ExtensionLoader {
 	}
 	
 	public void load(File extensionFile) {
-		Log.fine("Ext Loader: loading " + extensionFile.getName());
+		Log.fine("Loader - Reading file: " + extensionFile.getName());
 		URL jarURL;
 		try { jarURL = extensionFile.toURI().toURL(); }
 		catch (MalformedURLException e) { e.printStackTrace(); return; }
@@ -70,17 +70,19 @@ public class ExtensionLoader {
 				continue;
 			
 			String className = entry.getName().substring(0, entry.getName().length() - 6).replace('/', '.');
-			Log.finer("Ext Loader: load class " + className);
+			Log.finer("Loader - Loading class: " + className);
 			Class<?> clazz;
 			try { clazz = newLoader.loadClass(className); }
 			catch (ClassNotFoundException e) { e.printStackTrace(); continue; }
 
-			if(QuestExtension.class.isAssignableFrom(clazz))
+			if(QuestExtension.class.isAssignableFrom(clazz)) {
+				Log.finer("Loader - Found extension class: " + className);
 				extensionClasses.add(clazz);
+			}
 		}
 		
 		for(Class<?> extensionClass : extensionClasses) {
-			Log.fine("Constructing " + extensionClass.getName());
+			Log.fine("Loader - Constructing: " + extensionClass.getName());
 			try { extensionClass.getConstructor().newInstance(); }
 			catch (InstantiationException | IllegalAccessException | IllegalArgumentException
 					| InvocationTargetException | NoSuchMethodException | SecurityException e) {

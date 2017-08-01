@@ -378,7 +378,7 @@ public class Quest extends QuestingObject {
 		PlayerInventory.update(p);
 		
 		if (xp > 0) p.setLevel(p.getLevel() + xp);
-		if (money > 0 && QuestWorld.getInstance().getEconomy() != null) QuestWorld.getInstance().getEconomy().depositPlayer(p, money);
+		if (money > 0 && QuestWorld.getInstance().getEconomy() != null) QuestWorld.getInstance().getEconomy().get().depositPlayer(p, money);
 		
 		for (String command: commands) {
 			Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command.replaceAll("@p", p.getName()));

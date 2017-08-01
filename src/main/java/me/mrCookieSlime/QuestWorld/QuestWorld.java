@@ -27,11 +27,7 @@ import me.mrCookieSlime.QuestWorld.api.QuestExtension;
 import me.mrCookieSlime.QuestWorld.api.Translator;
 import me.mrCookieSlime.QuestWorld.commands.EditorCommand;
 import me.mrCookieSlime.QuestWorld.commands.QuestsCommand;
-import me.mrCookieSlime.QuestWorld.extensions.askyblock.ASkyBlock;
 import me.mrCookieSlime.QuestWorld.extensions.builtin.Builtin;
-import me.mrCookieSlime.QuestWorld.extensions.chatreaction.ChatReaction;
-import me.mrCookieSlime.QuestWorld.extensions.citizens.Citizens;
-import me.mrCookieSlime.QuestWorld.extensions.money.Money;
 import me.mrCookieSlime.QuestWorld.listeners.EditorListener;
 import me.mrCookieSlime.QuestWorld.listeners.HookInstaller;
 import me.mrCookieSlime.QuestWorld.listeners.Input;
@@ -43,12 +39,11 @@ import me.mrCookieSlime.QuestWorld.managers.PlayerManager;
 import me.mrCookieSlime.QuestWorld.quests.Category;
 import me.mrCookieSlime.QuestWorld.quests.Mission;
 import me.mrCookieSlime.QuestWorld.quests.Quest;
-import me.mrCookieSlime.QuestWorld.utils.DummyEconomy;
+import me.mrCookieSlime.QuestWorld.utils.EconWrapper;
 import me.mrCookieSlime.QuestWorld.utils.Lang;
 import me.mrCookieSlime.QuestWorld.utils.Log;
 import me.mrCookieSlime.QuestWorld.utils.Sounds;
 import me.mrCookieSlime.QuestWorld.utils.Text;
-import net.milkbowl.vault.economy.Economy;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -58,7 +53,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapelessRecipe;
-import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -73,7 +67,7 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 	private Map<UUID, PlayerManager>  profiles   = new HashMap<>();
 	private Map<UUID, Input>         inputs     = new HashMap<>();
 	
-	Economy economy = null;
+	EconWrapper economy = null;
 	Sounds eventSounds;
 	
 	private Lang language;
@@ -119,18 +113,10 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 	public void onEnable() {
 		// Initialize all we can before we need CSCoreLib
 		hookInstaller = new HookInstaller(this);
+		new Builtin();
 		hookInstaller.addAll(preEnableHooks);
 		
-		if (getServer().getPluginManager().isPluginEnabled("Vault"))
-			setupEconomy();
-		
-		new Builtin();
-		new Citizens();
-		new ChatReaction();
-		new ASkyBlock();
-		
-		// TODO
-		//new Money(); - Incomplete
+		setupEconomy();
 		
 		// Attempt to load Core to continue
 		CSCoreLibLoader loader = new CSCoreLibLoader(this);
@@ -212,14 +198,11 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 	
 	private boolean setupEconomy() {
 		if(getServer().getPluginManager().getPlugin("Vault") != null) {
-			RegisteredServiceProvider<Economy> economyProvider = getServer().getServicesManager().getRegistration(Economy.class);
-		    if (economyProvider != null)
-		    	economy = economyProvider.getProvider();
+			economy = new EconWrapper();
 		}
 		
 		if(economy == null) {
-			Log.severe("No economy was found! Falling back to dummy (no-op) economy, no money will be transfered!");
-			economy = new DummyEconomy();
+			Log.info("No economy (vault) found, money rewards disabled");
 		}
 		
 	    return true;
@@ -530,7 +513,7 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 		return sounds;
 	}
 	
-	public Economy getEconomy() {
+	public EconWrapper getEconomy() {
 		return economy;
 	}
 
