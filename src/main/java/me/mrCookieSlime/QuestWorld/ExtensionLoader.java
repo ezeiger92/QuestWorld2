@@ -13,6 +13,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 import me.mrCookieSlime.QuestWorld.api.QuestExtension;
+import me.mrCookieSlime.QuestWorld.utils.Log;
 
 public class ExtensionLoader {
 	private ClassLoader loader;
@@ -47,6 +48,7 @@ public class ExtensionLoader {
 	}
 	
 	public void load(File extensionFile) {
+		Log.fine("Ext Loader: loading " + extensionFile.getName());
 		URL jarURL;
 		try { jarURL = extensionFile.toURI().toURL(); }
 		catch (MalformedURLException e) { e.printStackTrace(); return; }
@@ -67,22 +69,25 @@ public class ExtensionLoader {
 			if(entry.isDirectory() || !entry.getName().endsWith(".class"))
 				continue;
 			
-			String className = entry.getName().substring(0, entry.getName().length() - 6);
+			String className = entry.getName().substring(0, entry.getName().length() - 6).replace('/', '.');
+			Log.finer("Ext Loader: load class " + className);
 			Class<?> clazz;
 			try { clazz = newLoader.loadClass(className); }
 			catch (ClassNotFoundException e) { e.printStackTrace(); continue; }
 
-			if(clazz.isAssignableFrom(QuestExtension.class))
+			if(QuestExtension.class.isAssignableFrom(clazz))
 				extensionClasses.add(clazz);
 		}
 		
-		for(Class<?> extensionClass : extensionClasses)
+		for(Class<?> extensionClass : extensionClasses) {
+			Log.fine("Constructing " + extensionClass.getName());
 			try { extensionClass.getConstructor().newInstance(); }
 			catch (InstantiationException | IllegalAccessException | IllegalArgumentException
 					| InvocationTargetException | NoSuchMethodException | SecurityException e) {
 				// TODO better messages for exceptions during construction
 				e.printStackTrace();
 			}
+		}
 		
 		try { jar.close(); }
 		catch (IOException e) { e.printStackTrace(); }

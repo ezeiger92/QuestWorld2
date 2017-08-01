@@ -32,7 +32,6 @@ import me.mrCookieSlime.QuestWorld.extensions.builtin.Builtin;
 import me.mrCookieSlime.QuestWorld.extensions.chatreaction.ChatReaction;
 import me.mrCookieSlime.QuestWorld.extensions.citizens.Citizens;
 import me.mrCookieSlime.QuestWorld.extensions.money.Money;
-import me.mrCookieSlime.QuestWorld.extensions.votifier.Votifier;
 import me.mrCookieSlime.QuestWorld.listeners.EditorListener;
 import me.mrCookieSlime.QuestWorld.listeners.HookInstaller;
 import me.mrCookieSlime.QuestWorld.listeners.Input;
@@ -128,7 +127,6 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 		new Builtin();
 		new Citizens();
 		new ChatReaction();
-		new Votifier();
 		new ASkyBlock();
 		
 		// TODO
