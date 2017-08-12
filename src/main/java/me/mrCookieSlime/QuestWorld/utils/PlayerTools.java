@@ -5,7 +5,15 @@ import org.bukkit.Chunk;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
+import org.bukkit.conversations.Conversation;
+import org.bukkit.conversations.ConversationFactory;
+import org.bukkit.conversations.Prompt;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.HandlerList;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.CraftingInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -71,6 +79,44 @@ public class PlayerTools {
 			text = QuestWorld.translate(Translation.default_prefix) + text;
 		
 		p.sendMessage(Text.colorize(text));
+	}
+	
+	private static ConversationFactory factory;
+	public static ConversationFactory getConversationFactory() {
+		if(factory == null)
+			factory = new ConversationFactory(QuestWorld.getInstance());
+		return factory;
+	}
+	public static void promptInput(Player p, Prompt prompt) {
+		getConversationFactory().withFirstPrompt(prompt).buildConversation(p).begin();
+	}
+	
+	public static void promptCommand(Player p, Prompt prompt) {
+		Conversation con = getConversationFactory().withFirstPrompt(prompt).buildConversation(p);
+		p.sendMessage(prompt.getPromptText(con.getContext()));
+		
+		Bukkit.getPluginManager().registerEvents(new Listener() {
+			@EventHandler
+			public void onCommand(PlayerCommandPreprocessEvent event) {
+				if(!event.getPlayer().getUniqueId().equals(p.getUniqueId()))
+					return;
+				
+				if(prompt.acceptInput(con.getContext(), event.getMessage()) != Prompt.END_OF_CONVERSATION) {
+					p.sendMessage(prompt.getPromptText(con.getContext()));
+				}
+				else
+					HandlerList.unregisterAll(this);
+			}
+			
+			@EventHandler
+			public void onLeave(PlayerQuitEvent event) {
+				HandlerList.unregisterAll(this);
+			}
+		}, QuestWorld.getInstance());
+	}
+	
+	public static void tellraw(Player p, String json) {
+		Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "/tellraw "+p.getName()+" "+json);
 	}
 	
 	@SuppressWarnings("deprecation")

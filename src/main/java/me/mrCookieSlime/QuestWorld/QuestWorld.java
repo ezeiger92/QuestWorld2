@@ -521,6 +521,11 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 		return types;
 	}
 	
+	@SuppressWarnings("unchecked")
+	public static <T extends MissionType> T getMissionType(String typeName) {
+		return (T)instance.types.get(typeName);
+	}
+	
 	public String getBookLocal(String input) {
 		return Text.colorize(book.getString(input));
 	}

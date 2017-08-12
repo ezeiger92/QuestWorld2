@@ -273,6 +273,10 @@ public class MissionButton {
 		};
 	}
 	
+	public static MenuData simpleButton(MissionChange changes, ItemStack item, Consumer<InventoryClickEvent> action)  {
+		return new MenuData(item, simpleHandler(changes, action));
+	}
+	
 	public static int clickNumber(int initial, int groupSize, InventoryClickEvent event) {
 		switch(event.getClick()) {
 		case RIGHT: initial -= 1; break;

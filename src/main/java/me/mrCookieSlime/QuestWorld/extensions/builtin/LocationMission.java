@@ -24,7 +24,7 @@ public class LocationMission extends MissionType implements Ticking {
 		super("REACH_LOCATION", false, false, new ItemStack(Material.LEATHER_BOOTS));
 	}
 	
-	private String coordinateString(Location location) {
+	public static String coordinateString(Location location) {
 		int x = location.getBlockX();
 		int y = location.getBlockY();
 		int z = location.getBlockZ();
@@ -33,8 +33,7 @@ public class LocationMission extends MissionType implements Ticking {
 	
 	@Override
 	public ItemStack userDisplayItem(IMission instance) {
-		return new ItemBuilder(getSelectorItem())
-				.display(coordinateString(instance.getLocation())).get();
+		return getSelectorItem().clone();
 	}
 	
 	@Override
