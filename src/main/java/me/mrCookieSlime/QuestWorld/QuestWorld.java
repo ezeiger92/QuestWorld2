@@ -127,6 +127,13 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 		if (!new File("plugins/QuestWorld/quests").exists()) new File("plugins/QuestWorld/quests").mkdirs();
 		if (!new File("plugins/QuestWorld/dialogues").exists()) new File("plugins/QuestWorld/dialogues").mkdirs();
 		if (!new File("plugins/QuestWorld/presets").exists()) new File("plugins/QuestWorld/presets").mkdirs();
+		
+		if(!getDataFolder().exists())
+			getDataFolder().mkdir();
+		
+		File extensionDir = new File(getDataFolder(), "extensions");
+		if(!extensionDir.exists())
+			extensionDir.mkdir();
 			
 		getServer().getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
 			
