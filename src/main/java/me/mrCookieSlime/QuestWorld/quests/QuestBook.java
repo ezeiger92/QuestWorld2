@@ -450,6 +450,32 @@ public class QuestBook {
 			});
 		}
 		
+		// Detect all
+		menu.addItem(1, new ItemBuilder(Material.CHEST).display("&7Check all Tasks").get());
+		menu.addMenuClickHandler(1, new MenuClickHandler() {
+			
+			@Override
+			public boolean onClick(Player arg0, int arg1, ItemStack arg2, ClickAction arg3) {
+				PlayerManager manager = QuestWorld.getInstance().getManager(p);
+				for(Mission mission : quest.getMissions()) {
+					if (!manager.hasUnlockedTask(mission)) continue;
+					if (manager.getStatus(quest).equals(QuestStatus.AVAILABLE) && quest.isWorldEnabled(p.getWorld().getName())) {
+						if (manager.hasCompletedTask(mission)) continue;
+						
+						if(mission.getType() instanceof Manual) {
+							Manual m = (Manual) mission.getType();
+							int progress = m.onManual(p, mission);
+							if(progress != Manual.FAIL) {
+								manager.setProgress(mission, progress);
+								openQuest(p, quest, categoryBack, back);
+							}
+						}
+					}
+				}
+				return false;
+			}
+		});
+		
 		if (quest.getCooldown() >= 0) {
 			String cooldown = quest.getFormattedCooldown();
 			if (QuestWorld.getInstance().getManager(p).getStatus(quest).equals(QuestStatus.ON_COOLDOWN)) {
