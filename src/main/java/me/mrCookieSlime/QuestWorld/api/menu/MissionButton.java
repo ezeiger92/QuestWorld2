@@ -244,7 +244,7 @@ public class MissionButton {
 			}
 			else {
 				p.closeInventory();
-				changes.setupDialogue(p);
+				changes.getSource().setupDialogue(p);
 			}
 		});
 		
