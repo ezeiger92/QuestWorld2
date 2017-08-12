@@ -42,7 +42,7 @@ public class KillNamedMission extends KillMission {
 		
 		QuestWorld.getInstance().getManager(killer).forEachTaskOf(this, mission -> {
 			return mission.getEntity() == e.getEntityType()
-					&& name.equals(mission.getDisplayName())
+					&& name.equals(mission.getCustomString())
 					&& (mission.acceptsSpawners() || !EntityTools.fromSpawner(e.getEntity()));
 		});
 	}
