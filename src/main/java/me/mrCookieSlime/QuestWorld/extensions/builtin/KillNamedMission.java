@@ -12,8 +12,48 @@ import me.mrCookieSlime.QuestWorld.api.MissionChange;
 import me.mrCookieSlime.QuestWorld.api.interfaces.IMission;
 import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
 import me.mrCookieSlime.QuestWorld.utils.EntityTools;
+import me.mrCookieSlime.QuestWorld.utils.ItemBuilder;
+import me.mrCookieSlime.QuestWorld.utils.Text;
 
 public class KillNamedMission extends KillMission {
+	private static enum MatchType {
+		EXACT,
+		CONTAINS,
+		;
+		public static MatchType at(int index) {
+			return values()[index];
+		}
+		
+		public MatchType scroll(int amount) {
+			int len = values().length;
+			int pos = (ordinal() + amount) % len;
+			if(pos < 0)
+				pos += len;
+			
+			return at(pos);
+		}
+		
+		public static String[] stringValues() {
+			String[] res = new String[values().length];
+			for(MatchType m : values())
+				res[m.ordinal()] = m.toString();
+			return res;
+		}
+		
+		@Override
+		public String toString() {
+			return Text.niceName(this.name());
+		}
+	}
+	
+	private boolean search(MatchType check, String search, String pile) {
+		switch(check) {
+		case EXACT:    return pile.equals(search);
+		case CONTAINS: return pile.contains(search);
+		default:       return false;
+		}
+	}
+	
 	public KillNamedMission() {
 		setName("KILL_NAMED_MOB");
 		setSelectorItem(new ItemStack(Material.GOLD_SWORD));
@@ -42,8 +82,8 @@ public class KillNamedMission extends KillMission {
 		
 		QuestWorld.getInstance().getManager(killer).forEachTaskOf(this, mission -> {
 			return mission.getEntity() == e.getEntityType()
-					&& name.equals(mission.getCustomString())
-					&& (mission.acceptsSpawners() || !EntityTools.fromSpawner(e.getEntity()));
+					&& (mission.acceptsSpawners() || !EntityTools.fromSpawner(e.getEntity()))
+					&& search(MatchType.at(mission.getCustomInt()), mission.getCustomString(), name);
 		});
 	}
 	
@@ -51,5 +91,19 @@ public class KillNamedMission extends KillMission {
 	protected void layoutMenu(MissionChange changes) {
 		super.layoutMenu(changes);
 		putButton(12, MissionButton.entityName(changes));
+		putButton(16, MissionButton.simpleButton(
+				changes,
+				new ItemBuilder(Material.BEDROCK).display("&7Match Type")	
+				.selector(changes.getSource().getCustomInt(), MatchType.stringValues()).get(),
+				event -> {
+					int delta = 1;
+					if(event.isRightClick())
+						delta = -1;
+					
+					changes.setCustomInt(MatchType.at(changes.getCustomInt()).scroll(delta).ordinal());
+					if(changes.sendEvent())
+						changes.apply();
+				}
+		));
 	}
 }

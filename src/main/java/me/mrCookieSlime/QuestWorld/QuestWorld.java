@@ -45,7 +45,6 @@ import me.mrCookieSlime.QuestWorld.utils.Log;
 import me.mrCookieSlime.QuestWorld.utils.Sounds;
 import me.mrCookieSlime.QuestWorld.utils.Text;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.PluginCommand;
@@ -152,9 +151,6 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 		
 		loadConfigs();
 		
-		// Needs sound config loaded
-		eventSounds = new Sounds();
-		
 		getCommand("quests").setExecutor(new QuestsCommand());
 		PluginCommand editorCommand = getCommand("questeditor");
 		editorCommand.setExecutor(new EditorCommand());
@@ -162,28 +158,28 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 
 		new EditorListener(this);
 		new PlayerListener(this);
-		Bukkit.getPluginManager().registerEvents(missionViewer, this);
-		Bukkit.getPluginManager().registerEvents(new SelfListener(), this);
+		getServer().getPluginManager().registerEvents(missionViewer, this);
+		getServer().getPluginManager().registerEvents(new SelfListener(), this);
 		
 		ShapelessRecipe recipe = new ShapelessRecipe(GuideBook.get());
 		recipe.addIngredient(Material.WORKBENCH);
 		getServer().addRecipe(recipe);
 		
-		getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
+		getServer().getScheduler().runTaskTimer(this, new Runnable() {
 			
 			@Override
 			public void run() {
-				for (Player p: Bukkit.getOnlinePlayers()) {
+				for (Player p: getServer().getOnlinePlayers()) {
 					getManager(p).update(true);
 				}
 			}
 		}, 0L, cfg.getInt("options.quest-check-delay"));
 		
-		getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
+		getServer().getScheduler().runTaskTimer(this, new Runnable() {
 			
 			@Override
 			public void run() {
-				for (Player p: Bukkit.getOnlinePlayers()) {
+				for (Player p: getServer().getOnlinePlayers()) {
 					getManager(p).save();
 				}
 			}
@@ -208,9 +204,8 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 			economy = new EconWrapper();
 		}
 		
-		if(economy == null) {
+		if(economy == null)
 			Log.info("No economy (vault) found, money rewards disabled");
-		}
 		
 	    return true;
 	}
@@ -269,6 +264,9 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 		sounds.setDefaultValue("sounds.party.click.list", Arrays.asList("BLOCK_NOTE_PLING", "NOTE_PLING"));
 		sounds.setDefaultValue("sounds.party.click.pitch", 0.2F);
 		sounds.save();
+
+		// Needs sound config loaded
+		eventSounds = new Sounds();
 	}
 	
 	public void load() {
@@ -309,7 +307,6 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 	}
 	
 	public void reloadQuests() {
-		// ... I feel like such a noob to have forgotten Map.clear()
 		categories.clear();
 		profiles.clear();
 		
