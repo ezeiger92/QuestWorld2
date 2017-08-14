@@ -1,8 +1,5 @@
 package me.mrCookieSlime.QuestWorld.api;
 
-import java.util.Arrays;
-import java.util.function.Consumer;
-
 public enum Translation implements Translator {
 	default_category("defaults.category.name"),
 	default_quest   ("defaults.quest.name"),
@@ -116,11 +113,14 @@ public enum Translation implements Translator {
 	
 	@Override
 	public String toString() {
-		return name() + " {path: " + path() + ", placeholders: " + Arrays.asList(placeholders()).toString() + "}";
-	}
-	
-	public static void forEach(Consumer<Translator> func) {
-		for(Translation t : values())
-			func.accept(t);
+		String result = path;
+		if(placeholders.length > 0) {
+			result += "[";
+			for(String s : placeholders)
+				result += s + ", ";
+			result = result.substring(0, result.length()-2) + "]";
+		}
+		
+		return result;
 	}
 }

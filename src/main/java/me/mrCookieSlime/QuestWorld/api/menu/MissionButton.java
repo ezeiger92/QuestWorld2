@@ -5,14 +5,13 @@ import java.util.function.Consumer;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu.MenuClickHandler;
-import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.MenuHelper.ChatHandler;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu.AdvancedMenuClickHandler;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ClickAction;
-import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.MenuHelper;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.MissionChange;
 import me.mrCookieSlime.QuestWorld.api.SinglePrompt;
@@ -25,44 +24,6 @@ import me.mrCookieSlime.QuestWorld.utils.PlayerTools;
 import me.mrCookieSlime.QuestWorld.utils.Text;
 
 public class MissionButton {
-
-	public static MenuData type(MissionChange changes) {
-		
-		int totalMissions = QuestWorld.getInstance().getMissionTypes().size();
-		String[] missionTypes = new String[totalMissions];
-		
-		int i = 0;
-		int missionIndex = -1;
-		
-		final String[] keys = QuestWorld.getInstance().getMissionTypes().keySet().toArray(new String[totalMissions]);
-		
-		for (String type: keys) {
-			if(type.equals(changes.getType().toString()))
-				missionIndex = i;
-			missionTypes[i++] = Text.niceName(type);
-		}
-		final int currentMission = missionIndex;
-		
-		ItemStack item = new ItemBuilder(changes.getType().getSelectorItem())
-				.display("&7" + missionTypes[missionIndex])
-				.selector(missionIndex, missionTypes)
-				.get();
-		
-		MenuClickHandler handler = simpleHandler(changes, event -> {
-			int delta = clickNumber(0, 1, event);
-			if(delta >= 0)
-				delta = 1;
-			else
-				delta = -1;
-			
-			int newMission = (currentMission + delta + totalMissions) % totalMissions;
-			
-			changes.setType(QuestWorld.getInstance().getMissionTypes().get(keys[newMission]));
-		});
-		
-		return new MenuData(item, handler);
-	}
-	
 	public static MenuData item(MissionChange changes) {
 		ItemStack item = new ItemBuilder(changes.getMissionItem()).lore(
 				"",
@@ -169,17 +130,18 @@ public class MissionButton {
 			}
 			else {
 				p.closeInventory();
-				PlayerTools.sendTranslation(p, true, Translation.mission_await);
-				MenuHelper.awaitChatInput(p, new ChatHandler() {
-					
-					@Override
-					public boolean onChat(Player p, String message) {
-						changes.getSource().setDisplayName(message);
-						PlayerTools.sendTranslation(p, true, Translation.mission_name);
-						QuestBook.openQuestMissionEditor(p, changes.getSource());
-						return false;
-					}
-				});
+				PlayerTools.promptInput(p, new SinglePrompt(
+						PlayerTools.makeTranslation(true, Translation.mission_await),
+						(c,s) -> {
+							changes.setDisplayName(s);
+							if(changes.sendEvent()) {
+								PlayerTools.sendTranslation(p, true, Translation.mission_name);
+								changes.apply();
+								QuestBook.openQuestMissionEditor(p, changes.getSource());
+							}
+							return true;
+						}
+				));
 			}
 		});
 		
@@ -289,7 +251,8 @@ public class MissionButton {
 	}
 	
 	public static int clickNumber(int initial, int groupSize, InventoryClickEvent event) {
-		switch(event.getClick()) {
+		ClickType click = event.getClick();
+		switch(click) {
 		case RIGHT: initial -= 1; break;
 		case SHIFT_RIGHT: initial -= groupSize; break;
 		case LEFT: initial += 1; break;

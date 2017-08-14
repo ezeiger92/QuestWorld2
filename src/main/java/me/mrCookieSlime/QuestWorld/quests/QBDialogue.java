@@ -29,8 +29,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 public class QBDialogue {
-	
-
 	public static void openDeletionConfirmation(Player p, final QuestingObject q) {
 		ChestMenu menu = new ChestMenu(Text.colorize("&4&lAre you Sure?"));
 		menu.addMenuOpeningHandler(new MenuOpeningHandler() {

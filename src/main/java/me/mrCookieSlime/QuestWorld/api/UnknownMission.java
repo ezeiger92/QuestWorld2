@@ -1,7 +1,6 @@
 package me.mrCookieSlime.QuestWorld.api;
 
 import java.util.HashMap;
-import java.util.Map;
 
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -11,9 +10,8 @@ import me.mrCookieSlime.QuestWorld.utils.Log;
 
 public class UnknownMission extends MissionType {
 	
-	private static Map<String, UnknownMission> cache = new HashMap<>();
+	private static HashMap<String, UnknownMission> cache = new HashMap<>();
 	public static UnknownMission get(String name) {
-		//throw new NullPointerException("Tried to fetch mission type: " + name + " that doesn't exist!");
 		UnknownMission result = cache.get(name);
 		if(result == null) {
 			result = new UnknownMission(name);
