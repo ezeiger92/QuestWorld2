@@ -277,9 +277,6 @@ public class QuestBook {
 						if (party.getSize() >= QuestWorld.getInstance().getCfg().getInt("party.max-members"))
 							PlayerTools.sendTranslation(p, true, Translation.party_errorfull);
 						else {
-							//PlayerTools.sendTranslation(p, true, Translation.party_playerpick);
-							//QuestWorld.getInstance().storeInput(p.getUniqueId(), new Input(InputType.PARTY_INVITE, party));
-							
 							PlayerTools.promptInput(p, new SinglePrompt(
 									PlayerTools.makeTranslation(true, Translation.party_playerpick),
 									(c,s) -> {
@@ -836,9 +833,7 @@ public class QuestBook {
 							return true;
 						}
 				));
-				
-				//QuestWorld.getInstance().storeInput(p.getUniqueId(), new Input(InputType.CATEGORY_RENAME, category));
-				//PlayerTools.sendTranslation(p, true, Translation.category_namechange, category.getName());
+
 				p.closeInventory();
 				return false;
 			}
@@ -868,9 +863,6 @@ public class QuestBook {
 			
 			@Override
 			public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-				//QuestWorld.getInstance().storeInput(p.getUniqueId(), new Input(InputType.CATEGORY_PERMISSION, category));
-				//PlayerTools.sendTranslation(p, true, Translation.category_permchange, category.getName(), category.getPermission());
-				
 				PlayerTools.promptInput(p, new SinglePrompt(
 						PlayerTools.makeTranslation(true, Translation.category_permchange, category.getName(), category.getPermission()),
 						(c,s) -> {
@@ -985,9 +977,6 @@ public class QuestBook {
 			
 			@Override
 			public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-				//QuestWorld.getInstance().storeInput(p.getUniqueId(), new Input(InputType.QUEST_RENAME, quest));
-				//PlayerTools.sendTranslation(p, true, Translation.quest_namechange, quest.getName());
-				
 				PlayerTools.promptInput(p, new SinglePrompt(
 						PlayerTools.makeTranslation(true, Translation.quest_namechange, quest.getName()),
 						(c,s) -> {
@@ -1123,9 +1112,6 @@ public class QuestBook {
 			
 			@Override
 			public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-				//QuestWorld.getInstance().storeInput(p.getUniqueId(), new Input(InputType.QUEST_PERMISSION, quest));
-				//PlayerTools.sendTranslation(p, true, Translation.quest_permchange, quest.getName(), quest.getPermission());
-				
 				PlayerTools.promptInput(p, new SinglePrompt(
 						PlayerTools.makeTranslation(true, Translation.quest_permchange, quest.getName(), quest.getPermission()),
 						(c,s) -> {

@@ -29,7 +29,7 @@ editor:
   category.deleted:     '&cSuccessfully deleted the category &r%name%'
   category.name-change: '&7Please type a new category name for &r%name%&8 (color codes are supported)'
   category.name-set:    '&aSuccessfully renamed category &r%name_old%&a to &r%name%'
-  category.perm-change: '&7Please type in a new permission node for &r%name%&7 (use "&7none&8" for no node)'
+  category.perm-change: '&7Please type in a new permission node for &r%name%&8 (use "&7none&8" for no node)'
   category.perm-set:    '&aSuccessfully set permission for &r%name%&a to &r%perm%'
   quest.created:     '&aSuccessfully created a category called &r%name%'
   quest.deleted:     '&cSuccessfully deleted the quest &r%name%'

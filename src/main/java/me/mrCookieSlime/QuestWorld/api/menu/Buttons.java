@@ -54,8 +54,6 @@ public class Buttons {
 						}
 				));
 				
-				//PlayerTools.sendTranslation(p, true, Translation.category_namechange, defaultCategoryName);
-				//QuestWorld.getInstance().storeInput(p.getUniqueId(), new Input(InputType.CATEGORY_CREATION, id));
 				p.closeInventory();
 				return false;
 			}
@@ -85,8 +83,6 @@ public class Buttons {
 			@Override
 			public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
 				String defaultQuestName = QuestWorld.translate(Translation.default_quest);
-				//PlayerTools.sendTranslation(p, true, Translation.quest_namechange, defaultQuestName);
-				//QuestWorld.getInstance().storeInput(p.getUniqueId(), new Input(InputType.QUEST_CREATION, cat_id + " M " + id));
 				
 				PlayerTools.promptInput(p, new SinglePrompt(
 						PlayerTools.makeTranslation(true, Translation.quest_namechange, defaultQuestName),

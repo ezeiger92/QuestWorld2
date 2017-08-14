@@ -147,8 +147,7 @@ public class MissionButton {
 						return true;
 					}
 			));
-			//QuestWorld.getInstance().storeInput(p.getUniqueId(), new Input(InputType.KILL_NAMED, changes.getSource()));
-			///PlayerTools.sendTranslation(p, true, Translation.killmission_rename);
+
 			p.closeInventory();
 		});
 		

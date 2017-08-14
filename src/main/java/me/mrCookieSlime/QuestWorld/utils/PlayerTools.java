@@ -93,11 +93,15 @@ public class PlayerTools {
 		return factory;
 	}
 	public static void promptInput(Player p, Prompt prompt) {
-		getConversationFactory().withFirstPrompt(prompt).buildConversation(p).begin();
+		getConversationFactory()
+		.withLocalEcho(false).withModality(false)
+		.withFirstPrompt(prompt).buildConversation(p).begin();
 	}
 	
 	public static void promptCommand(Player p, Prompt prompt) {
-		Conversation con = getConversationFactory().withFirstPrompt(prompt).buildConversation(p);
+		Conversation con = getConversationFactory()
+				.withLocalEcho(false).withModality(false)
+				.withFirstPrompt(prompt).buildConversation(p);
 		p.sendMessage(prompt.getPromptText(con.getContext()));
 		
 		Bukkit.getPluginManager().registerEvents(new Listener() {
