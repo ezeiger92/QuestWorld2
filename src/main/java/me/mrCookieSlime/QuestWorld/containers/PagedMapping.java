@@ -189,9 +189,7 @@ public class PagedMapping {
 			}
 		});
 		
-		if(backButton != null) {
-			display = QuestWorld.getInstance().getBookLocal("button.back.general");
-			menu.addItem(0, new ItemBuilder(Material.MAP).display(display).get(), backButton);
-		}
+		if(backButton != null) 
+			menu.addItem(0, ItemBuilder.Proto.MAP_BACK.getItem(), backButton);
 	}
 }

@@ -1,8 +1,8 @@
 name: QuestWorld
-version: ${pom.version}
+version: ${version}
 author: mrCookieSlime
 authors: [ezeiger92, erik1988]
-website: http://mrCookieSlime.github.io
+website: https://github.com/ezeiger92/QuestWorld2
 
 main: me.mrCookieSlime.QuestWorld.QuestWorld
 softdepend: [CS-CoreLib, Vault]
@@ -11,12 +11,17 @@ commands:
   quests:
     description: Opens up your Quest Book
     usage: /quests [Category ID]
+    permission: QuestWorld.quests
   questeditor:
     description: Opens up the Quest Editor
     usage: /questeditor <gui/import/export>
     aliases: [qe]
+    permission: QuestWorld.editor
     
 permissions:
   QuestWorld.editor:
     description: Allows you to use /questeditor
     default: op
+  QuestWorld.quests:
+    description: Allows you to use /quests
+    default: true

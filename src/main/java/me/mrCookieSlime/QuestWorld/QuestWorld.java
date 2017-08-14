@@ -4,8 +4,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -39,10 +39,10 @@ import me.mrCookieSlime.QuestWorld.utils.EconWrapper;
 import me.mrCookieSlime.QuestWorld.utils.Lang;
 import me.mrCookieSlime.QuestWorld.utils.Log;
 import me.mrCookieSlime.QuestWorld.utils.Sounds;
-import me.mrCookieSlime.QuestWorld.utils.Text;
 
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
@@ -55,7 +55,7 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 	private static QuestWorld instance = null;
 	private long lastSave;
 
-	private Config cfg, book, sounds;
+	private Config cfg, sounds;
 	private MissionViewer missionViewer = new MissionViewer();
 	private Map<String, MissionType> types      = new HashMap<>();
 	private Map<Integer, Category>   categories = new HashMap<>();
@@ -214,50 +214,15 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 		//TODO make logger info (and other) levels actually work
 		//Log.setLevel(cfg.getString("options.log-level"));
 		
-		book = new Config("plugins/QuestWorld/questbook_local.yml");
-		book.setDefaultValue("gui.title", "&e&lQuest Book");
-		book.setDefaultValue("gui.party", "&eParty Menu");
-		book.setDefaultValue("button.open", "&7> Click to open");
-		book.setDefaultValue("button.back.party", "&7> Click to go back to the Party Menu");
-		book.setDefaultValue("button.back.quests", "&7> Click to go back to the Quest Menu");
-		book.setDefaultValue("button.back.general", "&c< Back");
-		book.setDefaultValue("quests.locked", "&4&lLOCKED");
-		book.setDefaultValue("quests.locked-in-world", "&cThis Questline is not available in your World");
-		book.setDefaultValue("quests.tasks_completed", " Tasks completed");
-		book.setDefaultValue("quests.state.cooldown", "&e&lON COOLDOWN");
-		book.setDefaultValue("quests.state.completed", "&2&lCOMPLETED");
-		book.setDefaultValue("quests.state.reward_claimable", "&5&lUNCLAIMED REWARD");
-		book.setDefaultValue("quests.state.reward_claim", "&5&lCLAIM REWARD");
-		book.setDefaultValue("quests.display.cooldown", "&7Cooldown");
-		book.setDefaultValue("quests.display.monetary", "&7Monetary Reward");
-		book.setDefaultValue("quests.display.exp", "&7XP Reward");
-		book.setDefaultValue("quests.display.rewards", "&rRewards");
-		book.setDefaultValue("category.desc.total", " Quests in total");
-		book.setDefaultValue("category.desc.completed", " completed Quests");
-		book.setDefaultValue("category.desc.available", " Quests available for completion");
-		book.setDefaultValue("category.desc.cooldown", " Quests are on Cooldown");
-		book.setDefaultValue("category.desc.claimable_reward", " Quests with unclaimed Reward");
-		book.setDefaultValue("task.locked", "&4&lLOCKED");
-		book.save();
+		File soundFile = new File(getDataFolder(), "sounds.yml");
+		if(!soundFile.exists())
+			try {
+				YamlConfiguration.loadConfiguration(new InputStreamReader(getResource("sounds.yml"))).save(soundFile);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		
 		sounds = new Config("plugins/QuestWorld/sounds.yml");
-		sounds.setDefaultValue("sounds.quest.click.list", Arrays.asList("ENTITY_PLAYER_LEVELUP", "LEVEL_UP"));
-		sounds.setDefaultValue("sounds.quest.click.pitch", 0.2F);
-		sounds.setDefaultValue("sounds.quest.mission-submit.list", Arrays.asList("ENTITY_EXPERIENCE_ORB_PICKUP"));
-		sounds.setDefaultValue("sounds.quest.mission-submit.pitch", 0.7F);
-		sounds.setDefaultValue("sounds.quest.mission-submit.volume", 0.3F);
-		sounds.setDefaultValue("sounds.quest.mission-reject.list", Arrays.asList("BLOCK_NOTE_SNARE", "NOTE_SNARE"));
-		sounds.setDefaultValue("sounds.quest.reward.list", Arrays.asList("ENTITY_ITEM_PICKUP", "ITEM_PICKUP"));
-		sounds.setDefaultValue("sounds.editor.click.list", Arrays.asList("UI_BUTTON_CLICK", "CLICK"));
-		sounds.setDefaultValue("sounds.editor.click.pitch", 0.2F);
-		sounds.setDefaultValue("sounds.editor.dialog-add.list", Arrays.asList("ENTITY_PLAYER_LEVELUP", "LEVEL_UP"));
-		sounds.setDefaultValue("sounds.editor.destructive-action-warning.list", Arrays.asList("NOTE_PLING", "BLOCK_NOTE_HARP"));
-		sounds.setDefaultValue("sounds.editor.destructive-action-click.list", Arrays.asList("ENTITY_BAT_DEATH", "BAT_DEATH"));
-		sounds.setDefaultValue("sounds.editor.destructive-action-click.pitch", 0.5F);
-		sounds.setDefaultValue("sounds.editor.destructive-action-click.volume", 0.5F);
-		sounds.setDefaultValue("sounds.party.click.list", Arrays.asList("BLOCK_NOTE_PLING", "NOTE_PLING"));
-		sounds.setDefaultValue("sounds.party.click.pitch", 0.2F);
-		sounds.save();
 
 		// Needs sound config loaded
 		eventSounds = new Sounds();
@@ -504,10 +469,6 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 	@SuppressWarnings("unchecked")
 	public static <T extends MissionType> T getMissionType(String typeName) {
 		return (T)instance.types.get(typeName);
-	}
-	
-	public String getBookLocal(String input) {
-		return Text.colorize(book.getString(input));
 	}
 	
 	public static Sounds getSounds() {

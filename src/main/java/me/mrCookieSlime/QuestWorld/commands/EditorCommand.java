@@ -28,12 +28,6 @@ public class EditorCommand implements CommandExecutor {
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-		
-		if(!sender.hasPermission("QuestWorld.editor")) {
-			sender.sendMessage(Text.colorize("&cYou are not allowed to do this"));
-			return true;
-		}
-		
 		if(args.length == 0) {
 			help(label, sender);
 			return true;

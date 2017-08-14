@@ -44,7 +44,6 @@ public enum Translation implements Translator {
 	
 	killmission_rename("editor.rename-kill-mission"),
 	killtype_rename("editor.renamed-kill-type"),
-	citizen_rename("editor.renamed-citizen"),
 	location_rename("editor.renamed-location"),
 	// End PH
 	
@@ -61,11 +60,45 @@ public enum Translation implements Translator {
 	party_playerkick ("party.kicked",     "name"),
 	party_groupinvite("party.invitation", "name"),
 	party_groupjoin  ("party.joined",     "name"),
+
+	// TODO
+	// This is hacky, look again when less tired
+	gui_title(0),
+	gui_party(0),
+	button_open(0),
+	button_back_party(0),
+	button_back_quests(0),
+	button_back_general(0),
+	quests_locked(0),
+	quests_locked_in_world("quests.locked-in-world"),
+	quests_tasks_completed("quests.tasks_completed"),
+	quests_state_cooldown(0),
+	quests_state_completed(0),
+	quests_state_reward_claimable("quests.state.reward_claimable"),
+	quests_state_reward_claim("quests.state.reward_claim"),
+	quests_display_cooldown(0),
+	quests_display_monetary(0),
+	quests_display_exp(0),
+	quests_display_rewards(0),
+	category_desc_total(0),
+	category_desc_completed(0),
+	category_desc_available(0),
+	category_desc_cooldown(0),
+	category_desc_claimable_reward("category.desc.claimable_reward"),
+	task_locked(0),
 	;
+	
 	private String path;
 	private String[] placeholders;
 	Translation(String path, String... placeholders) {
 		this.path = path;
+		this.placeholders = placeholders;
+		for(int i = 0; i < this.placeholders.length; ++i)
+			this.placeholders[i] = "%" + this.placeholders[i] + "%"; 
+	}
+	
+	Translation(int d, String... placeholders) {
+		path = name().replace('_', '.');
 		this.placeholders = placeholders;
 		for(int i = 0; i < this.placeholders.length; ++i)
 			this.placeholders[i] = "%" + this.placeholders[i] + "%"; 

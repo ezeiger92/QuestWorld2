@@ -15,6 +15,9 @@ import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.inventory.meta.SpawnEggMeta;
 
+import me.mrCookieSlime.QuestWorld.QuestWorld;
+import me.mrCookieSlime.QuestWorld.api.Translation;
+
 /**
  * This class provides a builder for ItemStacks. It is exactly what you expect,
  * nothing special.
@@ -29,7 +32,7 @@ public class ItemBuilder {
 	 */
 	public static enum Proto {
 		RED_WOOL(new ItemBuilder(Material.WOOL).color(DyeColor.RED).get()),
-		MAP_BACK(new ItemBuilder(Material.MAP).display("&c< Back").get()),
+		MAP_BACK(new ItemBuilder(Material.MAP).display(QuestWorld.translate(Translation.button_back_general)).get()),
 		;
 		private ItemStack item;
 		Proto(ItemStack item) {
