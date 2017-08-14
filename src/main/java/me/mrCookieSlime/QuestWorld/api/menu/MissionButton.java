@@ -84,7 +84,7 @@ public class MissionButton {
 	}
 	
 	public static MenuData amount(MissionChange changes, int groupSize) {
-		ItemStack item = new ItemBuilder(Material.REDSTONE).display("&7Amount: §b" + changes.getAmount()).lore(
+		ItemStack item = new ItemBuilder(Material.REDSTONE).display("&7Amount: &b" + changes.getAmount()).lore(
 				"",
 				"&rLeft Click: &e+1",
 				"&rRight Click: &e-1",
@@ -249,7 +249,8 @@ public class MissionButton {
 			Player p = (Player)event.getWhoClicked();
 			if (event.getClick().isRightClick()) {
 				p.closeInventory();
-				if (changes.getSource().getDialogue().isEmpty()) p.sendMessage("§4No Dialogue found!");
+				if (changes.getSource().getDialogue().isEmpty())
+					p.sendMessage(Text.colorize("&4No Dialogue found!"));
 				else QuestWorld.getInstance().getManager(p).sendQuestDialogue(p, changes.getSource(), changes.getSource().getDialogue().iterator());
 			}
 			else {

@@ -1,7 +1,6 @@
 package me.mrCookieSlime.QuestWorld.quests;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu;
@@ -654,7 +653,7 @@ public class QuestBook {
 	 * 
 	 */
 	public static void openEditor(Player p) {
-		final ChestMenu menu = new ChestMenu("§3Quest Editor");
+		final ChestMenu menu = new ChestMenu("&3Quest Editor");
 		menu.addMenuOpeningHandler(new MenuOpeningHandler() {
 			@Override
 			public void onOpen(Player p) {
@@ -713,7 +712,7 @@ public class QuestBook {
 	}
 
 	public static void openCategoryQuestEditor(Player p, final Category category) {
-		final ChestMenu menu = new ChestMenu("§3Quest Editor");
+		final ChestMenu menu = new ChestMenu("&3Quest Editor");
 		menu.addMenuOpeningHandler(new MenuOpeningHandler() {
 			
 			@Override
@@ -782,7 +781,7 @@ public class QuestBook {
 	}
 
 	public static void openCategoryEditor(Player p, final Category category) {
-		final ChestMenu menu = new ChestMenu("§3Quest Editor");
+		final ChestMenu menu = new ChestMenu("&3Quest Editor");
 		CategoryChange changes = new CategoryChange(category);
 		menu.addMenuOpeningHandler(new MenuOpeningHandler() {
 			
@@ -802,10 +801,10 @@ public class QuestBook {
 			}
 		});
 		
-		ItemStack item = category.getItem().clone();
-		ItemMeta im = item.getItemMeta();
-		im.setLore(Arrays.asList("", "§e> Click to change the Item to", "§ethe Item you are currently holding"));
-		item.setItemMeta(im);
+		ItemStack item = new ItemBuilder(category.getItem()).lore(
+				"",
+				"&e> Click to change the Item to",
+				"&ethe Item you are currently holding").get();
 		
 		menu.addItem(9, item);
 		menu.addMenuClickHandler(9, new MenuClickHandler() {
@@ -823,7 +822,7 @@ public class QuestBook {
 			}
 		});
 		
-		menu.addItem(10, new ItemBuilder(Material.NAME_TAG).display(category.getName()).lore("", "§e> Click to change the Name").get());
+		menu.addItem(10, new ItemBuilder(Material.NAME_TAG).display(category.getName()).lore("", "&e> Click to change the Name").get());
 		menu.addMenuClickHandler(10, new MenuClickHandler() {
 			
 			@Override
@@ -851,10 +850,10 @@ public class QuestBook {
 		
 		menu.addItem(11, new ItemBuilder(Material.BOOK_AND_QUILL).display("&7Quest Requirement:").lore(
 				"",
-				(category.getParent() != null ? "§r" + category.getParent().getName(): "§7§oNone"),
+				(category.getParent() != null ? "&r" + category.getParent().getName(): "&7&oNone"),
 				"",
-				"§rLeft Click: §eChange Quest Requirement",
-				"§rRight Click: §eRemove Quest Requirement").get());
+				"&rLeft Click: &eChange Quest Requirement",
+				"&rRight Click: &eRemove Quest Requirement").get());
 		menu.addMenuClickHandler(11, new MenuClickHandler() {
 			
 			@Override
@@ -903,9 +902,9 @@ public class QuestBook {
 			}
 		});
 		
-		menu.addItem(13, new ItemBuilder(Material.GOLDEN_CARROT).display("§rShow in Quest Book: " + (!category.isHidden() ? "&2&l\u2714": "&4&l\u2718")).lore(
+		menu.addItem(13, new ItemBuilder(Material.GOLDEN_CARROT).display("&rShow in Quest Book: " + (!category.isHidden() ? "&2&l\u2714": "&4&l\u2718")).lore(
 				"",
-				"§e> Click to change whether this Category",
+				"&e> Click to change whether this Category",
 				"&ewill appear in the Quest Book").get());
 		menu.addMenuClickHandler(13, new MenuClickHandler() {
 			
@@ -954,7 +953,7 @@ public class QuestBook {
 	}
 
 	public static void openQuestEditor(Player p, final Quest quest) {
-		final ChestMenu menu = new ChestMenu("§3Quest Editor");
+		final ChestMenu menu = new ChestMenu("&3Quest Editor");
 		QuestChange changes = new QuestChange(quest);
 		menu.addMenuOpeningHandler(new MenuOpeningHandler() {
 			
@@ -1189,7 +1188,7 @@ public class QuestBook {
 		
 		menu.addItem(18, new ItemBuilder(Material.FIREWORK).display("&rParty Support: " + (quest.supportsParties() ? "&2&l\u2714": "&4&l\u2718")).lore(
 				"",
-				"§e> Click to change whether this Quest can be done in Parties or not").get());
+				"&e> Click to change whether this Quest can be done in Parties or not").get());
 		menu.addMenuClickHandler(18, new MenuClickHandler() {
 			
 			@Override
@@ -1341,7 +1340,7 @@ public class QuestBook {
 	}
 
 	public static void openWorldEditor(Player p, final Quest quest) {
-		final ChestMenu menu = new ChestMenu("§3Quest Editor");
+		final ChestMenu menu = new ChestMenu("&3Quest Editor");
 		
 		menu.addMenuOpeningHandler(new MenuOpeningHandler() {
 			
@@ -1383,7 +1382,7 @@ public class QuestBook {
 	}
 
 	public static void openWorldEditor(Player p, final Category category) {
-		final ChestMenu menu = new ChestMenu("§3Quest Editor");
+		final ChestMenu menu = new ChestMenu("&3Quest Editor");
 		
 		menu.addMenuOpeningHandler(new MenuOpeningHandler() {
 			
@@ -1426,7 +1425,7 @@ public class QuestBook {
 	}
 
 	public static void openQuestMissionEditor(Player p, final Mission mission) {
-		final ChestMenu menu = new ChestMenu("§3Quest Editor");
+		final ChestMenu menu = new ChestMenu("&3Quest Editor");
 		MissionChange changes = new MissionChange(mission);
 		menu.addMenuOpeningHandler(new MenuOpeningHandler() {
 			
