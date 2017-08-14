@@ -8,7 +8,6 @@ import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu.MenuClickHandler;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu.MenuOpeningHandler;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ClickAction;
-import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.Item.CustomItem;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.CategoryChange;
 import me.mrCookieSlime.QuestWorld.api.Manual;
@@ -36,7 +35,6 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.material.MaterialData;
 
 public class QuestBook {
 	
@@ -61,7 +59,9 @@ public class QuestBook {
 			if (!category.isHidden()) {
 				if (category.isWorldEnabled(p.getWorld().getName())) {
 					if ((category.getParent() != null && !QuestWorld.getInstance().getManager(p).hasFinished(category.getParent())) || !category.hasPermission(p)) {
-						view.addItem(category.getID(), new CustomItem(new MaterialData(Material.BARRIER), category.getName(), "", QuestWorld.getInstance().getBookLocal("quests.locked")));
+						view.addItem(category.getID(), new ItemBuilder(Material.BARRIER).display(category.getName()).lore(
+								"",
+								QuestWorld.getInstance().getBookLocal("quests.locked")).get());
 						view.addButton(category.getID(), new MenuClickHandler() {
 							
 							@Override
@@ -97,7 +97,9 @@ public class QuestBook {
 					}
 				}
 				else {
-					view.addItem(category.getID(), new CustomItem(new MaterialData(Material.BARRIER), category.getName(), "", QuestWorld.getInstance().getBookLocal("quests.locked-in-world")));
+					view.addItem(category.getID(), new ItemBuilder(Material.BARRIER).display(category.getName()).lore(
+							"",
+							QuestWorld.getInstance().getBookLocal("quests.locked-in-world")).get());
 					view.addButton(category.getID(), new MenuClickHandler() {
 						
 						@Override
@@ -241,7 +243,9 @@ public class QuestBook {
 			}
 		});
 		
-		menu.addItem(4, new CustomItem(new MaterialData(Material.MAP), QuestWorld.getInstance().getBookLocal("gui.title"), "", QuestWorld.getInstance().getBookLocal("button.back.quests")));
+		menu.addItem(4, new ItemBuilder(Material.MAP).display(QuestWorld.getInstance().getBookLocal("gui.title")).lore(
+				"",
+				QuestWorld.getInstance().getBookLocal("button.back.quests")).get());
 		menu.addMenuClickHandler(4, new MenuClickHandler() {
 			
 			@Override
@@ -460,7 +464,7 @@ public class QuestBook {
 		});
 		
 		if (back) {
-			menu.addItem(0, new CustomItem(new MaterialData(Material.MAP), QuestWorld.getInstance().getBookLocal("button.back.general")));
+			menu.addItem(0, ItemBuilder.Proto.MAP_BACK.getItem());
 			menu.addMenuClickHandler(0, new MenuClickHandler() {
 				
 				@Override
@@ -503,7 +507,9 @@ public class QuestBook {
 				long remaining = (QuestWorld.getInstance().getManager(p).getCooldownEnd(quest) - System.currentTimeMillis() + 59999) / 60 / 1000;
 				cooldown = (remaining / 60) + "h " + (remaining % 60) + "m remaining";
 			}
-			menu.addItem(8, new CustomItem(new MaterialData(Material.WATCH), QuestWorld.getInstance().getBookLocal("quests.display.cooldown"), "", "&b" + cooldown));
+			menu.addItem(8, new ItemBuilder(Material.WATCH).display(QuestWorld.getInstance().getBookLocal("quests.display.cooldown")).lore(
+					"",
+					"&b" + cooldown).get());
 			menu.addMenuClickHandler(8, new MenuClickHandler() {
 				
 				@Override
@@ -515,7 +521,9 @@ public class QuestBook {
 		
 		int rewardIndex = 2;
 		if (quest.getMoney() > 0 && QuestWorld.getInstance().getEconomy() != null) {
-			menu.addItem(rewardIndex, new CustomItem(new MaterialData(Material.GOLD_INGOT), QuestWorld.getInstance().getBookLocal("quests.display.monetary"), "", "&6$" + quest.getMoney()));
+			menu.addItem(rewardIndex, new ItemBuilder(Material.GOLD_INGOT).display(QuestWorld.getInstance().getBookLocal("quests.display.monetary")).lore(
+					"",
+					"&6$" + quest.getMoney()).get());
 			menu.addMenuClickHandler(rewardIndex, new MenuClickHandler() {
 				
 				@Override
@@ -527,7 +535,9 @@ public class QuestBook {
 		}
 		
 		if (quest.getXP() > 0) {
-			menu.addItem(rewardIndex, new CustomItem(new MaterialData(Material.EXP_BOTTLE), QuestWorld.getInstance().getBookLocal("quests.display.exp"), "", "&a" + quest.getXP() + " Level"));
+			menu.addItem(rewardIndex, new ItemBuilder(Material.EXP_BOTTLE).display(QuestWorld.getInstance().getBookLocal("quests.display.exp")).lore(
+					"",
+					"&a" + quest.getXP() + " Level").get());
 			menu.addMenuClickHandler(rewardIndex, new MenuClickHandler() {
 				
 				@Override
@@ -712,7 +722,7 @@ public class QuestBook {
 			}
 		});
 		
-		menu.addItem(0, new CustomItem(new MaterialData(Material.MAP), "&c< Back"));
+		menu.addItem(0, ItemBuilder.Proto.MAP_BACK.getItem());
 		menu.addMenuClickHandler(0, new MenuClickHandler() {
 			
 			@Override
@@ -782,7 +792,7 @@ public class QuestBook {
 			}
 		});
 		
-		menu.addItem(0, new CustomItem(new MaterialData(Material.MAP), "&c< Back"));
+		menu.addItem(0, ItemBuilder.Proto.MAP_BACK.getItem());
 		menu.addMenuClickHandler(0, new MenuClickHandler() {
 			
 			@Override
@@ -813,7 +823,7 @@ public class QuestBook {
 			}
 		});
 		
-		menu.addItem(10, new CustomItem(new MaterialData(Material.NAME_TAG), category.getName(), "", "§e> Click to change the Name"));
+		menu.addItem(10, new ItemBuilder(Material.NAME_TAG).display(category.getName()).lore("", "§e> Click to change the Name").get());
 		menu.addMenuClickHandler(10, new MenuClickHandler() {
 			
 			@Override
@@ -839,7 +849,12 @@ public class QuestBook {
 			}
 		});
 		
-		menu.addItem(11, new CustomItem(new MaterialData(Material.BOOK_AND_QUILL), "§7Quest Requirement:", "", (category.getParent() != null ? "§r" + category.getParent().getName(): "§7§oNone"), "", "§rLeft Click: §eChange Quest Requirement", "§rRight Click: §eRemove Quest Requirement"));
+		menu.addItem(11, new ItemBuilder(Material.BOOK_AND_QUILL).display("&7Quest Requirement:").lore(
+				"",
+				(category.getParent() != null ? "§r" + category.getParent().getName(): "§7§oNone"),
+				"",
+				"§rLeft Click: §eChange Quest Requirement",
+				"§rRight Click: §eRemove Quest Requirement").get());
 		menu.addMenuClickHandler(11, new MenuClickHandler() {
 			
 			@Override
@@ -858,7 +873,10 @@ public class QuestBook {
 			}
 		});
 		
-		menu.addItem(12, new CustomItem(new MaterialData(Material.NAME_TAG), "§r" + (category.getPermission().equals("") ? "None": category.getPermission()), "", "§e> Click to change the rquired Permission Node"));
+		menu.addItem(12, new ItemBuilder(Material.NAME_TAG)
+				.display("&r" + (category.getPermission().equals("") ? "None": category.getPermission())).lore(
+				"",
+				"&e> Click to change the rquired Permission Node").get());
 		menu.addMenuClickHandler(12, new MenuClickHandler() {
 			
 			@Override
@@ -885,7 +903,10 @@ public class QuestBook {
 			}
 		});
 		
-		menu.addItem(13, new CustomItem(new MaterialData(Material.GOLDEN_CARROT), "§rShow in Quest Book: " + (!category.isHidden() ? "§2§l\u2714": "§4§l\u2718"), "", "§e> Click to change whether this Category", "&ewill appear in the Quest Book"));
+		menu.addItem(13, new ItemBuilder(Material.GOLDEN_CARROT).display("§rShow in Quest Book: " + (!category.isHidden() ? "&2&l\u2714": "&4&l\u2718")).lore(
+				"",
+				"§e> Click to change whether this Category",
+				"&ewill appear in the Quest Book").get());
 		menu.addMenuClickHandler(13, new MenuClickHandler() {
 			
 			@Override
@@ -898,7 +919,10 @@ public class QuestBook {
 			}
 		});
 		
-		menu.addItem(14, new CustomItem(new MaterialData(Material.GRASS), "§7World Blacklist", "", "§e> Click to configure in which Worlds", "&ethis Category is enabled"));
+		menu.addItem(14, new ItemBuilder(Material.GRASS).display("&7World Blacklist").lore(
+				"",
+				"&e> Click to configure in which Worlds",
+				"&ethis Category is enabled").get());
 		menu.addMenuClickHandler(14, new MenuClickHandler() {
 			
 			@Override
@@ -940,7 +964,7 @@ public class QuestBook {
 			}
 		});
 		
-		menu.addItem(0, new CustomItem(new MaterialData(Material.MAP), "&c< Back"));
+		menu.addItem(0, ItemBuilder.Proto.MAP_BACK.getItem());
 		menu.addMenuClickHandler(0, new MenuClickHandler() {
 			
 			@Override
@@ -950,10 +974,11 @@ public class QuestBook {
 			}
 		});
 		
-		ItemStack item = quest.getItem().clone();
-		ItemMeta im = item.getItemMeta();
-		im.setLore(Arrays.asList("", "§e> Click to change the Item to", "§ethe Item you are currently holding"));
-		item.setItemMeta(im);
+		ItemStack item = new ItemBuilder(quest.getItem()).lore(
+				"",
+				"&e> Click to change the Item to",
+				"&ethe Item you are currently holding").get();
+
 		
 		menu.addItem(9, item);
 		menu.addMenuClickHandler(9, new MenuClickHandler() {
@@ -972,7 +997,7 @@ public class QuestBook {
 			}
 		});
 		
-		menu.addItem(10, new CustomItem(new MaterialData(Material.NAME_TAG), quest.getName(), "", "§e> Click to change the Name"));
+		menu.addItem(10, new ItemBuilder(Material.NAME_TAG).display(quest.getName()).lore("", "&e> Click to change the Name").get());
 		menu.addMenuClickHandler(10, new MenuClickHandler() {
 			
 			@Override
@@ -998,7 +1023,10 @@ public class QuestBook {
 			}
 		});
 		
-		menu.addItem(11, new CustomItem(new MaterialData(Material.CHEST), "§rRewards §7(Item)", "", "§e> Click to change the Rewards", "§eto be the Items in your Hotbar"));
+		menu.addItem(11, new ItemBuilder(Material.CHEST).display("&rRewards &7(Item)").lore(
+				"",
+				"&e> Click to change the Rewards",
+				"&eto be the Items in your Hotbar").get());
 		menu.addMenuClickHandler(11, new MenuClickHandler() {
 			
 			@Override
@@ -1012,7 +1040,12 @@ public class QuestBook {
 			}
 		});
 		
-		menu.addItem(12, new CustomItem(new MaterialData(Material.WATCH), "§7Cooldown: §b" + quest.getFormattedCooldown(), "", "§rLeft Click: §e+1m", "§rRight Click: §e-1m", "§rShift + Left Click: §e+1h", "§rShift + Right Click: §e-1h"));
+		menu.addItem(12, new ItemBuilder(Material.WATCH).display("&7Cooldown: &b" + quest.getFormattedCooldown()).lore(
+				"",
+				"&rLeft Click: &e+1m",
+				"&rRight Click: &e-1m",
+				"&rShift + Left Click: &e+1h",
+				"&rShift + Right Click: &e-1h").get());
 		menu.addMenuClickHandler(12, new MenuClickHandler() {
 			
 			@Override
@@ -1042,7 +1075,12 @@ public class QuestBook {
 		});
 		
 		if (QuestWorld.getInstance().getEconomy() != null) {
-			menu.addItem(13, new CustomItem(new MaterialData(Material.GOLD_INGOT), "§7Monetary Reward: §6$" + quest.getMoney(), "", "§rLeft Click: §e+1", "§rRight Click: §e-1", "§rShift + Left Click: §e+100", "§rShift + Right Click: §e-100"));
+			menu.addItem(13, new ItemBuilder(Material.GOLD_INGOT).display("&7Monetary Reward: &6$" + quest.getMoney()).lore(
+					"",
+					"&rLeft Click: &e+1",
+					"&rRight Click: &e-1",
+					"&rShift + Left Click: &e+100",
+					"&rShift + Right Click: &e-100").get());
 			menu.addMenuClickHandler(13, new MenuClickHandler() {
 				
 				@Override
@@ -1060,7 +1098,12 @@ public class QuestBook {
 			});
 		}
 		
-		menu.addItem(14, new CustomItem(new MaterialData(Material.EXP_BOTTLE), "§7XP Reward: §b" + quest.getXP() + " Level", "", "§rLeft Click: §e+1", "§rRight Click: §e-1", "§rShift + Left Click: §e+10", "§rShift + Right Click: §e-10"));
+		menu.addItem(14, new ItemBuilder(Material.EXP_BOTTLE).display("&7XP Reward: &b" + quest.getXP() + " Level").lore(
+				"",
+				"&rLeft Click: &e+1",
+				"&rRight Click: &e-1",
+				"&rShift + Left Click: &e+10",
+				"&rShift + Right Click: &e-10").get());
 		menu.addMenuClickHandler(14, new MenuClickHandler() {
 			
 			@Override
@@ -1077,7 +1120,12 @@ public class QuestBook {
 			}
 		});
 		
-		menu.addItem(15, new CustomItem(new MaterialData(Material.BOOK_AND_QUILL), "§7Quest Requirement:", "", (quest.getParent() != null ? "§r" + quest.getParent().getName(): "§7§oNone"), "", "§rLeft Click: §eChange Quest Requirement", "§rRight Click: §eRemove Quest Requirement"));
+		menu.addItem(15, new ItemBuilder(Material.BOOK_AND_QUILL).display("&7Quest Requirement:").lore(
+				"",
+				(quest.getParent() != null ? "&r" + quest.getParent().getName(): "&7&oNone"),
+				"",
+				"&rLeft Click: &eChange Quest Requirement",
+				"&rRight Click: &eRemove Quest Requirement").get());
 		menu.addMenuClickHandler(15, new MenuClickHandler() {
 			
 			@Override
@@ -1096,7 +1144,9 @@ public class QuestBook {
 			}
 		});
 		
-		menu.addItem(16, new CustomItem(new MaterialData(Material.COMMAND), "§7Commands executed upon Completion", "", "§rLeft Click: §eOpen Command Editor"));
+		menu.addItem(16, new ItemBuilder(Material.COMMAND).display("&7Commands executed upon Completion").lore(
+				"",
+				"&rLeft Click: &eOpen Command Editor").get());
 		menu.addMenuClickHandler(16, new MenuClickHandler() {
 			
 			@Override
@@ -1107,7 +1157,10 @@ public class QuestBook {
 			}
 		});
 		
-		menu.addItem(17, new CustomItem(new MaterialData(Material.NAME_TAG), "§r" + (quest.getPermission().equals("") ? "None": quest.getPermission()), "", "§e> Click to change the required Permission Node"));
+		menu.addItem(17, new ItemBuilder(Material.NAME_TAG)
+				.display("&r" + (quest.getPermission().equals("") ? "None": quest.getPermission())).lore(
+				"",
+				"&e> Click to change the required Permission Node").get());
 		menu.addMenuClickHandler(17, new MenuClickHandler() {
 			
 			@Override
@@ -1134,7 +1187,9 @@ public class QuestBook {
 			}
 		});
 		
-		menu.addItem(18, new CustomItem(new MaterialData(Material.FIREWORK), "§rParty Support: " + (quest.supportsParties() ? "§2§l\u2714": "§4§l\u2718"), "", "§e> Click to change whether this Quest can be done in Parties or not"));
+		menu.addItem(18, new ItemBuilder(Material.FIREWORK).display("&rParty Support: " + (quest.supportsParties() ? "&2&l\u2714": "&4&l\u2718")).lore(
+				"",
+				"§e> Click to change whether this Quest can be done in Parties or not").get());
 		menu.addMenuClickHandler(18, new MenuClickHandler() {
 			
 			@Override
@@ -1147,7 +1202,10 @@ public class QuestBook {
 			}
 		});
 		
-		menu.addItem(19, new CustomItem(new MaterialData(Material.COMMAND), "§rOrdered Completion Mode: " + (quest.isOrdered() ? "§2§l\u2714": "§4§l\u2718"), "", "§e> Click to change whether this Quest's Tasks", "§ehave to be done in the Order they are arranged"));
+		menu.addItem(19, new ItemBuilder(Material.COMMAND).display("&rOrdered Completion Mode: " + (quest.isOrdered() ? "&2&l\u2714": "&4&l\u2718")).lore(
+				"",
+				"&e> Click to change whether this Quest's Tasks",
+				"&ehave to be done in the Order they are arranged").get());
 		menu.addMenuClickHandler(19, new MenuClickHandler() {
 			
 			@Override
@@ -1160,7 +1218,11 @@ public class QuestBook {
 			}
 		});
 		
-		menu.addItem(20, new CustomItem(new MaterialData(Material.CHEST), "§rAuto-Claim Rewards: " + (quest.isAutoClaiming() ? "§2§l\u2714": "§4§l\u2718"), "", "§e> Click to change whether this Quest's Rewards", "§ewill be automatically given or have to be", "§eclaimed manually"));
+		menu.addItem(20, new ItemBuilder(Material.CHEST).display("&rAuto-Claim Rewards: " + (quest.isAutoClaiming() ? "&2&l\u2714": "&4&l\u2718")).lore(
+				"",
+				"&e> Click to change whether this Quest's Rewards",
+				"&ewill be automatically given or have to be",
+				"&eclaimed manually").get());
 		menu.addMenuClickHandler(20, new MenuClickHandler() {
 			
 			@Override
@@ -1173,7 +1235,10 @@ public class QuestBook {
 			}
 		});
 		
-		menu.addItem(21, new CustomItem(new MaterialData(Material.GRASS), "§7World Blacklist", "", "§e> Click to configure in which Worlds", "&ethis Quest is able to be completed"));
+		menu.addItem(21, new ItemBuilder(Material.GRASS).display("&7World Blacklist").lore(
+				"",
+				"&e> Click to configure in which Worlds",
+				"&ethis Quest is able to be completed").get());
 		menu.addMenuClickHandler(21, new MenuClickHandler() {
 			
 			@Override
@@ -1182,8 +1247,17 @@ public class QuestBook {
 				return false;
 			}
 		});
-		
-		menu.addItem(22, new CustomItem(new MaterialData(Material.FIREWORK), "§rMinimal Party Size: " + (quest.getPartySize() < 1 ? "§4Players aren't allowed be in a Party": (quest.getPartySize() == 1 ? ("§ePlayers can but don't have to be in a Party") : ("§aPlayers need to be in a Party of " + quest.getPartySize() + " or more"))), "", "§eChange the min. Amount of Players in", "§ea Party needed to start this Quest", "", "§r1 = §7Players can but don't have to be in a Party", "§r0 = §7Players aren't allowed to be in a Party", "", "§rLeft Click: §e+1", "§rRight Click: §e-1"));
+		String wtfString = "&rMinimal Party Size: " + (quest.getPartySize() < 1 ? "&4Players aren't allowed be in a Party": (quest.getPartySize() == 1 ? ("&ePlayers can but don't have to be in a Party") : ("&aPlayers need to be in a Party of " + quest.getPartySize() + " or more")));
+		menu.addItem(22, new ItemBuilder(Material.FIREWORK).display(wtfString).lore(
+				"",
+				"&eChange the min. Amount of Players in",
+				"&ea Party needed to start this Quest",
+				"",
+				"&r1 = &7Players can but don't have to be in a Party",
+				"&r0 = &7Players aren't allowed to be in a Party",
+				"",
+				"&rLeft Click: &e+1",
+				"&rRight Click: &e-1").get());
 		menu.addMenuClickHandler(22, new MenuClickHandler() {
 			
 			@Override
@@ -1231,7 +1305,7 @@ public class QuestBook {
 		for (int i = 0; i < 9; i++) {
 			final Mission mission = quest.getMission(i);
 			if (mission == null) {
-				menu.addItem(45 + i, new CustomItem(new MaterialData(Material.PAPER), "&7&o> New Task"));
+				menu.addItem(45 + i, new ItemBuilder(Material.PAPER).display("&7&o> New Task").get());
 				menu.addMenuClickHandler(45 + i, new MenuClickHandler() {
 					
 					@Override
@@ -1245,10 +1319,11 @@ public class QuestBook {
 				});
 			}
 			else {
-				ItemStack stack = new CustomItem(new MaterialData(Material.BOOK), mission.getText());
-				ItemMeta meta = stack.getItemMeta();
-				meta.setLore(Arrays.asList("", "§c§oLeft Click to edit", "§c§oRight Click to delete"));
-				stack.setItemMeta(meta);
+				ItemStack stack = new ItemBuilder(Material.BOOK).display(mission.getText()).lore(
+						"",
+						"&c&oLeft Click to edit",
+						"&c&oRight Click to delete").get();
+
 				menu.addItem(45 + i, stack);
 				menu.addMenuClickHandler(45 + i, new MenuClickHandler() {
 					
@@ -1276,7 +1351,7 @@ public class QuestBook {
 			}
 		});
 		
-		menu.addItem(0, new CustomItem(new MaterialData(Material.MAP), "&c< Back"));
+		menu.addItem(0, ItemBuilder.Proto.MAP_BACK.getItem());
 		menu.addMenuClickHandler(0, new MenuClickHandler() {
 			
 			@Override
@@ -1288,7 +1363,7 @@ public class QuestBook {
 		
 		int index = 9;
 		for (final World world: Bukkit.getWorlds()) {
-			menu.addItem(index, new CustomItem(new MaterialData(Material.GRASS), "&r" + world.getName() + ": " + (quest.isWorldEnabled(world.getName()) ? "§2§l\u2714": "§4§l\u2718")));
+			menu.addItem(index, new ItemBuilder(Material.GRASS).display("&r" + world.getName() + ": " + (quest.isWorldEnabled(world.getName()) ? "&2&l\u2714": "&4&l\u2718")).get());
 			menu.addMenuClickHandler(index, new MenuClickHandler() {
 				
 				@Override
@@ -1318,7 +1393,7 @@ public class QuestBook {
 			}
 		});
 		
-		menu.addItem(0, new CustomItem(new MaterialData(Material.MAP), "&c< Back"));
+		menu.addItem(0, ItemBuilder.Proto.MAP_BACK.getItem());
 		menu.addMenuClickHandler(0, new MenuClickHandler() {
 			
 			@Override
@@ -1330,7 +1405,7 @@ public class QuestBook {
 		
 		int index = 9;
 		for (final World world: Bukkit.getWorlds()) {
-			menu.addItem(index, new CustomItem(new MaterialData(Material.GRASS), "&r" + world.getName() + ": " + (category.isWorldEnabled(world.getName()) ? "§2§l\u2714": "§4§l\u2718")));
+			menu.addItem(index, new ItemBuilder(Material.GRASS).display("&r" + world.getName() + ": " + (category.isWorldEnabled(world.getName()) ? "&2&l\u2714": "&4&l\u2718")).get());
 			menu.addMenuClickHandler(index, new MenuClickHandler() {
 				
 				@Override
@@ -1361,7 +1436,7 @@ public class QuestBook {
 			}
 		});
 		
-		menu.addItem(0, new CustomItem(new MaterialData(Material.MAP), "&c< Back"));
+		menu.addItem(0, ItemBuilder.Proto.MAP_BACK.getItem());
 		menu.addMenuClickHandler(0, new MenuClickHandler() {
 			
 			@Override
@@ -1404,7 +1479,7 @@ public class QuestBook {
 			}
 		});
 		
-		menu.addItem(0, new CustomItem(new MaterialData(Material.MAP), QuestWorld.getInstance().getBookLocal("button.back.general")));
+		menu.addItem(0, new ItemBuilder(Material.MAP).display(QuestWorld.getInstance().getBookLocal("button.back.general")).get());
 		menu.addMenuClickHandler(0, new MenuClickHandler() {
 			
 			@Override

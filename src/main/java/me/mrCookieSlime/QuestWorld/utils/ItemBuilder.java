@@ -29,6 +29,7 @@ public class ItemBuilder {
 	 */
 	public static enum Proto {
 		RED_WOOL(new ItemBuilder(Material.WOOL).color(DyeColor.RED).get()),
+		MAP_BACK(new ItemBuilder(Material.MAP).display("&c< Back").get()),
 		;
 		private ItemStack item;
 		Proto(ItemStack item) {
@@ -37,6 +38,10 @@ public class ItemBuilder {
 		
 		public ItemBuilder get() {
 			return new ItemBuilder(item);
+		}
+		
+		public ItemStack getItem() {
+			return item.clone();
 		}
 	}
 	
