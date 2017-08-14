@@ -10,9 +10,8 @@ import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ClickAction;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu.AdvancedMenuClickHandler;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu.MenuClickHandler;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
+import me.mrCookieSlime.QuestWorld.api.SinglePrompt;
 import me.mrCookieSlime.QuestWorld.api.Translation;
-import me.mrCookieSlime.QuestWorld.listeners.Input;
-import me.mrCookieSlime.QuestWorld.listeners.InputType;
 import me.mrCookieSlime.QuestWorld.quests.Category;
 import me.mrCookieSlime.QuestWorld.quests.QBDialogue;
 import me.mrCookieSlime.QuestWorld.quests.Quest;
@@ -43,8 +42,20 @@ public class Buttons {
 			@Override
 			public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
 				String defaultCategoryName = QuestWorld.translate(Translation.default_category);
-				PlayerTools.sendTranslation(p, true, Translation.category_namechange, defaultCategoryName);
-				QuestWorld.getInstance().storeInput(p.getUniqueId(), new Input(InputType.CATEGORY_CREATION, id));
+				
+				PlayerTools.promptInput(p, new SinglePrompt(
+						PlayerTools.makeTranslation(true, Translation.category_namechange, defaultCategoryName),
+						(c,s) -> {
+							new Category(s, id);
+							PlayerTools.sendTranslation(p, true, Translation.category_created, s);
+							QuestBook.openEditor(p);
+
+							return true;
+						}
+				));
+				
+				//PlayerTools.sendTranslation(p, true, Translation.category_namechange, defaultCategoryName);
+				//QuestWorld.getInstance().storeInput(p.getUniqueId(), new Input(InputType.CATEGORY_CREATION, id));
 				p.closeInventory();
 				return false;
 			}
@@ -74,8 +85,20 @@ public class Buttons {
 			@Override
 			public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
 				String defaultQuestName = QuestWorld.translate(Translation.default_quest);
-				PlayerTools.sendTranslation(p, true, Translation.quest_namechange, defaultQuestName);
-				QuestWorld.getInstance().storeInput(p.getUniqueId(), new Input(InputType.QUEST_CREATION, cat_id + " M " + id));
+				//PlayerTools.sendTranslation(p, true, Translation.quest_namechange, defaultQuestName);
+				//QuestWorld.getInstance().storeInput(p.getUniqueId(), new Input(InputType.QUEST_CREATION, cat_id + " M " + id));
+				
+				PlayerTools.promptInput(p, new SinglePrompt(
+						PlayerTools.makeTranslation(true, Translation.quest_namechange, defaultQuestName),
+						(c,s) -> {
+							new Quest(s, cat_id+" M "+id);
+							PlayerTools.sendTranslation(p, true, Translation.quest_created, s);
+							QuestBook.openCategoryQuestEditor(p, QuestWorld.getInstance().getCategory(cat_id));
+
+							return true;
+						}
+				));
+				
 				p.closeInventory();
 				return false;
 			}

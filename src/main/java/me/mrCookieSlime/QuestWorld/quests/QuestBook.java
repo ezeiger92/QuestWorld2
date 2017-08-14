@@ -15,12 +15,11 @@ import me.mrCookieSlime.QuestWorld.api.Manual;
 import me.mrCookieSlime.QuestWorld.api.MissionChange;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.QuestChange;
+import me.mrCookieSlime.QuestWorld.api.SinglePrompt;
 import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.api.menu.Buttons;
 import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
 import me.mrCookieSlime.QuestWorld.containers.PagedMapping;
-import me.mrCookieSlime.QuestWorld.listeners.Input;
-import me.mrCookieSlime.QuestWorld.listeners.InputType;
 import me.mrCookieSlime.QuestWorld.managers.PlayerManager;
 import me.mrCookieSlime.QuestWorld.parties.Party;
 import me.mrCookieSlime.QuestWorld.utils.ItemBuilder;
@@ -278,8 +277,33 @@ public class QuestBook {
 						if (party.getSize() >= QuestWorld.getInstance().getCfg().getInt("party.max-members"))
 							PlayerTools.sendTranslation(p, true, Translation.party_errorfull);
 						else {
-							PlayerTools.sendTranslation(p, true, Translation.party_playerpick);
-							QuestWorld.getInstance().storeInput(p.getUniqueId(), new Input(InputType.PARTY_INVITE, party));
+							//PlayerTools.sendTranslation(p, true, Translation.party_playerpick);
+							//QuestWorld.getInstance().storeInput(p.getUniqueId(), new Input(InputType.PARTY_INVITE, party));
+							
+							PlayerTools.promptInput(p, new SinglePrompt(
+									PlayerTools.makeTranslation(true, Translation.party_playerpick),
+									(c,s) -> {
+										String name = Text.decolor(s).replace("@", "");
+
+										Player player = PlayerTools.getPlayer(name);
+										if (player != null) {
+											if (QuestWorld.getInstance().getManager(player).getParty() == null) {
+												PlayerTools.sendTranslation(p, true, Translation.party_playeradd, name);
+												try {
+													party.invitePlayer(player);
+												} catch (Exception e1) {
+													e1.printStackTrace();
+												}
+											}
+											else PlayerTools.sendTranslation(p, true, Translation.party_errormember, name);
+										}
+										else {
+											PlayerTools.sendTranslation(p, true, Translation.party_errorabsent, name);
+										}
+										return true;
+									}
+							));
+							
 							p.closeInventory();
 						}
 						return false;
@@ -797,8 +821,24 @@ public class QuestBook {
 			
 			@Override
 			public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-				QuestWorld.getInstance().storeInput(p.getUniqueId(), new Input(InputType.CATEGORY_RENAME, category));
-				PlayerTools.sendTranslation(p, true, Translation.category_namechange, category.getName());
+				PlayerTools.promptInput(p, new SinglePrompt(
+						PlayerTools.makeTranslation(true, Translation.category_namechange, category.getName()),
+						(c,s) -> {
+							CategoryChange changes = new CategoryChange(category);
+							changes.setName(s);
+							if(changes.sendEvent()) {
+								String oldName = category.getName();
+								changes.apply();
+								PlayerTools.sendTranslation(p, true, Translation.category_nameset, s, oldName);
+							}
+							
+							QuestBook.openCategoryEditor(p, category);
+							return true;
+						}
+				));
+				
+				//QuestWorld.getInstance().storeInput(p.getUniqueId(), new Input(InputType.CATEGORY_RENAME, category));
+				//PlayerTools.sendTranslation(p, true, Translation.category_namechange, category.getName());
 				p.closeInventory();
 				return false;
 			}
@@ -828,8 +868,26 @@ public class QuestBook {
 			
 			@Override
 			public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-				QuestWorld.getInstance().storeInput(p.getUniqueId(), new Input(InputType.CATEGORY_PERMISSION, category));
-				PlayerTools.sendTranslation(p, true, Translation.category_permchange, category.getName(), category.getPermission());
+				//QuestWorld.getInstance().storeInput(p.getUniqueId(), new Input(InputType.CATEGORY_PERMISSION, category));
+				//PlayerTools.sendTranslation(p, true, Translation.category_permchange, category.getName(), category.getPermission());
+				
+				PlayerTools.promptInput(p, new SinglePrompt(
+						PlayerTools.makeTranslation(true, Translation.category_permchange, category.getName(), category.getPermission()),
+						(c,s) -> {
+							CategoryChange changes = new CategoryChange(category);
+							String permission = s.equalsIgnoreCase("none") ? "": s;
+							changes.setPermission(permission);
+							if(changes.sendEvent()) {
+								String oldPerm = category.getPermission();
+								changes.apply();
+								PlayerTools.sendTranslation(p, true, Translation.category_permset, category.getName(), s, oldPerm);
+							}
+							
+							QuestBook.openCategoryEditor(p, category);
+							return true;
+						}
+				));
+				
 				p.closeInventory();
 				return false;
 			}
@@ -927,8 +985,25 @@ public class QuestBook {
 			
 			@Override
 			public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-				QuestWorld.getInstance().storeInput(p.getUniqueId(), new Input(InputType.QUEST_RENAME, quest));
-				PlayerTools.sendTranslation(p, true, Translation.quest_namechange, quest.getName());
+				//QuestWorld.getInstance().storeInput(p.getUniqueId(), new Input(InputType.QUEST_RENAME, quest));
+				//PlayerTools.sendTranslation(p, true, Translation.quest_namechange, quest.getName());
+				
+				PlayerTools.promptInput(p, new SinglePrompt(
+						PlayerTools.makeTranslation(true, Translation.quest_namechange, quest.getName()),
+						(c,s) -> {
+							QuestChange changes = new QuestChange(quest);
+							changes.setName(s);
+							if(changes.sendEvent()) {
+								String oldName = quest.getName();
+								changes.apply();
+								PlayerTools.sendTranslation(p, true, Translation.quest_nameset, s, oldName);
+							}
+
+							QuestBook.openQuestEditor(p, quest);
+							return true;
+						}
+				));
+				
 				p.closeInventory();
 				return false;
 			}
@@ -1048,8 +1123,26 @@ public class QuestBook {
 			
 			@Override
 			public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-				QuestWorld.getInstance().storeInput(p.getUniqueId(), new Input(InputType.QUEST_PERMISSION, quest));
-				PlayerTools.sendTranslation(p, true, Translation.quest_permchange, quest.getName(), quest.getPermission());
+				//QuestWorld.getInstance().storeInput(p.getUniqueId(), new Input(InputType.QUEST_PERMISSION, quest));
+				//PlayerTools.sendTranslation(p, true, Translation.quest_permchange, quest.getName(), quest.getPermission());
+				
+				PlayerTools.promptInput(p, new SinglePrompt(
+						PlayerTools.makeTranslation(true, Translation.quest_permchange, quest.getName(), quest.getPermission()),
+						(c,s) -> {
+							QuestChange changes = new QuestChange(quest);
+							String permission = s.equalsIgnoreCase("none") ? "": s;
+							changes.setPermission(permission);
+							if(changes.sendEvent()) {
+								String oldPerm = quest.getPermission();
+								changes.apply();
+								PlayerTools.sendTranslation(p, true, Translation.quest_permset, quest.getName(), s, oldPerm);
+							}
+
+							QuestBook.openQuestEditor(p, quest);
+							return true;
+						}
+				));
+				
 				p.closeInventory();
 				return false;
 			}

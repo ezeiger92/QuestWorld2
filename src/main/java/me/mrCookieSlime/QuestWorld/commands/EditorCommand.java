@@ -2,17 +2,19 @@ package me.mrCookieSlime.QuestWorld.commands;
 
 
 import me.mrCookieSlime.QuestWorld.QuestWorld;
-import me.mrCookieSlime.QuestWorld.listeners.Input;
-import me.mrCookieSlime.QuestWorld.listeners.InputType;
+import me.mrCookieSlime.QuestWorld.api.QuestChange;
+import me.mrCookieSlime.QuestWorld.api.SinglePrompt;
 import me.mrCookieSlime.QuestWorld.quests.Category;
 import me.mrCookieSlime.QuestWorld.quests.QBDialogue;
 import me.mrCookieSlime.QuestWorld.quests.Quest;
 import me.mrCookieSlime.QuestWorld.quests.QuestBook;
 import me.mrCookieSlime.QuestWorld.utils.Log;
+import me.mrCookieSlime.QuestWorld.utils.PlayerTools;
 import me.mrCookieSlime.QuestWorld.utils.Text;
 
 import java.util.Iterator;
 
+import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -36,6 +38,11 @@ public class EditorCommand implements CommandExecutor {
 			help(label, sender);
 			return true;
 		}
+		Player p;
+		if(sender instanceof Player)
+			p = (Player)sender;
+		else
+			p = null;
 		
 		String param = args[0].toLowerCase();
 		if (param.equals("import")) {
@@ -134,9 +141,23 @@ public class EditorCommand implements CommandExecutor {
 		}
 		else if (args.length == 3 && param.equals("add_command") && sender instanceof Player) {
 			Quest quest = QuestWorld.getInstance().getCategory(Integer.parseInt(args[1])).getQuest(Integer.parseInt(args[2]));
-			sender.sendMessage(Text.colorize("&7Type in your desired Command:"));
+			//sender.sendMessage(Text.colorize("&7Type in your desired Command:"));
+			//QuestWorld.getInstance().storeInput(((Player) sender).getUniqueId(), new Input(InputType.COMMAND_ADD, quest));
+			
+			PlayerTools.promptInput(p, new SinglePrompt(
+					"&7Type in your desired Command:",
+					(c,s) -> {
+						QuestChange changes = new QuestChange(quest);
+						changes.addCommand(ChatColor.stripColor(s));
+						if(changes.sendEvent())
+							changes.apply();
+
+						QBDialogue.openCommandEditor(p, quest);
+						return true;
+					}
+			));
 			sender.sendMessage(Text.colorize("&7Usable Variables: @p (Username)"));
-			QuestWorld.getInstance().storeInput(((Player) sender).getUniqueId(), new Input(InputType.COMMAND_ADD, quest));
+			
 		}
 		else {
 			help(label, sender);

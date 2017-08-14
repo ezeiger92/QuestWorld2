@@ -17,15 +17,6 @@ public class GuideBook {
 		return instance.guide.clone();
 	}
 	
-	public static boolean isSimilar(ItemStack stack) {
-		if(instance == null)
-			instance = new GuideBook();
-		if(stack == null)
-			return false;
-		
-		return stack.isSimilar(instance.guide);
-	}
-	
 	private GuideBook() {
 		String display = QuestWorld.translate(Translation.book_display);
 		String[] lore = QuestWorld.translate(Translation.book_lore).split("\n");

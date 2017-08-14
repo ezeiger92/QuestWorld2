@@ -71,14 +71,19 @@ public class PlayerTools {
 	}
 	
 	public static void sendTranslation(CommandSender p, boolean prefixed, Translator key, String... replacements) {
-		String text = QuestWorld.translate(key, replacements);
+		String text = makeTranslation(prefixed, key, replacements);
 		if(text.isEmpty())
 			return;
 		
-		if(prefixed)
+		p.sendMessage(text);
+	}
+	
+	public static String makeTranslation(boolean prefixed, Translator key, String... replacements) {
+		String text = QuestWorld.translate(key, replacements);
+		if(!text.isEmpty() && prefixed)
 			text = QuestWorld.translate(Translation.default_prefix) + text;
-		
-		p.sendMessage(Text.colorize(text));
+
+		return Text.colorize(text);
 	}
 	
 	private static ConversationFactory factory;

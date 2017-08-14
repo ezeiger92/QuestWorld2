@@ -24,16 +24,12 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 public class PlayerListener implements Listener {
-	
-	public PlayerListener(QuestWorld plugin) {
-		plugin.getServer().getPluginManager().registerEvents(this, plugin);
-	}
-	
+
 	@EventHandler
 	public void onQuestBook(ItemUseEvent e) {
-		if (GuideBook.isSimilar(e.getItem())) {
-			Player p = e.getPlayer();
-			QuestBook.openLastMenu(p);
+		if (GuideBook.get().isSimilar(e.getItem())) {
+
+			QuestBook.openLastMenu(e.getPlayer());
 		}
 	}
 	

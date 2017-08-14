@@ -9,7 +9,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -28,10 +27,7 @@ import me.mrCookieSlime.QuestWorld.api.Translator;
 import me.mrCookieSlime.QuestWorld.commands.EditorCommand;
 import me.mrCookieSlime.QuestWorld.commands.QuestsCommand;
 import me.mrCookieSlime.QuestWorld.extensions.builtin.Builtin;
-import me.mrCookieSlime.QuestWorld.listeners.EditorListener;
 import me.mrCookieSlime.QuestWorld.listeners.HookInstaller;
-import me.mrCookieSlime.QuestWorld.listeners.Input;
-import me.mrCookieSlime.QuestWorld.listeners.InputType;
 import me.mrCookieSlime.QuestWorld.listeners.PlayerListener;
 import me.mrCookieSlime.QuestWorld.listeners.SelfListener;
 import me.mrCookieSlime.QuestWorld.managers.MissionViewer;
@@ -47,11 +43,11 @@ import me.mrCookieSlime.QuestWorld.utils.Text;
 
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapelessRecipe;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -59,15 +55,14 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 	private static QuestWorld instance = null;
 	private long lastSave;
 
-	Config cfg, book, sounds;
+	private Config cfg, book, sounds;
 	private MissionViewer missionViewer = new MissionViewer();
 	private Map<String, MissionType> types      = new HashMap<>();
 	private Map<Integer, Category>   categories = new HashMap<>();
 	private Map<UUID, PlayerManager>  profiles   = new HashMap<>();
-	private Map<UUID, Input>         inputs     = new HashMap<>();
 	
-	EconWrapper economy = null;
-	Sounds eventSounds;
+	private EconWrapper economy = null;
+	private Sounds eventSounds;
 	
 	private Lang language;
 	private ExtensionLoader extLoader = null;
@@ -152,14 +147,13 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 		loadConfigs();
 		
 		getCommand("quests").setExecutor(new QuestsCommand());
-		PluginCommand editorCommand = getCommand("questeditor");
-		editorCommand.setExecutor(new EditorCommand());
-		editorCommand.setAliases(Arrays.asList("qe"));
+		getCommand("questeditor").setExecutor(new EditorCommand());
+		//editorCommand.setAliases(Arrays.asList("qe"));
 
-		new EditorListener(this);
-		new PlayerListener(this);
-		getServer().getPluginManager().registerEvents(missionViewer, this);
-		getServer().getPluginManager().registerEvents(new SelfListener(), this);
+		PluginManager pm = getServer().getPluginManager();
+		pm.registerEvents(new PlayerListener(), this);
+		pm.registerEvents(missionViewer, this);
+		pm.registerEvents(new SelfListener(), this);
 		
 		ShapelessRecipe recipe = new ShapelessRecipe(GuideBook.get());
 		recipe.addIngredient(Material.WORKBENCH);
@@ -328,32 +322,27 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 		return lastSave;
 	}
 
-	// Why wasn't this a thing?!
-	public void save() { save(false); }
 	public void save(boolean force) {
-		Iterator<Map.Entry<Integer,Category>> categories = this.categories.entrySet().iterator();
-		while(categories.hasNext())
-			categories.next().getValue().save(force);
+		for(Category c : categories.values())
+			c.save(force);
 		
-		Iterator<Map.Entry<UUID, PlayerManager>> managers = this.profiles.entrySet().iterator();
-		while(managers.hasNext())
-			managers.next().getValue().save();
+		for(PlayerManager p : profiles.values())
+			p.save();
 		
 		lastSave = System.currentTimeMillis();
 	}
 	
+	public void save() {
+		save(false);
+	}
+	
 	public void unload() {
-		Iterator<Map.Entry<Integer,Category>> categories = this.categories.entrySet().iterator();
-		while(categories.hasNext()) {
-			// Force save for now, change this when 100% sure we've updated all quest/category lastModified times
-			categories.next().getValue().save(true);
-		}
-		this.categories.clear();
+		for(Category c : categories.values())
+			c.save(true);
+		categories.clear();
 		
-		Iterator<Map.Entry<UUID, PlayerManager>> managers = this.profiles.entrySet().iterator();
-		while(managers.hasNext()) {
-			managers.next().getValue().save();
-		}
+		for(PlayerManager p : profiles.values())
+			p.save();
 		profiles.clear();
 	}
 	
@@ -474,10 +463,6 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 		return profiles.containsKey(UUID.fromString(uuid));
 	}
 	
-	public void storeInput(UUID uuid, Input input) {
-		this.inputs.put(uuid, input);
-	}
-	
 	public void enable(QuestExtension hook) {
 		for(MissionType type : hook.getMissions())
 			registerMissionType(type);
@@ -491,15 +476,6 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 			Log.fine("Registrar - Registering events: " + type.getName());
 			getServer().getPluginManager().registerEvents((Listener)type, this);
 		}
-	}
-
-	public Input getInput(UUID uuid) {
-		if (inputs.containsKey(uuid)) return inputs.get(uuid);
-		else return new Input(InputType.NONE, null);
-	}
-	
-	public void removeInput(UUID uuid) {
-		this.inputs.remove(uuid);
 	}
 	
 	public boolean isItemSimiliar(ItemStack item, ItemStack SFitem) {

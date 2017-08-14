@@ -40,14 +40,16 @@ public class MissionViewer implements Listener {
 	public void onCreateMission(QuestChangeEvent event) {
 		if(event.getNextState().hasChange(QuestChange.Member.TASKS)) {
 			List<Mission> questMissions = event.getNextState().getMissions();
-			add(questMissions.get(questMissions.size() - 1));
+			Mission m = questMissions.get(questMissions.size() - 1);
+			add(m, m.getType());
 		}
 	}
 	
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onUpdateMission(MissionChangeEvent event) {
 		if(event.getNextState().hasChange(MissionChange.Member.TYPE))
-			update(event.getMission(), event.getNextState().getType());
+			remove(event.getMission());
+			add(event.getMission(), event.getNextState().getType());
 	}
 	
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -65,25 +67,11 @@ public class MissionViewer implements Listener {
 		remove(event.getMission());
 	}
 	
-	private void add(Mission mission) {
-		add(mission, mission.getType());
-	}
-	
 	private void add(Mission mission, MissionType type) {
-		Set<Mission> missionsOfType = getMissionsOf(type);
+		getMissionsOf(type).add(mission);
 		
-		if(!missionsOfType.add(mission)) {
-			// TODO Mission already in set, ideally impossible. TEST ME
-		}
-		
-		if(type instanceof Ticking) {
+		if(type instanceof Ticking)
 			ticking_missions.add(mission);
-		}
-	}
-	
-	private void update(Mission mission, MissionType newType) {
-		remove(mission);
-		add(mission, newType);
 	}
 	
 	private void removeAll(Category category) {
@@ -97,18 +85,9 @@ public class MissionViewer implements Listener {
 	}
 	
 	private void remove(Mission mission) {
-		remove(mission, mission.getType());
-	}
-	
-	private void remove(Mission mission, MissionType type) {
-		Set<Mission> missionsOfType = getMissionsOf(type);
+		getMissionsOf(mission.getType()).remove(mission);
 		
-		if(!missionsOfType.remove(mission)) {
-			// TODO Mission not in set, ideally impossible. TEST ME
-		}
-		
-		if(type instanceof Ticking) {
+		if(mission.getType() instanceof Ticking)
 			ticking_missions.remove(mission);
-		}
 	}
 }

@@ -5,19 +5,19 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.MissionChange;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
+import me.mrCookieSlime.QuestWorld.api.SinglePrompt;
 import me.mrCookieSlime.QuestWorld.api.Ticking;
 import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.api.interfaces.IMission;
 import me.mrCookieSlime.QuestWorld.api.interfaces.IMissionWrite;
 import me.mrCookieSlime.QuestWorld.api.menu.MenuData;
 import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
-import me.mrCookieSlime.QuestWorld.listeners.Input;
-import me.mrCookieSlime.QuestWorld.listeners.InputType;
+import me.mrCookieSlime.QuestWorld.quests.QuestBook;
 import me.mrCookieSlime.QuestWorld.utils.ItemBuilder;
 import me.mrCookieSlime.QuestWorld.utils.PlayerTools;
+import me.mrCookieSlime.QuestWorld.utils.Text;
 
 public class LocationMission extends MissionType implements Ticking {
 	public LocationMission() {
@@ -87,8 +87,24 @@ public class LocationMission extends MissionType implements Ticking {
 						 "&e> Give your Location a Name").get(),
 				MissionButton.simpleHandler(changes, event -> {
 					Player p = (Player)event.getWhoClicked();
-					QuestWorld.getInstance().storeInput(p.getUniqueId(), new Input(InputType.LOCATION_NAME, changes.getSource()));
-					PlayerTools.sendTranslation(p, true, Translation.location_rename);
+					//QuestWorld.getInstance().storeInput(p.getUniqueId(), new Input(InputType.LOCATION_NAME, changes.getSource()));
+					//PlayerTools.sendTranslation(p, true, Translation.location_rename);
+					
+					PlayerTools.promptInput(p, new SinglePrompt(
+							PlayerTools.makeTranslation(true, Translation.location_rename),
+							(c,s) -> {
+								changes.setCustomString(Text.colorize(s));
+								
+								if(changes.sendEvent()) {
+									PlayerTools.sendTranslation(p, true, Translation.location_rename);
+									changes.apply();
+								}
+
+								QuestBook.openQuestMissionEditor(p, changes.getSource());
+								return true;
+							}
+					));
+					
 					p.closeInventory();
 				})
 		));

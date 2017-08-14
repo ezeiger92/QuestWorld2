@@ -15,9 +15,8 @@ import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ClickAction;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.MenuHelper;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.MissionChange;
+import me.mrCookieSlime.QuestWorld.api.SinglePrompt;
 import me.mrCookieSlime.QuestWorld.api.Translation;
-import me.mrCookieSlime.QuestWorld.listeners.Input;
-import me.mrCookieSlime.QuestWorld.listeners.InputType;
 import me.mrCookieSlime.QuestWorld.quests.QBDialogue;
 import me.mrCookieSlime.QuestWorld.quests.QuestBook;
 import me.mrCookieSlime.QuestWorld.utils.EntityTools;
@@ -136,8 +135,20 @@ public class MissionButton {
 		
 		MenuClickHandler handler = simpleHandler(changes, event -> {
 			Player p = (Player)event.getWhoClicked();
-			QuestWorld.getInstance().storeInput(p.getUniqueId(), new Input(InputType.KILL_NAMED, changes.getSource()));
-			PlayerTools.sendTranslation(p, true, Translation.killmission_rename);
+			PlayerTools.promptInput(p, new SinglePrompt(
+					PlayerTools.makeTranslation(true, Translation.killmission_rename),
+					(c,s) -> {
+						changes.setCustomString(Text.colorize(s));
+						if(changes.sendEvent()) {
+							changes.apply();
+							PlayerTools.sendTranslation(p, true, Translation.killtype_rename);
+						}
+						QuestBook.openQuestMissionEditor(p, changes.getSource());
+						return true;
+					}
+			));
+			//QuestWorld.getInstance().storeInput(p.getUniqueId(), new Input(InputType.KILL_NAMED, changes.getSource()));
+			///PlayerTools.sendTranslation(p, true, Translation.killmission_rename);
 			p.closeInventory();
 		});
 		

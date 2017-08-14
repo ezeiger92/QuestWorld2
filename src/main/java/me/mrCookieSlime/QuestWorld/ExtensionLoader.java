@@ -1,14 +1,10 @@
 package me.mrCookieSlime.QuestWorld;
 
 import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -22,47 +18,36 @@ public class ExtensionLoader {
 	public ExtensionLoader(ClassLoader loader, File folder) {
 		this.loader = loader;
 		this.folder = folder;
-		
-		if(loader == null || folder == null) {
-			String args = (loader == null ? (folder == null ? "both were" : "'loader' was") : "'folder' was");
-			throw new NullPointerException("'loader' and 'folder' must not be null, but " + args + " null!");
-		}
-		else if(!folder.isDirectory()) {
-			//throw new IllegalArgumentException("'folder' must be a directory!");
-		}
 	}
 	
 	public void loadLocal() {
-		File[] extensions = folder.listFiles((file, name) -> {
-			// TODO check for jar files the best way, because it's probably not
-			return name.endsWith(".jar");
-		});
+		// TODO check for jar files the best way, because it's probably not
+		File[] extensions = folder.listFiles((file, name) -> name.endsWith(".jar"));
 		
 		// Not a directory or unable to list files for some reason
-		if(extensions == null)
-			return;
-		
-		// Could be parallel, but not worth it yet
-		for(File f : extensions)
-			load(f);
+		if(extensions != null)
+			for(File f : extensions)
+				load(f);
 	}
 	
 	public void load(File extensionFile) {
 		Log.fine("Loader - Reading file: " + extensionFile.getName());
-		URL jarURL;
-		try { jarURL = extensionFile.toURI().toURL(); }
-		catch (MalformedURLException e) { e.printStackTrace(); return; }
+		URL[] jarURLs = {null};
+		try { jarURLs[0] = extensionFile.toURI().toURL(); }
+		catch (Exception e) { e.printStackTrace(); return; }
 		
-		ClassLoader newLoader = URLClassLoader.newInstance(new URL[] {
-			jarURL,
-		}, loader);
+		URLClassLoader newLoader = URLClassLoader.newInstance(jarURLs, loader);
 		
 		JarFile jar;
 		try { jar = new JarFile(extensionFile); }
-		catch (IOException e) { e.printStackTrace(); return; }
+		catch (Exception e) {
+			Log.severe("Failed to load \""+extensionFile+"\": is it a valid jar file?");
+			e.printStackTrace();
+			return;
+		}
 		
 		Enumeration<JarEntry> entries = jar.entries();
-		List<Class<?>> extensionClasses = new ArrayList<>();
+		ArrayList<Class<?>> extensionClasses = new ArrayList<>();
 		
 		while(entries.hasMoreElements()) {
 			JarEntry entry = entries.nextElement();
@@ -73,7 +58,11 @@ public class ExtensionLoader {
 			Log.finer("Loader - Loading class: " + className);
 			Class<?> clazz;
 			try { clazz = newLoader.loadClass(className); }
-			catch (ClassNotFoundException e) { e.printStackTrace(); continue; }
+			catch (ClassNotFoundException e) {
+				Log.severe("Could not load class \""+className+"\"!");
+				e.printStackTrace();
+				continue;
+			}
 
 			if(QuestExtension.class.isAssignableFrom(clazz)) {
 				Log.finer("Loader - Found extension class: " + className);
@@ -84,14 +73,14 @@ public class ExtensionLoader {
 		for(Class<?> extensionClass : extensionClasses) {
 			Log.fine("Loader - Constructing: " + extensionClass.getName());
 			try { extensionClass.getConstructor().newInstance(); }
-			catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-					| InvocationTargetException | NoSuchMethodException | SecurityException e) {
-				// TODO better messages for exceptions during construction
+			catch (Exception e) {
+				Log.severe("Exception while constructing extension class \""+extensionClass+"\"!");
+				Log.severe("Is it missing a default constructor?");
 				e.printStackTrace();
 			}
 		}
 		
 		try { jar.close(); }
-		catch (IOException e) { e.printStackTrace(); }
+		catch (Exception e) { e.printStackTrace(); }
 	}
 }
