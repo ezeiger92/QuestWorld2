@@ -49,7 +49,7 @@ public class MineMission extends MissionType implements Listener {
 						"",
 						"&e> Click to change the Block to",
 						"&ethe Item you are currently holding").get(),
-				MissionButton.simpleHandler(changes, event -> {
+				event -> {
 					Player p = (Player)event.getWhoClicked();
 					ItemStack mainItem = p.getInventory().getItemInMainHand();
 					if(mainItem != null && mainItem.getType().isBlock()) {
@@ -57,8 +57,8 @@ public class MineMission extends MissionType implements Listener {
 						mainItem.setAmount(1);
 						changes.setItem(mainItem);
 					}
-						
-				})
+					MissionButton.apply(event, changes);
+				}
 		));
 		putButton(17, MissionButton.amount(changes));
 	}

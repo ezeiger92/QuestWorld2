@@ -85,10 +85,8 @@ public class LocationMission extends MissionType implements Ticking {
 				new ItemBuilder(Material.NAME_TAG).display("&r" + changes.getCustomString()).lore(
 						 "",
 						 "&e> Give your Location a Name").get(),
-				MissionButton.simpleHandler(changes, event -> {
+				event -> {
 					Player p = (Player)event.getWhoClicked();
-					//QuestWorld.getInstance().storeInput(p.getUniqueId(), new Input(InputType.LOCATION_NAME, changes.getSource()));
-					//PlayerTools.sendTranslation(p, true, Translation.location_rename);
 					
 					PlayerTools.promptInput(p, new SinglePrompt(
 							PlayerTools.makeTranslation(true, Translation.location_rename),
@@ -104,9 +102,9 @@ public class LocationMission extends MissionType implements Ticking {
 								return true;
 							}
 					));
-					
-					p.closeInventory();
-				})
+
+					PlayerTools.closeInventoryWithEvent(p);
+				}
 		));
 		putButton(17, new MenuData(
 				new ItemBuilder(Material.COMPASS).display("&7Radius: &a" + changes.getCustomInt()).lore(
@@ -115,10 +113,11 @@ public class LocationMission extends MissionType implements Ticking {
 						"&rRight Click: &e-1",
 						"&rShift + Left Click: &e+16",
 						"&rShift + Right Click: &e-16").get(),
-				MissionButton.simpleHandler(changes, event -> {
+				event -> {
 					int amount = MissionButton.clickNumber(changes.getCustomInt(), 16, event);
 					changes.setCustomInt(Math.max(amount, 1));
-				})
+					MissionButton.apply(event, changes);
+				}
 		));
 	}
 }

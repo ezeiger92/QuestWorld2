@@ -12,6 +12,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.CraftingInventory;
@@ -131,6 +132,11 @@ public class PlayerTools {
 	@SuppressWarnings("deprecation")
 	public static Player getPlayer(String name) {
 		return Bukkit.getPlayerExact(name);
+	}
+	
+	public static void closeInventoryWithEvent(Player p) {
+		Bukkit.getPluginManager().callEvent(new InventoryCloseEvent(p.getOpenInventory()));
+		p.closeInventory();
 	}
 	
 	private interface IReflector {

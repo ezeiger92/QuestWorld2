@@ -1,27 +1,30 @@
 package me.mrCookieSlime.QuestWorld.containers;
 
+import java.util.function.Consumer;
+
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
-import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu;
-import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu.MenuClickHandler;
+import me.mrCookieSlime.QuestWorld.api.menu.Menu;
 import me.mrCookieSlime.QuestWorld.utils.ItemBuilder;
 
 public class PageList {
 	private final int pageSize;
 	private final ItemStack[] items;
-	private final MenuClickHandler[] buttons;
+	private final Consumer<InventoryClickEvent>[] buttons;
 	
 	private int filled = 0;
 	private ItemStack defaultItem = null;
-	private MenuClickHandler defaultButton = null;
+	private Consumer<InventoryClickEvent> defaultButton = null;
 	
+	@SuppressWarnings("unchecked")
 	public PageList(int elementCount) {
 		pageSize = elementCount;
 		items = new ItemStack[pageSize];
-		buttons = new MenuClickHandler[pageSize];
+		buttons = new Consumer[pageSize];
 	}
 	
-	public PageList(int elementCount, ItemStack item, MenuClickHandler button) {
+	public PageList(int elementCount, ItemStack item, Consumer<InventoryClickEvent> button) {
 		this(elementCount);
 		defaultItem = ItemBuilder.clone(item);
 		defaultButton = button;
@@ -31,7 +34,7 @@ public class PageList {
 		defaultItem = item.clone();
 	}
 	
-	public void setDefaultButton(MenuClickHandler button) {
+	public void setDefaultButton(Consumer<InventoryClickEvent> button) {
 		defaultButton = button;
 	}
 	
@@ -39,7 +42,7 @@ public class PageList {
 		return ItemBuilder.clone(items[index]);
 	}
 	
-	public MenuClickHandler getButton(int index) {
+	public Consumer<InventoryClickEvent> getButton(int index) {
 		return buttons[index];
 	}
 	
@@ -47,7 +50,7 @@ public class PageList {
 		items[index] = ItemBuilder.clone(item);
 	}
 	
-	public void addButton(int index, MenuClickHandler button) {
+	public void addButton(int index, Consumer<InventoryClickEvent> button) {
 		if(buttons[index] == null)
 			++filled;
 		buttons[index] = button;
@@ -71,27 +74,26 @@ public class PageList {
 		return pageSize;
 	}
 	
-	public void build(ChestMenu menu) {
+	public void build(Menu menu) {
 		build(menu, 0, pageSize);
 	}
 	
-	public void build(ChestMenu menu, int offset) {
+	public void build(Menu menu, int offset) {
 		build(menu, offset, pageSize);
 	}
 	
-	public void build(ChestMenu menu, int offset, int activeSize) {
+	public void build(Menu menu, int offset, int activeSize) {
 		for(int i = 0; i < activeSize; ++i) {
 			int slot = i + offset;
 			ItemStack item = items[i];
 			if(item == null)
 				item = defaultItem;
 			
-			MenuClickHandler button = buttons[i];
+			Consumer<InventoryClickEvent> button = buttons[i];
 			if(button == null && item != null)
 				button = defaultButton;
 
-			menu.addItem(slot, ItemBuilder.clone(item));
-			menu.addMenuClickHandler(slot, button);
+			menu.put(slot, ItemBuilder.clone(item), button);
 		}
 	}
 }

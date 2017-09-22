@@ -1,6 +1,7 @@
 package me.mrCookieSlime.QuestWorld.utils;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.bukkit.Color;
 import org.bukkit.DyeColor;
@@ -32,6 +33,7 @@ public class ItemBuilder {
 	 */
 	public static enum Proto {
 		RED_WOOL(new ItemBuilder(Material.WOOL).color(DyeColor.RED).get()),
+		LIME_WOOL(new ItemBuilder(Material.WOOL).color(DyeColor.LIME).get()),
 		MAP_BACK(new ItemBuilder(Material.MAP).display(QuestWorld.translate(Translation.button_back_general)).get()),
 		;
 		private ItemStack item;
@@ -297,8 +299,12 @@ public class ItemBuilder {
 	}
 	
 	public ItemBuilder lore(String... lore) {
+		return lore(Arrays.asList(Text.colorizeList(lore)));
+	}
+	
+	public ItemBuilder lore(List<String> lore) {
 		ItemMeta stackMeta = resultStack.getItemMeta();
-		stackMeta.setLore(Arrays.asList(Text.colorizeList(lore)));
+		stackMeta.setLore(lore);
 		resultStack.setItemMeta(stackMeta);
 		return this;
 	}

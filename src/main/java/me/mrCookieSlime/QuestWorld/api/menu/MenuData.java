@@ -1,42 +1,34 @@
 package me.mrCookieSlime.QuestWorld.api.menu;
 
+import java.util.function.Consumer;
+
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
-import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu;
-import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu.MenuClickHandler;
+import me.mrCookieSlime.QuestWorld.utils.ItemBuilder;
 
 public class MenuData {
-	private MenuClickHandler handler;
+	private Consumer<InventoryClickEvent> handler;
 	private ItemStack item;
 	
-	public MenuData(ItemStack item, MenuClickHandler handler) {
+	public MenuData(ItemStack item, Consumer<InventoryClickEvent> handler) {
 		setItem(item);
 		setHandler(handler);
 	}
 	
-	public MenuClickHandler getHandler() {
+	public Consumer<InventoryClickEvent> getHandler() {
 		return handler;
 	}
 	
 	public ItemStack getItem() {
-		return item.clone();
+		return ItemBuilder.clone(item);
 	}
 	
-	public void setHandler(MenuClickHandler handler) {
-		if(handler == null)
-			throw new NullPointerException("Handler cannot be null!");
-		
+	public void setHandler(Consumer<InventoryClickEvent> handler) {
 		this.handler = handler;
 	}
 	
 	public void setItem(ItemStack item) {
-		if(item == null)
-			throw new NullPointerException("Item cannot be null!");
-		
-		this.item = item.clone();
-	}
-	
-	public void attach(int slot, ChestMenu menu) {
-		menu.addItem(slot, item, handler);
+		this.item = ItemBuilder.clone(item);
 	}
 }

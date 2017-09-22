@@ -3,10 +3,6 @@ package me.mrCookieSlime.QuestWorld.quests;
 import java.util.ArrayList;
 import java.util.List;
 
-import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu;
-import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu.MenuClickHandler;
-import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu.MenuOpeningHandler;
-import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ClickAction;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.CategoryChange;
 import me.mrCookieSlime.QuestWorld.api.Manual;
@@ -16,6 +12,7 @@ import me.mrCookieSlime.QuestWorld.api.QuestChange;
 import me.mrCookieSlime.QuestWorld.api.SinglePrompt;
 import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.api.menu.Buttons;
+import me.mrCookieSlime.QuestWorld.api.menu.Menu;
 import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
 import me.mrCookieSlime.QuestWorld.containers.PagedMapping;
 import me.mrCookieSlime.QuestWorld.managers.PlayerManager;
@@ -23,6 +20,7 @@ import me.mrCookieSlime.QuestWorld.parties.Party;
 import me.mrCookieSlime.QuestWorld.utils.ItemBuilder;
 import me.mrCookieSlime.QuestWorld.utils.PlayerTools;
 import me.mrCookieSlime.QuestWorld.utils.Text;
+import me.mrCookieSlime.QuestWorld.utils.ItemBuilder.Proto;
 
 import org.bukkit.Bukkit;
 import org.bukkit.DyeColor;
@@ -33,23 +31,16 @@ import org.bukkit.World;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 
 public class QuestBook {
 	
 	public static void openMainMenu(Player p) {
+		QuestWorld.getSounds().QuestClick().playTo(p);
 		QuestWorld.getInstance().getManager(p).update(false);
 		QuestWorld.getInstance().getManager(p).updateLastEntry(null);
 		
-		ChestMenu menu = new ChestMenu(QuestWorld.translate(Translation.gui_title));
-		menu.addMenuOpeningHandler(new MenuOpeningHandler() {
-			
-			@Override
-			public void onOpen(Player p) {
-				QuestWorld.getSounds().QuestClick().playTo(p);
-			}
-		});
-		
+		Menu menu = new Menu(1, QuestWorld.translate(Translation.gui_title));
+
 		addPartyMenuButton(menu, p);
 		
 		PagedMapping view = new PagedMapping(45, 9);
@@ -61,56 +52,36 @@ public class QuestBook {
 						view.addItem(category.getID(), new ItemBuilder(Material.BARRIER).display(category.getName()).lore(
 								"",
 								QuestWorld.translate(Translation.quests_locked)).get());
-						view.addButton(category.getID(), new MenuClickHandler() {
-							
-							@Override
-							public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-								return false;
-							}
-						});
 					}
 					else {
-						ItemStack item = category.getItem();
-						ItemMeta im = item.getItemMeta();
-						List<String> lore = new ArrayList<String>();
-						lore.add("");
-						lore.add(category.getProgress(p));
-						lore.add("");
-						lore.add(Text.colorize("&7" + category.getQuests().size() + QuestWorld.translate(Translation.category_desc_total)));
-						lore.add(Text.colorize("&a" + category.getFinishedQuests(p).size() + QuestWorld.translate(Translation.category_desc_completed)));
-						lore.add(Text.colorize("&b" + category.getQuests(p, QuestStatus.AVAILABLE).size() + QuestWorld.translate(Translation.category_desc_available)));
-						lore.add(Text.colorize("&e" + category.getQuests(p, QuestStatus.ON_COOLDOWN).size() + QuestWorld.translate(Translation.category_desc_cooldown)));
-						lore.add(Text.colorize("&5" + category.getQuests(p, QuestStatus.REWARD_CLAIMABLE).size() + QuestWorld.translate(Translation.category_desc_claimable_reward)));
-						im.setLore(lore);
-						item.setItemMeta(im);
-						view.addItem(category.getID(), item);
-						view.addNavButton(category.getID(), new MenuClickHandler() {
-							
-							@Override
-							public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-								QuestWorld.getInstance().getManager(p).putPage(0);
-								openCategory(p, category, true);
-								return false;
-							}
-						});
+						view.addNavButton(category.getID(),
+								new ItemBuilder(category.getItem()).lore(
+										"",
+										category.getProgress(p),
+										"",
+										"&7" + category.getQuests().size() + QuestWorld.translate(Translation.category_desc_total),
+										"&a" + category.getFinishedQuests(p).size() + QuestWorld.translate(Translation.category_desc_completed),
+										"&b" + category.getQuests(p, QuestStatus.AVAILABLE).size() + QuestWorld.translate(Translation.category_desc_available),
+										"&e" + category.getQuests(p, QuestStatus.ON_COOLDOWN).size() + QuestWorld.translate(Translation.category_desc_cooldown),
+										"&5" + category.getQuests(p, QuestStatus.REWARD_CLAIMABLE).size() + QuestWorld.translate(Translation.category_desc_claimable_reward))
+								.get(),
+								event -> {
+									Player p2 = (Player) event.getWhoClicked();
+									QuestWorld.getInstance().getManager(p2).putPage(0);
+									openCategory(p2, category, true);
+								}
+						);
 					}
 				}
 				else {
 					view.addItem(category.getID(), new ItemBuilder(Material.BARRIER).display(category.getName()).lore(
 							"",
 							QuestWorld.translate(Translation.quests_locked_in_world)).get());
-					view.addButton(category.getID(), new MenuClickHandler() {
-						
-						@Override
-						public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-							return false;
-						}
-					});
 				}
 			}
 		}
 		view.build(menu, p);
-		menu.open(p);
+		menu.openFor(p);
 	}
 	
 	public static void openLastMenu(Player p) {
@@ -140,240 +111,190 @@ public class QuestBook {
 		QuestBook.openMainMenu(p);
 	}
 	
-	private static void addPartyMenuButton(ChestMenu menu, Player p) {
+	private static void addPartyMenuButton(Menu menu, Player p) {
 		if (QuestWorld.getInstance().getCfg().getBoolean("party.enabled")) {
-			ItemStack skullItem = new ItemBuilder(SkullType.PLAYER)
-				.display(QuestWorld.translate(Translation.gui_party))
-				.lore(QuestWorld.getInstance().getManager(p).getProgress(), "", QuestWorld.translate(Translation.button_open))
-				.get();
-			menu.addItem(4, skullItem);
-			menu.addMenuClickHandler(4, new MenuClickHandler() {
-				
-				@Override
-				public boolean onClick(Player arg0, int arg1, ItemStack arg2, ClickAction arg3) {
-					openPartyMenu(arg0);
-					return false;
-				}
-			});
+			menu.put(4, new ItemBuilder(SkullType.PLAYER)
+					.display(QuestWorld.translate(Translation.gui_party))
+					.lore(QuestWorld.getInstance().getManager(p).getProgress(), "", QuestWorld.translate(Translation.button_open))
+					.get(),
+					event -> {
+						openPartyMenu((Player) event.getWhoClicked());
+					}
+			);
 		}
 		else {
-			menu.addItem(4, new ItemBuilder(Material.ENCHANTED_BOOK)
+			menu.put(4, new ItemBuilder(Material.ENCHANTED_BOOK)
 					.display("&eQuest Book")
-					.lore("", QuestWorld.getInstance().getManager(p).getProgress()).get());
-			menu.addMenuClickHandler(4, new MenuClickHandler() {
-				
-				@Override
-				public boolean onClick(Player arg0, int arg1, ItemStack arg2, ClickAction arg3) {
-					return false;
-				}
-			});
+					.lore("", QuestWorld.getInstance().getManager(p).getProgress()).get(),
+					null);
 		}
 	}
 
 	public static void openPartyMembers(final Player p) {
-		ChestMenu menu = new ChestMenu(QuestWorld.translate(Translation.gui_party));
+		QuestWorld.getSounds().PartyClick().playTo(p);
 		
-		menu.addMenuOpeningHandler(new MenuOpeningHandler() {
-			
-			@Override
-			public void onOpen(Player p) {
-				QuestWorld.getSounds().PartyClick().playTo(p);
-			}
-		});
+		Menu menu = new Menu(1, QuestWorld.translate(Translation.gui_party));
+
 		ItemBuilder skull = new ItemBuilder(SkullType.PLAYER);
-		menu.addItem(4, skull.display(QuestWorld.translate(Translation.gui_party)).lore("", QuestWorld.translate(Translation.button_back_party)).get());
-		menu.addMenuClickHandler(4, new MenuClickHandler() {
-			
-			@Override
-			public boolean onClick(Player arg0, int arg1, ItemStack arg2, ClickAction arg3) {
-				openPartyMenu(arg0);
-				return false;
-			}
-		});
-		
+		menu.put(4,
+				skull.display(QuestWorld.translate(Translation.gui_party)).lore("", QuestWorld.translate(Translation.button_back_party)).get(),
+				event -> {
+					openPartyMenu((Player) event.getWhoClicked());
+				}
+		);
+
 		final Party party = QuestWorld.getInstance().getManager(p).getParty();
 		if (party != null) {
 			for (int i = 0; i < party.getSize(); i++) {
 				final OfflinePlayer player = Bukkit.getOfflinePlayer(party.getPlayers().get(i));
 				if (!party.isLeader(p)) {
-					
-					ItemStack item = skull.skull(player.getName()).display("&e" + player.getName()).lore("", (party.isLeader(player) ? "&4Party Leader": "&eParty Member")).get();
-					menu.addItem(i + 9, item);
-					menu.addMenuClickHandler(i + 9, new MenuClickHandler() {
-						
-						@Override
-						public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-							return false;
-						}
-					});
+					menu.put(i + 9,
+							skull.skull(player.getName())
+							.display("&e" + player.getName())
+							.lore("", (party.isLeader(player) ? "&4Party Leader": "&eParty Member")).get(),
+							null
+					);
 				}
 				else {
-					ItemStack item = skull.skull(player.getName())
+					menu.put(i + 9,
+							skull.skull(player.getName())
 							.display("&e" + player.getName())
 							.lore("", (party.isLeader(player) ? "&5&lParty Leader": "&e&lParty Member"), "", (party.isLeader(player) ? "": "&7&oClick here to kick this Member"))
-							.get();
-					menu.addItem(i + 9, item);
-					menu.addMenuClickHandler(i + 9, new MenuClickHandler() {
-						
-						@Override
-						public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-							if (!party.isLeader(player)) {
-								party.kickPlayer(player.getName());
-								openPartyMembers(p);
+							.get(),
+							event -> {
+								if (!party.isLeader(player)) {
+									party.kickPlayer(player.getName());
+									openPartyMembers((Player) event.getWhoClicked());
+								}
 							}
-							return false;
-						}
-					});
+					);
 				}
 			}
 		}
 		
-		menu.open(p);
+		menu.openFor(p);
 	}
 
 	public static void openPartyMenu(final Player p) {
-		ChestMenu menu = new ChestMenu(QuestWorld.translate(Translation.gui_party));
+		QuestWorld.getSounds().PartyClick().playTo(p);
 		
-		menu.addMenuOpeningHandler(new MenuOpeningHandler() {
-			
-			@Override
-			public void onOpen(Player p) {
-				QuestWorld.getSounds().PartyClick().playTo(p);
-			}
-		});
+		Menu menu = new Menu(2, QuestWorld.translate(Translation.gui_party));
 		
-		menu.addItem(4, new ItemBuilder(Material.MAP).display(QuestWorld.translate(Translation.gui_title)).lore(
+		menu.put(4, new ItemBuilder(Material.MAP).display(QuestWorld.translate(Translation.gui_title)).lore(
 				"",
-				QuestWorld.translate(Translation.button_back_quests)).get());
-		menu.addMenuClickHandler(4, new MenuClickHandler() {
-			
-			@Override
-			public boolean onClick(Player arg0, int arg1, ItemStack arg2, ClickAction arg3) {
-				openMainMenu(p);
-				return false;
-			}
-		});
+				QuestWorld.translate(Translation.button_back_quests)).get(),
+				event -> {
+					openMainMenu((Player) event.getWhoClicked());
+				}
+		);
 		
 		final Party party = QuestWorld.getInstance().getManager(p).getParty();
 		
 		ItemBuilder wool = new ItemBuilder(Material.WOOL);
 		
 		if (party == null) {
-			menu.addItem(9, wool.color(DyeColor.GREEN).display("&a&lCreate a new Party").lore("", "&rCreates a brand new Party for you", "&rto invite Friends and share your Progress").getNew());
-			menu.addMenuClickHandler(9, new MenuClickHandler() {
-				
-				@Override
-				public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-					Party.create(p);
-					openPartyMenu(p);
-					return false;
-				}
-			});
+			menu.put(9,
+					wool.color(DyeColor.GREEN)
+					.display("&a&lCreate a new Party")
+					.lore("", "&rCreates a brand new Party for you", "&rto invite Friends and share your Progress").getNew(),
+					event -> {
+						Player p2 = (Player) event.getWhoClicked();
+						Party.create(p2);
+						openPartyMenu(p2);
+					}
+			);
 		}
 		else {
 			if (party.isLeader(p)) {
-				menu.addItem(9, wool.color(DyeColor.GREEN).display("&a&lInvite a Player").lore("", "&rInvites a Player to your Party", "&rMax. Party Members: &e" + QuestWorld.getInstance().getCfg().getInt("party.max-members")).getNew());
-				menu.addMenuClickHandler(9, new MenuClickHandler() {
-					
-					@Override
-					public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-						if (party.getSize() >= QuestWorld.getInstance().getCfg().getInt("party.max-members"))
-							PlayerTools.sendTranslation(p, true, Translation.party_errorfull);
-						else {
-							PlayerTools.promptInput(p, new SinglePrompt(
-									PlayerTools.makeTranslation(true, Translation.party_playerpick),
-									(c,s) -> {
-										String name = Text.decolor(s).replace("@", "");
+				menu.put(9,
+						wool.color(DyeColor.GREEN)
+						.display("&a&lInvite a Player")
+						.lore("",
+								"&rInvites a Player to your Party",
+								"&rMax. Party Members: &e" + QuestWorld.getInstance().getCfg().getInt("party.max-members")).getNew(),
+						event -> {
+							Player p2 = (Player) event.getWhoClicked();
+							if (party.getSize() >= QuestWorld.getInstance().getCfg().getInt("party.max-members"))
+								PlayerTools.sendTranslation(p2, true, Translation.party_errorfull);
+							else {
+								PlayerTools.promptInput(p2, new SinglePrompt(
+										PlayerTools.makeTranslation(true, Translation.party_playerpick),
+										(c,s) -> {
+											String name = Text.decolor(s).replace("@", "");
 
-										Player player = PlayerTools.getPlayer(name);
-										if (player != null) {
-											if (QuestWorld.getInstance().getManager(player).getParty() == null) {
-												PlayerTools.sendTranslation(p, true, Translation.party_playeradd, name);
-												try {
-													party.invitePlayer(player);
-												} catch (Exception e1) {
-													e1.printStackTrace();
+											Player player = PlayerTools.getPlayer(name);
+											if (player != null) {
+												if (QuestWorld.getInstance().getManager(player).getParty() == null) {
+													PlayerTools.sendTranslation(p2, true, Translation.party_playeradd, name);
+													try {
+														party.invitePlayer(player);
+													} catch (Exception e1) {
+														e1.printStackTrace();
+													}
 												}
+												else PlayerTools.sendTranslation(p2, true, Translation.party_errormember, name);
 											}
-											else PlayerTools.sendTranslation(p, true, Translation.party_errormember, name);
+											else {
+												PlayerTools.sendTranslation(p2, true, Translation.party_errorabsent, name);
+											}
+											return true;
 										}
-										else {
-											PlayerTools.sendTranslation(p, true, Translation.party_errorabsent, name);
-										}
-										return true;
-									}
-							));
-							
-							p.closeInventory();
+								));
+
+								PlayerTools.closeInventoryWithEvent(p2);
+							}
 						}
-						return false;
-					}
-				});
+				);
 				
-				menu.addItem(17, wool.color(DyeColor.RED).display("&4&lDelete your Party").lore("", "&rDeletes this Party", "&rBe careful with this Option!").getNew());
-				menu.addMenuClickHandler(17, new MenuClickHandler() {
-					
-					@Override
-					public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-						party.abandon();
-						openPartyMenu(p);
-						return false;
-					}
-				});
+				menu.put(17,
+						wool.color(DyeColor.RED)
+						.display("&4&lDelete your Party")
+						.lore("", "&rDeletes this Party", "&rBe careful with this Option!").getNew(),
+						event -> {
+							party.abandon();
+							openPartyMenu((Player) event.getWhoClicked());
+						}
+				);
 			}
 			else {
-				menu.addItem(17, wool.color(DyeColor.RED).display("&4&lLeave your Party").lore("", "&rLeaves this Party", "&rBe careful with this Option!").getNew());
-				menu.addMenuClickHandler(17, new MenuClickHandler() {
-					
-					@Override
-					public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-						party.kickPlayer(p.getName());
-						openPartyMenu(p);
-						return false;
-					}
-				});
+				menu.put(17,
+						wool.color(DyeColor.RED)
+						.display("&4&lLeave your Party")
+						.lore("", "&rLeaves this Party", "&rBe careful with this Option!").getNew(), 
+						event -> {
+							Player p2 = (Player) event.getWhoClicked();
+							party.kickPlayer(p2.getName());
+							openPartyMenu(p2);
+						}
+				);
 			}
-			ItemStack skullItem = new ItemBuilder(SkullType.PLAYER).display("&eMember List").lore("", "&rShows you all Members of this Party").get();
-			menu.addItem(13, skullItem);
-			menu.addMenuClickHandler(13, new MenuClickHandler() {
-				
-				@Override
-				public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-					openPartyMembers(p);
-					return false;
-				}
-			});
+			
+			menu.put(13,
+					new ItemBuilder(SkullType.PLAYER)
+					.display("&eMember List")
+					.lore("", "&rShows you all Members of this Party").get(),
+					event -> {
+						openPartyMembers((Player) event.getWhoClicked());
+					}
+			);
 		}
 		
-		menu.open(p);
+		menu.openFor(p);
 	}
 
 	public static void openCategory(Player p, Category category, final boolean back) {
+		QuestWorld.getSounds().QuestClick().playTo(p);
 		QuestWorld.getInstance().getManager(p).update(false);
 		QuestWorld.getInstance().getManager(p).updateLastEntry(category);
 		
-		ChestMenu menu = new ChestMenu(QuestWorld.translate(Translation.gui_title));
-		menu.addMenuOpeningHandler(new MenuOpeningHandler() {
-			
-			@Override
-			public void onOpen(Player p) {
-				QuestWorld.getSounds().QuestClick().playTo(p);
-			}
-		});
+		Menu menu = new Menu(3, QuestWorld.translate(Translation.gui_title));
 		
 		addPartyMenuButton(menu, p);
 		
-		if (back) {
-			menu.addItem(0, ItemBuilder.Proto.MAP_BACK.getItem());
-			menu.addMenuClickHandler(0, new MenuClickHandler() {
-				
-				@Override
-				public boolean onClick(Player arg0, int arg1, ItemStack arg2, ClickAction arg3) {
-					openMainMenu(arg0);
-					return false;
-				}
+		if (back)
+			menu.put(0, ItemBuilder.Proto.MAP_BACK.getItem(), event -> {
+				openMainMenu((Player) event.getWhoClicked());
 			});
-		}
 		
 		ItemBuilder glassPane = new ItemBuilder(Material.STAINED_GLASS_PANE).color(DyeColor.RED);
 		
@@ -383,37 +304,14 @@ public class QuestBook {
 			glassPane.display(quest.getName());
 			if (QuestWorld.getInstance().getManager(p).getStatus(quest).equals(QuestStatus.LOCKED) || !quest.isWorldEnabled(p.getWorld().getName())) {
 				view.addItem(quest.getID(), glassPane.lore("", QuestWorld.translate(Translation.quests_locked)).getNew());
-				view.addButton(quest.getID(), new MenuClickHandler() {
-					
-					@Override
-					public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-						return false;
-					}
-				});
 			}
 			else if (QuestWorld.getInstance().getManager(p).getStatus(quest).equals(QuestStatus.LOCKED_NO_PARTY)) {
 				view.addItem(quest.getID(), glassPane.lore("", "&4You need to leave your current Party").getNew());
-				view.addButton(quest.getID(), new MenuClickHandler() {
-					
-					@Override
-					public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-						return false;
-					}
-				});
 			}
 			else if (QuestWorld.getInstance().getManager(p).getStatus(quest).equals(QuestStatus.LOCKED_PARTY_SIZE)) {
 				view.addItem(quest.getID(), glassPane.lore("", "&4You can only do this Quest in a Party", "&4with at least &c" + quest.getPartySize() + " &4Members").getNew());
-				view.addButton(quest.getID(), new MenuClickHandler() {
-					
-					@Override
-					public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-						return false;
-					}
-				});
 			}
 			else {
-				ItemStack item = quest.getItem();
-				ItemMeta im = item.getItemMeta();
 				List<String> lore = new ArrayList<String>();
 				lore.add("");
 				lore.add(quest.getProgress(p));
@@ -431,74 +329,55 @@ public class QuestBook {
 					lore.add("");
 					lore.add(QuestWorld.translate(Translation.quests_state_completed));
 				}
-				im.setLore(lore);
-				item.setItemMeta(im);
-				view.addItem(quest.getID(), item);
-				view.addNavButton(quest.getID(), new MenuClickHandler() {
-					
-					@Override
-					public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-						openQuest(p, quest, back, true);
-						return false;
-					}
-				});
+				view.addNavButton(quest.getID(),
+						new ItemBuilder(quest.getItem()).lore(lore)
+						.get(),
+						event -> {
+							openQuest((Player) event.getWhoClicked(), quest, back, true);
+						}
+				);
 			}
 		}
 		view.build(menu, p);
-		menu.open(p);
+		menu.openFor(p);
 	}
 	
 	public static void openQuest(final Player p, final Quest quest, final boolean categoryBack, final boolean back) {
+		QuestWorld.getSounds().QuestClick().playTo(p);
 		QuestWorld.getInstance().getManager(p).update(false);
 		QuestWorld.getInstance().getManager(p).updateLastEntry(quest);
 		
-		ChestMenu menu = new ChestMenu(QuestWorld.translate(Translation.gui_title));
-		
-		menu.addMenuOpeningHandler(new MenuOpeningHandler() {
-			
-			@Override
-			public void onOpen(Player p) {
-				QuestWorld.getSounds().QuestClick().playTo(p);
-			}
-		});
+		Menu menu = new Menu(3, QuestWorld.translate(Translation.gui_title));
 		
 		if (back) {
-			menu.addItem(0, ItemBuilder.Proto.MAP_BACK.getItem());
-			menu.addMenuClickHandler(0, new MenuClickHandler() {
-				
-				@Override
-				public boolean onClick(Player arg0, int arg1, ItemStack arg2, ClickAction arg3) {
-					openCategory(p, quest.getCategory(), categoryBack);
-					return false;
-				}
+			menu.put(0, ItemBuilder.Proto.MAP_BACK.getItem(), event -> {
+				openCategory((Player) event.getWhoClicked(), quest.getCategory(), categoryBack);
 			});
 		}
 		
 		// Detect all
-		menu.addItem(1, new ItemBuilder(Material.CHEST).display("&7Check all Tasks").get());
-		menu.addMenuClickHandler(1, new MenuClickHandler() {
-			
-			@Override
-			public boolean onClick(Player arg0, int arg1, ItemStack arg2, ClickAction arg3) {
-				PlayerManager manager = QuestWorld.getInstance().getManager(p);
-				for(Mission mission : quest.getMissions()) {
-					if (!manager.hasUnlockedTask(mission)) continue;
-					if (manager.getStatus(quest).equals(QuestStatus.AVAILABLE) && quest.isWorldEnabled(p.getWorld().getName())) {
-						if (manager.hasCompletedTask(mission)) continue;
-						
-						if(mission.getType() instanceof Manual) {
-							Manual m = (Manual) mission.getType();
-							int progress = m.onManual(p, mission);
-							if(progress != Manual.FAIL) {
-								manager.setProgress(mission, progress);
-								openQuest(p, quest, categoryBack, back);
+		menu.put(1,
+				new ItemBuilder(Material.CHEST).display("&7Check all Tasks").get(),
+				event -> {
+					Player p2 = (Player) event.getWhoClicked();
+					PlayerManager manager = QuestWorld.getInstance().getManager(p2);
+					for(Mission mission : quest.getMissions()) {
+						if (!manager.hasUnlockedTask(mission)) continue;
+						if (manager.getStatus(quest).equals(QuestStatus.AVAILABLE) && quest.isWorldEnabled(p2.getWorld().getName())) {
+							if (manager.hasCompletedTask(mission)) continue;
+							
+							if(mission.getType() instanceof Manual) {
+								Manual m = (Manual) mission.getType();
+								int progress = m.onManual(p2, mission);
+								if(progress != Manual.FAIL) {
+									manager.setProgress(mission, progress);
+									openQuest(p2, quest, categoryBack, back);
+								}
 							}
 						}
 					}
 				}
-				return false;
-			}
-		});
+		);
 		
 		if (quest.getCooldown() >= 0) {
 			String cooldown = quest.getFormattedCooldown();
@@ -506,53 +385,39 @@ public class QuestBook {
 				long remaining = (QuestWorld.getInstance().getManager(p).getCooldownEnd(quest) - System.currentTimeMillis() + 59999) / 60 / 1000;
 				cooldown = (remaining / 60) + "h " + (remaining % 60) + "m remaining";
 			}
-			menu.addItem(8, new ItemBuilder(Material.WATCH).display(QuestWorld.translate(Translation.quests_display_cooldown)).lore(
+			menu.put(8, new ItemBuilder(Material.WATCH).display(QuestWorld.translate(Translation.quests_display_cooldown)).lore(
 					"",
-					"&b" + cooldown).get());
-			menu.addMenuClickHandler(8, new MenuClickHandler() {
-				
-				@Override
-				public boolean onClick(Player arg0, int arg1, ItemStack arg2, ClickAction arg3) {
-					return false;
-				}
-			});
+					"&b" + cooldown).get(),
+					null
+			);
 		}
 		
 		int rewardIndex = 2;
 		if (quest.getMoney() > 0 && QuestWorld.getInstance().getEconomy() != null) {
-			menu.addItem(rewardIndex, new ItemBuilder(Material.GOLD_INGOT).display(QuestWorld.translate(Translation.quests_display_monetary)).lore(
+			menu.put(rewardIndex, new ItemBuilder(Material.GOLD_INGOT).display(QuestWorld.translate(Translation.quests_display_monetary)).lore(
 					"",
-					"&6$" + quest.getMoney()).get());
-			menu.addMenuClickHandler(rewardIndex, new MenuClickHandler() {
-				
-				@Override
-				public boolean onClick(Player arg0, int arg1, ItemStack arg2, ClickAction arg3) {
-					return false;
-				}
-			});
+					"&6$" + quest.getMoney()).get(),
+					null
+			);
 			rewardIndex++;
 		}
 		
 		if (quest.getXP() > 0) {
-			menu.addItem(rewardIndex, new ItemBuilder(Material.EXP_BOTTLE).display(QuestWorld.translate(Translation.quests_display_exp)).lore(
+			menu.put(rewardIndex, new ItemBuilder(Material.EXP_BOTTLE).display(QuestWorld.translate(Translation.quests_display_exp)).lore(
 					"",
-					"&a" + quest.getXP() + " Level").get());
-			menu.addMenuClickHandler(rewardIndex, new MenuClickHandler() {
-				
-				@Override
-				public boolean onClick(Player arg0, int arg1, ItemStack arg2, ClickAction arg3) {
-					return false;
-				}
-			});
+					"&a" + quest.getXP() + " Level").get(),
+					null
+			);
 			rewardIndex++;
 		}
 		
 		ItemBuilder glassPane = new ItemBuilder(Material.STAINED_GLASS_PANE);
+		glassPane.color(DyeColor.RED).display("&7&kSOMEWEIRDMISSION").lore("", QuestWorld.translate(Translation.task_locked));
 		
 		int index = 9;
 		for (final Mission mission: quest.getMissions()) {
+			ItemStack item = glassPane.get();
 			if (QuestWorld.getInstance().getManager(p).hasUnlockedTask(mission)) {
-
 				ItemBuilder entryItem = new ItemBuilder(mission.getDisplayItem()).display(mission.getText());
 				
 				if(mission.getType() instanceof Manual) {
@@ -562,33 +427,25 @@ public class QuestBook {
 				else
 					entryItem.lore("", mission.getProgress(p));
 
-				menu.addItem(index, entryItem.get());
-			}
-			else {
-				
-				menu.addItem(index, glassPane.color(DyeColor.RED).display("&7&kSOMEWEIRDMISSION").lore("", QuestWorld.translate(Translation.task_locked)).get());
+				item = entryItem.get();
 			}
 			
-			menu.addMenuClickHandler(index, new MenuClickHandler() {
+			menu.put(index, item, event -> {
+				Player p2 = (Player) event.getWhoClicked();
+				PlayerManager manager = QuestWorld.getInstance().getManager(p2);
 				
-				@Override
-				public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-					PlayerManager manager = QuestWorld.getInstance().getManager(p);
+				if (!manager.hasUnlockedTask(mission)) return;
+				if (manager.getStatus(quest).equals(QuestStatus.AVAILABLE) && quest.isWorldEnabled(p2.getWorld().getName())) {
+					if (manager.hasCompletedTask(mission)) return;
 					
-					if (!manager.hasUnlockedTask(mission)) return false;
-					if (manager.getStatus(quest).equals(QuestStatus.AVAILABLE) && quest.isWorldEnabled(p.getWorld().getName())) {
-						if (manager.hasCompletedTask(mission)) return false;
-						
-						if(mission.getType() instanceof Manual) {
-							Manual m = (Manual) mission.getType();
-							int progress = m.onManual(p, mission);
-							if(progress != Manual.FAIL) {
-								manager.setProgress(mission, progress);
-								openQuest(p, quest, categoryBack, back);
-							}
+					if(mission.getType() instanceof Manual) {
+						Manual m = (Manual) mission.getType();
+						int progress = m.onManual(p2, mission);
+						if(progress != Manual.FAIL) {
+							manager.setProgress(mission, progress);
+							openQuest(p2, quest, categoryBack, back);
 						}
 					}
-					return false;
 				}
 			});
 			index++;
@@ -596,54 +453,39 @@ public class QuestBook {
 		
 		for (int i = 0; i < 9; i++) {
 			if (QuestWorld.getInstance().getManager(p).getStatus(quest).equals(QuestStatus.REWARD_CLAIMABLE)) {
-				menu.addItem(i + 18, glassPane.color(DyeColor.PURPLE).display(QuestWorld.translate(Translation.quests_state_reward_claim)).get());
-				menu.addMenuClickHandler(i + 18, new MenuClickHandler() {
-					
-					@Override
-					public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-						quest.handoutReward(p);
-						QuestWorld.getSounds().muteNext();
-						openQuest(p, quest, categoryBack, back);
-						return false;
-					}
-				});
+				menu.put(i + 18,
+						glassPane.color(DyeColor.PURPLE)
+						.display(QuestWorld.translate(Translation.quests_state_reward_claim)).get(),
+						event -> {
+							Player p2 = (Player) event.getWhoClicked();
+							quest.handoutReward(p2);
+							QuestWorld.getSounds().muteNext();
+							openQuest(p2, quest, categoryBack, back);
+						}
+				);
 			}
 			else if (QuestWorld.getInstance().getManager(p).getStatus(quest).equals(QuestStatus.ON_COOLDOWN)) {
-				menu.addItem(i + 18, glassPane.color(DyeColor.YELLOW).display(QuestWorld.translate(Translation.quests_state_cooldown)).get());
-				menu.addMenuClickHandler(i + 18, new MenuClickHandler() {
-					
-					@Override
-					public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-						return false;
-					}
-				});
+				menu.put(i + 18,
+						glassPane.color(DyeColor.YELLOW)
+						.display(QuestWorld.translate(Translation.quests_state_cooldown)).get(),
+						null
+				);
 			}
 			else {
-				menu.addItem(i + 18, glassPane.color(DyeColor.GRAY).display(QuestWorld.translate(Translation.quests_display_rewards)).get());
-				menu.addMenuClickHandler(i + 18, new MenuClickHandler() {
-					
-					@Override
-					public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-						return false;
-					}
-				});
+				menu.put(i + 18,
+						glassPane.color(DyeColor.GRAY)
+						.display(QuestWorld.translate(Translation.quests_display_rewards)).get(),
+						null);
 			}
 		}
 		
 		int slot = 27;
 		for (ItemStack reward: quest.getRewards()) {
-			menu.addItem(slot, reward);
-			menu.addMenuClickHandler(slot, new MenuClickHandler() {
-				
-				@Override
-				public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-					return false;
-				}
-			});
+			menu.put(slot, reward, null);
 			slot++;
 		}
 		
-		menu.open(p);
+		menu.openFor(p);
 	}
 
 	
@@ -653,13 +495,9 @@ public class QuestBook {
 	 * 
 	 */
 	public static void openEditor(Player p) {
-		final ChestMenu menu = new ChestMenu("&3Quest Editor");
-		menu.addMenuOpeningHandler(new MenuOpeningHandler() {
-			@Override
-			public void onOpen(Player p) {
-				QuestWorld.getSounds().EditorClick().playTo(p);
-			}
-		});
+		QuestWorld.getSounds().EditorClick().playTo(p);
+		
+		final Menu menu = new Menu(6, "&3Quest Editor");
 		
 		ItemBuilder defaultItem = new ItemBuilder(Material.STAINED_GLASS_PANE)
 				.color(DyeColor.RED).display("&7&o> New Category");
@@ -698,37 +536,25 @@ public class QuestBook {
 				}
 				
 				++found;
-				view.addItem(i, new ItemBuilder(category.getItem()).lore(lore).get());
-				view.addNavButton(i, Buttons.onCategory(category));
+				view.addNavButton(i,
+						new ItemBuilder(category.getItem()).lore(lore).get(),
+						Buttons.onCategory(category));
 			}
-			else {
-				view.addItem(i, defaultItem.get());
-				view.addNavButton(i, Buttons.newCategory(i));
-			}
+			else
+				view.addNavButton(i, defaultItem.get(), Buttons.newCategory(i));
 		}
 
 		view.build(menu, p);
-		menu.open(p);
+		menu.openFor(p);
 	}
 
 	public static void openCategoryQuestEditor(Player p, final Category category) {
-		final ChestMenu menu = new ChestMenu("&3Quest Editor");
-		menu.addMenuOpeningHandler(new MenuOpeningHandler() {
-			
-			@Override
-			public void onOpen(Player p) {
-				QuestWorld.getSounds().EditorClick().playTo(p);
-			}
-		});
+		QuestWorld.getSounds().EditorClick().playTo(p);
 		
-		menu.addItem(0, ItemBuilder.Proto.MAP_BACK.getItem());
-		menu.addMenuClickHandler(0, new MenuClickHandler() {
-			
-			@Override
-			public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-				openEditor(p);
-				return false;
-			}
+		final Menu menu = new Menu(6, "&3Quest Editor");
+
+		menu.put(0, ItemBuilder.Proto.MAP_BACK.getItem(), event -> {
+			openEditor((Player) event.getWhoClicked());
 		});
 		
 		ItemBuilder defaultItem = new ItemBuilder(Material.STAINED_GLASS_PANE)
@@ -768,685 +594,559 @@ public class QuestBook {
 				}
 				
 				++found;
-				view.addItem(i, new ItemBuilder(quest.getItem()).lore(lore).get());
-				view.addNavButton(i, Buttons.onQuest(quest));
+				view.addNavButton(i,
+						new ItemBuilder(quest.getItem()).lore(lore).get(),
+						Buttons.onQuest(quest));
 			}
-			else {
-				view.addItem(i, defaultItem.getNew());
-				view.addNavButton(i, Buttons.newQuest(category.getID(), i));
-			}
+			else
+				view.addNavButton(i, defaultItem.getNew(), Buttons.newQuest(category.getID(), i));
 		}
 		view.build(menu, p);
-		menu.open(p);
+		menu.openFor(p);
 	}
 
 	public static void openCategoryEditor(Player p, final Category category) {
-		final ChestMenu menu = new ChestMenu("&3Quest Editor");
+		QuestWorld.getSounds().EditorClick().playTo(p);
+		
+		final Menu menu = new Menu(2, "&3Quest Editor");
 		CategoryChange changes = new CategoryChange(category);
-		menu.addMenuOpeningHandler(new MenuOpeningHandler() {
-			
-			@Override
-			public void onOpen(Player p) {
-				QuestWorld.getSounds().EditorClick().playTo(p);
-			}
+		
+		menu.put(0,  Proto.MAP_BACK.getItem(), event -> {
+			openEditor((Player) event.getWhoClicked());
 		});
 		
-		menu.addItem(0, ItemBuilder.Proto.MAP_BACK.getItem());
-		menu.addMenuClickHandler(0, new MenuClickHandler() {
-			
-			@Override
-			public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-				openEditor(p);
-				return false;
-			}
-		});
-		
-		ItemStack item = new ItemBuilder(category.getItem()).lore(
-				"",
-				"&e> Click to change the Item to",
-				"&ethe Item you are currently holding").get();
-		
-		menu.addItem(9, item);
-		menu.addMenuClickHandler(9, new MenuClickHandler() {
-			
-			@Override
-			public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-				ItemStack hand = PlayerTools.getActiveHandItem(p);
-				if (hand != null) {
-					changes.setItem(hand);
-					if(changes.sendEvent())
-						changes.apply();
-					openCategoryEditor(p, category);
+		menu.put(9,
+				new ItemBuilder(category.getItem()).lore(
+						"",
+						"&e> Click to change the Item to",
+						"&ethe Item you are currently holding").get(),
+				event -> {
+					Player p2 = (Player) event.getWhoClicked();
+					ItemStack hand = PlayerTools.getActiveHandItem(p2);
+					if (hand != null) {
+						changes.setItem(hand);
+						if(changes.sendEvent())
+							changes.apply();
+						openCategoryEditor(p2, category);
 				}
-				return false;
-			}
 		});
 		
-		menu.addItem(10, new ItemBuilder(Material.NAME_TAG).display(category.getName()).lore("", "&e> Click to change the Name").get());
-		menu.addMenuClickHandler(10, new MenuClickHandler() {
-			
-			@Override
-			public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-				PlayerTools.promptInput(p, new SinglePrompt(
-						PlayerTools.makeTranslation(true, Translation.category_namechange, category.getName()),
-						(c,s) -> {
-							CategoryChange changes = new CategoryChange(category);
-							changes.setName(s);
-							if(changes.sendEvent()) {
-								String oldName = category.getName();
-								changes.apply();
-								PlayerTools.sendTranslation(p, true, Translation.category_nameset, s, oldName);
+		menu.put(10,
+				new ItemBuilder(Material.NAME_TAG)
+				.display(category.getName())
+				.lore("", "&e> Click to change the Name").get(),
+				event -> {
+					Player p2 = (Player) event.getWhoClicked();
+					PlayerTools.promptInput(p2, new SinglePrompt(
+							PlayerTools.makeTranslation(true, Translation.category_namechange, category.getName()),
+							(c,s) -> {
+								changes.setName(s);
+								if(changes.sendEvent()) {
+									String oldName = category.getName();
+									changes.apply();
+									PlayerTools.sendTranslation(p2, true, Translation.category_nameset, s, oldName);
+								}
+								
+								QuestBook.openCategoryEditor(p2, category);
+								return true;
 							}
-							
-							QuestBook.openCategoryEditor(p, category);
-							return true;
-						}
-				));
+					));
 
-				p.closeInventory();
-				return false;
-			}
-		});
+					PlayerTools.closeInventoryWithEvent(p2);
+				}
+		);
 		
-		menu.addItem(11, new ItemBuilder(Material.BOOK_AND_QUILL).display("&7Quest Requirement:").lore(
-				"",
-				(category.getParent() != null ? "&r" + category.getParent().getName(): "&7&oNone"),
-				"",
-				"&rLeft Click: &eChange Quest Requirement",
-				"&rRight Click: &eRemove Quest Requirement").get());
-		menu.addMenuClickHandler(11, new MenuClickHandler() {
-			
-			@Override
-			public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-				if (action.isRightClicked()) {
-					changes.setParent(null);
+		menu.put(11,
+				new ItemBuilder(Material.BOOK_AND_QUILL).display("&7Quest Requirement:").lore(
+						"",
+						(category.getParent() != null ? "&r" + category.getParent().getName(): "&7&oNone"),
+						"",
+						"&rLeft Click: &eChange Quest Requirement",
+						"&rRight Click: &eRemove Quest Requirement").get(),
+				event -> {
+					Player p2 = (Player) event.getWhoClicked();
+					if (event.isRightClick()) {
+						changes.setParent(null);
+						if(changes.sendEvent())
+							changes.apply();
+						openCategoryEditor(p2, category);
+					}
+					else {
+						QuestWorld.getInstance().getManager(p2).putPage(0);
+						QBDialogue.openQuestRequirementChooser(p2, category);
+					}
+				}
+		);
+		
+		menu.put(12,
+				new ItemBuilder(Material.NAME_TAG)
+				.display("&r" + (category.getPermission().equals("") ? "None": category.getPermission())).lore(
+						"",
+						"&e> Click to change the rquired Permission Node").get(),
+				event -> {
+					Player p2 = (Player) event.getWhoClicked();
+					PlayerTools.promptInput(p2, new SinglePrompt(
+							PlayerTools.makeTranslation(true, Translation.category_permchange, category.getName(), category.getPermission()),
+							(c,s) -> {
+								String permission = s.equalsIgnoreCase("none") ? "": s;
+								changes.setPermission(permission);
+								if(changes.sendEvent()) {
+									String oldPerm = category.getPermission();
+									changes.apply();
+									PlayerTools.sendTranslation(p2, true, Translation.category_permset, category.getName(), s, oldPerm);
+								}
+								
+								QuestBook.openCategoryEditor(p2, category);
+								return true;
+							}
+					));
+					
+					PlayerTools.closeInventoryWithEvent(p2);
+				}
+		);
+		
+		menu.put(13,
+				new ItemBuilder(Material.GOLDEN_CARROT)
+				.display("&rShow in Quest Book: " + (!category.isHidden() ? "&2&l\u2714": "&4&l\u2718")).lore(
+						"",
+						"&e> Click to change whether this Category",
+						"&ewill appear in the Quest Book").get(),
+				event -> {
+					changes.setHidden(!category.isHidden());
 					if(changes.sendEvent())
 						changes.apply();
-					openCategoryEditor(p, category);
+					openCategoryEditor((Player) event.getWhoClicked(), category);
 				}
-				else {
-					QuestWorld.getInstance().getManager(p).putPage(0);
-					QBDialogue.openQuestRequirementChooser(p, category);
+		);
+		
+		menu.put(14,
+				new ItemBuilder(Material.GRASS).display("&7World Blacklist").lore(
+						"",
+						"&e> Click to configure in which Worlds",
+						"&ethis Category is enabled").get(),
+				event -> {
+					openWorldEditor((Player) event.getWhoClicked(), category);
 				}
-				return false;
-			}
-		});
+		);
 		
-		menu.addItem(12, new ItemBuilder(Material.NAME_TAG)
-				.display("&r" + (category.getPermission().equals("") ? "None": category.getPermission())).lore(
-				"",
-				"&e> Click to change the rquired Permission Node").get());
-		menu.addMenuClickHandler(12, new MenuClickHandler() {
-			
-			@Override
-			public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-				PlayerTools.promptInput(p, new SinglePrompt(
-						PlayerTools.makeTranslation(true, Translation.category_permchange, category.getName(), category.getPermission()),
-						(c,s) -> {
-							CategoryChange changes = new CategoryChange(category);
-							String permission = s.equalsIgnoreCase("none") ? "": s;
-							changes.setPermission(permission);
-							if(changes.sendEvent()) {
-								String oldPerm = category.getPermission();
-								changes.apply();
-								PlayerTools.sendTranslation(p, true, Translation.category_permset, category.getName(), s, oldPerm);
-							}
-							
-							QuestBook.openCategoryEditor(p, category);
-							return true;
-						}
-				));
-				
-				p.closeInventory();
-				return false;
-			}
-		});
-		
-		menu.addItem(13, new ItemBuilder(Material.GOLDEN_CARROT).display("&rShow in Quest Book: " + (!category.isHidden() ? "&2&l\u2714": "&4&l\u2718")).lore(
-				"",
-				"&e> Click to change whether this Category",
-				"&ewill appear in the Quest Book").get());
-		menu.addMenuClickHandler(13, new MenuClickHandler() {
-			
-			@Override
-			public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-				changes.setHidden(!category.isHidden());
-				if(changes.sendEvent())
-					changes.apply();
-				openCategoryEditor(p, category);
-				return false;
-			}
-		});
-		
-		menu.addItem(14, new ItemBuilder(Material.GRASS).display("&7World Blacklist").lore(
-				"",
-				"&e> Click to configure in which Worlds",
-				"&ethis Category is enabled").get());
-		menu.addMenuClickHandler(14, new MenuClickHandler() {
-			
-			@Override
-			public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-				openWorldEditor(p, category);
-				return false;
-			}
-		});
-		
-		menu.addItem(17, ItemBuilder.Proto.RED_WOOL.get().display("&4Delete Database").lore(
-				"",
-				"&rThis is going to delete the Database",
-				"&rof all Quests inside this Category",
-				"&rand will clear all Player's Progress associated",
-				"&rwith those Quests.").get());
-		menu.addMenuClickHandler(17, new MenuClickHandler() {
-			
-			@Override
-			public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-				for (Quest quest: category.getQuests()) {
-					PlayerManager.clearAllQuestData(quest);
+		menu.put(17,
+				ItemBuilder.Proto.RED_WOOL.get().display("&4Delete Database").lore(
+						"",
+						"&rThis is going to delete the Database",
+						"&rof all Quests inside this Category",
+						"&rand will clear all Player's Progress associated",
+						"&rwith those Quests.").get(),
+				event -> {
+					for (Quest quest: category.getQuests()) {
+						PlayerManager.clearAllQuestData(quest);
+					}
+					QuestWorld.getSounds().DestructiveClick().playTo((Player) event.getWhoClicked());
 				}
-				QuestWorld.getSounds().DestructiveClick().playTo(p);
-				return false;
-			}
-		});
+		);
 		
-		menu.open(p);
+		menu.openFor(p);
 	}
 
 	public static void openQuestEditor(Player p, final Quest quest) {
-		final ChestMenu menu = new ChestMenu("&3Quest Editor");
+		QuestWorld.getSounds().EditorClick().playTo(p);
+		
+		final Menu menu = new Menu(6, "&3Quest Editor");
 		QuestChange changes = new QuestChange(quest);
-		menu.addMenuOpeningHandler(new MenuOpeningHandler() {
-			
-			@Override
-			public void onOpen(Player p) {
-				QuestWorld.getSounds().EditorClick().playTo(p);
-			}
+		
+		menu.put(0, ItemBuilder.Proto.MAP_BACK.getItem(), event -> {
+			openCategoryQuestEditor((Player) event.getWhoClicked(), quest.getCategory());
 		});
 		
-		menu.addItem(0, ItemBuilder.Proto.MAP_BACK.getItem());
-		menu.addMenuClickHandler(0, new MenuClickHandler() {
-			
-			@Override
-			public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-				openCategoryQuestEditor(p, quest.getCategory());
-				return false;
-			}
-		});
+		menu.put(9,
+				new ItemBuilder(quest.getItem()).lore(
+						"",
+						"&e> Click to change the Item to",
+						"&ethe Item you are currently holding").get(),
+				event -> {
+					Player p2 = (Player) event.getWhoClicked();
+					ItemStack mainItem = p2.getInventory().getItemInMainHand();
+					if (mainItem != null) {
+						changes.setItem(mainItem);
+						if(changes.sendEvent())
+							changes.apply();
+						
+						openQuestEditor(p2, quest);
+					}
+				}
+		);
 		
-		ItemStack item = new ItemBuilder(quest.getItem()).lore(
-				"",
-				"&e> Click to change the Item to",
-				"&ethe Item you are currently holding").get();
+		menu.put(10,
+				new ItemBuilder(Material.NAME_TAG)
+				.display(quest.getName())
+				.lore("", "&e> Click to change the Name").get(),
+				event -> {
+					Player p2 = (Player) event.getWhoClicked();
+					PlayerTools.promptInput(p2, new SinglePrompt(
+							PlayerTools.makeTranslation(true, Translation.quest_namechange, quest.getName()),
+							(c,s) -> {
+								changes.setName(s);
+								if(changes.sendEvent()) {
+									String oldName = quest.getName();
+									changes.apply();
+									PlayerTools.sendTranslation(p2, true, Translation.quest_nameset, s, oldName);
+								}
 
+								QuestBook.openQuestEditor(p2, quest);
+								return true;
+							}
+					));
+
+					PlayerTools.closeInventoryWithEvent(p2);
+				}
+		);
 		
-		menu.addItem(9, item);
-		menu.addMenuClickHandler(9, new MenuClickHandler() {
-			
-			@Override
-			public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-				ItemStack mainItem = p.getInventory().getItemInMainHand();
-				if (mainItem != null) {
-					changes.setItem(mainItem);
+		menu.put(11,
+				new ItemBuilder(Material.CHEST)
+				.display("&rRewards &7(Item)").lore(
+						"",
+						"&e> Click to change the Rewards",
+						"&eto be the Items in your Hotbar").get(),
+				event -> {
+					Player p2 = (Player) event.getWhoClicked();
+					changes.setItemRewards(p2);
 					if(changes.sendEvent())
 						changes.apply();
 					
-					openQuestEditor(p, quest);
+					openQuestEditor(p2, quest);
 				}
-				return false;
-			}
-		});
+		);
 		
-		menu.addItem(10, new ItemBuilder(Material.NAME_TAG).display(quest.getName()).lore("", "&e> Click to change the Name").get());
-		menu.addMenuClickHandler(10, new MenuClickHandler() {
-			
-			@Override
-			public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-				PlayerTools.promptInput(p, new SinglePrompt(
-						PlayerTools.makeTranslation(true, Translation.quest_namechange, quest.getName()),
-						(c,s) -> {
-							QuestChange changes = new QuestChange(quest);
-							changes.setName(s);
-							if(changes.sendEvent()) {
-								String oldName = quest.getName();
-								changes.apply();
-								PlayerTools.sendTranslation(p, true, Translation.quest_nameset, s, oldName);
-							}
+		menu.put(12,
+				new ItemBuilder(Material.WATCH)
+				.display("&7Cooldown: &b" + quest.getFormattedCooldown()).lore(
+						"",
+						"&rLeft Click: &e+1m",
+						"&rRight Click: &e-1m",
+						"&rShift + Left Click: &e+1h",
+						"&rShift + Right Click: &e-1h").get(),
+				event -> {
+					long cooldown = quest.getCooldown();
+					long delta = event.isShiftClick() ? 60: 1;
+					if (event.isRightClick()) delta = -delta;
 
-							QuestBook.openQuestEditor(p, quest);
-							return true;
-						}
-				));
-				
-				p.closeInventory();
-				return false;
-			}
-		});
-		
-		menu.addItem(11, new ItemBuilder(Material.CHEST).display("&rRewards &7(Item)").lore(
-				"",
-				"&e> Click to change the Rewards",
-				"&eto be the Items in your Hotbar").get());
-		menu.addMenuClickHandler(11, new MenuClickHandler() {
-			
-			@Override
-			public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-				changes.setItemRewards(p);
-				if(changes.sendEvent())
-					changes.apply();
-				
-				openQuestEditor(p, quest);
-				return false;
-			}
-		});
-		
-		menu.addItem(12, new ItemBuilder(Material.WATCH).display("&7Cooldown: &b" + quest.getFormattedCooldown()).lore(
-				"",
-				"&rLeft Click: &e+1m",
-				"&rRight Click: &e-1m",
-				"&rShift + Left Click: &e+1h",
-				"&rShift + Right Click: &e-1h").get());
-		menu.addMenuClickHandler(12, new MenuClickHandler() {
-			
-			@Override
-			public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-				long cooldown = quest.getCooldown();
-				long delta = action.isShiftClicked() ? 60: 1;
-				if (action.isRightClicked()) delta = -delta;
-
-				// Force a step at 0, so you can't jump from 59 -> -1 or -1 -> 59
-				if(cooldown + delta < 0) {
-					if(cooldown <= 0) 
-						cooldown = -1;
-					else
+					// Force a step at 0, so you can't jump from 59 -> -1 or -1 -> 59
+					if(cooldown + delta < 0) {
+						if(cooldown <= 0) 
+							cooldown = -1;
+						else
+							cooldown = 0;
+					}
+					else if(cooldown == -1)
 						cooldown = 0;
+					else
+						cooldown += delta;
+					
+					changes.setCooldown(cooldown);
+					if(changes.sendEvent())
+						changes.apply();
+					openQuestEditor((Player) event.getWhoClicked(), quest);
 				}
-				else if(cooldown == -1)
-					cooldown = 0;
-				else
-					cooldown += delta;
-				
-				changes.setCooldown(cooldown);
-				if(changes.sendEvent())
-					changes.apply();
-				openQuestEditor(p, quest);
-				return false;
-			}
-		});
+		);
 		
 		if (QuestWorld.getInstance().getEconomy() != null) {
-			menu.addItem(13, new ItemBuilder(Material.GOLD_INGOT).display("&7Monetary Reward: &6$" + quest.getMoney()).lore(
-					"",
-					"&rLeft Click: &e+1",
-					"&rRight Click: &e-1",
-					"&rShift + Left Click: &e+100",
-					"&rShift + Right Click: &e-100").get());
-			menu.addMenuClickHandler(13, new MenuClickHandler() {
-				
-				@Override
-				public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-					int money = quest.getMoney();
-					if (action.isRightClicked()) money = money - (action.isShiftClicked() ? 100: 1);
-					else money = money + (action.isShiftClicked() ? 100: 1);
-					if (money < 0) money = 0;
-					changes.setMoney(money);
-					if(changes.sendEvent())
-						changes.apply();
-					openQuestEditor(p, quest);
-					return false;
-				}
-			});
+			menu.put(13,
+					new ItemBuilder(Material.GOLD_INGOT)
+					.display("&7Monetary Reward: &6$" + quest.getMoney()).lore(
+							"",
+							"&rLeft Click: &e+1",
+							"&rRight Click: &e-1",
+							"&rShift + Left Click: &e+100",
+							"&rShift + Right Click: &e-100").get(),
+					event -> {
+						int money = quest.getMoney();
+						if (event.isRightClick()) money = money - (event.isShiftClick() ? 100: 1);
+						else money = money + (event.isShiftClick() ? 100: 1);
+						if (money < 0) money = 0;
+						changes.setMoney(money);
+						if(changes.sendEvent())
+							changes.apply();
+						openQuestEditor((Player) event.getWhoClicked(), quest);
+					}
+			);
 		}
 		
-		menu.addItem(14, new ItemBuilder(Material.EXP_BOTTLE).display("&7XP Reward: &b" + quest.getXP() + " Level").lore(
-				"",
-				"&rLeft Click: &e+1",
-				"&rRight Click: &e-1",
-				"&rShift + Left Click: &e+10",
-				"&rShift + Right Click: &e-10").get());
-		menu.addMenuClickHandler(14, new MenuClickHandler() {
-			
-			@Override
-			public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-				int xp = quest.getXP();
-				if (action.isRightClicked()) xp = xp - (action.isShiftClicked() ? 10: 1);
-				else xp = xp + (action.isShiftClicked() ? 10: 1);
-				if (xp < 0) xp = 0;
-				changes.setXP(xp);
-				if(changes.sendEvent())
-					changes.apply();
-				openQuestEditor(p, quest);
-				return false;
-			}
-		});
-		
-		menu.addItem(15, new ItemBuilder(Material.BOOK_AND_QUILL).display("&7Quest Requirement:").lore(
-				"",
-				(quest.getParent() != null ? "&r" + quest.getParent().getName(): "&7&oNone"),
-				"",
-				"&rLeft Click: &eChange Quest Requirement",
-				"&rRight Click: &eRemove Quest Requirement").get());
-		menu.addMenuClickHandler(15, new MenuClickHandler() {
-			
-			@Override
-			public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-				if (action.isRightClicked()) {
-					changes.setParent(null);
+		menu.put(14,
+				new ItemBuilder(Material.EXP_BOTTLE)
+				.display("&7XP Reward: &b" + quest.getXP() + " Level").lore(
+						"",
+						"&rLeft Click: &e+1",
+						"&rRight Click: &e-1",
+						"&rShift + Left Click: &e+10",
+						"&rShift + Right Click: &e-10").get(),
+				event -> {
+					int xp = quest.getXP();
+					if (event.isRightClick()) xp = xp - (event.isShiftClick() ? 10: 1);
+					else xp = xp + (event.isShiftClick() ? 10: 1);
+					if (xp < 0) xp = 0;
+					changes.setXP(xp);
 					if(changes.sendEvent())
 						changes.apply();
-					openQuestEditor(p, quest);
+					openQuestEditor((Player) event.getWhoClicked(), quest);
 				}
-				else {
-					QuestWorld.getInstance().getManager(p).putPage(0);
-					QBDialogue.openQuestRequirementChooser(p, quest);
+		);
+		
+		menu.put(15,
+				new ItemBuilder(Material.BOOK_AND_QUILL)
+				.display("&7Quest Requirement:").lore(
+						"",
+						(quest.getParent() != null ? "&r" + quest.getParent().getName(): "&7&oNone"),
+						"",
+						"&rLeft Click: &eChange Quest Requirement",
+						"&rRight Click: &eRemove Quest Requirement").get(),
+				event -> {
+					Player p2 = (Player) event.getWhoClicked();
+					if (event.isRightClick()) {
+						changes.setParent(null);
+						if(changes.sendEvent())
+							changes.apply();
+						openQuestEditor(p2, quest);
+					}
+					else {
+						QuestWorld.getInstance().getManager(p2).putPage(0);
+						QBDialogue.openQuestRequirementChooser(p2, quest);
+					}
 				}
-				return false;
-			}
-		});
+		);
 		
-		menu.addItem(16, new ItemBuilder(Material.COMMAND).display("&7Commands executed upon Completion").lore(
-				"",
-				"&rLeft Click: &eOpen Command Editor").get());
-		menu.addMenuClickHandler(16, new MenuClickHandler() {
-			
-			@Override
-			public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-				p.closeInventory();
-				QBDialogue.openCommandEditor(p, quest);
-				return false;
-			}
-		});
+		menu.put(16,
+				new ItemBuilder(Material.COMMAND)
+				.display("&7Commands executed upon Completion").lore(
+						"",
+						"&rLeft Click: &eOpen Command Editor").get(),
+				event -> {
+					Player p2 = (Player) event.getWhoClicked();
+					PlayerTools.closeInventoryWithEvent(p2);
+					QBDialogue.openCommandEditor(p2, quest);
+				}
+		);
 		
-		menu.addItem(17, new ItemBuilder(Material.NAME_TAG)
+		menu.put(17, new ItemBuilder(Material.NAME_TAG)
 				.display("&r" + (quest.getPermission().equals("") ? "None": quest.getPermission())).lore(
-				"",
-				"&e> Click to change the required Permission Node").get());
-		menu.addMenuClickHandler(17, new MenuClickHandler() {
-			
-			@Override
-			public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-				PlayerTools.promptInput(p, new SinglePrompt(
-						PlayerTools.makeTranslation(true, Translation.quest_permchange, quest.getName(), quest.getPermission()),
-						(c,s) -> {
-							QuestChange changes = new QuestChange(quest);
-							String permission = s.equalsIgnoreCase("none") ? "": s;
-							changes.setPermission(permission);
-							if(changes.sendEvent()) {
-								String oldPerm = quest.getPermission();
-								changes.apply();
-								PlayerTools.sendTranslation(p, true, Translation.quest_permset, quest.getName(), s, oldPerm);
-							}
+						"",
+						"&e> Click to change the required Permission Node").get(),
+				event -> {
+					Player p2 = (Player) event.getWhoClicked();
+					PlayerTools.promptInput(p2, new SinglePrompt(
+							PlayerTools.makeTranslation(true, Translation.quest_permchange, quest.getName(), quest.getPermission()),
+							(c,s) -> {
+								String permission = s.equalsIgnoreCase("none") ? "": s;
+								changes.setPermission(permission);
+								if(changes.sendEvent()) {
+									String oldPerm = quest.getPermission();
+									changes.apply();
+									PlayerTools.sendTranslation(p2, true, Translation.quest_permset, quest.getName(), s, oldPerm);
+								}
 
-							QuestBook.openQuestEditor(p, quest);
-							return true;
-						}
-				));
-				
-				p.closeInventory();
-				return false;
-			}
-		});
+								QuestBook.openQuestEditor(p2, quest);
+								return true;
+							}
+					));
+
+					PlayerTools.closeInventoryWithEvent(p2);
+				}
+		);
 		
-		menu.addItem(18, new ItemBuilder(Material.FIREWORK).display("&rParty Support: " + (quest.supportsParties() ? "&2&l\u2714": "&4&l\u2718")).lore(
-				"",
-				"&e> Click to change whether this Quest can be done in Parties or not").get());
-		menu.addMenuClickHandler(18, new MenuClickHandler() {
-			
-			@Override
-			public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-				changes.setPartySupport(quest.supportsParties());
-				if(changes.sendEvent())
-					changes.apply();
-				openQuestEditor(p, quest);
-				return false;
-			}
-		});
+		menu.put(18,
+				new ItemBuilder(Material.FIREWORK)
+				.display("&rParty Support: " + (quest.supportsParties() ? "&2&l\u2714": "&4&l\u2718")).lore(
+						"",
+						"&e> Click to change whether this Quest can be done in Parties or not").get(),
+				event -> {
+					changes.setPartySupport(quest.supportsParties());
+					if(changes.sendEvent())
+						changes.apply();
+					openQuestEditor((Player) event.getWhoClicked(), quest);
+				}
+		);
 		
-		menu.addItem(19, new ItemBuilder(Material.COMMAND).display("&rOrdered Completion Mode: " + (quest.isOrdered() ? "&2&l\u2714": "&4&l\u2718")).lore(
-				"",
-				"&e> Click to change whether this Quest's Tasks",
-				"&ehave to be done in the Order they are arranged").get());
-		menu.addMenuClickHandler(19, new MenuClickHandler() {
-			
-			@Override
-			public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-				changes.setOrdered(!quest.isOrdered());
-				if(changes.sendEvent())
-					changes.apply();
-				openQuestEditor(p, quest);
-				return false;
-			}
-		});
+		menu.put(19,
+				new ItemBuilder(Material.COMMAND)
+				.display("&rOrdered Completion Mode: " + (quest.isOrdered() ? "&2&l\u2714": "&4&l\u2718")).lore(
+						"",
+						"&e> Click to change whether this Quest's Tasks",
+						"&ehave to be done in the Order they are arranged").get(),
+				event -> {
+					changes.setOrdered(!quest.isOrdered());
+					if(changes.sendEvent())
+						changes.apply();
+					openQuestEditor((Player) event.getWhoClicked(), quest);
+				}
+		);
 		
-		menu.addItem(20, new ItemBuilder(Material.CHEST).display("&rAuto-Claim Rewards: " + (quest.isAutoClaiming() ? "&2&l\u2714": "&4&l\u2718")).lore(
-				"",
-				"&e> Click to change whether this Quest's Rewards",
-				"&ewill be automatically given or have to be",
-				"&eclaimed manually").get());
-		menu.addMenuClickHandler(20, new MenuClickHandler() {
-			
-			@Override
-			public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-				changes.setAutoClaim(!changes.isAutoClaiming());
-				if(changes.sendEvent())
-					changes.apply();
-				openQuestEditor(p, quest);
-				return false;
-			}
-		});
+		menu.put(20,
+				new ItemBuilder(Material.CHEST)
+				.display("&rAuto-Claim Rewards: " + (quest.isAutoClaiming() ? "&2&l\u2714": "&4&l\u2718")).lore(
+						"",
+						"&e> Click to change whether this Quest's Rewards",
+						"&ewill be automatically given or have to be",
+						"&eclaimed manually").get(),
+				event -> {
+					changes.setAutoClaim(!changes.isAutoClaiming());
+					if(changes.sendEvent())
+						changes.apply();
+					openQuestEditor((Player) event.getWhoClicked(), quest);
+				}
+		);
 		
-		menu.addItem(21, new ItemBuilder(Material.GRASS).display("&7World Blacklist").lore(
-				"",
-				"&e> Click to configure in which Worlds",
-				"&ethis Quest is able to be completed").get());
-		menu.addMenuClickHandler(21, new MenuClickHandler() {
-			
-			@Override
-			public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-				openWorldEditor(p, quest);
-				return false;
-			}
-		});
+		menu.put(21,
+				new ItemBuilder(Material.GRASS)
+				.display("&7World Blacklist").lore(
+						"",
+						"&e> Click to configure in which Worlds",
+						"&ethis Quest is able to be completed").get(),
+				event -> {
+					openWorldEditor((Player) event.getWhoClicked(), quest);
+				}
+		);
+		
 		String wtfString = "&rMinimal Party Size: " + (quest.getPartySize() < 1 ? "&4Players aren't allowed be in a Party": (quest.getPartySize() == 1 ? ("&ePlayers can but don't have to be in a Party") : ("&aPlayers need to be in a Party of " + quest.getPartySize() + " or more")));
-		menu.addItem(22, new ItemBuilder(Material.FIREWORK).display(wtfString).lore(
-				"",
-				"&eChange the min. Amount of Players in",
-				"&ea Party needed to start this Quest",
-				"",
-				"&r1 = &7Players can but don't have to be in a Party",
-				"&r0 = &7Players aren't allowed to be in a Party",
-				"",
-				"&rLeft Click: &e+1",
-				"&rRight Click: &e-1").get());
-		menu.addMenuClickHandler(22, new MenuClickHandler() {
-			
-			@Override
-			public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-				int size = quest.getPartySize();
-				if (action.isRightClicked()) size--;
-				else size++;
-				if (size < 0) size = 0;
-				changes.setPartySize(size);
-				if(changes.sendEvent())
-					changes.apply();
-				openQuestEditor(p, quest);
-				return false;
-			}
-		});
+		menu.put(22,
+				new ItemBuilder(Material.FIREWORK)
+				.display(wtfString).lore(
+						"",
+						"&eChange the min. Amount of Players in",
+						"&ea Party needed to start this Quest",
+						"",
+						"&r1 = &7Players can but don't have to be in a Party",
+						"&r0 = &7Players aren't allowed to be in a Party",
+						"",
+						"&rLeft Click: &e+1",
+						"&rRight Click: &e-1").get(),
+				event -> {
+					int size = quest.getPartySize();
+					if (event.isRightClick()) size--;
+					else size++;
+					if (size < 0) size = 0;
+					changes.setPartySize(size);
+					if(changes.sendEvent())
+						changes.apply();
+					openQuestEditor((Player) event.getWhoClicked(), quest);
+				}
+		);
 		
-		menu.addItem(26, ItemBuilder.Proto.RED_WOOL.get().display("&4Delete Database").lore(
-				"",
-				"&rThis is going to delete this Quest's Database",
-				"&rand will clear all Player's Progress associated",
-				"&rwith this Quest.").get());
-		menu.addMenuClickHandler(26, new MenuClickHandler() {
-			
-			@Override
-			public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-				PlayerManager.clearAllQuestData(quest);
-				QuestWorld.getSounds().DestructiveClick().playTo(p);
-				return false;
-			}
-		});
+		menu.put(26,
+				ItemBuilder.Proto.RED_WOOL.get().display("&4Delete Database").lore(
+						"",
+						"&rThis is going to delete this Quest's Database",
+						"&rand will clear all Player's Progress associated",
+						"&rwith this Quest.").get(),
+				event -> {
+					PlayerManager.clearAllQuestData(quest);
+					QuestWorld.getSounds().DestructiveClick().playTo((Player) event.getWhoClicked());
+				}
+		);
 		
 		int index = 36;
 		for (ItemStack reward: quest.getRewards()) {
-			menu.addItem(index, reward);
-			menu.addMenuClickHandler(index, new MenuClickHandler() {
-				
-				@Override
-				public boolean onClick(Player arg0, int arg1, ItemStack arg2, ClickAction arg3) {
-					return false;
-				}
-			});
+			menu.put(index, reward, null);
 			index++;
 		}
 		
 		for (int i = 0; i < 9; i++) {
 			final Mission mission = quest.getMission(i);
 			if (mission == null) {
-				menu.addItem(45 + i, new ItemBuilder(Material.PAPER).display("&7&o> New Task").get());
-				menu.addMenuClickHandler(45 + i, new MenuClickHandler() {
-					
-					@Override
-					public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-						changes.addMission(new Mission(quest, String.valueOf(slot - 36), MissionType.valueOf("SUBMIT"), EntityType.PLAYER, "", new ItemStack(Material.STONE), p.getLocation().getBlock().getLocation(), 1, null, 0, false, 0, true, "Hey there! Do this Quest."));
-						if(changes.sendEvent())
-							changes.apply();
-						openQuestEditor(p, quest);
-						return false;
-					}
-				});
+				menu.put(45 + i,
+						new ItemBuilder(Material.PAPER).display("&7&o> New Task").get(),
+						event -> {
+							changes.addMission(new Mission(quest, String.valueOf(event.getSlot() + 9), MissionType.valueOf("SUBMIT"), EntityType.PLAYER, "", new ItemStack(Material.STONE), p.getLocation().getBlock().getLocation(), 1, null, 0, false, 0, true, "Hey there! Do this Quest."));
+							if(changes.sendEvent())
+								changes.apply();
+							openQuestEditor((Player) event.getWhoClicked(), quest);
+						});
 			}
 			else {
-				ItemStack stack = new ItemBuilder(Material.BOOK).display(mission.getText()).lore(
-						"",
-						"&c&oLeft Click to edit",
-						"&c&oRight Click to delete").get();
-
-				menu.addItem(45 + i, stack);
-				menu.addMenuClickHandler(45 + i, new MenuClickHandler() {
-					
-					@Override
-					public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-						if (action.isRightClicked()) QBDialogue.openDeletionConfirmation(p, mission);
-						else openQuestMissionEditor(p, mission);
-						return false;
-					}
-				});
+				menu.put(45 + i,
+						new ItemBuilder(Material.BOOK)
+						.display(mission.getText()).lore(
+								"",
+								"&c&oLeft Click to edit",
+								"&c&oRight Click to delete").get(),
+						event -> {
+							Player p2 = (Player) event.getWhoClicked();
+							if (event.isRightClick()) QBDialogue.openDeletionConfirmation(p2, mission);
+							else openQuestMissionEditor(p2, mission);
+						}
+				);
 			}
 		}
 		
-		menu.open(p);
+		menu.openFor(p);
 	}
 
 	public static void openWorldEditor(Player p, final Quest quest) {
-		final ChestMenu menu = new ChestMenu("&3Quest Editor");
+		QuestWorld.getSounds().EditorClick().playTo(p);
 		
-		menu.addMenuOpeningHandler(new MenuOpeningHandler() {
-			
-			@Override
-			public void onOpen(Player p) {
-				QuestWorld.getSounds().EditorClick().playTo(p);
-			}
-		});
+		final Menu menu = new Menu(2, "&3Quest Editor");
 		
-		menu.addItem(0, ItemBuilder.Proto.MAP_BACK.getItem());
-		menu.addMenuClickHandler(0, new MenuClickHandler() {
-			
-			@Override
-			public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-				openQuestEditor(p, quest);
-				return false;
-			}
+		menu.put(0, ItemBuilder.Proto.MAP_BACK.getItem(), event -> {
+			openQuestEditor((Player) event.getWhoClicked(), quest);
 		});
 		
 		int index = 9;
 		for (final World world: Bukkit.getWorlds()) {
-			menu.addItem(index, new ItemBuilder(Material.GRASS).display("&r" + world.getName() + ": " + (quest.isWorldEnabled(world.getName()) ? "&2&l\u2714": "&4&l\u2718")).get());
-			menu.addMenuClickHandler(index, new MenuClickHandler() {
-				
-				@Override
-				public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-					QuestChange changes = new QuestChange(quest);
-					changes.toggleWorld(world.getName());
-					if(changes.sendEvent())
-						changes.apply();
-					openWorldEditor(p, quest);
-					return false;
-				}
-			});
+			menu.put(index,
+					new ItemBuilder(Material.GRASS)
+					.display("&r" + world.getName() + ": " + (quest.isWorldEnabled(world.getName()) ? "&2&l\u2714": "&4&l\u2718")).get(),
+					event -> {
+						QuestChange changes = new QuestChange(quest);
+						changes.toggleWorld(world.getName());
+						if(changes.sendEvent())
+							changes.apply();
+						openWorldEditor((Player) event.getWhoClicked(), quest);
+					}
+			);
 			index++;
 		}
 		
-		menu.open(p);
+		menu.openFor(p);
 	}
 
 	public static void openWorldEditor(Player p, final Category category) {
-		final ChestMenu menu = new ChestMenu("&3Quest Editor");
+		QuestWorld.getSounds().EditorClick().playTo(p);
 		
-		menu.addMenuOpeningHandler(new MenuOpeningHandler() {
-			
-			@Override
-			public void onOpen(Player p) {
-				QuestWorld.getSounds().EditorClick().playTo(p);
-			}
-		});
+		final Menu menu = new Menu(2, "&3Quest Editor");
 		
-		menu.addItem(0, ItemBuilder.Proto.MAP_BACK.getItem());
-		menu.addMenuClickHandler(0, new MenuClickHandler() {
-			
-			@Override
-			public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-				openCategoryEditor(p, category);
-				return false;
-			}
+		menu.put(0, ItemBuilder.Proto.MAP_BACK.getItem(), event -> {
+			openCategoryEditor((Player) event.getWhoClicked(), category);
 		});
 		
 		int index = 9;
 		for (final World world: Bukkit.getWorlds()) {
-			menu.addItem(index, new ItemBuilder(Material.GRASS).display("&r" + world.getName() + ": " + (category.isWorldEnabled(world.getName()) ? "&2&l\u2714": "&4&l\u2718")).get());
-			menu.addMenuClickHandler(index, new MenuClickHandler() {
-				
-				@Override
-				public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-					CategoryChange changes = new CategoryChange(category);
-					changes.toggleWorld(world.getName());
-					if(changes.sendEvent())
-						changes.apply();
-					
-					openWorldEditor(p, category);
-					return false;
-				}
-			});
+			menu.put(index,
+					new ItemBuilder(Material.GRASS)
+					.display("&r" + world.getName() + ": " + (category.isWorldEnabled(world.getName()) ? "&2&l\u2714": "&4&l\u2718")).get(),
+					event -> {
+						CategoryChange changes = new CategoryChange(category);
+						changes.toggleWorld(world.getName());
+						if(changes.sendEvent())
+							changes.apply();
+						
+						openWorldEditor((Player) event.getWhoClicked(), category);
+					}
+			);
 			index++;
 		}
 		
-		menu.open(p);
+		menu.openFor(p);
 	}
 
 	public static void openQuestMissionEditor(Player p, final Mission mission) {
-		final ChestMenu menu = new ChestMenu("&3Quest Editor");
-		MissionChange changes = new MissionChange(mission);
-		menu.addMenuOpeningHandler(new MenuOpeningHandler() {
-			
-			@Override
-			public void onOpen(Player p) {
-				QuestWorld.getSounds().EditorClick().playTo(p);
-			}
-		});
+		QuestWorld.getSounds().EditorClick().playTo(p);
 		
-		menu.addItem(0, ItemBuilder.Proto.MAP_BACK.getItem());
-		menu.addMenuClickHandler(0, new MenuClickHandler() {
-			
-			@Override
-			public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-				openQuestEditor(p, mission.getQuest());
-				return false;
-			}
+		Menu menu2 = new Menu(3, "&3Quest Editor");
+		MissionChange changes = new MissionChange(mission);
+
+		menu2.put(0, ItemBuilder.Proto.MAP_BACK.getItem(), e -> {
+			openQuestEditor(p, mission.getQuest());
 		});
 		
 		// Mission types now handle their own menu data!
-		mission.getType().buildMenu(changes, menu);
+		mission.getType().buildMenu(changes, menu2);
 		
 		ItemStack missionSelector = new ItemBuilder(mission.getType().getSelectorItem())
 				.display("&7" + mission.getType().toString())
@@ -1454,38 +1154,21 @@ public class QuestBook {
 						"",
 						"&e> Click to change the Mission Type").get();
 		
-		menu.addItem(9, missionSelector);
-		menu.addMenuClickHandler(9, new MenuClickHandler() {
-			
-			@Override
-			public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-				openMissionSelector(p, changes.getSource());
-				return false;
-			}
+		menu2.put(9, missionSelector, e -> {
+			openMissionSelector(p, changes.getSource());
 		});
 		
-		menu.open(p);
+		menu2.openFor(p);
 	}
 
 	public static void openMissionSelector(Player p, Mission mission) {
-		final ChestMenu menu = new ChestMenu(Text.colorize("&3Mission Selector: " + mission.getQuest().getName()));
-		MissionChange changes = new MissionChange(mission);
-		menu.addMenuOpeningHandler(new MenuOpeningHandler() {
-			
-			@Override
-			public void onOpen(Player p) {
-				QuestWorld.getSounds().EditorClick().playTo(p);
-			}
-		});
+		QuestWorld.getSounds().EditorClick().playTo(p);
 		
-		menu.addItem(0, ItemBuilder.Proto.MAP_BACK.getItem());
-		menu.addMenuClickHandler(0, new MenuClickHandler() {
-			
-			@Override
-			public boolean onClick(Player arg0, int arg1, ItemStack arg2, ClickAction arg3) {
-				openQuestMissionEditor(arg0, mission);
-				return false;
-			}
+		final Menu menu = new Menu(2, Text.colorize("&3Mission Selector: " + mission.getQuest().getName()));
+		MissionChange changes = new MissionChange(mission);
+
+		menu.put(0, ItemBuilder.Proto.MAP_BACK.getItem(), event -> {
+			openQuestMissionEditor((Player) event.getWhoClicked(), mission);
 		});
 		
 		PagedMapping view = new PagedMapping(45, 9);
@@ -1493,12 +1176,15 @@ public class QuestBook {
 		for(MissionType type : QuestWorld.getInstance().getMissionTypes().values()) {
 			String name = Text.niceName(type.getName());
 			view.addItem(i, new ItemBuilder(type.getSelectorItem()).display("&f" + name).get());
-			view.addButton(i, MissionButton.simpleHandler(changes, event -> changes.setType(type) ));
+			view.addButton(i, event -> {
+				changes.setType(type);
+				MissionButton.apply(event, changes);
+			});
 			++i;
 		}
-		view.setBackButton(Buttons.simpleHandler(event -> openQuestMissionEditor(p, mission)));
+		view.setBackButton(event -> openQuestMissionEditor(p, mission));
 		view.build(menu, p);
 		
-		menu.open(p);
+		menu.openFor(p);
 	}
 }

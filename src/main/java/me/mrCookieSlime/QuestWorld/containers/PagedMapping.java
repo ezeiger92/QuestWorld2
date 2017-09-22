@@ -2,17 +2,18 @@ package me.mrCookieSlime.QuestWorld.containers;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
-import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu;
-import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ClickAction;
-import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.Maps;
-import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu.MenuClickHandler;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.Translation;
+import me.mrCookieSlime.QuestWorld.api.menu.Menu;
+import me.mrCookieSlime.QuestWorld.managers.MenuManager;
 import me.mrCookieSlime.QuestWorld.utils.ItemBuilder;
 
 public class PagedMapping {
@@ -22,9 +23,9 @@ public class PagedMapping {
 
 	private int activeSize;
 	private ItemStack defaultItem = null;
-	private MenuClickHandler defaultButton = null;
+	private Consumer<InventoryClickEvent> defaultButton = null;
 	
-	private MenuClickHandler backButton = null;
+	private Consumer<InventoryClickEvent> backButton = null;
 	
 	public PagedMapping(int elementsPerPage) {
 		pageSize = elementsPerPage;
@@ -46,13 +47,13 @@ public class PagedMapping {
 			page.setDefaultItem(item);
 	}
 	
-	public void setDefaultButton(MenuClickHandler button) {
+	public void setDefaultButton(Consumer<InventoryClickEvent> button) {
 		defaultButton = button;
 		for(PageList page : pages)
 			page.setDefaultButton(button);
 	}
 	
-	public void setBackButton(MenuClickHandler button) {
+	public void setBackButton(Consumer<InventoryClickEvent> button) {
 		backButton = button;
 	}
 	
@@ -86,7 +87,7 @@ public class PagedMapping {
 		return findPage(index).getItem(index % pageSize);
 	}
 	
-	public MenuClickHandler getButton(int index) {
+	public Consumer<InventoryClickEvent> getButton(int index) {
 		return findPage(index).getButton(index % pageSize);
 	}
 	
@@ -94,7 +95,7 @@ public class PagedMapping {
 		findPage(index).addItem(index % pageSize, item);
 	}
 	
-	public void addButton(int index, MenuClickHandler button) {
+	public void addButton(int index, Consumer<InventoryClickEvent> button) {
 		findPage(index).addButton(index % pageSize, button);
 	}
 	
@@ -108,16 +109,11 @@ public class PagedMapping {
 		hacked[index] = true;
 	}
 	
-	public void addNavButton(int index, MenuClickHandler button) {
+	public void addNavButton(int index, ItemStack item, Consumer<InventoryClickEvent> button) {
 
-		findPage(index).addButton(index % pageSize, new MenuClickHandler() {
-
-			@Override
-			public boolean onClick(Player arg0, int arg1, ItemStack arg2, ClickAction arg3) {
-				QuestWorld.getInstance().getManager(arg0).putPage(currentPage);
-				return button.onClick(arg0, arg1, arg2, arg3);
-			}
-			
+		findPage(index).addButton(index % pageSize, event -> {
+			QuestWorld.getInstance().getManager((OfflinePlayer) event.getWhoClicked()).putPage(currentPage);
+			button.accept(event);
 		});
 	}
 	
@@ -129,12 +125,12 @@ public class PagedMapping {
 		findPage(index).removeButton(index % pageSize);
 	}
 	
-	public void build(ChestMenu menu, Player p) {
+	public void build(Menu menu, Player p) {
 		int page = QuestWorld.getInstance().getManager(p).popPage();
 		build(menu, page);
 	}
 
-	private void build(ChestMenu menu, int page) {
+	private void build(Menu menu, int page) {
 		if(page < 0 || page >= pages.size())
 			return;
 		currentPage = page;
@@ -142,15 +138,10 @@ public class PagedMapping {
 		// TODO same as above, hack made for party button
 		for(int i = 0; i < 9; ++i) {
 			if(hacked[i]) {
-				MenuClickHandler old = menu.getMenuClickHandler(i);
-				menu.addMenuClickHandler(i, new MenuClickHandler() {
-
-					@Override
-					public boolean onClick(Player arg0, int arg1, ItemStack arg2, ClickAction arg3) {
-						QuestWorld.getInstance().getManager(arg0).clearPages();
-						return old.onClick(arg0, arg1, arg2, arg3);
-					}
-					
+				Consumer<InventoryClickEvent> old = menu.getHandler(i);
+				menu.put(i, menu.getItem(i), event -> {
+					QuestWorld.getInstance().getManager((Player) event.getWhoClicked()).clearPages();
+					old.accept(event);
 				});
 			}
 		}
@@ -167,29 +158,23 @@ public class PagedMapping {
 				.amount(page + 1)
 				.display(display).lore(lore);
 
-		menu.addItem(1, navigation.getNew());
-		menu.addMenuClickHandler(1, new MenuClickHandler() {
+		menu.put(1, navigation.getNew(), event -> {
+			int delta = 1;
+			if(event.isRightClick())
+				delta = -1;
 			
-			@Override
-			public boolean onClick(Player p, int slot, ItemStack item, ClickAction action) {
-				int delta = 1;
-				if(action.isRightClicked())
-					delta = -1;
-				
-				if(action.isShiftClicked())
-					delta *= pages.size();
-				
-				int nextPage = Math.max(Math.min(pages.size() - 1, page + delta), 0);
-				
-				ChestMenu self = Maps.getInstance().menus.get(p.getUniqueId());
-				build(self, nextPage);
-				self.reset(true);
-				self.open(p); // This isn't really needed, but it forces items to appear correct
-				return false;
-			}
+			if(event.isShiftClick())
+				delta *= pages.size();
+			
+			int nextPage = Math.max(Math.min(pages.size() - 1, page + delta), 0);
+			Player p = (Player) event.getWhoClicked();
+			
+			Menu self = MenuManager.get().playerOpenMenus.get(p.getUniqueId());
+			build(self, nextPage);
+			self.openFor(p); // This isn't really needed, but it forces items to appear correct --- TODO NOW LEGACY, CHECK
 		});
 		
 		if(backButton != null) 
-			menu.addItem(0, ItemBuilder.Proto.MAP_BACK.getItem(), backButton);
+			menu.put(0, ItemBuilder.Proto.MAP_BACK.getItem(), backButton);
 	}
 }

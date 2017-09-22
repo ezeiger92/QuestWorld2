@@ -28,6 +28,7 @@ import me.mrCookieSlime.QuestWorld.commands.EditorCommand;
 import me.mrCookieSlime.QuestWorld.commands.QuestsCommand;
 import me.mrCookieSlime.QuestWorld.extensions.builtin.Builtin;
 import me.mrCookieSlime.QuestWorld.listeners.HookInstaller;
+import me.mrCookieSlime.QuestWorld.listeners.MenuListener;
 import me.mrCookieSlime.QuestWorld.listeners.PlayerListener;
 import me.mrCookieSlime.QuestWorld.listeners.SelfListener;
 import me.mrCookieSlime.QuestWorld.managers.MissionViewer;
@@ -154,6 +155,7 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 		pm.registerEvents(new PlayerListener(), this);
 		pm.registerEvents(missionViewer, this);
 		pm.registerEvents(new SelfListener(), this);
+		pm.registerEvents(new MenuListener(), this);
 		
 		ShapelessRecipe recipe = new ShapelessRecipe(GuideBook.get());
 		recipe.addIngredient(Material.WORKBENCH);

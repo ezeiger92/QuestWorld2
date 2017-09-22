@@ -50,12 +50,13 @@ public class PlayMission extends MissionType implements Ticking {
 						"&rShift + Left Click: &e+1h",
 						"&rShift + Right Click: &e-1h"
 						).get(),
-				MissionButton.simpleHandler(changes, event -> {
+				 event -> {
 					int amount = MissionButton.clickNumber(changes.getAmount(), 60, event);
 					if(amount < 1)
 						amount = 1;
 					changes.setAmount(amount);
-				})
+					MissionButton.apply(event, changes);
+				}
 		));
 	}
 }

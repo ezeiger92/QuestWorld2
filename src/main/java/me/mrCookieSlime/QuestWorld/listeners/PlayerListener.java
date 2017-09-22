@@ -2,9 +2,6 @@ package me.mrCookieSlime.QuestWorld.listeners;
 
 import java.io.File;
 
-import me.mrCookieSlime.CSCoreLibPlugin.events.ItemUseEvent;
-import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu;
-import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.Maps;
 import me.mrCookieSlime.QuestWorld.GuideBook;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.managers.PlayerManager;
@@ -17,20 +14,20 @@ import me.mrCookieSlime.QuestWorld.quests.QuestStatus;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDeathEvent;
-import org.bukkit.event.inventory.ClickType;
-import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 public class PlayerListener implements Listener {
-
+	
 	@EventHandler
-	public void onQuestBook(ItemUseEvent e) {
-		if (GuideBook.get().isSimilar(e.getItem())) {
-
-			QuestBook.openLastMenu(e.getPlayer());
-		}
+	public void onQuestBook2(PlayerInteractEvent event) {
+		Action a = event.getAction();
+		if(a == Action.RIGHT_CLICK_AIR || a == Action.RIGHT_CLICK_BLOCK)
+			if (GuideBook.get().isSimilar(event.getItem()))
+				QuestBook.openLastMenu(event.getPlayer());
 	}
 	
 	@EventHandler
@@ -62,16 +59,5 @@ public class PlayerListener implements Listener {
 	@EventHandler
 	public void onleave(PlayerQuitEvent e) {
 		QuestWorld.getInstance().getManager(e.getPlayer()).unload();
-	}
-	
-	// Fix for ezeiger92/QuestWorld2#26
-	@EventHandler
-	public void onInvClick(InventoryClickEvent e) {
-		if(e.getClick() == ClickType.NUMBER_KEY) {
-			ChestMenu menu = Maps.getInstance().menus.get(e.getWhoClicked().getUniqueId());
-			
-			if(menu != null)
-				e.setCancelled(true);
-		}
 	}
 }

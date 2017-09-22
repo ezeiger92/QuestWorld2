@@ -1,9 +1,9 @@
 package me.mrCookieSlime.QuestWorld.api;
 
-import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.interfaces.IMission;
 import me.mrCookieSlime.QuestWorld.api.interfaces.IMissionWrite;
+import me.mrCookieSlime.QuestWorld.api.menu.Menu;
 import me.mrCookieSlime.QuestWorld.api.menu.MenuData;
 import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
 import me.mrCookieSlime.QuestWorld.utils.Log;
@@ -108,11 +108,11 @@ public abstract class MissionType {
 	public final MenuData removeButton(int index) {
 		return menuData.remove(index);
 	}
-	 
-	public final void buildMenu(MissionChange changes, ChestMenu menu) {
+	
+	public final void buildMenu(MissionChange changes, Menu menu) {
 		layoutMenu(changes);
 		for(Map.Entry<Integer, MenuData> entry : menuData.entrySet())
-			menu.addItem(entry.getKey(), entry.getValue().getItem(), entry.getValue().getHandler());
+			menu.put(entry.getKey(), entry.getValue().getItem(), entry.getValue().getHandler());
 	}
 	
 	protected void layoutMenu(MissionChange changes) {
