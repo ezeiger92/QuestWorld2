@@ -146,6 +146,8 @@ public class PlayerManager {
 		if (task.getTimeframe() == 0) return true;
 		Config cfg = QuestWorld.getInstance().getManager(Bukkit.getOfflinePlayer(uuid)).toConfig();
 		Player p = Bukkit.getPlayer(uuid);
+		
+		// TODO This checks against the class' uuid, then assigns based on the supplied uuid. WHAT.
 		if (!isWithinTimeframe(task)) {
 			cfg.setValue(task.getQuest().getCategory().getID() + "." + task.getQuest().getID() + ".mission." + task.getID() + ".complete-until", null);
 			cfg.setValue(task.getQuest().getCategory().getID() + "." + task.getQuest().getID() + ".mission." + task.getID() + ".progress", 0);
@@ -255,32 +257,25 @@ public class PlayerManager {
 	}
 
 	public void setProgress(IMission task, int amount) {
-		if (!updateTimeframe(this.uuid, task, amount)) return;
-		cfg.setValue(task.getQuest().getCategory().getID() + "." + task.getQuest().getID() + ".mission." + task.getID() + ".progress", amount > task.getAmount() ? task.getAmount(): amount);
+		if(task.getQuest().supportsParties() && getParty() != null)
+			for(UUID uuid : getParty().getPlayers())
+				setSingleProgress(uuid, task, amount);
+		else
+			setSingleProgress(this.uuid, task, amount);
+	}
+	
+	private void setSingleProgress(UUID uuid, IMission task, int amount) {
+		amount = Math.min(amount, task.getAmount());
+		if (!updateTimeframe(uuid, task, amount))
+			return;
 		
-		if (amount >= task.getAmount()) {
+		QuestWorld.getInstance().getManager(uuid.toString()).toConfig()
+		.setValue(task.getQuest().getCategory().getID() + "." + task.getQuest().getID() + ".mission." + task.getID() + ".progress", amount);
+		
+		if(amount == task.getAmount()) {
 			Player player = Bukkit.getPlayer(uuid);
-			if (player != null) {
+			if(player != null)
 				sendQuestDialogue(player, task, task.getDialogue().iterator());
-			}
-		}
-		// TODO check !task.getType().getID().equals("ACCEPT_QUEST_FROM_NPC") && 
-		// OH! This was done to keep quests quiet when interacting with citizens, should do something for this
-		if (task.getQuest().supportsParties()) {
-			Party party = getParty();
-			if (party != null) {
-				for (UUID uuid: party.getPlayers()) {
-					if (!uuid.equals(this.uuid)) {
-						updateTimeframe(uuid, task, amount);
-						if (amount >= task.getAmount()) {
-							Player player = Bukkit.getPlayer(uuid);
-							if (player != null) 
-								PlayerTools.sendTranslation(player, false, Translation.notify_completetask, task.getQuest().getName());
-						}
-						QuestWorld.getInstance().getManager(Bukkit.getOfflinePlayer(uuid)).toConfig().setValue(task.getQuest().getCategory().getID() + "." + task.getQuest().getID() + ".mission." + task.getID() + ".progress", amount);
-					}
-				}
-			}
 		}
 	}
 
@@ -311,8 +306,11 @@ public class PlayerManager {
 		}
 		else {
 			Player player = Bukkit.getPlayer(uuid);
-			// TODO check !task.getType().getID().equals("ACCEPT_QUEST_FROM_NPC") && 
-			if (player != null)
+
+			// Change for ezeiger92/QuestWorld2#43 - Remove default complete message if dialog is present
+			// Previously "check !task.getType().getID().equals("ACCEPT_QUEST_FROM_NPC") && "
+			// This was done to keep quests quiet when interacting with citizens
+			if (player != null && task.getDialogue().isEmpty())
 				PlayerTools.sendTranslation(player, false, Translation.notify_completetask, task.getQuest().getName());
 		}
 	}
