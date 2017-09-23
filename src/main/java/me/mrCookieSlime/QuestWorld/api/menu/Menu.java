@@ -60,9 +60,12 @@ public class Menu implements Cloneable {
 	
 	public void put(int slot, ItemStack item, Consumer<InventoryClickEvent> handler) {
 		if(slot >= inv.getSize())
-			resize(slot / ROW_WIDTH);
-		// Arbitrary data to make double-click not pick up items from upper inv
-		inv.setItem(slot, new ItemBuilder(item).flag(ItemFlag.HIDE_PLACED_ON).get());
+			resize(slot / ROW_WIDTH + 1);
+		if(item == null)
+			inv.clear(slot);
+		else
+			// Arbitrary data to make double-click not pick up items from upper inv
+			inv.setItem(slot, new ItemBuilder(item).flag(ItemFlag.HIDE_PLACED_ON).get());
 		handlers[slot] = handler;
 	}
 	

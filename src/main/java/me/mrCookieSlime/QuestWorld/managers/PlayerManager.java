@@ -14,7 +14,6 @@ import java.util.UUID;
 import java.util.function.Predicate;
 
 import me.mrCookieSlime.CSCoreLibPlugin.Configuration.Config;
-import me.mrCookieSlime.CSCoreLibPlugin.general.Clock;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.api.interfaces.IMission;
@@ -330,7 +329,10 @@ public class PlayerManager {
 		else {
 			if (quest.getCooldown() == 0) cfg.setValue(quest.getCategory().getID() + "." + quest.getID() + ".status", QuestStatus.AVAILABLE.toString());
 			else cfg.setValue(quest.getCategory().getID() + "." + quest.getID() + ".status", QuestStatus.ON_COOLDOWN.toString());
-			cfg.setValue(quest.getCategory().getID() + "." + quest.getID() + ".cooldown", Clock.format(new Date(System.currentTimeMillis() + quest.getRawCooldown())));
+			
+			String dateString = new SimpleDateFormat("yyyy-MM-dd-HH-mm").format(new Date(System.currentTimeMillis() + quest.getRawCooldown()));
+			
+			cfg.setValue(quest.getCategory().getID() + "." + quest.getID() + ".cooldown", dateString);
 			for (Mission task: quest.getMissions()) {
 				 setProgress(task, 0);
 			 }

@@ -1,5 +1,6 @@
 package me.mrCookieSlime.QuestWorld.listeners;
 
+import org.bukkit.ChatColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -14,8 +15,17 @@ public class MenuListener implements Listener {
 	@EventHandler(ignoreCancelled=true)
 	public void onInventoryClick(InventoryClickEvent event) {
 		Menu openMenu = MenuManager.get().playerOpenMenus.get(event.getWhoClicked().getUniqueId());
-		if(openMenu != null) 
-			event.setCancelled(openMenu.click(event));
+		if(openMenu != null) {
+			boolean val = true;
+			try {
+				val = openMenu.click(event);
+			}
+			catch(Exception e) {
+				e.printStackTrace();
+				event.getWhoClicked().sendMessage(ChatColor.RED + "An internal error occurred, please contact an admin!");
+			}
+			event.setCancelled(val);
+		}
 	}
 	
 	@EventHandler

@@ -46,13 +46,10 @@ public class PageList {
 		return buttons[index];
 	}
 	
-	public void addItem(int index, ItemStack item) {
-		items[index] = ItemBuilder.clone(item);
-	}
-	
-	public void addButton(int index, Consumer<InventoryClickEvent> button) {
+	public void addButton(int index, ItemStack item, Consumer<InventoryClickEvent> button) {
 		if(buttons[index] == null)
 			++filled;
+		items[index] = ItemBuilder.clone(item);
 		buttons[index] = button;
 	}
 	

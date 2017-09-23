@@ -91,12 +91,8 @@ public class PagedMapping {
 		return findPage(index).getButton(index % pageSize);
 	}
 	
-	public void addItem(int index, ItemStack item) {
-		findPage(index).addItem(index % pageSize, item);
-	}
-	
-	public void addButton(int index, Consumer<InventoryClickEvent> button) {
-		findPage(index).addButton(index % pageSize, button);
+	public void addButton(int index, ItemStack item, Consumer<InventoryClickEvent> button) {
+		findPage(index).addButton(index % pageSize, item, button);
 	}
 	
 	// TODO this is all to handle party buttons NOT being part of the nav frame
@@ -111,7 +107,7 @@ public class PagedMapping {
 	
 	public void addNavButton(int index, ItemStack item, Consumer<InventoryClickEvent> button) {
 
-		findPage(index).addButton(index % pageSize, event -> {
+		findPage(index).addButton(index % pageSize, item, event -> {
 			QuestWorld.getInstance().getManager((OfflinePlayer) event.getWhoClicked()).putPage(currentPage);
 			button.accept(event);
 		});

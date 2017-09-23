@@ -9,10 +9,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.MenuHelper;
-import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.MenuHelper.ChatHandler;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
+import me.mrCookieSlime.QuestWorld.api.SinglePrompt;
 import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.api.interfaces.IMissionWrite;
 import me.mrCookieSlime.QuestWorld.utils.PlayerTools;
@@ -257,40 +256,39 @@ public class Mission extends QuestingObject implements IMissionWrite {
 	}
 	
 	public void addDialogueLine(Player p, final String path) {
-		PlayerTools.sendTranslation(p, true, Translation.dialog_add);
 		String dprefix = QuestWorld.getInstance().getCfg().getString("dialogue.prefix");
 		final Mission mission = this;
-		MenuHelper.awaitChatInput(p, true, new ChatHandler() {
-			
-			@Override
-			public boolean onChat(Player p, String message) {
-				if (message.equalsIgnoreCase("exit()")) {
-					quest.updateLastModified();
-					PlayerTools.sendTranslation(p, true, Translation.dialog_set, path);
-					QuestBook.openQuestMissionEditor(p, mission);
-					
-					File file = new File(path);
-					try {
-						file.createNewFile();
+		PlayerTools.promptInput(p, new SinglePrompt(
+				PlayerTools.makeTranslation(true, Translation.dialog_add),
+				(c,s) -> {
+					Player p2 = (Player) c.getForWhom();
+					if (s.equalsIgnoreCase("exit()")) {
+						quest.updateLastModified();
+						PlayerTools.sendTranslation(p2, true, Translation.dialog_set, path);
+						QuestBook.openQuestMissionEditor(p2, mission);
 						
-						BufferedWriter writer = new BufferedWriter(new FileWriter(file, true));
-						for (int i = 0; i < dialogue.size(); i++) {
-							if (i == 0) writer.append(dialogue.get(i));
-							else writer.append("\n" + dialogue.get(i));
+						File file = new File(path);
+						try {
+							file.createNewFile();
+							
+							BufferedWriter writer = new BufferedWriter(new FileWriter(file, true));
+							for (int i = 0; i < dialogue.size(); i++) {
+								if (i == 0) writer.append(dialogue.get(i));
+								else writer.append("\n" + dialogue.get(i));
+							}
+							writer.close();
+						} catch (IOException e) {
+							e.printStackTrace();
 						}
-						writer.close();
-					} catch (IOException e) {
-						e.printStackTrace();
 					}
+					else {
+						dialogue.add(dprefix + s);
+						addDialogueLine(p2, path);
+						QuestWorld.getSounds().DialogAdd().playTo(p2);
+					}
+					return true;
 				}
-				else {
-					dialogue.add(dprefix + message);
-					addDialogueLine(p, path);
-					QuestWorld.getSounds().DialogAdd().playTo(p);
-				}
-				return true;
-			}
-		});
+		));
 	}
 
 	public List<String> getDialogue() {

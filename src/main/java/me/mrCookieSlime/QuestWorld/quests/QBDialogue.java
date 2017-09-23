@@ -2,8 +2,8 @@ package me.mrCookieSlime.QuestWorld.quests;
 
 import java.util.List;
 
-import me.mrCookieSlime.CSCoreLibPlugin.general.Chat.TellRawMessage;
-import me.mrCookieSlime.CSCoreLibPlugin.general.Chat.TellRawMessage.HoverAction;
+//import me.mrCookieSlime.CSCoreLibPlugin.general.Chat.TellRawMessage;
+//import me.mrCookieSlime.CSCoreLibPlugin.general.Chat.TellRawMessage.HoverAction;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.api.menu.Menu;
@@ -20,7 +20,6 @@ import me.mrCookieSlime.QuestWorld.utils.Text;
 
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 
 public class QBDialogue {
 	public static void openDeletionConfirmation(Player p, final QuestingObject q) {
@@ -115,14 +114,15 @@ public class QBDialogue {
 		List<EntityType> entities = EntityTools.listAliveEntityTypes();
 		for(int i = 0; i < entities.size(); ++i) {
 			EntityType entity = entities.get(i);
-			ItemBuilder builder = new ItemBuilder(EntityTools.getEntityDisplay(entity))
+			pager.addNavButton(i,
+					new ItemBuilder(EntityTools.getEntityDisplay(entity))
 					.lore(lore)
-					.display("&7Entity Type: &r" + Text.niceName(entity.name()));
-			pager.addItem(i, builder.get());
-			pager.addNavButton(i, builder.get(), event -> {
-				mission.setEntity(entity);
-				QuestBook.openQuestMissionEditor((Player) event.getWhoClicked(), mission);
-			});
+					.display("&7Entity Type: &r" + Text.niceName(entity.name())).get(),
+					event -> {
+						mission.setEntity(entity);
+						QuestBook.openQuestMissionEditor((Player) event.getWhoClicked(), mission);
+					}
+			);
 		}
 		pager.setBackButton(event -> QuestBook.openQuestMissionEditor(p, mission));
 		pager.build(menu, p);
@@ -133,10 +133,21 @@ public class QBDialogue {
 		try {
 			p.sendMessage(Text.colorize("&7&m----------------------------"));
 			for (int i = 0; i < quest.getCommands().size(); i++) {
-				String command = quest.getCommands().get(i);
-				new TellRawMessage(Text.colorize("&4X &7") + command).addHoverEvent(HoverAction.SHOW_TEXT, Text.colorize("&7Click to remove this Command")).addClickEvent(me.mrCookieSlime.CSCoreLibPlugin.general.Chat.TellRawMessage.ClickAction.RUN_COMMAND, "/questeditor delete_command " + quest.getCategory().getID() + " " + quest.getID() + " " + i).send(p);
+				String command = quest.getCommands().get(i).replaceAll("('|\"|\\\\)", "\\\\$1");
+				
+				//new TellRawMessage(Text.colorize("&4X &7") + command).addHoverEvent(HoverAction.SHOW_TEXT, Text.colorize("&7Click to remove this Command")).addClickEvent(me.mrCookieSlime.CSCoreLibPlugin.general.Chat.TellRawMessage.ClickAction.RUN_COMMAND, "/questeditor delete_command " + quest.getCategory().getID() + " " + quest.getID() + " " + i).send(p);
+				PlayerTools.tellraw(p, Text.colorize("['', {"
+						+ "'text':'&4X &7" + command + "',"
+						+ "'clickEvent':{'action':'run_command','value':'/questeditor delete_command " + quest.getCategory().getID() + " " + quest.getID() + " " + i + "'},"
+						+ "'hoverEvent':{'action':'show_text','value':'&7Click to remove this Command'}}]")
+						.replaceAll("(?<!\\\\)'", "\\\"").replaceAll("\\\\'", "'"));
 			}
-			new TellRawMessage(Text.colorize("&2+ &7Add more Commands... (Click)")).addHoverEvent(HoverAction.SHOW_TEXT, Text.colorize("&7Click to add a new Command")).addClickEvent(me.mrCookieSlime.CSCoreLibPlugin.general.Chat.TellRawMessage.ClickAction.RUN_COMMAND, "/questeditor add_command " + quest.getCategory().getID() + " " + quest.getID()).send(p);
+			//new TellRawMessage(Text.colorize("&2+ &7Add more Commands... (Click)")).addHoverEvent(HoverAction.SHOW_TEXT, Text.colorize("&7Click to add a new Command")).addClickEvent(me.mrCookieSlime.CSCoreLibPlugin.general.Chat.TellRawMessage.ClickAction.RUN_COMMAND, "/questeditor add_command " + quest.getCategory().getID() + " " + quest.getID()).send(p);
+			PlayerTools.tellraw(p, Text.colorize("['', {"
+					+ "'text':'&2+ &7Add more Commands... (Click)',"
+					+ "'clickEvent':{'action':'run_command','value':'/questeditor add_command " + quest.getCategory().getID() + " " + quest.getID() + "'},"
+					+ "'hoverEvent':{'action':'show_text','value':'&7Click to add a new Command'}}]")
+					.replace('\'', '"'));
 			p.sendMessage(Text.colorize("&7&m----------------------------"));
 		} catch (Exception x) {
 			x.printStackTrace();
@@ -177,25 +188,23 @@ public class QBDialogue {
 		
 		PagedMapping pager = new PagedMapping(45, 9);
 		for(Quest quest : category.getQuests()) {
-			int i = quest.getID();
-			ItemStack item = new ItemBuilder(quest.getItem()).lore(
-					"",
-					"&7&oClick to select it as a Requirement",
-					"&7&ofor the Quest:",
-					"&r" + q.getName()).get();
-			pager.addItem(i, item);
-			pager.addButton(i, event -> {
-				Player p2 = (Player) event.getWhoClicked();
-				QuestWorld.getInstance().getManager(p2).popPage();
-				q.setParent(quest);
-				if (q instanceof Quest) QuestBook.openQuestEditor(p2, (Quest) q);
-				else QuestBook.openCategoryEditor(p2, (Category) q);
-				}
+			pager.addButton(quest.getID(),
+					new ItemBuilder(quest.getItem()).lore(
+							"",
+							"&7&oClick to select it as a Requirement",
+							"&7&ofor the Quest:",
+							"&r" + q.getName()).get(),
+					event -> {
+						Player p2 = (Player) event.getWhoClicked();
+						QuestWorld.getInstance().getManager(p2).popPage();
+						q.setParent(quest);
+						if (q instanceof Quest) QuestBook.openQuestEditor(p2, (Quest) q);
+						else QuestBook.openCategoryEditor(p2, (Category) q);
+					}
 			);
 		}
 		pager.setBackButton(event -> openQuestRequirementChooser(p, q));
 		pager.build(menu, p);
 		menu.openFor(p);
 	}
-
 }

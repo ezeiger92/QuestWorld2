@@ -126,7 +126,7 @@ public class PlayerTools {
 	}
 	
 	public static void tellraw(Player p, String json) {
-		Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "/tellraw "+p.getName()+" "+json);
+		Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "minecraft:tellraw "+p.getName()+" "+json);
 	}
 	
 	@SuppressWarnings("deprecation")

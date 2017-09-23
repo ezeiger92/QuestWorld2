@@ -58,8 +58,12 @@ public class ItemBuilder {
 	}
 	
 	public static ItemBuilder edit(ItemStack stack) {
+		
 		ItemBuilder res = new ItemBuilder();
 		res.resultStack = stack;
+
+		if(stack.getType() == Material.AIR)
+			res.type(Material.BARRIER);
 		
 		return res;
 	}
@@ -76,6 +80,9 @@ public class ItemBuilder {
      */
 	public ItemBuilder(ItemStack stack) {
 		resultStack = new ItemStack(stack);
+		
+		if(stack.getType() == Material.AIR)
+			type(Material.BARRIER);
 	}
 	
 	/**
@@ -85,6 +92,9 @@ public class ItemBuilder {
      */
 	public ItemBuilder(Material type) {
 		resultStack = new ItemStack(type);
+
+		if(type == Material.AIR)
+			type(Material.BARRIER);
 	}
 	
 	/**
@@ -94,7 +104,8 @@ public class ItemBuilder {
      * @param amount Amount of material
      */
 	public ItemBuilder(Material type, int amount) {
-		resultStack = new ItemStack(type, amount);
+		this(type);
+		amount(amount);
 	}
 	
 	/**
@@ -105,7 +116,8 @@ public class ItemBuilder {
      * @param durability Stack durability
      */
 	public ItemBuilder(Material type, int amount, short durability) {
-		resultStack = new ItemStack(type, amount, durability);
+		this(type, amount);
+		durability(durability);
 	}
 	
 	public ItemBuilder(Material type, int amount, int durability) {
