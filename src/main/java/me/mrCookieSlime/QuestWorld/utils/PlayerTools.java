@@ -110,7 +110,8 @@ public class PlayerTools {
 			public void onCommand(PlayerCommandPreprocessEvent event) {
 				if(!event.getPlayer().getUniqueId().equals(p.getUniqueId()))
 					return;
-				
+
+				event.setCancelled(true);
 				if(prompt.acceptInput(con.getContext(), event.getMessage()) != Prompt.END_OF_CONVERSATION) {
 					p.sendMessage(prompt.getPromptText(con.getContext()));
 				}
