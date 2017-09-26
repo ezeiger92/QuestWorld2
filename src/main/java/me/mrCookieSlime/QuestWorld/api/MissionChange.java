@@ -2,6 +2,7 @@ package me.mrCookieSlime.QuestWorld.api;
 
 import java.util.List;
 
+import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -95,6 +96,12 @@ public class MissionChange extends Mission {
 	public void setAmount(int amount) {
 		super.setAmount(amount);
 		changeBits |= BitFlag.getBits(Member.AMOUNT);
+	}
+	
+	@Override
+	public void setLocation(Location loc) {
+		super.setLocation(loc);
+		changeBits |= BitFlag.getBits(Member.LOCATION);
 	}
 
 	@Override

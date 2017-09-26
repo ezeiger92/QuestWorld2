@@ -231,10 +231,14 @@ public class Mission extends QuestingObject implements IMissionWrite {
 	public Location getLocation() {
 		return location;
 	}
+	
+	public void setLocation(Location loc) {
+		quest.updateLastModified();
+		this.location = loc.clone();
+	}
 
 	public void setLocation(Player p) {
-		quest.updateLastModified();
-		this.location = p.getLocation().getBlock().getLocation();
+		setLocation(p.getLocation().getBlock().getLocation());
 	}
 
 	@Override

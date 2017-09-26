@@ -89,16 +89,12 @@ public enum Translation implements Translator {
 	private String[] placeholders;
 	Translation(String path, String... placeholders) {
 		this.path = path;
-		this.placeholders = placeholders;
-		for(int i = 0; i < this.placeholders.length; ++i)
-			this.placeholders[i] = "%" + this.placeholders[i] + "%"; 
+		this.placeholders = wrap(placeholders);
 	}
 	
 	Translation(int d, String... placeholders) {
 		path = name().replace('_', '.');
-		this.placeholders = placeholders;
-		for(int i = 0; i < this.placeholders.length; ++i)
-			this.placeholders[i] = "%" + this.placeholders[i] + "%"; 
+		this.placeholders = wrap(placeholders);
 	}
 	
 	@Override

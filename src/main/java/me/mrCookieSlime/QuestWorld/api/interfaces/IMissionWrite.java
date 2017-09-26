@@ -1,5 +1,6 @@
 package me.mrCookieSlime.QuestWorld.api.interfaces;
 
+import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -12,6 +13,7 @@ public interface IMissionWrite extends IMission {
 	void setCustomString(String customString);
 	void setType(MissionType type);
 	void setAmount(int amount);
+	void setLocation(Location loc);
 	void setLocation(Player p);
 	void addDialogueLine(Player p, final String path);
 	void setDisplayName(String displayName);
