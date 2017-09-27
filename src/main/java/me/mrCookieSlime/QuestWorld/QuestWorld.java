@@ -41,13 +41,11 @@ import me.mrCookieSlime.QuestWorld.utils.Lang;
 import me.mrCookieSlime.QuestWorld.utils.Log;
 import me.mrCookieSlime.QuestWorld.utils.Sounds;
 
-import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -156,10 +154,8 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 		pm.registerEvents(missionViewer, this);
 		pm.registerEvents(new SelfListener(), this);
 		pm.registerEvents(new MenuListener(), this);
-		
-		ShapelessRecipe recipe = new ShapelessRecipe(GuideBook.get());
-		recipe.addIngredient(Material.WORKBENCH);
-		getServer().addRecipe(recipe);
+
+		getServer().addRecipe(GuideBook.recipe());
 		
 		getServer().getScheduler().runTaskTimer(this, new Runnable() {
 			

@@ -13,7 +13,8 @@ import java.lang.annotation.Target;
  * the function will not blindly use that value without checking against null.
  * 
  * <p> When used on a function, it indicates null may be returned and the user
- * should check before using the value.
+ * should check before using the value. If implementing a @Nullable function,
+ * null may be returned.
  * 
  * <p> This will not be included during compilation, it is purely for
  * documentation.

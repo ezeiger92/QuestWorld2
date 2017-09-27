@@ -250,11 +250,13 @@ public class ItemBuilder {
 		return this;
 	}
 	
+	@SuppressWarnings("deprecation")
 	public ItemBuilder skull(String playerName) {
 		skull(SkullType.PLAYER);
 		
 		if(resultStack.getItemMeta() instanceof SkullMeta) {
 			SkullMeta smHolder = (SkullMeta)resultStack.getItemMeta();
+			//smHolder.setOwningPlayer(PlayerTools.getPlayer(playerName)); // in 1.12+
 			smHolder.setOwner(playerName);
 			resultStack.setItemMeta(smHolder);
 		}

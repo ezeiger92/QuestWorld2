@@ -14,7 +14,8 @@ import java.lang.annotation.Target;
  * data into that parameter.
  * 
  * <p> When used on a function, it indicates modification of the returned
- * value may cause side-effects.
+ * value may cause side-effects. If implementing a @Mutable function, a copy
+ * may be returned, although a reference is recommended.
  * 
  * <p> This will not be included during compilation, it is purely for
  * documentation.
