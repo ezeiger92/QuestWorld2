@@ -39,5 +39,6 @@ public class BitFlag {
 
 	public interface BitString {
 		int ordinal();
+		static int ALL = -1;
 	}
 }

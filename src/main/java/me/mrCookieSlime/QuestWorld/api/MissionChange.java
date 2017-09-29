@@ -86,9 +86,10 @@ public class MissionChange extends Mission {
 	@Override
 	public void setType(MissionType type) {
 		super.setType(type);
-		if(!type.migrateFrom(this))
-			// TODO This does not flag any changes made by migrateFrom or loadDefaults
+		if(!type.migrateFrom(this)) {
 			loadDefaults();
+			changeBits |= BitString.ALL;
+		}
 		changeBits |= BitFlag.getBits(Member.TYPE);
 	}
 

@@ -142,7 +142,7 @@ public class MissionButton {
 	public static MenuData timeframe(MissionChange changes) {
 		return simpleButton(changes,
 				new ItemBuilder(Material.WATCH)
-				.display("&7Complete Mission within: &b" + (changes.getTimeframe() / 60) + "h " + (changes.getTimeframe() % 60) + "m").lore(
+				.display("&7Complete Mission within: &b" + Text.timeFromNum(changes.getTimeframe())).lore(
 						"",
 						"&rLeft Click: &e+1m",
 						"&rRight Click: &e-1m",

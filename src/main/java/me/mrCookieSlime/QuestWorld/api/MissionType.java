@@ -7,6 +7,7 @@ import me.mrCookieSlime.QuestWorld.api.menu.Menu;
 import me.mrCookieSlime.QuestWorld.api.menu.MenuData;
 import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
 import me.mrCookieSlime.QuestWorld.utils.Log;
+import me.mrCookieSlime.QuestWorld.utils.Text;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -41,7 +42,7 @@ public abstract class MissionType {
 			return "";
 		long duration = instance.getTimeframe();
 		
-		return " &7within " + (duration / 60) + "h " + (duration % 60) + "m";
+		return " &7within " + Text.timeFromNum(duration);
 	}
 	
 	private String formatDeathReset(IMission instance) {

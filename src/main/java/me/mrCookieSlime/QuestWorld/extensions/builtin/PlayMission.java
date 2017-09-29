@@ -12,6 +12,7 @@ import me.mrCookieSlime.QuestWorld.api.interfaces.IMission;
 import me.mrCookieSlime.QuestWorld.api.menu.MenuData;
 import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
 import me.mrCookieSlime.QuestWorld.utils.ItemBuilder;
+import me.mrCookieSlime.QuestWorld.utils.Text;
 
 public class PlayMission extends MissionType implements Ticking {
 	public PlayMission() {
@@ -25,13 +26,13 @@ public class PlayMission extends MissionType implements Ticking {
 	
 	@Override
 	protected String userInstanceDescription(IMission instance) {
-		return "&7Play for " + (instance.getAmount() / 60) + "h " + (instance.getAmount() % 60) + "m";
+		return "&7Play for " + Text.timeFromNum(instance.getAmount());
 	}
 	
 	@Override
 	public String progressString(float percent, int current, int total) {
 		int remaining = total - current;
-		return Math.round(percent * 100) + "% (" + (remaining / 60) + "h " + (remaining % 60) + "m remaining)";
+		return Math.round(percent * 100) + "% (" + Text.timeFromNum(remaining) + " remaining)";
 	}
 	
 	@Override
@@ -43,7 +44,7 @@ public class PlayMission extends MissionType implements Ticking {
 	protected void layoutMenu(MissionChange changes) {
 		super.layoutMenu(changes);
 		putButton(17, new MenuData(
-				new ItemBuilder(Material.WATCH).display("&7Time: &b" + (changes.getAmount() / 60) + "h " + (changes.getAmount() % 60) + "m").lore(
+				new ItemBuilder(Material.WATCH).display("&7Time: &b" + Text.timeFromNum(changes.getAmount())).lore(
 						"",
 						"&rLeft Click: &e+1m",
 						"&rRight Click: &e-1m",

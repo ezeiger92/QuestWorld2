@@ -391,13 +391,8 @@ public class Quest extends QuestingObject {
 		
 		if(cooldown == 0)
 			return "Repeating";
-		
-		StringBuilder builder = new StringBuilder();
-		builder.append(cooldown / 60);
-		builder.append("h ");
-		builder.append(cooldown % 60);
-		builder.append("m");
-		return builder.toString();
+
+		return Text.timeFromNum(cooldown);
 	}
 	
 	public Quest getParent() {

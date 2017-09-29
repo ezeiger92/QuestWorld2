@@ -84,15 +84,8 @@ public class PlayerManager {
 		String worldName = player.getWorld().getName();
 		
 		for(Mission task : QuestWorld.getInstance().getMissionsOf(type)) {
-			Quest quest = task.getQuest();
-			if(quest == null)
-				continue;
-			
+			Quest quest = task.getQuest();	
 			Category category = quest.getCategory();
-			//TODO This (and the null above) *shouldn't* ever happen, but there are some crazy things in this code
-			// Check to make sure this ACTUALY never happens, prevent it from being possible, and remove checks
-			if(category == null)
-				continue;
 			
 			if (category.isWorldEnabled(worldName) && quest.isWorldEnabled(worldName)) {
 				if (!hasCompletedTask(task) && hasUnlockedTask(task)) {

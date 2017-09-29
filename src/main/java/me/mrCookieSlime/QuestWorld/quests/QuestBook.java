@@ -391,7 +391,7 @@ public class QuestBook {
 			String cooldown = quest.getFormattedCooldown();
 			if (QuestWorld.getInstance().getManager(p).getStatus(quest).equals(QuestStatus.ON_COOLDOWN)) {
 				long remaining = (QuestWorld.getInstance().getManager(p).getCooldownEnd(quest) - System.currentTimeMillis() + 59999) / 60 / 1000;
-				cooldown = (remaining / 60) + "h " + (remaining % 60) + "m remaining";
+				cooldown = Text.timeFromNum(remaining) + " remaining";
 			}
 			menu.put(8, new ItemBuilder(Material.WATCH).display(QuestWorld.translate(Translation.quests_display_cooldown)).lore(
 					"",
