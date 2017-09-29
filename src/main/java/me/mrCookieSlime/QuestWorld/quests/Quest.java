@@ -5,8 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import me.mrCookieSlime.CSCoreLibPlugin.Configuration.Config;
-import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.InvUtils;
-import me.mrCookieSlime.CSCoreLibPlugin.general.Player.PlayerInventory;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.QuestChange;
@@ -370,12 +368,11 @@ public class Quest extends QuestingObject {
 	}
 	
 	public void handoutReward(Player p) {
-		for (ItemStack reward: rewards) {
-			if (InvUtils.fits(p.getInventory(), reward.clone())) p.getInventory().addItem(reward.clone());
-			else p.getWorld().dropItemNaturally(p.getLocation(), reward.clone());
-		}
+		ItemStack[] itemReward = rewards.toArray(new ItemStack[0]);
+		for(ItemStack item : p.getInventory().addItem(itemReward).values())
+			p.getWorld().dropItemNaturally(p.getLocation(), item);
+		
 		QuestWorld.getSounds().QuestReward().playTo(p);
-		PlayerInventory.update(p);
 		
 		if (xp > 0) p.setLevel(p.getLevel() + xp);
 		if (money > 0 && QuestWorld.getInstance().getEconomy() != null) QuestWorld.getInstance().getEconomy().get().depositPlayer(p, money);

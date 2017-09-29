@@ -1,7 +1,5 @@
 package me.mrCookieSlime.QuestWorld.listeners;
 
-import me.mrCookieSlime.QuestWorld.utils.EntityTools;
-
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -9,6 +7,8 @@ import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 
 import org.bukkit.plugin.Plugin;
+
+import me.mrCookieSlime.QuestWorld.utils.EntityTools;
 
 public class TaskListener implements Listener {
 

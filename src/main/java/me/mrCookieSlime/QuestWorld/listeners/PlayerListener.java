@@ -6,9 +6,9 @@ import me.mrCookieSlime.QuestWorld.GuideBook;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.managers.PlayerManager;
 import me.mrCookieSlime.QuestWorld.quests.Category;
+import me.mrCookieSlime.QuestWorld.quests.Mission;
 import me.mrCookieSlime.QuestWorld.quests.Quest;
 import me.mrCookieSlime.QuestWorld.quests.QuestBook;
-import me.mrCookieSlime.QuestWorld.quests.Mission;
 import me.mrCookieSlime.QuestWorld.quests.QuestStatus;
 
 import org.bukkit.entity.Player;

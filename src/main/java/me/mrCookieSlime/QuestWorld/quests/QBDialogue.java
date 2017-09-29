@@ -2,8 +2,6 @@ package me.mrCookieSlime.QuestWorld.quests;
 
 import java.util.List;
 
-//import me.mrCookieSlime.CSCoreLibPlugin.general.Chat.TellRawMessage;
-//import me.mrCookieSlime.CSCoreLibPlugin.general.Chat.TellRawMessage.HoverAction;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.api.menu.Menu;
@@ -20,6 +18,8 @@ import me.mrCookieSlime.QuestWorld.utils.Text;
 
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+
+import com.google.gson.JsonObject;
 
 public class QBDialogue {
 	public static void openDeletionConfirmation(Player p, final QuestingObject q) {
@@ -133,16 +133,46 @@ public class QBDialogue {
 		try {
 			p.sendMessage(Text.colorize("&7&m----------------------------"));
 			for (int i = 0; i < quest.getCommands().size(); i++) {
-				String command = quest.getCommands().get(i).replaceAll("('|\"|\\\\)", "\\\\$1");
+				String command = quest.getCommands().get(i).replaceAll("(\"|\\\\)", "\\\\$1");
 				
-				//new TellRawMessage(Text.colorize("&4X &7") + command).addHoverEvent(HoverAction.SHOW_TEXT, Text.colorize("&7Click to remove this Command")).addClickEvent(me.mrCookieSlime.CSCoreLibPlugin.general.Chat.TellRawMessage.ClickAction.RUN_COMMAND, "/questeditor delete_command " + quest.getCategory().getID() + " " + quest.getID() + " " + i).send(p);
-				PlayerTools.tellraw(p, Text.colorize("['', {"
+				JsonObject redX = new JsonObject();
+				redX.addProperty("text", "X ");
+				redX.addProperty("color", "dark_red");
+				
+				JsonObject commandDisplay = new JsonObject();
+				commandDisplay.addProperty("text", command);
+				commandDisplay.addProperty("color", "gray");
+				{
+					JsonObject clickEvent = new JsonObject();
+					clickEvent.addProperty("action", "run_command");
+					clickEvent.addProperty("value",  "/questeditor delete_command " + quest.getCategory().getID() + " " + quest.getID() + " " + i);
+
+					redX.add("clickEvent", clickEvent);
+					commandDisplay.add("clickEvent", clickEvent);
+				}
+				{
+					JsonObject hoverEvent = new JsonObject();
+					hoverEvent.addProperty("action", "show_text");
+					{
+						JsonObject hoverText = new JsonObject();
+						hoverText.addProperty("text", "Click to remove this Command");
+						hoverText.addProperty("color", "gray");
+
+						hoverEvent.add("value",  hoverText);
+					}
+
+					redX.add("hoverEvent", hoverEvent);
+					commandDisplay.add("hoverEvent", hoverEvent);
+				}
+				
+				PlayerTools.tellraw(p, redX.toString(), commandDisplay.toString());
+				/*PlayerTools.tellraw(p, Text.colorize("['', {"
 						+ "'text':'&4X &7" + command + "',"
 						+ "'clickEvent':{'action':'run_command','value':'/questeditor delete_command " + quest.getCategory().getID() + " " + quest.getID() + " " + i + "'},"
 						+ "'hoverEvent':{'action':'show_text','value':'&7Click to remove this Command'}}]")
-						.replaceAll("(?<!\\\\)'", "\\\"").replaceAll("\\\\'", "'"));
+						.replaceAll("(?<!\\\\)'", "\\\"").replaceAll("\\\\'", "'"));*/
 			}
-			//new TellRawMessage(Text.colorize("&2+ &7Add more Commands... (Click)")).addHoverEvent(HoverAction.SHOW_TEXT, Text.colorize("&7Click to add a new Command")).addClickEvent(me.mrCookieSlime.CSCoreLibPlugin.general.Chat.TellRawMessage.ClickAction.RUN_COMMAND, "/questeditor add_command " + quest.getCategory().getID() + " " + quest.getID()).send(p);
+			
 			PlayerTools.tellraw(p, Text.colorize("['', {"
 					+ "'text':'&2+ &7Add more Commands... (Click)',"
 					+ "'clickEvent':{'action':'run_command','value':'/questeditor add_command " + quest.getCategory().getID() + " " + quest.getID() + "'},"

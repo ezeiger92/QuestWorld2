@@ -46,6 +46,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -444,6 +445,31 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 	public boolean isItemSimiliar(ItemStack item, ItemStack SFitem) {
 		if(item == null || SFitem == null)
 			return item == SFitem;
+		
+		boolean wildcardLeft = false;
+		boolean wildcardRight = false;
+		
+		if(item.hasItemMeta()) {
+			ItemMeta meta = item.getItemMeta();
+			wildcardLeft = meta.hasLore() && meta.getLore().get(0).equals("*");
+		}
+		
+		if(SFitem.hasItemMeta()) {
+			ItemMeta meta = SFitem.getItemMeta();
+			wildcardRight = meta.hasLore() && meta.getLore().get(0).equals("*");
+		}
+		
+		if(wildcardLeft || wildcardRight) {
+			item = item.clone();
+			ItemMeta meta = item.getItemMeta();
+			meta.setLore(null);
+			item.setItemMeta(meta);
+			
+			SFitem = SFitem.clone();
+			meta = SFitem.getItemMeta();
+			meta.setLore(null);
+			SFitem.setItemMeta(meta);
+		}
 		
 		return item.isSimilar(SFitem);
 	}

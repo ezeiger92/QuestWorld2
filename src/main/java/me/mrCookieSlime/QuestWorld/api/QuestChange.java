@@ -7,8 +7,8 @@ import org.bukkit.inventory.ItemStack;
 
 import me.mrCookieSlime.QuestWorld.events.CancellableEvent;
 import me.mrCookieSlime.QuestWorld.events.QuestChangeEvent;
-import me.mrCookieSlime.QuestWorld.quests.Quest;
 import me.mrCookieSlime.QuestWorld.quests.Mission;
+import me.mrCookieSlime.QuestWorld.quests.Quest;
 import me.mrCookieSlime.QuestWorld.utils.BitFlag;
 import me.mrCookieSlime.QuestWorld.utils.BitFlag.BitString;
 

@@ -126,7 +126,9 @@ public class PlayerTools {
 		}, QuestWorld.getInstance());
 	}
 	
-	public static void tellraw(Player p, String json) {
+	public static void tellraw(Player p, String json, String... extra) {
+		if(extra.length > 0)
+			json = "[" + json + "," + String.join(",", extra) + "]";
 		Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "minecraft:tellraw "+p.getName()+" "+json);
 	}
 	
