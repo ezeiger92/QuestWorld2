@@ -166,8 +166,12 @@ public class PagedMapping {
 			Player p = (Player) event.getWhoClicked();
 			
 			Menu self = MenuManager.get().playerOpenMenus.get(p.getUniqueId());
+			QuestWorld.getSounds().EditorClick().playTo(p); // TODO This is not entirely right - not all PagedMappings are editor menus!
 			build(self, nextPage);
-			self.openFor(p); // This isn't really needed, but it forces items to appear correct --- TODO NOW LEGACY, CHECK
+			
+			// This logically isn't needed, BUT inventories have a nasty habit of displaying old items when only metadata is
+			// changed. Most obvious in entity selector. Last checked MC1.12.2
+			self.openFor(p);
 		});
 		
 		if(backButton != null) 
