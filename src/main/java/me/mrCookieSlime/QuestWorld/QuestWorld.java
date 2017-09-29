@@ -68,6 +68,9 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 	private ExtensionLoader extLoader = null;
 	private HookInstaller hookInstaller = null;
 	
+	private int questCheckHandle = -1;
+	private int autosaveHandle = -1;
+	
 	public static String translate(Translator key, String... replacements) {
 		return getInstance().language.translate(key, replacements);
 	}
@@ -110,7 +113,9 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 		new Builtin();
 		hookInstaller.addAll(preEnableHooks);
 		
-		setupEconomy();
+		economy = EconWrapper.wrap();
+		if(economy == null)
+			Log.info("No economy (vault) found, money rewards disabled");
 		
 		// Attempt to load Core to continue
 		CSCoreLibLoader loader = new CSCoreLibLoader(this);
@@ -129,26 +134,21 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 		if(!extensionDir.exists())
 			extensionDir.mkdir();
 			
-		getServer().getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
-			
-			@Override
-			public void run() {
-				Log.fine("Retrieving Quest Configuration...");
-				load();
-				int categories = getCategories().size(), quests = 0;
-				for (Category category: getCategories())
-					quests += category.getQuests().size();
+		getServer().getScheduler().scheduleSyncDelayedTask(this, () -> {
+			Log.fine("Retrieving Quest Configuration...");
+			load();
+			int categories = getCategories().size(), quests = 0;
+			for (Category category: getCategories())
+				quests += category.getQuests().size();
 
-				Log.fine("Successfully loaded " + categories + " Categories");
-				Log.fine("Successfully loaded " + quests + " Quests");
-			}
+			Log.fine("Successfully loaded " + categories + " Categories");
+			Log.fine("Successfully loaded " + quests + " Quests");
 		}, 0L);
 		
 		loadConfigs();
 		
 		getCommand("quests").setExecutor(new QuestsCommand());
 		getCommand("questeditor").setExecutor(new EditorCommand());
-		//editorCommand.setAliases(Arrays.asList("qe"));
 
 		PluginManager pm = getServer().getPluginManager();
 		pm.registerEvents(new PlayerListener(), this);
@@ -158,57 +158,16 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 
 		getServer().addRecipe(GuideBook.recipe());
 		
-		getServer().getScheduler().runTaskTimer(this, new Runnable() {
-			
-			@Override
-			public void run() {
-				for (Player p: getServer().getOnlinePlayers()) {
-					getManager(p).update(true);
-				}
-			}
-		}, 0L, cfg.getInt("options.quest-check-delay"));
 		
-		getServer().getScheduler().runTaskTimer(this, new Runnable() {
-			
-			@Override
-			public void run() {
-				for (Player p: getServer().getOnlinePlayers()) {
-					getManager(p).save();
-				}
-			}
-		}, 0L, 5 * 60L * 20L);
-		
-		int autosave = cfg.getInt("options.autosave-interval");
-		if(autosave > 0) {
-			autosave = autosave * 20 * 60; // minutes to ticks
-			this.getServer().getScheduler().runTaskTimer(this, new Runnable() {
-	
-				@Override
-				public void run() {
-					save();
-				}
-				
-			}, autosave, autosave);
-		}
-	}
-	
-	private boolean setupEconomy() {
-		if(getServer().getPluginManager().getPlugin("Vault") != null) {
-			economy = new EconWrapper();
-		}
-		
-		if(economy == null)
-			Log.info("No economy (vault) found, money rewards disabled");
-		
-	    return true;
 	}
 	
 	public void loadConfigs() {
 		PluginUtils utils = new PluginUtils(this);
-		utils.setupConfig();
-		cfg = utils.getConfig();
 		utils.setupMetrics();
 		utils.setupUpdater(77071, getFile());
+
+		utils.setupConfig();
+		cfg = utils.getConfig();
 		
 		//TODO make logger info (and other) levels actually work
 		//Log.setLevel(cfg.getString("options.log-level"));
@@ -225,6 +184,31 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 
 		// Needs sound config loaded
 		eventSounds = new Sounds();
+		
+		if(questCheckHandle != -1)
+			getServer().getScheduler().cancelTask(questCheckHandle);
+		
+		questCheckHandle = getServer().getScheduler().scheduleSyncRepeatingTask(this,
+				() -> {
+					for (Player p: getServer().getOnlinePlayers())
+						getManager(p).update(true);
+				},
+				0L,
+				cfg.getInt("options.quest-check-delay")
+		);
+		
+		int autosave = cfg.getInt("options.autosave-interval");
+		if(autosave > 0) {
+			autosave = autosave * 20 * 60; // minutes to ticks
+			if(autosaveHandle != -1)
+				getServer().getScheduler().cancelTask(autosaveHandle);
+			
+			autosaveHandle = getServer().getScheduler().scheduleSyncRepeatingTask(this,
+					() -> save(),
+					autosave,
+					autosave
+			);
+		}
 	}
 	
 	public void load() {
