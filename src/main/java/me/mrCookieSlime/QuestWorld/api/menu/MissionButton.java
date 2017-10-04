@@ -91,12 +91,12 @@ public class MissionButton {
 
 					PlayerTools.closeInventoryWithEvent(p);
 					PlayerTools.promptInput(p, new SinglePrompt(
-							PlayerTools.makeTranslation(true, Translation.killmission_rename),
+							PlayerTools.makeTranslation(true, Translation.KILLMISSION_NAME_EDIT),
 							(c,s) -> {
 								changes.setCustomString(Text.colorize(s));
 								if(changes.sendEvent()) {
 									changes.apply();
-									PlayerTools.sendTranslation(p, true, Translation.killtype_rename);
+									PlayerTools.sendTranslation(p, true, Translation.KILLMISSION_NAME_SET);
 								}
 								QuestBook.openQuestMissionEditor(p, changes.getSource());
 								return true;
@@ -123,11 +123,11 @@ public class MissionButton {
 					else {
 						PlayerTools.closeInventoryWithEvent(p);
 						PlayerTools.promptInput(p, new SinglePrompt(
-								PlayerTools.makeTranslation(true, Translation.mission_await),
+								PlayerTools.makeTranslation(true, Translation.MISSION_NAME_EDIT),
 								(c,s) -> {
 									changes.setDisplayName(s);
 									if(changes.sendEvent()) {
-										PlayerTools.sendTranslation(p, true, Translation.mission_name);
+										PlayerTools.sendTranslation(p, true, Translation.MISSION_NAME_SET);
 										changes.apply();
 										QuestBook.openQuestMissionEditor(p, changes.getSource());
 									}

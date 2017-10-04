@@ -32,13 +32,13 @@ public class Buttons {
 	public static Consumer<InventoryClickEvent> newCategory(int id) {
 		return event -> {
 			Player p = (Player) event.getWhoClicked();
-			String defaultCategoryName = QuestWorld.translate(Translation.default_category);
+			String defaultCategoryName = QuestWorld.translate(Translation.DEFAULT_CATEGORY);
 			
 			PlayerTools.promptInput(p, new SinglePrompt(
-					PlayerTools.makeTranslation(true, Translation.category_namechange, defaultCategoryName),
+					PlayerTools.makeTranslation(true, Translation.CATEGORY_NAME_EDIT, defaultCategoryName),
 					(c,s) -> {
 						new Category(s, id);
-						PlayerTools.sendTranslation(p, true, Translation.category_created, s);
+						PlayerTools.sendTranslation(p, true, Translation.CATEGORY_CREATED, s);
 						QuestBook.openEditor(p);
 
 						return true;
@@ -67,13 +67,13 @@ public class Buttons {
 	public static Consumer<InventoryClickEvent> newQuest(int cat_id, int id) {
 		return event -> {
 			Player p = (Player) event.getWhoClicked();
-			String defaultQuestName = QuestWorld.translate(Translation.default_quest);
+			String defaultQuestName = QuestWorld.translate(Translation.DEFAULT_QUEST);
 			
 			PlayerTools.promptInput(p, new SinglePrompt(
-					PlayerTools.makeTranslation(true, Translation.quest_namechange, defaultQuestName),
+					PlayerTools.makeTranslation(true, Translation.QUEST_NAME_EDIT, defaultQuestName),
 					(c,s) -> {
 						new Quest(s, cat_id+" M "+id);
-						PlayerTools.sendTranslation(p, true, Translation.quest_created, s);
+						PlayerTools.sendTranslation(p, true, Translation.QUEST_CREATED, s);
 						QuestBook.openCategoryQuestEditor(p, QuestWorld.getInstance().getCategory(cat_id));
 
 						return true;
@@ -81,6 +81,19 @@ public class Buttons {
 			));
 
 			PlayerTools.closeInventoryWithEvent(p);
+		};
+	}
+	
+	public static Consumer<InventoryClickEvent> partyMenu() {
+		return event -> {
+			if (QuestWorld.getInstance().getCfg().getBoolean("party.enabled")) {
+				Player p = (Player) event.getWhoClicked();
+				
+				// TODO openPartyMenu has no way to go back to where it came from, so it always goes to the main menu
+				// As a result, we need to clear pages to avoid odd behavior. RIP.
+				QuestWorld.getInstance().getManager(p).clearPages();
+				QuestBook.openPartyMenu(p);
+			}
 		};
 	}
 }

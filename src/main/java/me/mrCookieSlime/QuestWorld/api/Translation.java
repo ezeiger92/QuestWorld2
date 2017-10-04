@@ -1,63 +1,62 @@
 package me.mrCookieSlime.QuestWorld.api;
 
 public enum Translation implements Translator {
-	default_category("defaults.category.name"),
-	default_quest   ("defaults.quest.name"),
-	default_mission ("defaults.mission.name"),
-	default_prefix  ("defaults.prefix"),
+	DEFAULT_CATEGORY("defaults.category.name"),
+	DEFAULT_QUEST   ("defaults.quest.name"),
+	DEFAULT_MISSION ("defaults.mission.name"),
+	DEFAULT_PREFIX  ("defaults.prefix"),
 	
-	book_display("book.display"),
-	book_lore   ("book.lore"),
+	BOOK_DISPLAY("book.display"),
+	BOOK_LORE   ("book.lore"),
 	
-	nav_display("navigation.display", "page",     "pages"),
-	nav_lore(   "navigation.lore",    "pre-next", "pre-last"),
-	nav_next(   "navigation.prefix-next"),
-	nav_prev(   "navigation.prefix-last"),
-	nav_nextbad("navigation.prefix-next-inactive"),
-	nav_prevbad("navigation.prefix-last-inactive"),
+	NAV_DISPLAY("navigation.display", "page",     "pages"),
+	NAV_LORE(   "navigation.lore",    "pre-next", "pre-last"),
+	NAV_NEXT(   "navigation.prefix-next"),
+	NAV_PREV(   "navigation.prefix-last"),
+	NAV_NEXTBAD("navigation.prefix-next-inactive"),
+	NAV_PREVBAD("navigation.prefix-last-inactive"),
 	
-	category_created   ("editor.category.created",     "name"),
-	category_deleted   ("editor.category.deleted",     "name"),
-	category_namechange("editor.category.name-change", "name"),
-	category_nameset   ("editor.category.name-set",    "name", "name_old"),
-	category_permchange("editor.category.perm-change", "name", "perm"),
-	category_permset   ("editor.category.perm-set",    "name", "perm", "perm_old"),
+	CATEGORY_CREATED  ("editor.category.created",     "name"),
+	CATEGORY_DELETED  ("editor.category.deleted",     "name"),
+	CATEGORY_NAME_EDIT("editor.category.name-change", "name"),
+	CATEGORY_NAME_SET ("editor.category.name-set",    "name", "name_old"),
+	CATEGORY_PERM_EDIT("editor.category.perm-change", "name", "perm"),
+	CATEGORY_PERM_SET ("editor.category.perm-set",    "name", "perm", "perm_old"),
 	
-	quest_created   ("editor.quest.created",     "name"),
-	quest_deleted   ("editor.quest.deleted",     "name"),
-	quest_namechange("editor.quest.name-change", "name"),
-	quest_nameset   ("editor.quest.name-set",    "name", "name_old"),
-	quest_permchange("editor.quest.perm-change", "name", "perm"),
-	quest_permset   ("editor.quest.perm-set",    "name", "perm", "perm_old"),
-	
-	// TODO better names, PH
-	mission_await("editor.await-mission-name"),
-	mission_name("editor.edit-mission-name"),
-	
-	dialog_add("editor.add-dialogue"),
-	dialog_set("editor.set-dialogue", "path"),
-	
-	mission_desc("editor.misssion-description"),
-	
-	killmission_rename("editor.rename-kill-mission"),
-	killtype_rename("editor.renamed-kill-type"),
-	location_rename("editor.renamed-location"),
-	// End PH
-	
-	notify_timefail    ("notifications.task-failed-timeframe",  "quest"),
-	notify_timestart   ("notifications.task-timeframe-started", "task", "time"),
-	notify_completetask("notifications.task-completed",         "quest"),
+	QUEST_CREATED  ("editor.quest.created",     "name"),
+	QUEST_DELETED  ("editor.quest.deleted",     "name"),
+	QUEST_NAME_EDIT("editor.quest.name-change", "name"),
+	QUEST_NAME_SET ("editor.quest.name-set",    "name", "name_old"),
+	QUEST_PERM_EDIT("editor.quest.perm-change", "name", "perm"),
+	QUEST_PERM_SET ("editor.quest.perm-set",    "name", "perm", "perm_old"),
 
-	party_errorfull  ("party.full",       "max"),
-	party_errorabsent("party.not-online", "name"),
-	party_errormember("party.already",    "name"),
-	party_playerpick ("party.invite"),
-	party_playeradd  ("party.invited",    "name"),
-	party_playerjoin ("party.join",       "name"),
-	party_playerkick ("party.kicked",     "name"),
-	party_groupinvite("party.invitation", "name"),
-	party_groupjoin  ("party.joined",     "name"),
+	// TODO Description is only used by QW-Citizens, potentially export to CitizenTranslation
+	MISSION_DESC_EDIT("editor.misssion-description"),
+	MISSION_DESC_SET("editor.mission.desc-set", "name", "desc"),
+	MISSION_DIALOG_ADD("editor.add-dialogue"),
+	MISSION_DIALOG_SET("editor.set-dialogue", "path"),
+	MISSION_NAME_EDIT("editor.await-mission-name"),
+	MISSION_NAME_SET ("editor.edit-mission-name"),
+	
+	KILLMISSION_NAME_EDIT("editor.rename-kill-mission"),
+	KILLMISSION_NAME_SET ("editor.renamed-kill-type"),
+	LOCMISSION_NAME_EDIT("editor.rename-location"),
+	LOCMISSION_NAME_SET ("editor.renamed-location"),
 
+	PARTY_ERROR_FULL  ("party.full",       "max"),
+	PARTY_ERROR_ABSENT("party.not-online", "name"),
+	PARTY_ERROR_MEMBER("party.already",    "name"),
+	PARTY_PLAYER_PICK ("party.invite"),
+	PARTY_PLAYER_ADD  ("party.invited",    "name"),
+	PARTY_PLAYER_JOIN ("party.join",       "name"),
+	PARTY_PLAYER_KICK ("party.kicked",     "name"),
+	PARTY_GROUP_INVITE("party.invitation", "name"),
+	PARTY_GROUP_JOIN  ("party.joined",     "name"),
+
+	NOTIFY_COMPLETED ("notifications.task-completed",         "quest"),
+	NOTIFY_TIME_FAIL ("notifications.task-failed-timeframe",  "quest"),
+	NOTIFY_TIME_START("notifications.task-timeframe-started", "task", "time"),
+	
 	// TODO
 	// This is hacky, look again when less tired
 	gui_title(0),

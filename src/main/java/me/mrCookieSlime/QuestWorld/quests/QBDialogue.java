@@ -53,7 +53,7 @@ public class QBDialogue {
 							QuestWorld.getInstance().unregisterCategory(category);
 							p2.closeInventory();
 							QuestBook.openEditor(p2);
-							PlayerTools.sendTranslation(p2, true, Translation.category_deleted, q.getName());
+							PlayerTools.sendTranslation(p2, true, Translation.CATEGORY_DELETED, q.getName());
 						}
 					}
 					else if (q instanceof Quest) {
@@ -63,7 +63,7 @@ public class QBDialogue {
 							quest.getCategory().removeQuest(quest);
 							p2.closeInventory();
 							QuestBook.openCategoryQuestEditor(p2, quest.getCategory());
-							PlayerTools.sendTranslation(p2, true, Translation.quest_deleted, q.getName());
+							PlayerTools.sendTranslation(p2, true, Translation.QUEST_DELETED, q.getName());
 						}
 					}
 					else if (q instanceof Mission) {
@@ -114,14 +114,14 @@ public class QBDialogue {
 		List<EntityType> entities = EntityTools.listAliveEntityTypes();
 		for(int i = 0; i < entities.size(); ++i) {
 			EntityType entity = entities.get(i);
-			pager.addNavButton(i,
+			pager.addButton(i,
 					new ItemBuilder(EntityTools.getEntityDisplay(entity))
 					.lore(lore)
 					.display("&7Entity Type: &r" + Text.niceName(entity.name())).get(),
 					event -> {
 						mission.setEntity(entity);
 						QuestBook.openQuestMissionEditor((Player) event.getWhoClicked(), mission);
-					}
+					}, true
 			);
 		}
 		pager.setBackButton(event -> QuestBook.openQuestMissionEditor(p, mission));
@@ -191,14 +191,14 @@ public class QBDialogue {
 
 		PagedMapping pager = new PagedMapping(45, 9);
 		for(Category category : QuestWorld.getInstance().getCategories()) {
-			pager.addNavButton(category.getID(), new ItemBuilder(category.getItem()).lore(
+			pager.addButton(category.getID(), new ItemBuilder(category.getItem()).lore(
 					"",
 					"&7&oLeft Click to open").get(),
 					event -> {
 						Player p2 = (Player)event.getWhoClicked();
 						QuestWorld.getInstance().getManager(p2).putPage(0);
 						openQuestRequirementChooser2(p2, quest, category);
-					}
+					}, true
 			);
 		}
 		pager.setBackButton(event -> {
@@ -230,7 +230,7 @@ public class QBDialogue {
 						q.setParent(quest);
 						if (q instanceof Quest) QuestBook.openQuestEditor(p2, (Quest) q);
 						else QuestBook.openCategoryEditor(p2, (Category) q);
-					}
+					}, false
 			);
 		}
 		pager.setBackButton(event -> openQuestRequirementChooser(p, q));

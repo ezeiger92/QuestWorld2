@@ -29,7 +29,7 @@ public class QuestsCommand implements CommandExecutor {
 					if (party != null && party.hasInvited(p)) {
 						int maxParty = QuestWorld.getInstance().getCfg().getInt("party.max-members");
 						if (party.getSize() >= maxParty) {
-							PlayerTools.sendTranslation(sender, true, Translation.party_errorfull, Integer.toString(maxParty));
+							PlayerTools.sendTranslation(sender, true, Translation.PARTY_ERROR_FULL, Integer.toString(maxParty));
 						}
 						else party.playerJoin(p);
 					}

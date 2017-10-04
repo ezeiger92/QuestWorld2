@@ -82,7 +82,7 @@ public class PlayerTools {
 	public static String makeTranslation(boolean prefixed, Translator key, String... replacements) {
 		String text = QuestWorld.translate(key, replacements);
 		if(!text.isEmpty() && prefixed)
-			text = QuestWorld.translate(Translation.default_prefix) + text;
+			text = QuestWorld.translate(Translation.DEFAULT_PREFIX) + text;
 
 		return Text.colorize(text);
 	}

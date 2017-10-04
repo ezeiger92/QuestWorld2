@@ -263,12 +263,12 @@ public class Mission extends QuestingObject implements IMissionWrite {
 		String dprefix = QuestWorld.getInstance().getCfg().getString("dialogue.prefix");
 		final Mission mission = this;
 		PlayerTools.promptInput(p, new SinglePrompt(
-				PlayerTools.makeTranslation(true, Translation.dialog_add),
+				PlayerTools.makeTranslation(true, Translation.MISSION_DIALOG_ADD),
 				(c,s) -> {
 					Player p2 = (Player) c.getForWhom();
 					if (s.equalsIgnoreCase("exit()")) {
 						quest.updateLastModified();
-						PlayerTools.sendTranslation(p2, true, Translation.dialog_set, path);
+						PlayerTools.sendTranslation(p2, true, Translation.MISSION_DIALOG_SET, path);
 						QuestBook.openQuestMissionEditor(p2, mission);
 						
 						File file = new File(path);

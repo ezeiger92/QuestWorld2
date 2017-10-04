@@ -8,34 +8,18 @@ import org.bukkit.inventory.ItemStack;
 import me.mrCookieSlime.QuestWorld.api.menu.Menu;
 import me.mrCookieSlime.QuestWorld.utils.ItemBuilder;
 
-public class PageList {
+public class Panel {
 	private final int pageSize;
 	private final ItemStack[] items;
 	private final Consumer<InventoryClickEvent>[] buttons;
 	
 	private int filled = 0;
-	private ItemStack defaultItem = null;
-	private Consumer<InventoryClickEvent> defaultButton = null;
 	
 	@SuppressWarnings("unchecked")
-	public PageList(int elementCount) {
+	public Panel(int elementCount) {
 		pageSize = elementCount;
 		items = new ItemStack[pageSize];
 		buttons = new Consumer[pageSize];
-	}
-	
-	public PageList(int elementCount, ItemStack item, Consumer<InventoryClickEvent> button) {
-		this(elementCount);
-		defaultItem = ItemBuilder.clone(item);
-		defaultButton = button;
-	}
-	
-	public void setDefaultItem(ItemStack item) {
-		defaultItem = item.clone();
-	}
-	
-	public void setDefaultButton(Consumer<InventoryClickEvent> button) {
-		defaultButton = button;
 	}
 	
 	public ItemStack getItem(int index) {
@@ -67,30 +51,12 @@ public class PageList {
 		return filled;
 	}
 	
-	public int getCapacity() {
-		return pageSize;
-	}
-	
 	public void build(Menu menu) {
 		build(menu, 0, pageSize);
 	}
 	
-	public void build(Menu menu, int offset) {
-		build(menu, offset, pageSize);
-	}
-	
 	public void build(Menu menu, int offset, int activeSize) {
-		for(int i = 0; i < activeSize; ++i) {
-			int slot = i + offset;
-			ItemStack item = items[i];
-			if(item == null)
-				item = defaultItem;
-			
-			Consumer<InventoryClickEvent> button = buttons[i];
-			if(button == null && item != null)
-				button = defaultButton;
-
-			menu.put(slot, ItemBuilder.clone(item), button);
-		}
+		for(int i = 0; i < activeSize; ++i)
+			menu.put(i + offset, items[i], buttons[i]);
 	}
 }

@@ -27,8 +27,8 @@ public class GuideBook {
 	}
 	
 	private GuideBook() {
-		String display = QuestWorld.translate(Translation.book_display);
-		String[] lore = QuestWorld.translate(Translation.book_lore).split("\n");
+		String display = QuestWorld.translate(Translation.BOOK_DISPLAY);
+		String[] lore = QuestWorld.translate(Translation.BOOK_LORE).split("\n");
 		
 		guide = new ItemBuilder(Material.ENCHANTED_BOOK).display(display).lore(lore).get();
 	}

@@ -10,6 +10,12 @@ public class Text {
 	public final static char dummyChar = '&';
 	public final static char colorChar = ChatColor.COLOR_CHAR;
 	
+	/**
+	 * Colors a string
+	 * 
+	 * @param input A string with "&1" style colors
+	 * @return Colored string
+	 */
 	public static String colorize(String input) {
 		if(input == null)
 			return null;
@@ -18,7 +24,7 @@ public class Text {
 	}
 	
 	public static String colorize(String... inputs) {
-		StringBuilder sb = new StringBuilder();
+		StringBuilder sb = new StringBuilder(inputs.length);
 		
 		for(String input : inputs)
 			sb.append(colorize(input));
@@ -43,7 +49,7 @@ public class Text {
 	}
 	
 	public static String decolor(String... inputs) {
-		StringBuilder sb = new StringBuilder();
+		StringBuilder sb = new StringBuilder(inputs.length);
 		
 		for(String input : inputs)
 			sb.append(decolor(input));
@@ -68,7 +74,7 @@ public class Text {
 	}
 	
 	public static String escape(String... inputs) {
-		StringBuilder sb = new StringBuilder();
+		StringBuilder sb = new StringBuilder(inputs.length);
 		
 		for(String input : inputs)
 			sb.append(escape(input));

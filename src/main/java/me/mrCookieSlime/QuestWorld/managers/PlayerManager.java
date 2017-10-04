@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 import java.util.UUID;
+import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
 import me.mrCookieSlime.CSCoreLibPlugin.Configuration.Config;
@@ -75,10 +76,10 @@ public class PlayerManager {
 	}
 	
 	public void forEachTaskOf(MissionType type, Predicate<IMission> condition) {
-		forEachTaskOf(type, condition, 1, false);
+		forEachTaskOf(type, (m,i) -> condition.test(m) ? 1 : Manual.FAIL, false);
 	}
 	
-	public void forEachTaskOf(MissionType type, Predicate<IMission> condition, int amount, boolean overwriteProgress) {
+	public void forEachTaskOf(MissionType type, BiFunction<IMission, Integer, Integer> condition, boolean overwriteProgress) {
 		
 		Player player = Bukkit.getPlayer(uuid);
 		String worldName = player.getWorld().getName();
@@ -90,11 +91,10 @@ public class PlayerManager {
 			if (category.isWorldEnabled(worldName) && quest.isWorldEnabled(worldName)) {
 				if (!hasCompletedTask(task) && hasUnlockedTask(task)) {
 					if (getStatus(quest).equals(QuestStatus.AVAILABLE)) {
-						if(condition.test(task))
-							if(overwriteProgress)
-								setProgress(task, amount);
-							else
-								addProgress(task, amount);
+						int progress = overwriteProgress ? 0 : getProgress(task);
+						int result = condition.apply(task, task.getAmount() - progress);
+						if(result != Manual.FAIL)
+							setProgress(task, result + progress);
 					}
 				}
 			}
@@ -145,14 +145,14 @@ public class PlayerManager {
 			cfg.setValue(task.getQuest().getCategory().getID() + "." + task.getQuest().getID() + ".mission." + task.getID() + ".complete-until", null);
 			cfg.setValue(task.getQuest().getCategory().getID() + "." + task.getQuest().getID() + ".mission." + task.getID() + ".progress", 0);
 			if (p != null) {
-				PlayerTools.sendTranslation(p, false, Translation.notify_timefail, task.getQuest().getName());
+				PlayerTools.sendTranslation(p, false, Translation.NOTIFY_TIME_FAIL, task.getQuest().getName());
 			}
 			return false;
 		}
 		else if (getProgress(task) == 0 && amount > 0) {
 			cfg.setValue(task.getQuest().getCategory().getID() + "." + task.getQuest().getID() + ".mission." + task.getID() + ".complete-until", (long) (System.currentTimeMillis() + (task.getTimeframe() * 60 * 1000)));
 			if (p != null) 
-				PlayerTools.sendTranslation(p, false, Translation.notify_timestart, task.getText(), Text.timeFromNum(task.getTimeframe()));
+				PlayerTools.sendTranslation(p, false, Translation.NOTIFY_TIME_START, task.getText(), Text.timeFromNum(task.getTimeframe()));
 		}
 		return true;
 	}
@@ -278,7 +278,7 @@ public class PlayerManager {
 			sendDialogue(player.getUniqueId(), task, dialogue);
 		}
 		else {
-			PlayerTools.sendTranslation(player, false, Translation.notify_completetask, task.getQuest().getName());
+			PlayerTools.sendTranslation(player, false, Translation.NOTIFY_COMPLETED, task.getQuest().getName());
 		}
 	}
 	
@@ -304,7 +304,7 @@ public class PlayerManager {
 			// Previously "check !task.getType().getID().equals("ACCEPT_QUEST_FROM_NPC") && "
 			// This was done to keep quests quiet when interacting with citizens
 			if (player != null && task.getDialogue().isEmpty())
-				PlayerTools.sendTranslation(player, false, Translation.notify_completetask, task.getQuest().getName());
+				PlayerTools.sendTranslation(player, false, Translation.NOTIFY_COMPLETED, task.getQuest().getName());
 		}
 	}
 

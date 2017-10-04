@@ -10,6 +10,7 @@ import org.bukkit.inventory.ItemStack;
 
 import me.mrCookieSlime.CSCoreLibPlugin.general.String.StringUtils;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
+import me.mrCookieSlime.QuestWorld.api.Manual;
 import me.mrCookieSlime.QuestWorld.api.MissionChange;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.interfaces.IMission;
@@ -82,9 +83,12 @@ public class CraftMission extends MissionType implements Listener {
 		
 		Player player = (Player)e.getWhoClicked();
 
-		QuestWorld.getInstance().getManager(player).forEachTaskOf(this, mission -> {
-			return QuestWorld.getInstance().isItemSimiliar(test, mission.getMissionItem());
-		}, test.getAmount(), false);
+		QuestWorld.getInstance().getManager(player).forEachTaskOf(this, (mission, needed) -> {
+			if(QuestWorld.getInstance().isItemSimiliar(test, mission.getMissionItem()))
+				return test.getAmount();
+			
+			return Manual.FAIL;
+		}, false);
 	}
 	
 	@Override

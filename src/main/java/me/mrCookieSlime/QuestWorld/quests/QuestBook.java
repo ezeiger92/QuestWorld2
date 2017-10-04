@@ -40,11 +40,10 @@ public class QuestBook {
 		QuestWorld.getInstance().getManager(p).updateLastEntry(null);
 		
 		Menu menu = new Menu(1, QuestWorld.translate(Translation.gui_title));
-
-		addPartyMenuButton(menu, p);
-		
+	
 		PagedMapping view = new PagedMapping(45, 9);
-		view.hackNav(4);
+		view.addFrameButton(4, partyMenuItem(p), Buttons.partyMenu(), true);
+
 		for(Category category : QuestWorld.getInstance().getCategories()) {
 			if (!category.isHidden()) {
 				if (category.isWorldEnabled(p.getWorld().getName())) {
@@ -52,10 +51,10 @@ public class QuestBook {
 						view.addButton(category.getID(), new ItemBuilder(Material.BARRIER).display(category.getName()).lore(
 								"",
 								QuestWorld.translate(Translation.quests_locked)).get(),
-								null);
+								null, false);
 					}
 					else {
-						view.addNavButton(category.getID(),
+						view.addButton(category.getID(),
 								new ItemBuilder(category.getItem()).lore(
 										"",
 										category.getProgress(p),
@@ -70,7 +69,7 @@ public class QuestBook {
 									Player p2 = (Player) event.getWhoClicked();
 									QuestWorld.getInstance().getManager(p2).putPage(0);
 									openCategory(p2, category, true);
-								}
+								}, true
 						);
 					}
 				}
@@ -78,7 +77,7 @@ public class QuestBook {
 					view.addButton(category.getID(), new ItemBuilder(Material.BARRIER).display(category.getName()).lore(
 							"",
 							QuestWorld.translate(Translation.quests_locked_in_world)).get(),
-							null);
+							null, false);
 				}
 			}
 		}
@@ -113,23 +112,19 @@ public class QuestBook {
 		QuestBook.openMainMenu(p);
 	}
 	
-	private static void addPartyMenuButton(Menu menu, Player p) {
+	private static ItemStack partyMenuItem(Player p) {
 		if (QuestWorld.getInstance().getCfg().getBoolean("party.enabled")) {
-			menu.put(4, new ItemBuilder(SkullType.PLAYER)
-					.display(QuestWorld.translate(Translation.gui_party))
-					.lore(QuestWorld.getInstance().getManager(p).getProgress(), "", QuestWorld.translate(Translation.button_open))
-					.get(),
-					event -> {
-						openPartyMenu((Player) event.getWhoClicked());
-					}
-			);
+			return new ItemBuilder(SkullType.PLAYER)
+					.display(QuestWorld.translate(Translation.gui_party)).lore(
+							QuestWorld.getInstance().getManager(p).getProgress(),
+							"",
+							QuestWorld.translate(Translation.button_open)).get();
 		}
-		else {
-			menu.put(4, new ItemBuilder(Material.ENCHANTED_BOOK)
-					.display("&eQuest Book")
-					.lore("", QuestWorld.getInstance().getManager(p).getProgress()).get(),
-					null);
-		}
+		
+		return new ItemBuilder(Material.ENCHANTED_BOOK)
+				.display("&eQuest Book").lore(
+						"",
+						QuestWorld.getInstance().getManager(p).getProgress()).get();
 	}
 
 	public static void openPartyMembers(final Player p) {
@@ -217,27 +212,27 @@ public class QuestBook {
 						event -> {
 							Player p2 = (Player) event.getWhoClicked();
 							if (party.getSize() >= QuestWorld.getInstance().getCfg().getInt("party.max-members"))
-								PlayerTools.sendTranslation(p2, true, Translation.party_errorfull);
+								PlayerTools.sendTranslation(p2, true, Translation.PARTY_ERROR_FULL);
 							else {
 								PlayerTools.promptInput(p2, new SinglePrompt(
-										PlayerTools.makeTranslation(true, Translation.party_playerpick),
+										PlayerTools.makeTranslation(true, Translation.PARTY_PLAYER_PICK),
 										(c,s) -> {
 											String name = Text.decolor(s).replace("@", "");
 
 											Player player = PlayerTools.getPlayer(name);
 											if (player != null) {
 												if (QuestWorld.getInstance().getManager(player).getParty() == null) {
-													PlayerTools.sendTranslation(p2, true, Translation.party_playeradd, name);
+													PlayerTools.sendTranslation(p2, true, Translation.PARTY_PLAYER_ADD, name);
 													try {
 														party.invitePlayer(player);
 													} catch (Exception e1) {
 														e1.printStackTrace();
 													}
 												}
-												else PlayerTools.sendTranslation(p2, true, Translation.party_errormember, name);
+												else PlayerTools.sendTranslation(p2, true, Translation.PARTY_ERROR_MEMBER, name);
 											}
 											else {
-												PlayerTools.sendTranslation(p2, true, Translation.party_errorabsent, name);
+												PlayerTools.sendTranslation(p2, true, Translation.PARTY_ERROR_ABSENT, name);
 											}
 											return true;
 										}
@@ -290,31 +285,29 @@ public class QuestBook {
 		QuestWorld.getInstance().getManager(p).updateLastEntry(category);
 		
 		Menu menu = new Menu(1, QuestWorld.translate(Translation.gui_title));
+		ItemBuilder glassPane = new ItemBuilder(Material.STAINED_GLASS_PANE).color(DyeColor.RED);
+		PagedMapping view = new PagedMapping(45, 9);
 		
-		addPartyMenuButton(menu, p);
-		
-		if (back)
-			menu.put(0, ItemBuilder.Proto.MAP_BACK.getItem(), event -> {
+		if(back)
+			view.setBackButton(event -> {
 				openMainMenu((Player) event.getWhoClicked());
 			});
 		
-		ItemBuilder glassPane = new ItemBuilder(Material.STAINED_GLASS_PANE).color(DyeColor.RED);
+		view.addFrameButton(4, partyMenuItem(p), Buttons.partyMenu(), true);
 		
-		PagedMapping view = new PagedMapping(45, 9);
-		view.hackNav(4);
 		for (final Quest quest: category.getQuests()) {
 			glassPane.display(quest.getName());
 			if (QuestWorld.getInstance().getManager(p).getStatus(quest).equals(QuestStatus.LOCKED) || !quest.isWorldEnabled(p.getWorld().getName())) {
 				view.addButton(quest.getID(), glassPane.lore("", QuestWorld.translate(Translation.quests_locked)).getNew(),
-						null);
+						null, false);
 			}
 			else if (QuestWorld.getInstance().getManager(p).getStatus(quest).equals(QuestStatus.LOCKED_NO_PARTY)) {
 				view.addButton(quest.getID(), glassPane.lore("", "&4You need to leave your current Party").getNew(),
-						null);
+						null, false);
 			}
 			else if (QuestWorld.getInstance().getManager(p).getStatus(quest).equals(QuestStatus.LOCKED_PARTY_SIZE)) {
 				view.addButton(quest.getID(), glassPane.lore("", "&4You can only do this Quest in a Party", "&4with at least &c" + quest.getPartySize() + " &4Members").getNew(),
-						null);
+						null, false);
 			}
 			else {
 				List<String> lore = new ArrayList<String>();
@@ -337,12 +330,12 @@ public class QuestBook {
 				for(int i = 0; i < lore.size(); ++i)
 					lore.set(i, Text.colorize(lore.get(i)));
 				
-				view.addNavButton(quest.getID(),
+				view.addButton(quest.getID(),
 						new ItemBuilder(quest.getItem()).lore(lore)
 						.get(),
 						event -> {
 							openQuest((Player) event.getWhoClicked(), quest, back, true);
-						}
+						}, true
 				);
 			}
 		}
@@ -514,19 +507,17 @@ public class QuestBook {
 				.color(DyeColor.RED).display("&7&o> New Category");
 
 		PagedMapping view = new PagedMapping(45);
-		view.touch(0); // Dummy, force a page to exist
+		view.reserve(1);
 		
-		int found = 0, categoryCount = QuestWorld.getInstance().getCategories().size();
 		for(int i = 0; i < view.getCapacity(); ++i) {
-			if(found < categoryCount)
-				view.touch(i + view.getPageCapacity());
-			
 			Category category = QuestWorld.getInstance().getCategory(i);
 			if(category != null) {
+				view.reserve(1);
+				
 				String[] lore = {
 						"",
-						"&c&oLeft Click to edit",
-						"&c&oShift + Left Click to open",
+						"&c&oLeft Click to open",
+						"&c&oShift + Left Click to edit",
 						"&c&oRight Click to delete"
 				};
 				int quests = category.getQuests().size();
@@ -546,13 +537,12 @@ public class QuestBook {
 					lore = newLore;
 				}
 				
-				++found;
-				view.addNavButton(i,
+				view.addButton(i,
 						new ItemBuilder(category.getItem()).lore(lore).get(),
-						Buttons.onCategory(category));
+						Buttons.onCategory(category), true);
 			}
 			else
-				view.addNavButton(i, defaultItem.get(), Buttons.newCategory(i));
+				view.addButton(i, defaultItem.get(), Buttons.newCategory(i), true);
 		}
 
 		view.build(menu, p);
@@ -564,23 +554,20 @@ public class QuestBook {
 		
 		final Menu menu = new Menu(6, "&3Quest Editor");
 
-		menu.put(0, ItemBuilder.Proto.MAP_BACK.getItem(), event -> {
-			openEditor((Player) event.getWhoClicked());
-		});
-		
 		ItemBuilder defaultItem = new ItemBuilder(Material.STAINED_GLASS_PANE)
 				.color(DyeColor.RED).display("&7&o> New Quest");
 		
 		PagedMapping view = new PagedMapping(45);
-		view.touch(0); // Dummy, force a page to exist
-		
-		int found = 0, questCount = category.getQuests().size();
+		view.reserve(1);
+		view.setBackButton(event -> {
+			openEditor((Player) event.getWhoClicked());
+		});
+
 		for (int i = 0; i < view.getCapacity(); ++i) {
-			if(found < questCount)
-				view.touch(i + view.getPageCapacity());
-			
 			Quest quest = category.getQuest(i);
 			if (quest != null) {
+				view.reserve(1);
+				
 				int missions = quest.getMissions().size();
 				String[] lore = {
 					"",
@@ -604,13 +591,12 @@ public class QuestBook {
 					lore = newLore;
 				}
 				
-				++found;
-				view.addNavButton(i,
+				view.addButton(i,
 						new ItemBuilder(quest.getItem()).lore(lore).get(),
-						Buttons.onQuest(quest));
+						Buttons.onQuest(quest), true);
 			}
 			else
-				view.addNavButton(i, defaultItem.getNew(), Buttons.newQuest(category.getID(), i));
+				view.addButton(i, defaultItem.getNew(), Buttons.newQuest(category.getID(), i), true);
 		}
 		view.build(menu, p);
 		menu.openFor(p);
@@ -649,13 +635,13 @@ public class QuestBook {
 				event -> {
 					Player p2 = (Player) event.getWhoClicked();
 					PlayerTools.promptInput(p2, new SinglePrompt(
-							PlayerTools.makeTranslation(true, Translation.category_namechange, category.getName()),
+							PlayerTools.makeTranslation(true, Translation.CATEGORY_NAME_EDIT, category.getName()),
 							(c,s) -> {
 								changes.setName(s);
 								if(changes.sendEvent()) {
 									String oldName = category.getName();
 									changes.apply();
-									PlayerTools.sendTranslation(p2, true, Translation.category_nameset, s, oldName);
+									PlayerTools.sendTranslation(p2, true, Translation.CATEGORY_NAME_SET, s, oldName);
 								}
 								
 								QuestBook.openCategoryEditor(p2, category);
@@ -697,14 +683,14 @@ public class QuestBook {
 				event -> {
 					Player p2 = (Player) event.getWhoClicked();
 					PlayerTools.promptInput(p2, new SinglePrompt(
-							PlayerTools.makeTranslation(true, Translation.category_permchange, category.getName(), category.getPermission()),
+							PlayerTools.makeTranslation(true, Translation.CATEGORY_PERM_EDIT, category.getName(), category.getPermission()),
 							(c,s) -> {
 								String permission = s.equalsIgnoreCase("none") ? "": s;
 								changes.setPermission(permission);
 								if(changes.sendEvent()) {
 									String oldPerm = category.getPermission();
 									changes.apply();
-									PlayerTools.sendTranslation(p2, true, Translation.category_permset, category.getName(), s, oldPerm);
+									PlayerTools.sendTranslation(p2, true, Translation.CATEGORY_PERM_SET, category.getName(), s, oldPerm);
 								}
 								
 								QuestBook.openCategoryEditor(p2, category);
@@ -793,13 +779,13 @@ public class QuestBook {
 				event -> {
 					Player p2 = (Player) event.getWhoClicked();
 					PlayerTools.promptInput(p2, new SinglePrompt(
-							PlayerTools.makeTranslation(true, Translation.quest_namechange, quest.getName()),
+							PlayerTools.makeTranslation(true, Translation.QUEST_NAME_EDIT, quest.getName()),
 							(c,s) -> {
 								changes.setName(s);
 								if(changes.sendEvent()) {
 									String oldName = quest.getName();
 									changes.apply();
-									PlayerTools.sendTranslation(p2, true, Translation.quest_nameset, s, oldName);
+									PlayerTools.sendTranslation(p2, true, Translation.QUEST_NAME_SET, s, oldName);
 								}
 
 								QuestBook.openQuestEditor(p2, quest);
@@ -943,14 +929,14 @@ public class QuestBook {
 				event -> {
 					Player p2 = (Player) event.getWhoClicked();
 					PlayerTools.promptInput(p2, new SinglePrompt(
-							PlayerTools.makeTranslation(true, Translation.quest_permchange, quest.getName(), quest.getPermission()),
+							PlayerTools.makeTranslation(true, Translation.QUEST_PERM_EDIT, quest.getName(), quest.getPermission()),
 							(c,s) -> {
 								String permission = s.equalsIgnoreCase("none") ? "": s;
 								changes.setPermission(permission);
 								if(changes.sendEvent()) {
 									String oldPerm = quest.getPermission();
 									changes.apply();
-									PlayerTools.sendTranslation(p2, true, Translation.quest_permset, quest.getName(), s, oldPerm);
+									PlayerTools.sendTranslation(p2, true, Translation.QUEST_PERM_SET, quest.getName(), s, oldPerm);
 								}
 
 								QuestBook.openQuestEditor(p2, quest);
@@ -1149,15 +1135,15 @@ public class QuestBook {
 	public static void openQuestMissionEditor(Player p, final Mission mission) {
 		QuestWorld.getSounds().EditorClick().playTo(p);
 		
-		Menu menu2 = new Menu(2, "&3Quest Editor");
+		Menu menu = new Menu(2, "&3Quest Editor");
 		MissionChange changes = new MissionChange(mission);
 
-		menu2.put(0, ItemBuilder.Proto.MAP_BACK.getItem(), e -> {
+		menu.put(0, ItemBuilder.Proto.MAP_BACK.getItem(), e -> {
 			openQuestEditor(p, mission.getQuest());
 		});
 		
 		// Mission types now handle their own menu data!
-		mission.getType().buildMenu(changes, menu2);
+		mission.getType().buildMenu(changes, menu);
 		
 		ItemStack missionSelector = new ItemBuilder(mission.getType().getSelectorItem())
 				.display("&7" + mission.getType().toString())
@@ -1165,11 +1151,11 @@ public class QuestBook {
 						"",
 						"&e> Click to change the Mission Type").get();
 		
-		menu2.put(9, missionSelector, e -> {
+		menu.put(9, missionSelector, e -> {
 			openMissionSelector(p, changes.getSource());
 		});
 		
-		menu2.openFor(p);
+		menu.openFor(p);
 	}
 
 	public static void openMissionSelector(Player p, Mission mission) {
@@ -1178,11 +1164,10 @@ public class QuestBook {
 		final Menu menu = new Menu(3, Text.colorize("&3Mission Selector: " + mission.getQuest().getName()));
 		MissionChange changes = new MissionChange(mission);
 
-		menu.put(0, ItemBuilder.Proto.MAP_BACK.getItem(), event -> {
+		PagedMapping view = new PagedMapping(45, 9);
+		view.setBackButton(event -> {
 			openQuestMissionEditor((Player) event.getWhoClicked(), mission);
 		});
-		
-		PagedMapping view = new PagedMapping(45, 9);
 		int i = 0;
 		for(MissionType type : QuestWorld.getInstance().getMissionTypes().values()) {
 			String name = Text.niceName(type.getName());
@@ -1191,7 +1176,7 @@ public class QuestBook {
 					event -> {
 				changes.setType(type);
 				MissionButton.apply(event, changes);
-			});
+			}, false);
 			++i;
 		}
 		view.setBackButton(event -> openQuestMissionEditor(p, mission));

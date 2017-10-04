@@ -89,12 +89,12 @@ public class LocationMission extends MissionType implements Ticking {
 					Player p = (Player)event.getWhoClicked();
 					
 					PlayerTools.promptInput(p, new SinglePrompt(
-							PlayerTools.makeTranslation(true, Translation.location_rename),
+							PlayerTools.makeTranslation(true, Translation.LOCMISSION_NAME_EDIT),
 							(c,s) -> {
 								changes.setCustomString(Text.colorize(s));
 								
 								if(changes.sendEvent()) {
-									PlayerTools.sendTranslation(p, true, Translation.location_rename);
+									PlayerTools.sendTranslation(p, true, Translation.LOCMISSION_NAME_SET);
 									changes.apply();
 								}
 

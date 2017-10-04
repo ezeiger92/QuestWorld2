@@ -50,7 +50,7 @@ public class Party {
 	}
 	
 	public void invitePlayer(Player p) throws Exception {
-		PlayerTools.sendTranslation(p, true, Translation.party_groupinvite, Bukkit.getOfflinePlayer(leader).getName());
+		PlayerTools.sendTranslation(p, true, Translation.PARTY_GROUP_INVITE, Bukkit.getOfflinePlayer(leader).getName());
 
 		new TellRawMessage()
 		.addText(Text.colorize("&a&lACCEPT"))
@@ -79,7 +79,7 @@ public class Party {
 		
 		if(target != null) {
 			for(Player p : existingParty) {
-				PlayerTools.sendTranslation(p, true, Translation.party_playerkick, name);
+				PlayerTools.sendTranslation(p, true, Translation.PARTY_PLAYER_KICK, name);
 			}
 			
 			members.remove(target.getUniqueId());
@@ -92,11 +92,11 @@ public class Party {
 		for (UUID member: getPlayers()) {
 			Player player = Bukkit.getPlayer(member);
 			if (player != null) 
-				PlayerTools.sendTranslation(player, true, Translation.party_playerjoin, p.getName());
+				PlayerTools.sendTranslation(player, true, Translation.PARTY_PLAYER_JOIN, p.getName());
 		}
 		
 		this.members.add(p.getUniqueId());
-		PlayerTools.sendTranslation(p, true, Translation.party_groupjoin, p.getName(), Bukkit.getOfflinePlayer(leader).getName());
+		PlayerTools.sendTranslation(p, true, Translation.PARTY_GROUP_JOIN, p.getName(), Bukkit.getOfflinePlayer(leader).getName());
 		QuestWorld.getInstance().getManager(p).toConfig().setValue("party.associated", leader.toString());
 		if (pending.contains(p.getUniqueId())) pending.remove(p.getUniqueId());
 		save();
