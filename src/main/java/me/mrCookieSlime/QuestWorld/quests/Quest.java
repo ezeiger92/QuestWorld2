@@ -12,7 +12,6 @@ import me.mrCookieSlime.QuestWorld.utils.ItemBuilder;
 import me.mrCookieSlime.QuestWorld.utils.Text;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -134,25 +133,38 @@ public class Quest extends QuestingObject {
 			return;
 
 		for (String key: cfg.getKeys("missions")) {
-			if (!cfg.contains("missions." + key + ".location.world")) {
-				cfg.setValue("missions." + key + ".location", new Location(Bukkit.getWorlds().get(0), 0, 0, 0));
+			String prefix = "missions." + key;
+			
+			if(cfg.contains(prefix + ".citizen")) {
+				int customInt = cfg.getInt(prefix + ".citizen");
+				cfg.setValue(prefix + ".citizen", null);
+				cfg.setValue(prefix + ".custom_int", customInt);
 				cfg.save();
 			}
+			
+			if(cfg.contains(prefix + ".name")) {
+				String customString = cfg.getString(prefix + ".name");
+				cfg.setValue(prefix + ".name", null);
+				cfg.setValue(prefix + ".custom_string", customString);
+				cfg.save();
+			}
+
 			QuestChange changes = new QuestChange(this);
+			
 			changes.addMission(new Mission(this, key,
-					MissionType.valueOf(cfg.getString("missions." + key + ".type")),
-					EntityType.valueOf(cfg.getString("missions." + key + ".entity")),
-					Text.colorize(cfg.getString("missions." + key + ".name")),
-					cfg.getItem("missions." + key + ".item"),
-					cfg.getLocation("missions." + key + ".location"),
-					cfg.getInt("missions." + key + ".amount"),
-					Text.colorize(cfg.getString("missions." + key + ".display-name")),
-					cfg.contains("missions." + key + ".timeframe") ? cfg.getInt("missions." + key + ".timeframe"): 0,
-					cfg.getBoolean("missions." + key + ".reset-on-death"),
-					cfg.getInt("missions." + key + ".citizen"),
+					MissionType.valueOf(cfg.getString(prefix + ".type")),
+					EntityType.valueOf(cfg.getString(prefix + ".entity")),
+					Text.colorize(cfg.getString(prefix + ".custom_string")),
+					cfg.getItem(prefix + ".item"),
+					cfg.getLocation(prefix + ".location"),
+					cfg.getInt(prefix + ".amount"),
+					Text.colorize(cfg.getString(prefix + ".display-name")),
+					cfg.contains(prefix + ".timeframe") ? cfg.getInt(prefix + ".timeframe"): 0,
+					cfg.getBoolean(prefix + ".reset-on-death"),
+					cfg.getInt(prefix + ".custom_int"),
 					// not exclude = allow, what we want
-					!cfg.getBoolean("missions." + key + ".exclude-spawners"),
-					Text.colorize(cfg.getString("missions." + key + ".lore"))));
+					!cfg.getBoolean(prefix + ".exclude-spawners"),
+					Text.colorize(cfg.getString(prefix + ".lore"))));
 			
 			if(changes.sendEvent())
 				changes.apply();
@@ -191,14 +203,15 @@ public class Quest extends QuestingObject {
 			cfg.setValue("missions." + mission.getID() + ".item", new ItemStack(mission.getMissionItem()));
 			cfg.setValue("missions." + mission.getID() + ".entity", mission.getEntity().toString());
 			if (mission.getLocation() != null && mission.getLocation().getWorld() != null) cfg.setValue("missions." + mission.getID() + ".location", mission.getLocation());
-			cfg.setValue("missions." + mission.getID() + ".name", Text.escape(mission.getCustomString()));
 			cfg.setValue("missions." + mission.getID() + ".display-name", Text.escape(mission.getDisplayName()));
 			cfg.setValue("missions." + mission.getID() + ".timeframe", mission.getTimeframe());
 			cfg.setValue("missions." + mission.getID() + ".reset-on-death", mission.resetsonDeath());
 			cfg.setValue("missions." + mission.getID() + ".lore", Text.escape(mission.getDescription()));
+			// Formerly ".citizen"
+			cfg.setValue("missions." + mission.getID() + ".custom_int", mission.getCustomInt());
+			// Formerly ".name"
+			cfg.setValue("missions." + mission.getID() + ".custom_string", Text.escape(mission.getCustomString()));
 			
-			// TODO move citizen tag to custom_int tag
-			cfg.setValue("missions." + mission.getID() + ".citizen", mission.getCustomInt());
 			cfg.setValue("missions." + mission.getID() + ".exclude-spawners", !mission.acceptsSpawners());
 		}
 		if (parent != null) cfg.setValue("parent", String.valueOf(parent.getCategory().getID() + "-C" + parent.getID()));

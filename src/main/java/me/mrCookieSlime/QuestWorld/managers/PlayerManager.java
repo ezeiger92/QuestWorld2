@@ -33,6 +33,7 @@ import me.mrCookieSlime.QuestWorld.utils.Text;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.AnimalTamer;
 import org.bukkit.entity.Player;
 
 public class PlayerManager {
@@ -135,13 +136,13 @@ public class PlayerManager {
 		return date > System.currentTimeMillis();
 	}
 	
-	public boolean updateTimeframe(UUID uuid, IMission task, int amount) {
+	public static boolean updateTimeframe(UUID uuid, IMission task, int amount) {
 		if (task.getTimeframe() == 0) return true;
-		Config cfg = QuestWorld.getInstance().getManager(Bukkit.getOfflinePlayer(uuid)).toConfig();
+		PlayerManager manager = QuestWorld.getInstance().getManager(Bukkit.getOfflinePlayer(uuid));
+		Config cfg = manager.toConfig();
 		Player p = Bukkit.getPlayer(uuid);
-		
-		// TODO This checks against the class' uuid, then assigns based on the supplied uuid. WHAT.
-		if (!isWithinTimeframe(task)) {
+
+		if (!manager.isWithinTimeframe(task)) {
 			cfg.setValue(task.getQuest().getCategory().getID() + "." + task.getQuest().getID() + ".mission." + task.getID() + ".complete-until", null);
 			cfg.setValue(task.getQuest().getCategory().getID() + "." + task.getQuest().getID() + ".mission." + task.getID() + ".progress", 0);
 			if (p != null) {
@@ -149,7 +150,7 @@ public class PlayerManager {
 			}
 			return false;
 		}
-		else if (getProgress(task) == 0 && amount > 0) {
+		else if (manager.getProgress(task) == 0 && amount > 0) {
 			cfg.setValue(task.getQuest().getCategory().getID() + "." + task.getQuest().getID() + ".mission." + task.getID() + ".complete-until", (long) (System.currentTimeMillis() + (task.getTimeframe() * 60 * 1000)));
 			if (p != null) 
 				PlayerTools.sendTranslation(p, false, Translation.NOTIFY_TIME_START, task.getText(), Text.timeFromNum(task.getTimeframe()));
@@ -234,8 +235,9 @@ public class PlayerManager {
 	
 	public int getProgress(IMission task) {
 		Quest quest = task.getQuest();
-		if (!cfg.contains(quest.getCategory().getID() + "." + quest.getID() + ".mission." + task.getID() + ".progress")) return 0;
-		else return cfg.getInt(quest.getCategory().getID() + "." + quest.getID() + ".mission." + task.getID() + ".progress");
+		int progress = cfg.getInt(quest.getCategory().getID() + "." + quest.getID() + ".mission." + task.getID() + ".progress");
+		
+		return Math.min(progress, task.getAmount());
 	}
 	
 	public int getTotal(IMission task) {
@@ -257,12 +259,12 @@ public class PlayerManager {
 			setSingleProgress(this.uuid, task, amount);
 	}
 	
-	private void setSingleProgress(UUID uuid, IMission task, int amount) {
+	private static void setSingleProgress(UUID uuid, IMission task, int amount) {
 		amount = Math.min(amount, task.getAmount());
 		if (!updateTimeframe(uuid, task, amount))
 			return;
 		
-		QuestWorld.getInstance().getManager(uuid.toString()).toConfig()
+		QuestWorld.getInstance().getManager(uuid).toConfig()
 		.setValue(task.getQuest().getCategory().getID() + "." + task.getQuest().getID() + ".mission." + task.getID() + ".progress", amount);
 		
 		if(amount == task.getAmount()) {
@@ -272,7 +274,7 @@ public class PlayerManager {
 		}
 	}
 
-	public void sendQuestDialogue(final Player player, final IMission task, final Iterator<String> dialogue) {
+	public static void sendQuestDialogue(final Player player, final IMission task, final Iterator<String> dialogue) {
 		if (dialogue.hasNext()) {
 			sendDialogueComponent(player, dialogue.next());
 			sendDialogue(player.getUniqueId(), task, dialogue);
@@ -282,7 +284,7 @@ public class PlayerManager {
 		}
 	}
 	
-	private void sendDialogue(final UUID uuid, final IMission task, final Iterator<String> dialogue) {
+	private static void sendDialogue(final UUID uuid, final IMission task, final Iterator<String> dialogue) {
 		if (dialogue.hasNext()) {
 			final String line = dialogue.next();
 			Bukkit.getScheduler().scheduleSyncDelayedTask(QuestWorld.getInstance(), new Runnable() {
@@ -308,7 +310,7 @@ public class PlayerManager {
 		}
 	}
 
-	private void sendDialogueComponent(Player player, String line) {
+	private static void sendDialogueComponent(Player player, String line) {
 		if (line.startsWith("/")) {
 			Bukkit.dispatchCommand(Bukkit.getConsoleSender(), line.substring(1).replace("<player>", player.getName()));
 		}
@@ -413,18 +415,25 @@ public class PlayerManager {
 		
 	}
 	
+	// Right, so this function USED to loop through every file in data-storage/Quest World on
+	// the main thread. W H A T
 	public static void clearAllQuestData(Quest quest) {
-		for (File file: new File("data-storage/Quest World").listFiles()) {
-			String uuid = file.getName().replace(".yml", "");
-			if (QuestWorld.getInstance().isManagerLoaded(uuid)) {
-				QuestWorld.getInstance().getManager(uuid).clearQuestData(quest);
-			}
-			else {
+		Bukkit.getScheduler().runTaskAsynchronously(QuestWorld.getInstance(), () -> {
+			// First: clear all the quest data on a new thread
+			for (File file: new File("data-storage/Quest World").listFiles()) {
 				Config cfg = new Config(file);
 
 				cfg.setValue(quest.getCategory().getID() + "." + quest.getID(), null);
 				cfg.save();
 			}
-		}
+
+			// Second: go back to the main thread and make sure all player managers know what happened
+			Bukkit.getScheduler().callSyncMethod(QuestWorld.getInstance(), () -> {
+				for(AnimalTamer player : Bukkit.getOnlinePlayers())
+					QuestWorld.getInstance().getManager(player.getUniqueId()).clearQuestData(quest);
+				
+				return false;
+			});
+		});
 	}
 }

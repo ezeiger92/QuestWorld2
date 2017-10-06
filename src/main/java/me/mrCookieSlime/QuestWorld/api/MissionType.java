@@ -91,7 +91,7 @@ public abstract class MissionType {
 	}
 	
 	protected void setSelectorItem(ItemStack material) {
-		selectorItem = material;
+		selectorItem = material.clone();
 	}
 	
 	public String progressString(float percent, int current, int total) {

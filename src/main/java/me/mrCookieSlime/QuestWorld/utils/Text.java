@@ -70,7 +70,15 @@ public class Text {
 		if(input == null)
 			return null;
 		
-		return input.replace(colorChar, dummyChar);
+		int len = input.length() - 1;
+		char[] inputArray = input.toCharArray();
+		
+		for(int i = 0; i < len; ++i) {
+			char c = inputArray[i];
+			inputArray[i] = (c == colorChar) ? dummyChar : c;
+		}
+		
+		return new String(inputArray);
 	}
 	
 	public static String escape(String... inputs) {

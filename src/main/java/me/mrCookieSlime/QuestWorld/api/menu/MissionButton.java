@@ -8,10 +8,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
-import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.MissionChange;
 import me.mrCookieSlime.QuestWorld.api.SinglePrompt;
 import me.mrCookieSlime.QuestWorld.api.Translation;
+import me.mrCookieSlime.QuestWorld.managers.PlayerManager;
 import me.mrCookieSlime.QuestWorld.quests.QBDialogue;
 import me.mrCookieSlime.QuestWorld.quests.QuestBook;
 import me.mrCookieSlime.QuestWorld.utils.EntityTools;
@@ -194,7 +194,7 @@ public class MissionButton {
 						if (changes.getSource().getDialogue().isEmpty())
 							p.sendMessage(Text.colorize("&4No Dialogue found!"));
 						else
-							QuestWorld.getInstance().getManager(p).sendQuestDialogue(p, changes.getSource(), changes.getSource().getDialogue().iterator());
+							PlayerManager.sendQuestDialogue(p, changes.getSource(), changes.getSource().getDialogue().iterator());
 					}
 					else
 						changes.getSource().setupDialogue(p);

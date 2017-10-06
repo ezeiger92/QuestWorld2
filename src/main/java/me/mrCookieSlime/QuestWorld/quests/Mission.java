@@ -41,7 +41,7 @@ public class Mission extends QuestingObject implements IMissionWrite {
 	int customInt;
 	boolean spawnersAllowed;
 	
-	List<String> dialogue = new ArrayList<String>();
+	ArrayList<String> dialogue = new ArrayList<String>();
 	
 	public Mission(Quest quest, String id, MissionType type, EntityType entity, String customString,
 			ItemStack item, Location location, int amount, String displayName, int timeframe,
@@ -151,7 +151,7 @@ public class Mission extends QuestingObject implements IMissionWrite {
 	
 	public void setItem(ItemStack item) {
 		quest.updateLastModified();
-		this.item = new ItemStack(item);
+		this.item = item.clone();
 		this.item.setAmount(1);
 	}
 	
@@ -183,37 +183,24 @@ public class Mission extends QuestingObject implements IMissionWrite {
 		this.amount = amount;
 	}
 	
+	private static final String[] progress_colors = {
+		"&4", "&c", "&6", "&e", "&2", "&a"
+	};
+	
+	private static final String progress_bar = "::::::::::::::::::::";
+	
 	public String getProgress(Player p) {
-		StringBuilder progress = new StringBuilder();
-		int amount = QuestWorld.getInstance().getManager(p).getProgress(this);
-		int total = this.amount;
-
-		// In the event that amount somehow exceeded total, clamp it.
-		// TODO: Although this fix works, this situation shouldn't happen. Find the real cause.
-		amount = Math.min(amount, total);
+		int progress = QuestWorld.getInstance().getManager(p).getProgress(this);
+		int length = (progress * 20) / amount;
 		
-		float percentage = amount / (float)total;
-		
-		if (percentage < .16f) progress.append("&4");
-		else if (percentage < .32f) progress.append("&c");
-		else if (percentage < .48f) progress.append("&6");
-		else if (percentage < .64f) progress.append("&e");
-		else if (percentage < .80f) progress.append("&2");
-		else progress = progress.append("&a");
-		
-		String bar = "::::::::::::::::::::";
-		int prog = (int)(percentage * 20.f);
-		int rest = 20 - prog;
-		
-		progress.append(bar.substring(0, prog));
-		
-		progress.append("&7");
-		progress.append(bar.substring(0, rest));
-		progress.append(" - ");
-		
-		progress.append(getType().progressString(percentage, amount, total));
-		
-		return Text.colorize(progress.toString());
+		return Text.colorize(
+				progress_colors[(progress * 6) / amount],
+				progress_bar.substring(20 - length),
+				"&7",
+				progress_bar.substring(length),
+				" - ",
+				getType().progressString(progress / (float)amount, progress, amount)
+		);
 	}
 	
 	public String getCustomString() {

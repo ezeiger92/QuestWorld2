@@ -41,8 +41,8 @@ import me.mrCookieSlime.QuestWorld.utils.Lang;
 import me.mrCookieSlime.QuestWorld.utils.Log;
 import me.mrCookieSlime.QuestWorld.utils.Sounds;
 
-import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.AnimalTamer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
@@ -399,16 +399,17 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 		this.profiles.remove(manager.getUUID());
 	}
 	
-	public PlayerManager getManager(OfflinePlayer p) {
-		return profiles.containsKey(p.getUniqueId()) ? profiles.get(p.getUniqueId()): new PlayerManager(p);
+	public PlayerManager getManager(UUID uuid) {
+		return profiles.containsKey(uuid) ? profiles.get(uuid): new PlayerManager(uuid);
 	}
 	
-	public PlayerManager getManager(String uuid) {
-		return profiles.containsKey(UUID.fromString(uuid)) ? profiles.get(UUID.fromString(uuid)): new PlayerManager(UUID.fromString(uuid));
+	// This was changed to AnimalTamer because it's the most basic interface with getUniqueId
+	public PlayerManager getManager(AnimalTamer player) {
+		return getManager(player.getUniqueId());
 	}
 	
-	public boolean isManagerLoaded(String uuid) {
-		return profiles.containsKey(UUID.fromString(uuid));
+	public boolean isManagerLoaded(UUID uuid) {
+		return profiles.containsKey(uuid);
 	}
 	
 	public void enable(QuestExtension hook) {

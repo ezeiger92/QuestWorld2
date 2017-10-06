@@ -57,8 +57,7 @@ public enum Translation implements Translator {
 	NOTIFY_TIME_FAIL ("notifications.task-failed-timeframe",  "quest"),
 	NOTIFY_TIME_START("notifications.task-timeframe-started", "task", "time"),
 	
-	// TODO
-	// This is hacky, look again when less tired
+	// TODO This is hacky, look again when less tired
 	gui_title(0),
 	gui_party(0),
 	button_open(0),

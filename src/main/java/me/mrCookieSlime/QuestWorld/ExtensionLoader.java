@@ -21,7 +21,7 @@ public class ExtensionLoader {
 	}
 	
 	public void loadLocal() {
-		// TODO check for jar files the best way, because it's probably not
+		// This is as much as bukkit checks, good enough for me!
 		File[] extensions = folder.listFiles((file, name) -> name.endsWith(".jar"));
 		
 		// Not a directory or unable to list files for some reason
