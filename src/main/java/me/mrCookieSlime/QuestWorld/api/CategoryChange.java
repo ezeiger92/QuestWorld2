@@ -4,12 +4,12 @@ import java.util.List;
 
 import org.bukkit.inventory.ItemStack;
 
-import me.mrCookieSlime.QuestWorld.events.CancellableEvent;
-import me.mrCookieSlime.QuestWorld.events.CategoryChangeEvent;
-import me.mrCookieSlime.QuestWorld.quests.Category;
-import me.mrCookieSlime.QuestWorld.quests.Quest;
-import me.mrCookieSlime.QuestWorld.utils.BitFlag;
-import me.mrCookieSlime.QuestWorld.utils.BitFlag.BitString;
+import me.mrCookieSlime.QuestWorld.event.CancellableEvent;
+import me.mrCookieSlime.QuestWorld.event.CategoryChangeEvent;
+import me.mrCookieSlime.QuestWorld.quest.Category;
+import me.mrCookieSlime.QuestWorld.quest.Quest;
+import me.mrCookieSlime.QuestWorld.util.BitFlag;
+import me.mrCookieSlime.QuestWorld.util.BitFlag.BitString;
 
 public class CategoryChange extends Category {
 	public enum Member implements BitString {

@@ -6,7 +6,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapelessRecipe;
 
 import me.mrCookieSlime.QuestWorld.api.Translation;
-import me.mrCookieSlime.QuestWorld.utils.ItemBuilder;
+import me.mrCookieSlime.QuestWorld.util.ItemBuilder;
 
 public class GuideBook {
 	private static GuideBook instance = null;

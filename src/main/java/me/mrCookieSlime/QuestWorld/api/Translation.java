@@ -22,6 +22,7 @@ public enum Translation implements Translator {
 	CATEGORY_NAME_SET ("editor.category.name-set",    "name", "name_old"),
 	CATEGORY_PERM_EDIT("editor.category.perm-change", "name", "perm"),
 	CATEGORY_PERM_SET ("editor.category.perm-set",    "name", "perm", "perm_old"),
+	CATEGORY_DESC     ("editor.category.description", "total", "completed", "available", "cooldown", "reward", "progress"),
 	
 	QUEST_CREATED  ("editor.quest.created",     "name"),
 	QUEST_DELETED  ("editor.quest.deleted",     "name"),
@@ -58,29 +59,24 @@ public enum Translation implements Translator {
 	NOTIFY_TIME_START("notifications.task-timeframe-started", "task", "time"),
 	
 	// TODO This is hacky, look again when less tired
-	gui_title(0),
-	gui_party(0),
-	button_open(0),
-	button_back_party(0),
-	button_back_quests(0),
-	button_back_general(0),
-	quests_locked(0),
+	gui_title,
+	gui_party,
+	button_open,
+	button_back_party,
+	button_back_quests,
+	button_back_general,
+	quests_locked,
 	quests_locked_in_world("quests.locked-in-world"),
 	quests_tasks_completed("quests.tasks_completed"),
-	quests_state_cooldown(0),
-	quests_state_completed(0),
+	quests_state_cooldown,
+	quests_state_completed,
 	quests_state_reward_claimable("quests.state.reward_claimable"),
 	quests_state_reward_claim("quests.state.reward_claim"),
-	quests_display_cooldown(0),
-	quests_display_monetary(0),
-	quests_display_exp(0),
-	quests_display_rewards(0),
-	category_desc_total(0),
-	category_desc_completed(0),
-	category_desc_available(0),
-	category_desc_cooldown(0),
-	category_desc_claimable_reward("category.desc.claimable_reward"),
-	task_locked(0),
+	quests_display_cooldown,
+	quests_display_monetary,
+	quests_display_exp,
+	quests_display_rewards,
+	task_locked,
 	;
 	
 	private String path;
@@ -90,9 +86,9 @@ public enum Translation implements Translator {
 		this.placeholders = wrap(placeholders);
 	}
 	
-	Translation(int d, String... placeholders) {
+	Translation() {
 		path = name().replace('_', '.');
-		this.placeholders = wrap(placeholders);
+		placeholders = new String[0];
 	}
 	
 	@Override

@@ -1,13 +1,13 @@
 package me.mrCookieSlime.QuestWorld.api;
 
 import me.mrCookieSlime.QuestWorld.QuestWorld;
-import me.mrCookieSlime.QuestWorld.api.interfaces.IMission;
-import me.mrCookieSlime.QuestWorld.api.interfaces.IMissionWrite;
+import me.mrCookieSlime.QuestWorld.api.contract.IMission;
+import me.mrCookieSlime.QuestWorld.api.contract.IMissionWrite;
 import me.mrCookieSlime.QuestWorld.api.menu.Menu;
 import me.mrCookieSlime.QuestWorld.api.menu.MenuData;
 import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
-import me.mrCookieSlime.QuestWorld.utils.Log;
-import me.mrCookieSlime.QuestWorld.utils.Text;
+import me.mrCookieSlime.QuestWorld.util.Log;
+import me.mrCookieSlime.QuestWorld.util.Text;
 
 import java.util.HashMap;
 import java.util.Map;

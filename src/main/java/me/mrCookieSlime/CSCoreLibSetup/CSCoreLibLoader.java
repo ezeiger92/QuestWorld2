@@ -16,7 +16,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
-import me.mrCookieSlime.QuestWorld.utils.Log;
+import me.mrCookieSlime.QuestWorld.util.Log;
 
 public class CSCoreLibLoader {
 	

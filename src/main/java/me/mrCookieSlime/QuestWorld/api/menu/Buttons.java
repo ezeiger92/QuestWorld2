@@ -8,11 +8,11 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.SinglePrompt;
 import me.mrCookieSlime.QuestWorld.api.Translation;
-import me.mrCookieSlime.QuestWorld.quests.Category;
-import me.mrCookieSlime.QuestWorld.quests.QBDialogue;
-import me.mrCookieSlime.QuestWorld.quests.Quest;
-import me.mrCookieSlime.QuestWorld.quests.QuestBook;
-import me.mrCookieSlime.QuestWorld.utils.PlayerTools;
+import me.mrCookieSlime.QuestWorld.quest.Category;
+import me.mrCookieSlime.QuestWorld.quest.QBDialogue;
+import me.mrCookieSlime.QuestWorld.quest.Quest;
+import me.mrCookieSlime.QuestWorld.quest.QuestBook;
+import me.mrCookieSlime.QuestWorld.util.PlayerTools;
 
 public class Buttons {
 	public static Consumer<InventoryClickEvent> onCategory(Category category) {

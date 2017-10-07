@@ -4,7 +4,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
-import me.mrCookieSlime.QuestWorld.utils.Log;
+import me.mrCookieSlime.QuestWorld.api.contract.QuestLoader;
+import me.mrCookieSlime.QuestWorld.util.Log;
 
 public abstract class QuestExtension {
 	private String[] requirements;

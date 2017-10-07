@@ -5,7 +5,7 @@ import java.util.function.Consumer;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
-import me.mrCookieSlime.QuestWorld.utils.ItemBuilder;
+import me.mrCookieSlime.QuestWorld.util.ItemBuilder;
 
 public class MenuData {
 	private Consumer<InventoryClickEvent> handler;

@@ -7,13 +7,15 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import me.mrCookieSlime.QuestWorld.events.CancellableEvent;
-import me.mrCookieSlime.QuestWorld.events.MissionChangeEvent;
-import me.mrCookieSlime.QuestWorld.quests.Mission;
-import me.mrCookieSlime.QuestWorld.utils.BitFlag;
-import me.mrCookieSlime.QuestWorld.utils.BitFlag.BitString;
+import me.mrCookieSlime.QuestWorld.api.contract.IMission;
+import me.mrCookieSlime.QuestWorld.api.contract.IMissionWrite;
+import me.mrCookieSlime.QuestWorld.event.CancellableEvent;
+import me.mrCookieSlime.QuestWorld.event.MissionChangeEvent;
+import me.mrCookieSlime.QuestWorld.quest.Mission;
+import me.mrCookieSlime.QuestWorld.util.BitFlag;
+import me.mrCookieSlime.QuestWorld.util.BitFlag.BitString;
 
-public class MissionChange extends Mission {
+public class MissionChange extends Mission implements IMissionWrite {
 	public enum Member implements BitString {
 		QUEST,
 		TYPE,
@@ -32,13 +34,16 @@ public class MissionChange extends Mission {
 		DIALOGUE,
 	}
 	
-	private long changeBits;
+	private long changeBits = 0;
 	private Mission origin;
 	
-	public MissionChange(Mission copy) {
-		super(copy);
-		changeBits = 0;
-		origin = copy;
+	public MissionChange(IMission copy) {
+		super((Mission)copy);
+		origin = (Mission)copy;
+	}
+	
+	public MissionChange(MissionChange source) {
+		super(source.origin);
 	}
 	
 	public boolean hasChange(Member field) {
@@ -53,11 +58,27 @@ public class MissionChange extends Mission {
 		return origin;
 	}
 	
-	public void apply() {
-		copyTo(origin);
+	@Override
+	public boolean apply() {
+		if(sendEvent()) {
+			copyTo(origin);
+			changeBits = 0;
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	public boolean discard() {
+		if(changeBits != 0) {
+			copy(origin);
+			changeBits = 0;
+			return true;
+		}
+		return false;
 	}
 	
-	public boolean sendEvent() {
+	private boolean sendEvent() {
 		if(changeBits == 0)
 			return false;
 		
@@ -152,5 +173,4 @@ public class MissionChange extends Mission {
 		super.setSpawnerSupport(acceptsSpawners);
 		changeBits |= BitFlag.getBits(Member.SPAWNERS_ALLOWED);
 	}
-
 }

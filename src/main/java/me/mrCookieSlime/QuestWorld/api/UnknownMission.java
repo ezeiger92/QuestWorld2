@@ -5,8 +5,8 @@ import java.util.HashMap;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
-import me.mrCookieSlime.QuestWorld.api.interfaces.IMission;
-import me.mrCookieSlime.QuestWorld.utils.Log;
+import me.mrCookieSlime.QuestWorld.api.contract.IMission;
+import me.mrCookieSlime.QuestWorld.util.Log;
 
 public class UnknownMission extends MissionType {
 	

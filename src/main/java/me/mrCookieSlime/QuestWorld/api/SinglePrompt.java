@@ -6,7 +6,7 @@ import org.bukkit.conversations.ConversationContext;
 import org.bukkit.conversations.Prompt;
 import org.bukkit.conversations.StringPrompt;
 
-import me.mrCookieSlime.QuestWorld.utils.Text;
+import me.mrCookieSlime.QuestWorld.util.Text;
 
 public class SinglePrompt extends StringPrompt {
 	private String question;

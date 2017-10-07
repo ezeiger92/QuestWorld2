@@ -10,9 +10,9 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 
-import me.mrCookieSlime.QuestWorld.managers.MenuManager;
-import me.mrCookieSlime.QuestWorld.utils.ItemBuilder;
-import me.mrCookieSlime.QuestWorld.utils.Text;
+import me.mrCookieSlime.QuestWorld.manager.MenuManager;
+import me.mrCookieSlime.QuestWorld.util.ItemBuilder;
+import me.mrCookieSlime.QuestWorld.util.Text;
 
 public class Menu implements Cloneable {
 	private static final int ROW_WIDTH = 9;

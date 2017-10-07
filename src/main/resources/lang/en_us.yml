@@ -31,6 +31,15 @@ editor:
   category.name-set:    '&aSuccessfully renamed category &r%name_old%&a to &r%name%'
   category.perm-change: '&7Please type in a new permission node for &r%name%&8 (use "&7none&8" for no node)'
   category.perm-set:    '&aSuccessfully set permission for &r%name%&a to &r%perm%'
+  category.description: |2
+
+    %progress%
+
+    &7%total% Quests in total
+    &7%completed% completed Quests
+    &7%available% Quests available for completion
+    &7%cooldown% Quests are on Cooldown
+    &7%reward% Quests with unclaimed Reward
   quest.created:     '&aSuccessfully created a category called &r%name%'
   quest.deleted:     '&cSuccessfully deleted the quest &r%name%'
   quest.name-change: '&7Please type a new quest name for &r%name%&8 (color codes are supported)'
@@ -99,12 +108,5 @@ quests:
     monetary: '&7Monetary Reward'
     exp: '&7XP Reward'
     rewards: '&rRewards'
-category:
-  desc:
-    total: ' Quests in total'
-    completed: ' completed Quests'
-    available: ' Quests available for completion'
-    cooldown: ' Quests are on Cooldown'
-    claimable_reward: ' Quests with unclaimed Reward'
 task:
   locked: '&4&lLOCKED'

@@ -5,12 +5,12 @@ import java.util.List;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import me.mrCookieSlime.QuestWorld.events.CancellableEvent;
-import me.mrCookieSlime.QuestWorld.events.QuestChangeEvent;
-import me.mrCookieSlime.QuestWorld.quests.Mission;
-import me.mrCookieSlime.QuestWorld.quests.Quest;
-import me.mrCookieSlime.QuestWorld.utils.BitFlag;
-import me.mrCookieSlime.QuestWorld.utils.BitFlag.BitString;
+import me.mrCookieSlime.QuestWorld.event.CancellableEvent;
+import me.mrCookieSlime.QuestWorld.event.QuestChangeEvent;
+import me.mrCookieSlime.QuestWorld.quest.Mission;
+import me.mrCookieSlime.QuestWorld.quest.Quest;
+import me.mrCookieSlime.QuestWorld.util.BitFlag;
+import me.mrCookieSlime.QuestWorld.util.BitFlag.BitString;
 
 public class QuestChange extends Quest {
 	public enum Member implements BitString {

@@ -11,16 +11,17 @@ import org.bukkit.inventory.ItemStack;
 import me.mrCookieSlime.QuestWorld.api.MissionChange;
 import me.mrCookieSlime.QuestWorld.api.SinglePrompt;
 import me.mrCookieSlime.QuestWorld.api.Translation;
-import me.mrCookieSlime.QuestWorld.managers.PlayerManager;
-import me.mrCookieSlime.QuestWorld.quests.QBDialogue;
-import me.mrCookieSlime.QuestWorld.quests.QuestBook;
-import me.mrCookieSlime.QuestWorld.utils.EntityTools;
-import me.mrCookieSlime.QuestWorld.utils.ItemBuilder;
-import me.mrCookieSlime.QuestWorld.utils.PlayerTools;
-import me.mrCookieSlime.QuestWorld.utils.Text;
+import me.mrCookieSlime.QuestWorld.api.contract.IMissionWrite;
+import me.mrCookieSlime.QuestWorld.manager.PlayerManager;
+import me.mrCookieSlime.QuestWorld.quest.QBDialogue;
+import me.mrCookieSlime.QuestWorld.quest.QuestBook;
+import me.mrCookieSlime.QuestWorld.util.EntityTools;
+import me.mrCookieSlime.QuestWorld.util.ItemBuilder;
+import me.mrCookieSlime.QuestWorld.util.PlayerTools;
+import me.mrCookieSlime.QuestWorld.util.Text;
 
 public class MissionButton {
-	public static MenuData item(MissionChange changes) {
+	public static MenuData item(IMissionWrite changes) {
 		return simpleButton(changes,
 				new ItemBuilder(changes.getMissionItem()).lore(
 						"",
@@ -35,11 +36,11 @@ public class MissionButton {
 		);
 	}
 
-	public static MenuData amount(MissionChange changes) {
+	public static MenuData amount(IMissionWrite changes) {
 		return amount(changes, 16);
 	}
 	
-	public static MenuData amount(MissionChange changes, int groupSize) {
+	public static MenuData amount(IMissionWrite changes, int groupSize) {
 		return simpleButton(changes,
 				new ItemBuilder(Material.REDSTONE).display("&7Amount: &b" + changes.getAmount()).lore(
 						"",
@@ -54,7 +55,7 @@ public class MissionButton {
 		);
 	}
 	
-	public static MenuData entity(MissionChange changes) {
+	public static MenuData entity(IMissionWrite changes) {
 		EntityType entity = changes.getEntity();
 		
 		return new MenuData(
@@ -63,12 +64,12 @@ public class MissionButton {
 						"",
 						"&e> Click to change the Entity").get(),
 				event -> {
-					QBDialogue.openQuestMissionEntityEditor((Player)event.getWhoClicked(), changes.getSource());
+					QBDialogue.openQuestMissionEntityEditor((Player)event.getWhoClicked(), changes);
 				}
 		);
 	}
 	
-	public static MenuData location(MissionChange changes) {
+	public static MenuData location(IMissionWrite changes) {
 		return simpleButton(changes,
 				new ItemBuilder(changes.getDisplayItem()).lore(
 						"",
@@ -80,7 +81,7 @@ public class MissionButton {
 		);
 	}
 	
-	public static MenuData entityName(MissionChange changes) {
+	public static MenuData entityName(IMissionWrite changes) {
 		return new MenuData(
 				new ItemBuilder(Material.NAME_TAG)
 				.display("&r" + changes.getCustomString()).lore(
@@ -94,11 +95,10 @@ public class MissionButton {
 							PlayerTools.makeTranslation(true, Translation.KILLMISSION_NAME_EDIT),
 							(c,s) -> {
 								changes.setCustomString(Text.colorize(s));
-								if(changes.sendEvent()) {
-									changes.apply();
+								if(changes.apply()) {
 									PlayerTools.sendTranslation(p, true, Translation.KILLMISSION_NAME_SET);
 								}
-								QuestBook.openQuestMissionEditor(p, changes.getSource());
+								QuestBook.openQuestMissionEditor(p, changes);
 								return true;
 							}
 					));
@@ -106,7 +106,7 @@ public class MissionButton {
 		);
 	}
 	
-	public static MenuData missionName(MissionChange changes) {
+	public static MenuData missionName(IMissionWrite changes) {
 		return new MenuData(
 				new ItemBuilder(Material.NAME_TAG).display("").lore(
 						changes.getText(),
@@ -126,10 +126,9 @@ public class MissionButton {
 								PlayerTools.makeTranslation(true, Translation.MISSION_NAME_EDIT),
 								(c,s) -> {
 									changes.setDisplayName(s);
-									if(changes.sendEvent()) {
+									if(changes.apply()) {
 										PlayerTools.sendTranslation(p, true, Translation.MISSION_NAME_SET);
-										changes.apply();
-										QuestBook.openQuestMissionEditor(p, changes.getSource());
+										QuestBook.openQuestMissionEditor(p, changes);
 									}
 									return true;
 								}
@@ -139,7 +138,7 @@ public class MissionButton {
 		);
 	}
 
-	public static MenuData timeframe(MissionChange changes) {
+	public static MenuData timeframe(IMissionWrite changes) {
 		return simpleButton(changes,
 				new ItemBuilder(Material.WATCH)
 				.display("&7Complete Mission within: &b" + Text.timeFromNum(changes.getTimeframe())).lore(
@@ -155,7 +154,7 @@ public class MissionButton {
 		);
 	}
 	
-	public static MenuData deathReset(MissionChange changes) {
+	public static MenuData deathReset(IMissionWrite changes) {
 		return simpleButton(changes,
 				new ItemBuilder(Material.SKULL_ITEM)
 				.display("&7Resets on Death: " + (changes.resetsonDeath() ? "&2&l\u2714": "&4&l\u2718")).lore(
@@ -168,7 +167,7 @@ public class MissionButton {
 		);
 	}
 	
-	public static MenuData spawnersAllowed(MissionChange changes) {
+	public static MenuData spawnersAllowed(IMissionWrite changes) {
 		return simpleButton(changes,
 				new ItemBuilder(Material.MOB_SPAWNER)
 				.display("&7Allow Mobs from Spawners: " + (changes.acceptsSpawners() ? "&2&l\u2714": "&4&l\u2718")).lore(
@@ -181,7 +180,7 @@ public class MissionButton {
 		);
 	}
 	
-	public static MenuData dialogue(MissionChange changes) {
+	public static MenuData dialogue(IMissionWrite changes) {
 		return new MenuData(
 				new ItemBuilder(Material.PAPER).display("&rDialogue").lore(
 						"",
@@ -191,27 +190,27 @@ public class MissionButton {
 					Player p = (Player)event.getWhoClicked();
 					
 					if (event.getClick().isRightClick()) {
-						if (changes.getSource().getDialogue().isEmpty())
+						if (changes.getDialogue().isEmpty())
 							p.sendMessage(Text.colorize("&4No Dialogue found!"));
 						else
-							PlayerManager.sendQuestDialogue(p, changes.getSource(), changes.getSource().getDialogue().iterator());
+							PlayerManager.sendQuestDialogue(p, changes, changes.getDialogue().iterator());
 					}
 					else
-						changes.getSource().setupDialogue(p);
+						((MissionChange)changes).getSource().setupDialogue(p);
 						
 					PlayerTools.closeInventoryWithEvent(p);
 				}
 		);
 	}
 	
-	public static void apply(InventoryClickEvent event, MissionChange changes) {
-		if(changes.sendEvent()) {
-			changes.apply();
-			QuestBook.openQuestMissionEditor((Player) event.getWhoClicked(), changes.getSource());
+	public static void apply(InventoryClickEvent event, IMissionWrite changes) {
+		if(changes.apply()) {
+			// TODO remove MissionChange and QuestBook from here, somehow
+			QuestBook.openQuestMissionEditor((Player) event.getWhoClicked(), changes);
 		}
 	}
 
-	public static MenuData simpleButton(MissionChange changes, ItemStack item, Consumer<InventoryClickEvent> action)  {
+	public static MenuData simpleButton(IMissionWrite changes, ItemStack item, Consumer<InventoryClickEvent> action)  {
 		return new MenuData(item, action.andThen(event -> apply(event, changes)));
 	}
 	

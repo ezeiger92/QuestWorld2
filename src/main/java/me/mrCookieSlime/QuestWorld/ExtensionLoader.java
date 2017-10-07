@@ -9,7 +9,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 import me.mrCookieSlime.QuestWorld.api.QuestExtension;
-import me.mrCookieSlime.QuestWorld.utils.Log;
+import me.mrCookieSlime.QuestWorld.util.Log;
 
 public class ExtensionLoader {
 	private ClassLoader loader;
