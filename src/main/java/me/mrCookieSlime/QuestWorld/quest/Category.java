@@ -4,14 +4,14 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import me.mrCookieSlime.CSCoreLibPlugin.Configuration.Config;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
+import me.mrCookieSlime.QuestWorld.api.QuestStatus;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
+import me.mrCookieSlime.QuestWorld.api.contract.ICategoryWrite;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
 import me.mrCookieSlime.QuestWorld.util.ItemBuilder;
 import me.mrCookieSlime.QuestWorld.util.Text;
@@ -20,7 +20,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-public class Category extends QuestingObject implements ICategory {
+class Category extends QuestingObject implements ICategoryWrite {
 	
 	Map<Integer, Quest> quests;
 	int id;
@@ -84,22 +84,25 @@ public class Category extends QuestingObject implements ICategory {
 	
 	public void updateParent(Config cfg) {
 		if (cfg.contains("parent")) {
-			Category category = QuestWorld.getInstance().getCategory(Integer.parseInt(cfg.getString("parent").split("-C")[0]));
+			Category category = (Category)QuestWorld.getInstance().getCategory(Integer.parseInt(cfg.getString("parent").split("-C")[0]));
 			if (category != null) parent = category.getQuest(Integer.parseInt(cfg.getString("parent").split("-C")[1]));
 		}
 	}
 	
-	public void addQuest(Quest quest) {
-		quests.put(quest.getID(), quest);
+	public void addQuest(IQuest quest) {
+		if(quest instanceof QuestChange)
+			quests.put(quest.getID(), ((QuestChange)quest).getSource());
+		else
+			quests.put(quest.getID(), (Quest)quest);
 	}
 	
-	public void removeQuest(Quest quest) {
-		quest.updateLastModified();
+	public void removeQuest(IQuest quest) {
+		// TODO maybe was needed
+		//quest.updateLastModified();
 		quests.remove(quest.getID());
 		new File("plugins/QuestWorld/quests/" + quest.getID() + "-C" + getID() + ".quest").delete();
 	}
 	
-	public void save() { save(false); }
 	public void save(boolean force) {
 		long lastSave = QuestWorld.getInstance().getLastSaved();
 		for (Quest quest: quests.values()) {
@@ -146,26 +149,17 @@ public class Category extends QuestingObject implements ICategory {
 		return i;
 	}
 	
-	@Deprecated
-	public Set<Quest> getQuests(Player p, QuestStatus status) {
-		Set<Quest> quests = new HashSet<>();
-		for (Quest quest: getQuests()) {
-			if (quest.getStatus(p) == status) quests.add(quest);
-		}
-		return quests;
-	}
-	
-	public Set<Quest> getFinishedQuests(Player p) {
-		Set<Quest> quests = new HashSet<>();
-		for (Quest quest: getQuests()) {
-			if (QuestWorld.getInstance().getManager(p).hasFinished(quest)) quests.add(quest);
-		}
-		return quests;
+	public int countFinishedQuests(Player p) {
+		int i = 0;
+		for(Quest quest : getQuests())
+			if(QuestWorld.getInstance().getManager(p).hasFinished(quest))
+				++i;
+		return i;
 	}
 
 	public String getProgress(Player p) {
 		return Text.progressBar(
-				getFinishedQuests(p).size(),
+				countFinishedQuests(p),
 				getQuests().size(),
 				null);
 	}
@@ -236,5 +230,30 @@ public class Category extends QuestingObject implements ICategory {
 	@Override
 	public boolean isValid() {
 		return QuestWorld.getInstance().getCategory(id) != null;
+	}
+	
+	@Override
+	public CategoryChange getWriter() {
+		return new CategoryChange(this);
+	}
+
+	@Override
+	public boolean apply() {
+		return true;
+	}
+
+	@Override
+	public boolean discard() {
+		return false;
+	}
+
+	@Override
+	public ICategory getSource() {
+		return this;
+	}
+
+	@Override
+	public boolean hasChange(Member field) {
+		return true;
 	}
 }

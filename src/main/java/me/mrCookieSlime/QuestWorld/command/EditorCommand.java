@@ -5,9 +5,9 @@ import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.SinglePrompt;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
-import me.mrCookieSlime.QuestWorld.quest.QBDialogue;
-import me.mrCookieSlime.QuestWorld.quest.QuestBook;
-import me.mrCookieSlime.QuestWorld.quest.QuestChange;
+import me.mrCookieSlime.QuestWorld.api.contract.IQuestWrite;
+import me.mrCookieSlime.QuestWorld.api.menu.QBDialogue;
+import me.mrCookieSlime.QuestWorld.api.menu.QuestBook;
 import me.mrCookieSlime.QuestWorld.util.Log;
 import me.mrCookieSlime.QuestWorld.util.PlayerTools;
 import me.mrCookieSlime.QuestWorld.util.Text;
@@ -98,16 +98,13 @@ public class EditorCommand implements CommandExecutor {
 				for(ICategory category : QuestWorld.getInstance().getCategories())
 					for(IQuest quest : category.getQuests())
 						if(quest.getCooldown() == 0) {
-							QuestChange changes = new QuestChange(quest);
-							changes.setCooldown(-1);
-							if(changes.apply()) {
-								++changeCount;
-								String questFile = quest.getID() + "-C" + category.getID();
-								Log.info("[Quest World 2] Upgrading "+category.getName()+"."+quest.getName()+" ("+questFile+".quest): Cooldown changed from 0 to -1");
-							}
-							else {
-								// Some error here 
-							}
+							// Administrative process - bypass events and directly modify quest
+							// 99% of the time you should use .getWriter() and .apply()
+							IQuestWrite q = (IQuestWrite)quest;
+							q.setCooldown(-1);
+							++changeCount;
+							String questFile = quest.getID() + "-C" + category.getID();
+							Log.info("[Quest World 2] Upgrading "+category.getName()+"."+quest.getName()+" ("+questFile+".quest): Cooldown changed from 0 to -1");
 						}
 				
 				String s = "s";
@@ -130,7 +127,7 @@ public class EditorCommand implements CommandExecutor {
 		else if (args.length == 4 && param.equals("delete_command") && sender instanceof Player) {
 			IQuest quest = QuestWorld.getInstance().getCategory(Integer.parseInt(args[1])).getQuest(Integer.parseInt(args[2]));
 			
-			QuestChange changes = new QuestChange(quest);
+			IQuestWrite changes = quest.getWriter();
 			changes.removeCommand(Integer.parseInt(args[3]));
 			if(changes.apply()) {
 				
@@ -146,10 +143,9 @@ public class EditorCommand implements CommandExecutor {
 			PlayerTools.promptInput(p, new SinglePrompt(
 					"&7Type in your desired Command:",
 					(c,s) -> {
-						QuestChange changes = new QuestChange(quest);
+						IQuestWrite changes = quest.getWriter();
 						changes.addCommand(ChatColor.stripColor(s));
-						if(changes.sendEvent())
-							changes.apply();
+						changes.apply();
 
 						QBDialogue.openCommandEditor(p, quest);
 						return true;

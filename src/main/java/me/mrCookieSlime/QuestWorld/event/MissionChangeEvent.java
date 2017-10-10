@@ -4,12 +4,11 @@ import org.bukkit.event.HandlerList;
 
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IMissionWrite;
-import me.mrCookieSlime.QuestWorld.quest.MissionChange;
 
 public class MissionChangeEvent extends CancellableEvent {
-	private MissionChange nextState;
+	private IMissionWrite nextState;
 	
-	public MissionChangeEvent(MissionChange nextState) {
+	public MissionChangeEvent(IMissionWrite nextState) {
 		this.nextState = nextState;
 	}
 	

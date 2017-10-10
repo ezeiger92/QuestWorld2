@@ -4,12 +4,11 @@ import org.bukkit.event.HandlerList;
 
 import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategoryWrite;
-import me.mrCookieSlime.QuestWorld.quest.CategoryChange;
 
 public class CategoryChangeEvent extends CancellableEvent {
-	private CategoryChange nextState;
+	private ICategoryWrite nextState;
 	
-	public CategoryChangeEvent(CategoryChange nextState) {
+	public CategoryChangeEvent(ICategoryWrite nextState) {
 		this.nextState = nextState;
 	}
 	

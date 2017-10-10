@@ -5,19 +5,20 @@ import java.util.List;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuestWrite;
 import me.mrCookieSlime.QuestWorld.event.CancellableEvent;
 import me.mrCookieSlime.QuestWorld.event.QuestChangeEvent;
 import me.mrCookieSlime.QuestWorld.util.BitFlag;
 
-public class QuestChange extends Quest implements IQuestWrite {	
+class QuestChange extends Quest implements IQuestWrite {	
 	private long changeBits = 0;
 	private Quest origin;
 	
-	public QuestChange(IQuest copy) {
-		super((Quest)copy);
-		origin = (Quest)copy;
+	public QuestChange(Quest copy) {
+		super(copy);
+		origin = copy;
 	}
 	
 	public boolean hasChange(Member field) {
@@ -101,13 +102,13 @@ public class QuestChange extends Quest implements IQuestWrite {
 	}
 	
 	@Override
-	public void addMission(Mission mission) {
+	public void addMission(IMission mission) {
 		super.addMission(mission);
 		changeBits |= BitFlag.getBits(Member.TASKS);
 	}
 	
 	@Override
-	public void removeMission(Mission mission) {
+	public void removeMission(IMission mission) {
 		super.removeMission(mission);
 		changeBits |= BitFlag.getBits(Member.TASKS);
 	}
@@ -183,5 +184,9 @@ public class QuestChange extends Quest implements IQuestWrite {
 		super.setAutoClaim(autoclaim);
 		changeBits |= BitFlag.getBits(Member.AUTOCLAIM);
 	}
-	
+
+	@Override
+	public QuestChange getWriter() {
+		return this;
+	}
 }

@@ -8,24 +8,19 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import me.mrCookieSlime.QuestWorld.api.MissionType;
-import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IMissionWrite;
 import me.mrCookieSlime.QuestWorld.event.CancellableEvent;
 import me.mrCookieSlime.QuestWorld.event.MissionChangeEvent;
 import me.mrCookieSlime.QuestWorld.util.BitFlag;
 import me.mrCookieSlime.QuestWorld.util.BitFlag.BitString;
 
-public class MissionChange extends Mission implements IMissionWrite {
+class MissionChange extends Mission implements IMissionWrite {
 	private long changeBits = 0;
 	private Mission origin;
 	
-	public MissionChange(IMission copy) {
-		super((Mission)copy);
-		origin = (Mission)copy;
-	}
-	
-	public MissionChange(MissionChange source) {
-		super(source.origin);
+	public MissionChange(Mission copy) {
+		super(copy);
+		origin = copy;
 	}
 	
 	public boolean hasChange(Member field) {
@@ -161,5 +156,10 @@ public class MissionChange extends Mission implements IMissionWrite {
 	@Override
 	public void setupDialogue(Player p) {
 		origin.setupDialogue(p);
+	}
+	
+	@Override
+	public MissionChange getWriter() {
+		return this;
 	}
 }

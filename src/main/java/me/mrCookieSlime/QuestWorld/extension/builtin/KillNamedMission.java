@@ -9,8 +9,8 @@ import org.bukkit.inventory.ItemStack;
 
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
+import me.mrCookieSlime.QuestWorld.api.contract.IMissionWrite;
 import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
-import me.mrCookieSlime.QuestWorld.quest.MissionChange;
 import me.mrCookieSlime.QuestWorld.util.EntityTools;
 import me.mrCookieSlime.QuestWorld.util.ItemBuilder;
 import me.mrCookieSlime.QuestWorld.util.Text;
@@ -88,7 +88,7 @@ public class KillNamedMission extends KillMission {
 	}
 	
 	@Override
-	protected void layoutMenu(MissionChange changes) {
+	protected void layoutMenu(IMissionWrite changes) {
 		super.layoutMenu(changes);
 		putButton(12, MissionButton.entityName(changes));
 		putButton(16, MissionButton.simpleButton(

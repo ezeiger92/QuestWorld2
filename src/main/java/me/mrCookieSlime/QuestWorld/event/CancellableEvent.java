@@ -27,7 +27,7 @@ public abstract class CancellableEvent extends Event implements Cancellable {
 	}
 	
 /*
-	COPY PASTE ME INTO OTHER EVENTS :D
+	COPY PASTE ME INTO DERIVED EVENTS :D
 
 	// Boilerplate copy/paste from CancellableEvent
 	@Override

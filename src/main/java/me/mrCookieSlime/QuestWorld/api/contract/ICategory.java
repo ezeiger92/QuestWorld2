@@ -1,12 +1,11 @@
 package me.mrCookieSlime.QuestWorld.api.contract;
 
 import java.util.Collection;
-import java.util.Set;
 
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import me.mrCookieSlime.QuestWorld.quest.QuestStatus;
+import me.mrCookieSlime.QuestWorld.api.QuestStatus;
 
 public interface ICategory extends IQuestingObject {
 	int getID();
@@ -17,8 +16,10 @@ public interface ICategory extends IQuestingObject {
 	boolean isHidden();
 	boolean isWorldEnabled(String world);
 	
-
-	Set<? extends IQuest> getQuests(Player p, QuestStatus status);
-	Set<? extends IQuest> getFinishedQuests(Player p);
 	String getProgress(Player p);
+	int countQuests(Player p, QuestStatus onCooldown);
+	int countFinishedQuests(Player p);
+	
+	ICategoryWrite getWriter();
+	void save(boolean force);
 }

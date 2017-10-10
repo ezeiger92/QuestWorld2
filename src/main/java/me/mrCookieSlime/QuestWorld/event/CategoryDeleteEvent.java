@@ -2,16 +2,16 @@ package me.mrCookieSlime.QuestWorld.event;
 
 import org.bukkit.event.HandlerList;
 
-import me.mrCookieSlime.QuestWorld.quest.Category;
+import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
 
 public class CategoryDeleteEvent extends CancellableEvent {
-	private Category category;
+	private ICategory category;
 	
-	public CategoryDeleteEvent(Category category) {
+	public CategoryDeleteEvent(ICategory category) {
 		this.category = category;
 	}
 	
-	public Category getCategory() {
+	public ICategory getCategory() {
 		return category;
 	}
 	

@@ -37,4 +37,6 @@ public interface IMission extends IQuestingObject {
 
 	boolean acceptsSpawners();
 	IQuest getQuest();
+	
+	IMissionWrite getWriter();
 }

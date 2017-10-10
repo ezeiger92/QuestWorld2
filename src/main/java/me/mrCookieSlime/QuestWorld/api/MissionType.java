@@ -6,7 +6,6 @@ import me.mrCookieSlime.QuestWorld.api.contract.IMissionWrite;
 import me.mrCookieSlime.QuestWorld.api.menu.Menu;
 import me.mrCookieSlime.QuestWorld.api.menu.MenuData;
 import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
-import me.mrCookieSlime.QuestWorld.quest.MissionChange;
 import me.mrCookieSlime.QuestWorld.util.Log;
 import me.mrCookieSlime.QuestWorld.util.Text;
 
@@ -111,13 +110,13 @@ public abstract class MissionType {
 		return menuData.remove(index);
 	}
 	
-	public final void buildMenu(MissionChange changes, Menu menu) {
+	public final void buildMenu(IMissionWrite changes, Menu menu) {
 		layoutMenu(changes);
 		for(Map.Entry<Integer, MenuData> entry : menuData.entrySet())
 			menu.put(entry.getKey(), entry.getValue().getItem(), entry.getValue().getHandler());
 	}
 	
-	protected void layoutMenu(MissionChange changes) {
+	protected void layoutMenu(IMissionWrite changes) {
 		if(supportsDeathReset()) putButton(5, MissionButton.deathReset(changes));
 		if(supportsTimeframes()) putButton(6, MissionButton.timeframe(changes));
 		putButton(7, MissionButton.missionName(changes));

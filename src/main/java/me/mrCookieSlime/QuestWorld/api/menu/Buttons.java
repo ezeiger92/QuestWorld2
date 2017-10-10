@@ -8,15 +8,12 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.SinglePrompt;
 import me.mrCookieSlime.QuestWorld.api.Translation;
+import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
-import me.mrCookieSlime.QuestWorld.quest.Category;
-import me.mrCookieSlime.QuestWorld.quest.QBDialogue;
-import me.mrCookieSlime.QuestWorld.quest.Quest;
-import me.mrCookieSlime.QuestWorld.quest.QuestBook;
 import me.mrCookieSlime.QuestWorld.util.PlayerTools;
 
 public class Buttons {
-	public static Consumer<InventoryClickEvent> onCategory(Category category) {
+	public static Consumer<InventoryClickEvent> onCategory(ICategory category) {
 		return event -> {
 			Player p = (Player) event.getWhoClicked();
 			if(event.isRightClick())
@@ -38,7 +35,7 @@ public class Buttons {
 			PlayerTools.promptInput(p, new SinglePrompt(
 					PlayerTools.makeTranslation(true, Translation.CATEGORY_NAME_EDIT, defaultCategoryName),
 					(c,s) -> {
-						new Category(s, id);
+						QuestWorld.getCreator().createCategory(s, id);
 						PlayerTools.sendTranslation(p, true, Translation.CATEGORY_CREATED, s);
 						QuestBook.openEditor(p);
 
@@ -73,7 +70,7 @@ public class Buttons {
 			PlayerTools.promptInput(p, new SinglePrompt(
 					PlayerTools.makeTranslation(true, Translation.QUEST_NAME_EDIT, defaultQuestName),
 					(c,s) -> {
-						new Quest(s, cat_id+" M "+id);
+						QuestWorld.getCreator().createQuest(s, cat_id+" M "+id);
 						PlayerTools.sendTranslation(p, true, Translation.QUEST_CREATED, s);
 						QuestBook.openCategoryQuestEditor(p, QuestWorld.getInstance().getCategory(cat_id));
 

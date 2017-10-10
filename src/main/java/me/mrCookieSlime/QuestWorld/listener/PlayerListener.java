@@ -4,12 +4,12 @@ import java.io.File;
 
 import me.mrCookieSlime.QuestWorld.GuideBook;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
+import me.mrCookieSlime.QuestWorld.api.QuestStatus;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
+import me.mrCookieSlime.QuestWorld.api.menu.QuestBook;
 import me.mrCookieSlime.QuestWorld.manager.PlayerManager;
-import me.mrCookieSlime.QuestWorld.quest.QuestBook;
-import me.mrCookieSlime.QuestWorld.quest.QuestStatus;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;

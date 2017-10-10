@@ -23,8 +23,11 @@ import me.mrCookieSlime.CSCoreLibSetup.CSCoreLibLoader;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.QuestExtension;
 import me.mrCookieSlime.QuestWorld.api.Translator;
+import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
+import me.mrCookieSlime.QuestWorld.api.contract.ICategoryWrite;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
+import me.mrCookieSlime.QuestWorld.api.contract.IQuestWrite;
 import me.mrCookieSlime.QuestWorld.api.contract.QuestLoader;
 import me.mrCookieSlime.QuestWorld.command.EditorCommand;
 import me.mrCookieSlime.QuestWorld.command.QuestsCommand;
@@ -35,8 +38,7 @@ import me.mrCookieSlime.QuestWorld.listener.PlayerListener;
 import me.mrCookieSlime.QuestWorld.listener.SelfListener;
 import me.mrCookieSlime.QuestWorld.manager.MissionViewer;
 import me.mrCookieSlime.QuestWorld.manager.PlayerManager;
-import me.mrCookieSlime.QuestWorld.quest.Category;
-import me.mrCookieSlime.QuestWorld.quest.Quest;
+import me.mrCookieSlime.QuestWorld.quest.Creator;
 import me.mrCookieSlime.QuestWorld.util.EconWrapper;
 import me.mrCookieSlime.QuestWorld.util.Lang;
 import me.mrCookieSlime.QuestWorld.util.Log;
@@ -59,11 +61,14 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 	private Config cfg, sounds;
 	private MissionViewer missionViewer = new MissionViewer();
 	private Map<String, MissionType> types      = new HashMap<>();
-	private Map<Integer, Category>   categories = new HashMap<>();
+	private Map<Integer, ICategory>   categories = new HashMap<>();
 	private Map<UUID, PlayerManager>  profiles   = new HashMap<>();
 	
 	private EconWrapper economy = null;
 	private Sounds eventSounds;
+	
+	// TODO Make an interface
+	private Creator creator = new Creator();
 	
 	private Lang language;
 	private ExtensionLoader extLoader = null;
@@ -139,7 +144,7 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 			Log.fine("Retrieving Quest Configuration...");
 			load();
 			int categories = getCategories().size(), quests = 0;
-			for (Category category: getCategories())
+			for (ICategory category: getCategories())
 				quests += category.getQuests().size();
 
 			Log.fine("Successfully loaded " + categories + " Categories");
@@ -212,6 +217,17 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 		}
 	}
 	
+	private IQuest parentFromConfig(Config cfg) {
+		IQuest parent = null;
+		if (cfg.contains("parent")) {
+			String[] parts = cfg.getString("parent").split("-C");
+			ICategory c = getCategory(Integer.parseInt(parts[0]));
+			if (c != null)
+				parent = c.getQuest(Integer.parseInt(parts[1]));
+		}
+		return parent;
+	}
+	
 	public void load() {
 		Set<File> categories = new HashSet<File>();
 		Map<Integer, List<File>> quests = new HashMap<Integer, List<File>>();
@@ -231,13 +247,22 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 			int id = Integer.parseInt(file.getName().replace(".category", ""));
 			List<File> files = new ArrayList<File>();
 			if (quests.containsKey(id)) files = quests.get(id);
-			new Category(file, files);
+			creator.createCategory(file, files);
 		}
 		
-		for (Category category: this.categories.values()) {
-			category.updateParent(new Config("plugins/QuestWorld/quests/" + category.getID() + ".category"));
-			for (Quest quest: category.getQuests()) {
-				quest.updateParent(new Config("plugins/QuestWorld/quests/" + quest.getID() + "-C" + category.getID() + ".quest"));
+		for (ICategory category: this.categories.values()) {
+			// Administrative process - bypass events and directly modify data
+			// 99% of the time you should use .getWriter() and .apply()
+			ICategoryWrite c = (ICategoryWrite)category;
+			c.setParent(parentFromConfig(
+				new Config("plugins/QuestWorld/quests/" + category.getID() + ".category")
+			));
+			
+			for (IQuest quest: category.getQuests()) {
+				IQuestWrite q = (IQuestWrite)quest;
+				q.setParent(parentFromConfig(
+					new Config("plugins/QuestWorld/quests/" + quest.getID() + "-C" + category.getID() + ".quest")
+				));
 			}
 		}
 		
@@ -272,7 +297,7 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 	}
 
 	public void save(boolean force) {
-		for(Category c : categories.values())
+		for(ICategory c : categories.values())
 			c.save(force);
 		
 		for(PlayerManager p : profiles.values())
@@ -286,7 +311,7 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 	}
 	
 	public void unload() {
-		for(Category c : categories.values())
+		for(ICategory c : categories.values())
 			c.save(true);
 		categories.clear();
 		
@@ -371,19 +396,19 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 		return instance;
 	}
 	
-	public Collection<Category> getCategories() {
+	public Collection<ICategory> getCategories() {
 		return categories.values();
 	}
 	
-	public Category getCategory(int id) {
+	public ICategory getCategory(int id) {
 		return categories.get(id);
 	}
 	
-	public void registerCategory(Category category) {
+	public void registerCategory(ICategory category) {
 		categories.put(category.getID(), category);
 	}
 	
-	public void unregisterCategory(Category category) {
+	public void unregisterCategory(ICategory category) {
 		for (IQuest quest: category.getQuests()) {
 			PlayerManager.clearAllQuestData(quest);
 			new File("plugins/QuestWorld/quests/" + quest.getID() + "-C" + category.getID() + ".quest").delete();
@@ -483,5 +508,9 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 	
 	public static Sounds getSounds() {
 		return instance.eventSounds;
+	}
+	
+	public static Creator getCreator() {
+		return instance.creator;
 	}
 }

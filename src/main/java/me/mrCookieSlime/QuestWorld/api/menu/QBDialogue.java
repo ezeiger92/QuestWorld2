@@ -1,13 +1,16 @@
-package me.mrCookieSlime.QuestWorld.quest;
+package me.mrCookieSlime.QuestWorld.api.menu;
 
 import java.util.List;
 
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.Translation;
+import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
+import me.mrCookieSlime.QuestWorld.api.contract.ICategoryWrite;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
+import me.mrCookieSlime.QuestWorld.api.contract.IMissionWrite;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
+import me.mrCookieSlime.QuestWorld.api.contract.IQuestWrite;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuestingObject;
-import me.mrCookieSlime.QuestWorld.api.menu.Menu;
 import me.mrCookieSlime.QuestWorld.container.PagedMapping;
 import me.mrCookieSlime.QuestWorld.event.CancellableEvent;
 import me.mrCookieSlime.QuestWorld.event.CategoryDeleteEvent;
@@ -32,15 +35,15 @@ public class QBDialogue {
 		
 		menu.put(6, ItemBuilder.Proto.RED_WOOL.get().display("&cNo").get(), event -> {
 			Player p2 = (Player) event.getWhoClicked();
-			if (q instanceof Quest) QuestBook.openCategoryEditor(p2, ((Quest) q).getCategory());
-			else if (q instanceof Category) QuestBook.openEditor(p2);
-			else if (q instanceof Mission) QuestBook.openQuestEditor(p2, ((Mission) q).getQuest());
+			if (q instanceof IQuest) QuestBook.openCategoryEditor(p2, ((IQuest) q).getCategory());
+			else if (q instanceof ICategory) QuestBook.openEditor(p2);
+			else if (q instanceof IMission) QuestBook.openQuestEditor(p2, ((IMission) q).getQuest());
 		});
 		
 		String tag = Text.colorize("&r") ;
-		if (q instanceof Quest) tag += "your Quest \"" + ((Quest) q).getName() + "\"";
-		else if (q instanceof Category) tag += "your Category \"" + ((Category) q).getName() + "\"";
-		else if (q instanceof Mission) tag += "your Task";
+		if (q instanceof IQuest) tag += "your Quest \"" + ((IQuest) q).getName() + "\"";
+		else if (q instanceof ICategory) tag += "your Category \"" + ((ICategory) q).getName() + "\"";
+		else if (q instanceof IMission) tag += "your Task";
 		
 		menu.put(2,
 				ItemBuilder.Proto.LIME_WOOL.get()
@@ -50,8 +53,8 @@ public class QBDialogue {
 					Player p2 = (Player) event.getWhoClicked();
 					QuestWorld.getSounds().DestructiveClick().playTo(p2);
 					QuestWorld.getSounds().muteNext();
-					if (q instanceof Category) {
-						Category category = (Category)q;
+					if (q instanceof ICategory) {
+						ICategory category = (ICategory)q;
 						if(CancellableEvent.send(new CategoryDeleteEvent(category))) {
 							QuestWorld.getInstance().unregisterCategory(category);
 							p2.closeInventory();
@@ -59,20 +62,27 @@ public class QBDialogue {
 							PlayerTools.sendTranslation(p2, true, Translation.CATEGORY_DELETED, q.getName());
 						}
 					}
-					else if (q instanceof Quest) {
-						Quest quest = (Quest)q;
+					else if (q instanceof IQuest) {
+						IQuest quest = (IQuest)q;
 						if(CancellableEvent.send(new QuestDeleteEvent(quest))) {
 							PlayerManager.clearAllQuestData(quest);
-							quest.getCategory().removeQuest(quest);
+							
+							ICategoryWrite changes = quest.getCategory().getWriter();
+							changes.removeQuest(quest);
+							//changes.apply(); 
+
 							p2.closeInventory();
 							QuestBook.openCategoryQuestEditor(p2, quest.getCategory());
 							PlayerTools.sendTranslation(p2, true, Translation.QUEST_DELETED, q.getName());
 						}
 					}
-					else if (q instanceof Mission) {
-						Mission mission = (Mission)q;
+					else if (q instanceof IMission) {
+						IMission mission = (IMission)q;
 						if(CancellableEvent.send(new MissionDeleteEvent(mission))) {
-							mission.getQuest().removeMission(mission);
+							IQuestWrite changes = mission.getQuest().getWriter();
+							changes.removeMission(mission);
+							changes.apply();
+							
 							p2.closeInventory();
 							QuestBook.openQuestEditor(p2, mission.getQuest());
 						}
@@ -83,7 +93,7 @@ public class QBDialogue {
 		menu.openFor(p);
 	}
 
-	public static void openResetConfirmation(Player p, final Quest q) {
+	public static void openResetConfirmation(Player p, final IQuest q) {
 		QuestWorld.getSounds().DestructiveWarning().playTo(p);
 		
 		Menu menu = new Menu(1, "&4&lAre you Sure?");
@@ -107,7 +117,7 @@ public class QBDialogue {
 	public static void openQuestMissionEntityEditor(Player p, final IMission mission) {
 		QuestWorld.getSounds().EditorClick().playTo(p);
 		
-		MissionChange changes = new MissionChange(mission);
+		IMissionWrite changes = mission.getWriter();
 		//String title = Text.colorize(mission.getQuest().getName() + " &7- &8(Page " + (page+1) + "/" + (lastPage+1) + ")");
 		final Menu menu = new Menu(6, "&3Entity Selector: " + mission.getQuest().getName());
 		
@@ -195,7 +205,7 @@ public class QBDialogue {
 		Menu menu = new Menu(1, "&c&lQuest Editor");
 
 		PagedMapping pager = new PagedMapping(45, 9);
-		for(Category category : QuestWorld.getInstance().getCategories()) {
+		for(ICategory category : QuestWorld.getInstance().getCategories()) {
 			pager.addButton(category.getID(), new ItemBuilder(category.getItem()).lore(
 					"",
 					"&7&oLeft Click to open").get(),
@@ -207,16 +217,16 @@ public class QBDialogue {
 			);
 		}
 		pager.setBackButton(event -> {
-			if(quest instanceof Quest)
-				QuestBook.openQuestEditor(p, (Quest)quest);
+			if(quest instanceof IQuest)
+				QuestBook.openQuestEditor(p, (IQuest)quest);
 			else
-				QuestBook.openCategoryEditor(p, (Category)quest);
+				QuestBook.openCategoryEditor(p, (ICategory)quest);
 		});
 		pager.build(menu, p);
 		menu.openFor(p);
 	}
 
-	public static void openQuestRequirementChooser2(Player p, final IQuestingObject q, Category category) {
+	private static void openQuestRequirementChooser2(Player p, final IQuestingObject q, ICategory category) {
 		QuestWorld.getSounds().EditorClick().playTo(p);
 		
 		Menu menu = new Menu(1, "&c&lQuest Editor");
@@ -233,9 +243,15 @@ public class QBDialogue {
 						Player p2 = (Player) event.getWhoClicked();
 						QuestWorld.getInstance().getManager(p2).popPage();
 						// TODO this is messy
-						((QuestingObject)q).setParent(quest);
-						if (q instanceof Quest) QuestBook.openQuestEditor(p2, (Quest) q);
-						else QuestBook.openCategoryEditor(p2, (Category) q);
+						//((QuestingObject)q).setParent(quest);
+						if (q instanceof IQuest) {
+							IQuest child = (IQuest)q;
+							QuestBook.openQuestEditor(p2, child);
+						}
+						else {
+							ICategory child = (ICategory)q;
+							QuestBook.openCategoryEditor(p2, child);
+						}
 					}, false
 			);
 		}

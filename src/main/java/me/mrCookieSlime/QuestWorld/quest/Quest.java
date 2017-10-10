@@ -7,8 +7,10 @@ import java.util.List;
 import me.mrCookieSlime.CSCoreLibPlugin.Configuration.Config;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
+import me.mrCookieSlime.QuestWorld.api.QuestStatus;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
+import me.mrCookieSlime.QuestWorld.api.contract.IQuestWrite;
 import me.mrCookieSlime.QuestWorld.util.ItemBuilder;
 import me.mrCookieSlime.QuestWorld.util.Text;
 
@@ -18,7 +20,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-public class Quest extends QuestingObject implements IQuest {
+class Quest extends QuestingObject implements IQuestWrite {
 	
 	Category category;
 	int id;
@@ -106,7 +108,7 @@ public class Quest extends QuestingObject implements IQuest {
 	}
 
 	public Quest(String name, String input) {
-		this.category = QuestWorld.getInstance().getCategory(Integer.parseInt(input.split(" M ")[0]));
+		this.category = (Category)QuestWorld.getInstance().getCategory(Integer.parseInt(input.split(" M ")[0]));
 		
 		this.id = Integer.parseInt(input.split(" M ")[1]);
 		this.cooldown = -1;
@@ -127,7 +129,7 @@ public class Quest extends QuestingObject implements IQuest {
 	
 	public void updateParent(Config cfg) {
 		if (cfg.contains("parent")) {
-			Category c = QuestWorld.getInstance().getCategory(Integer.parseInt(cfg.getString("parent").split("-C")[0]));
+			Category c = (Category)QuestWorld.getInstance().getCategory(Integer.parseInt(cfg.getString("parent").split("-C")[0]));
 			if (c != null) parent = c.getQuest(Integer.parseInt(cfg.getString("parent").split("-C")[1]));
 		}
 	}
@@ -248,13 +250,6 @@ public class Quest extends QuestingObject implements IQuest {
 		return i;
 	}
 
-	public String getProgress(Player p) {
-		return Text.progressBar(
-				countFinishedTasks(p),
-				getMissions().size(),
-				null);
-	}
-
 	public List<Mission> getMissions() {
 		return tasks;
 	}
@@ -308,19 +303,25 @@ public class Quest extends QuestingObject implements IQuest {
 		return tasks.size() > i ? tasks.get(i): null;
 	}
 	
-	public void addMission(Mission mission) {
+	public void addMission(IMission mission) {
 		updateLastModified();
-		this.tasks.add(mission);
+		if(mission instanceof MissionChange)
+			tasks.add(((MissionChange)mission).getSource());
+		else
+			tasks.add((Mission)mission);
 	}
 	
-	public void removeMission(Mission mission) {
+	public void removeMission(IMission mission) {
 		updateLastModified();
-		this.tasks.remove(mission);
+		if(mission instanceof MissionChange)
+			tasks.remove(((MissionChange)mission).getSource());
+		else
+			tasks.remove((Mission)mission);
 	}
 	
 	public void setPartySize(int size) {
 		updateLastModified();
-		this.partysize = size;
+		partysize = size;
 	}
 
 	public long getRawCooldown() {
@@ -333,7 +334,7 @@ public class Quest extends QuestingObject implements IQuest {
 	}
 	
 	public long getCooldown() {
-		return this.cooldown / 60 / 1000;
+		return cooldown / 60 / 1000;
 	}
 
 	public void setCooldown(long cooldown) {
@@ -398,7 +399,10 @@ public class Quest extends QuestingObject implements IQuest {
 	@Override
 	public void setParent(IQuest quest) {
 		updateLastModified();
-		this.parent = (Quest)quest;
+		if(quest instanceof QuestChange)
+			parent = ((QuestChange)quest).getSource();
+		else
+			parent = (Quest)quest;
 	}
 
 	public List<String> getCommands() {
@@ -460,5 +464,30 @@ public class Quest extends QuestingObject implements IQuest {
 	@Override
 	public boolean isValid() {
 		return category.isValid() && (category.getQuest(id) != null);
+	}
+	
+	@Override
+	public QuestChange getWriter() {
+		return new QuestChange(this);
+	}
+
+	@Override
+	public boolean apply() {
+		return true;
+	}
+
+	@Override
+	public boolean discard() {
+		return false;
+	}
+
+	@Override
+	public IQuest getSource() {
+		return this;
+	}
+
+	@Override
+	public boolean hasChange(Member field) {
+		return true;
 	}
 }

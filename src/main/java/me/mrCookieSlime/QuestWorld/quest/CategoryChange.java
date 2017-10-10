@@ -10,12 +10,12 @@ import me.mrCookieSlime.QuestWorld.event.CancellableEvent;
 import me.mrCookieSlime.QuestWorld.event.CategoryChangeEvent;
 import me.mrCookieSlime.QuestWorld.util.BitFlag;
 
-public class CategoryChange extends Category implements ICategoryWrite {
-	private long changeBits;
+class CategoryChange extends Category implements ICategoryWrite {
+	private long changeBits = 0;
 	private Category origin;
+	
 	public CategoryChange(Category copy) {
 		super(copy);
-		changeBits = 0;
 		origin = copy;
 	}
 	
@@ -73,6 +73,17 @@ public class CategoryChange extends Category implements ICategoryWrite {
 	public boolean sendEvent() {
 		return CancellableEvent.send(new CategoryChangeEvent(this));
 	}
+
+	// TODO this doesn't support CategoryChange
+	@Override
+	public void addQuest(IQuest quest) {
+		origin.addQuest(quest);
+	}
+	
+	@Override
+	public void removeQuest(IQuest quest) {
+		origin.removeQuest(quest);
+	}
 	
 	// Modify "setX" methods
 	@Override
@@ -109,5 +120,10 @@ public class CategoryChange extends Category implements ICategoryWrite {
 	public void toggleWorld(String world) {
 		super.toggleWorld(world);
 		changeBits |= BitFlag.getBits(Member.WORLD_BLACKLIST);
+	}
+	
+	@Override
+	public CategoryChange getWriter() {
+		return this;
 	}
 }

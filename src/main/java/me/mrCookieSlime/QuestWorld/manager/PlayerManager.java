@@ -23,10 +23,8 @@ import me.mrCookieSlime.QuestWorld.api.contract.IQuestingObject;
 import me.mrCookieSlime.QuestWorld.party.Party;
 import me.mrCookieSlime.QuestWorld.api.Manual;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
+import me.mrCookieSlime.QuestWorld.api.QuestStatus;
 import me.mrCookieSlime.QuestWorld.api.Ticking;
-import me.mrCookieSlime.QuestWorld.quest.Category;
-//import me.mrCookieSlime.QuestWorld.quest.Quest;
-import me.mrCookieSlime.QuestWorld.quest.QuestStatus;
 import me.mrCookieSlime.QuestWorld.util.PlayerTools;
 import me.mrCookieSlime.QuestWorld.util.Text;
 
@@ -168,7 +166,7 @@ public class PlayerManager {
 			}
 		}
 		
-		for (Category category: QuestWorld.getInstance().getCategories()) {
+		for (ICategory category: QuestWorld.getInstance().getCategories()) {
 			for (IQuest quest: category.getQuests()) {
 				if (getStatus(quest).equals(QuestStatus.AVAILABLE)) {
 					boolean finished = quest.getMissions().size() != 0;
@@ -238,7 +236,7 @@ public class PlayerManager {
 	}
 	
 	
-	//TODO Better place for this
+	//TODO Better place for these
 	public String progressString(IMission task) {
 		int progress = getProgress(task);
 		int amount = task.getAmount();
@@ -247,6 +245,20 @@ public class PlayerManager {
 				progress,
 				amount,
 				task.getType().progressString(progress / (float)amount, progress, amount));
+	}
+	
+	public String progressString(IQuest quest) {
+		int progress = 0;
+		for(IMission mission : quest.getMissions())
+			if(hasCompletedTask(mission))
+				++progress;
+		
+		int amount = quest.getMissions().size();
+		
+		return Text.progressBar(
+				progress,
+				amount,
+				null);
 	}
 	
 	public int getTotal(IMission task) {
@@ -365,7 +377,7 @@ public class PlayerManager {
 	public String getProgress() {
 		StringBuilder progress = new StringBuilder();
 		int done = 0, total = 0;
-		for (Category category: QuestWorld.getInstance().getCategories())  {
+		for (ICategory category: QuestWorld.getInstance().getCategories())  {
 			for (IQuest quest: category.getQuests()) {
 				if (hasFinished(quest)) done++;
 				total++;

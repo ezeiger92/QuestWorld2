@@ -13,8 +13,7 @@ import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IMissionWrite;
 import me.mrCookieSlime.QuestWorld.api.menu.MenuData;
 import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
-import me.mrCookieSlime.QuestWorld.quest.MissionChange;
-import me.mrCookieSlime.QuestWorld.quest.QuestBook;
+import me.mrCookieSlime.QuestWorld.api.menu.QuestBook;
 import me.mrCookieSlime.QuestWorld.util.ItemBuilder;
 import me.mrCookieSlime.QuestWorld.util.PlayerTools;
 import me.mrCookieSlime.QuestWorld.util.Text;
@@ -78,7 +77,7 @@ public class LocationMission extends MissionType implements Ticking {
 	}
 	
 	@Override
-	protected void layoutMenu(MissionChange changes) {
+	protected void layoutMenu(IMissionWrite changes) {
 		super.layoutMenu(changes);
 		putButton(10, MissionButton.location(changes));
 		putButton(11, new MenuData(

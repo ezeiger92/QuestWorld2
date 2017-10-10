@@ -4,9 +4,9 @@ import java.util.UUID;
 
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.Translation;
+import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
+import me.mrCookieSlime.QuestWorld.api.menu.QuestBook;
 import me.mrCookieSlime.QuestWorld.party.Party;
-import me.mrCookieSlime.QuestWorld.quest.Category;
-import me.mrCookieSlime.QuestWorld.quest.QuestBook;
 import me.mrCookieSlime.QuestWorld.util.PlayerTools;
 import me.mrCookieSlime.QuestWorld.util.Text;
 
@@ -36,7 +36,7 @@ public class QuestsCommand implements CommandExecutor {
 				}
 				else {
 					try {
-						Category category = QuestWorld.getInstance().getCategory(Integer.parseInt(args[0]));
+						ICategory category = QuestWorld.getInstance().getCategory(Integer.parseInt(args[0]));
 						if (category != null)  {
 							QuestWorld.getInstance().getManager((Player)sender).clearPages();
 							if (args.length == 2) QuestBook.openQuest((Player) sender, category.getQuest(Integer.parseInt(args[1])), false, false);

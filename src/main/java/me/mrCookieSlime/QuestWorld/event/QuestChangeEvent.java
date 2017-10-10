@@ -4,15 +4,14 @@ import org.bukkit.event.HandlerList;
 
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuestWrite;
-import me.mrCookieSlime.QuestWorld.quest.QuestChange;
 
 /**
  * An event fired before applying a set of changes to a quest
  */
 public class QuestChangeEvent extends CancellableEvent {
-	private QuestChange nextState;
+	private IQuestWrite nextState;
 
-	public QuestChangeEvent(QuestChange nextState) {
+	public QuestChangeEvent(IQuestWrite nextState) {
 		this.nextState = nextState;
 	}
 

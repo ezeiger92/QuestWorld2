@@ -14,9 +14,10 @@ import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.SinglePrompt;
 import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
+import me.mrCookieSlime.QuestWorld.api.contract.IMissionWrite;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
+import me.mrCookieSlime.QuestWorld.api.menu.QuestBook;
 import me.mrCookieSlime.QuestWorld.util.PlayerTools;
-import me.mrCookieSlime.QuestWorld.util.Text;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -25,7 +26,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-public class Mission extends QuestingObject implements IMission {
+class Mission extends QuestingObject implements IMissionWrite {
 	
 	Quest quest;
 	MissionType type;
@@ -158,7 +159,7 @@ public class Mission extends QuestingObject implements IMission {
 		return type.userDisplayItem(this);
 	}
 	
-	protected void setItem(ItemStack item) {
+	public void setItem(ItemStack item) {
 		this.item = item.clone();
 		this.item.setAmount(1);
 	}
@@ -167,12 +168,12 @@ public class Mission extends QuestingObject implements IMission {
 		return entity;
 	}
 	
-	protected void setEntity(EntityType entity) {
+	public void setEntity(EntityType entity) {
 		updateLastModified();
 		this.entity = entity;
 	}
 	
-	protected void setCustomString(String customString) {
+	public void setCustomString(String customString) {
 		updateLastModified();
 		this.customString = customString;
 	}
@@ -181,24 +182,14 @@ public class Mission extends QuestingObject implements IMission {
 		return type;
 	}
 
-	protected void setType(MissionType type) {
+	public void setType(MissionType type) {
 		updateLastModified();
 		this.type = type;
 	}
 
-	protected void setAmount(int amount) {
+	public void setAmount(int amount) {
 		updateLastModified();
 		this.amount = amount;
-	}
-
-	@Deprecated
-	public String getProgress(Player p) {
-		int progress = QuestWorld.getInstance().getManager(p).getProgress(this);
-		
-		return Text.progressBar(
-				progress,
-				amount,
-				getType().progressString(progress / (float)amount, progress, amount));
 	}
 	
 	public String getCustomString() {
@@ -217,12 +208,12 @@ public class Mission extends QuestingObject implements IMission {
 		return location;
 	}
 	
-	protected void setLocation(Location loc) {
+	public void setLocation(Location loc) {
 		updateLastModified();
 		this.location = loc.clone();
 	}
 
-	protected void setLocation(Player p) {
+	public void setLocation(Player p) {
 		setLocation(p.getLocation().getBlock().getLocation());
 	}
 
@@ -284,7 +275,7 @@ public class Mission extends QuestingObject implements IMission {
 		return this.dialogue;
 	}
 
-	protected void setDisplayName(String name) {
+	public void setDisplayName(String name) {
 		updateLastModified();
 		this.displayName = name;
 	}
@@ -301,7 +292,7 @@ public class Mission extends QuestingObject implements IMission {
 		return this.timeframe > 0;
 	}
 	
-	protected void setTimeframe(int timeframe) {
+	public void setTimeframe(int timeframe) {
 		updateLastModified();
 		this.timeframe = timeframe;
 	}
@@ -310,7 +301,7 @@ public class Mission extends QuestingObject implements IMission {
 		return this.deathReset;
 	}
 	
-	protected void setDeathReset(boolean deathReset) {
+	public void setDeathReset(boolean deathReset) {
 		updateLastModified();
 		this.deathReset = deathReset;
 	}
@@ -319,12 +310,12 @@ public class Mission extends QuestingObject implements IMission {
 		return this.description;
 	}
 	
-	protected void setDescription(String description) {
+	public void setDescription(String description) {
 		updateLastModified();
 		this.description = description;
 	}
 
-	protected void setCustomInt(int val) {
+	public void setCustomInt(int val) {
 		updateLastModified();
 		this.customInt = val;
 	}
@@ -337,7 +328,7 @@ public class Mission extends QuestingObject implements IMission {
 		return spawnersAllowed;
 	}
 
-	protected void setSpawnerSupport(boolean acceptsSpawners) {
+	public void setSpawnerSupport(boolean acceptsSpawners) {
 		updateLastModified();
 		this.spawnersAllowed = acceptsSpawners;
 	}
@@ -346,5 +337,30 @@ public class Mission extends QuestingObject implements IMission {
 	public void updateLastModified() {
 		// TODO Really take a look at this whole system again
 		((Quest)quest).updateLastModified();
+	}
+	
+	@Override
+	public MissionChange getWriter() {
+		return new MissionChange(this);
+	}
+
+	@Override
+	public boolean apply() {
+		return true;
+	}
+
+	@Override
+	public boolean discard() {
+		return false;
+	}
+
+	@Override
+	public IMission getSource() {
+		return this;
+	}
+
+	@Override
+	public boolean hasChange(Member field) {
+		return true;
 	}
 }

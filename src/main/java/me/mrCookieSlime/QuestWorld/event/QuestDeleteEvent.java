@@ -2,16 +2,16 @@ package me.mrCookieSlime.QuestWorld.event;
 
 import org.bukkit.event.HandlerList;
 
-import me.mrCookieSlime.QuestWorld.quest.Quest;
+import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
 
 public class QuestDeleteEvent extends CancellableEvent {
-	private Quest quest;
+	private IQuest quest;
 	
-	public QuestDeleteEvent(Quest quest) {
+	public QuestDeleteEvent(IQuest quest) {
 		this.quest = quest;
 	}
 	
-	public Quest getQuest() {
+	public IQuest getQuest() {
 		return quest;
 	}
 

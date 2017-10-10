@@ -14,14 +14,14 @@ import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.Ticking;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
+import me.mrCookieSlime.QuestWorld.api.contract.IMissionWrite;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
+import me.mrCookieSlime.QuestWorld.api.contract.IQuestWrite;
 import me.mrCookieSlime.QuestWorld.event.CategoryDeleteEvent;
 import me.mrCookieSlime.QuestWorld.event.MissionChangeEvent;
 import me.mrCookieSlime.QuestWorld.event.MissionDeleteEvent;
 import me.mrCookieSlime.QuestWorld.event.QuestChangeEvent;
 import me.mrCookieSlime.QuestWorld.event.QuestDeleteEvent;
-import me.mrCookieSlime.QuestWorld.quest.MissionChange;
-import me.mrCookieSlime.QuestWorld.quest.QuestChange;
 
 public class MissionViewer implements Listener {
 	private Map<MissionType, Set<IMission>> missions = new HashMap<>();
@@ -38,7 +38,7 @@ public class MissionViewer implements Listener {
 	
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onCreateMission(QuestChangeEvent event) {
-		if(event.hasChange(QuestChange.Member.TASKS)) {
+		if(event.hasChange(IQuestWrite.Member.TASKS)) {
 			List<? extends IMission> questMissions = event.getNextState().getMissions();
 			IMission m = questMissions.get(questMissions.size() - 1);
 			add(m, m.getType());
@@ -47,7 +47,7 @@ public class MissionViewer implements Listener {
 	
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onUpdateMission(MissionChangeEvent event) {
-		if(event.hasChange(MissionChange.Member.TYPE))
+		if(event.hasChange(IMissionWrite.Member.TYPE))
 			remove(event.getMission());
 			add(event.getMission(), event.getNextState().getType());
 	}

@@ -5,7 +5,7 @@ import java.util.List;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import me.mrCookieSlime.QuestWorld.quest.QuestStatus;
+import me.mrCookieSlime.QuestWorld.api.QuestStatus;
 
 public interface IQuest extends IQuestingObject {
 	int getID();
@@ -29,6 +29,7 @@ public interface IQuest extends IQuestingObject {
 	
 	QuestStatus getStatus(Player p);
 	int countFinishedTasks(Player p);
-	String getProgress(Player p);
 	void handoutReward(Player p);
+	
+	IQuestWrite getWriter();
 }

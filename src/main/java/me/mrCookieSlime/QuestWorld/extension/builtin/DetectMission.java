@@ -9,8 +9,8 @@ import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.Ticking;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
+import me.mrCookieSlime.QuestWorld.api.contract.IMissionWrite;
 import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
-import me.mrCookieSlime.QuestWorld.quest.MissionChange;
 
 public class DetectMission extends MissionType implements Ticking {
 	public DetectMission() {
@@ -48,7 +48,7 @@ public class DetectMission extends MissionType implements Ticking {
 	}
 	
 	@Override
-	protected void layoutMenu(MissionChange changes) {
+	protected void layoutMenu(IMissionWrite changes) {
 		super.layoutMenu(changes);
 		putButton(10, MissionButton.item(changes));
 		putButton(17, MissionButton.amount(changes));

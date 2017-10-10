@@ -1,4 +1,4 @@
-package me.mrCookieSlime.QuestWorld.quest;
+package me.mrCookieSlime.QuestWorld.api;
 
 public enum QuestStatus {
 	

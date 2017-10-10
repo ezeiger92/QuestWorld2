@@ -5,16 +5,17 @@ import org.bukkit.entity.Player;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuestingObject;
 
-public abstract class QuestingObject implements IQuestingObject {
+abstract class QuestingObject implements IQuestingObject {
+	private static long s_uniqueId = 0;
+	
+	private final long uniqueId = s_uniqueId++;
+	public final long getUnique() {
+		return uniqueId;
+	}
+	
 	private long lastModified = System.currentTimeMillis();
 	public long getLastModified() {
 		return lastModified;
-	}
-	
-	private static long s_uniqueId = 0;
-	private long uniqueId = s_uniqueId++;
-	public long getUnique() {
-		return uniqueId;
 	}
 	
 	public void updateLastModified() {

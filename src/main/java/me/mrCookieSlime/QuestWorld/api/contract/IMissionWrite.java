@@ -47,4 +47,5 @@ public interface IMissionWrite extends IMission {
 		SPAWNERS_ALLOWED,
 		DIALOGUE,
 	}
+	boolean hasChange(Member field);
 }

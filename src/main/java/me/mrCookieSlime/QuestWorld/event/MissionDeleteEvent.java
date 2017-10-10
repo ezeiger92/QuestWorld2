@@ -2,16 +2,16 @@ package me.mrCookieSlime.QuestWorld.event;
 
 import org.bukkit.event.HandlerList;
 
-import me.mrCookieSlime.QuestWorld.quest.Mission;
+import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 
 public class MissionDeleteEvent extends CancellableEvent {
-	private Mission mission;
+	private IMission mission;
 	
-	public MissionDeleteEvent(Mission mission) {
+	public MissionDeleteEvent(IMission mission) {
 		this.mission = mission;
 	}
 	
-	public Mission getMission() {
+	public IMission getMission() {
 		return mission;
 	}
 	

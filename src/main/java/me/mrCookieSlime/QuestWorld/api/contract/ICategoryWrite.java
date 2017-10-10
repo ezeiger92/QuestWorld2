@@ -7,10 +7,12 @@ import me.mrCookieSlime.QuestWorld.util.BitFlag.BitString;
 public interface ICategoryWrite extends ICategory {
 	void setItem(ItemStack item);
 	void setName(String name);
-	//void setParent(Quest quest);
 	void setPermission(String permission);
 	void setHidden(boolean hidden);
 	void toggleWorld(String world);
+	void setParent(IQuest object);
+	void addQuest(IQuest quest);
+	void removeQuest(IQuest quest);
 	
 	boolean apply();
 	boolean discard();
@@ -26,4 +28,5 @@ public interface ICategoryWrite extends ICategory {
 		HIDDEN,
 		WORLD_BLACKLIST,
 	}
+	boolean hasChange(Member field);
 }
