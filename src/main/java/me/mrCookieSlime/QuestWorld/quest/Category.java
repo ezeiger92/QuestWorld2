@@ -11,6 +11,8 @@ import java.util.Set;
 
 import me.mrCookieSlime.CSCoreLibPlugin.Configuration.Config;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
+import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
+import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
 import me.mrCookieSlime.QuestWorld.util.ItemBuilder;
 import me.mrCookieSlime.QuestWorld.util.Text;
 
@@ -18,7 +20,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-public class Category extends QuestingObject {
+public class Category extends QuestingObject implements ICategory {
 	
 	Map<Integer, Quest> quests;
 	int id;
@@ -31,24 +33,28 @@ public class Category extends QuestingObject {
 	List<String> world_blacklist = new ArrayList<String>();
 	
 	protected Category(Category cat) {
-		cat.copyTo(this);
+		copy(cat);
+	}
+	
+	protected void copy(Category source) {
+		id         = source.id;
+		name       = source.name;
+		item       = source.item.clone();
+		parent     = source.parent;
+		permission = source.permission;
+		hidden     = source.hidden;
+		
+		world_blacklist = new ArrayList<>();
+		world_blacklist.addAll(source.world_blacklist);
 	}
 	
 	protected void copyTo(Category dest) {
-		dest.id         = id;
-		dest.name       = name;
-		dest.item       = item.clone();
-		dest.parent     = parent;
-		dest.permission = permission;
-		dest.hidden     = hidden;
-		
-		dest.world_blacklist = new ArrayList<>();
-		dest.world_blacklist.addAll(world_blacklist);
+		dest.copy(this);
 	}
 	
 	public Category(String name, int id) {
 		this.id = id;
-		this.quests = new HashMap<Integer, Quest>();
+		this.quests = new HashMap<>();
 		this.name = Text.colorize(name);
 		this.item = new ItemBuilder(Material.BOOK_AND_QUILL).display(name).get();
 		this.world_blacklist = new ArrayList<String>();
@@ -60,7 +66,7 @@ public class Category extends QuestingObject {
 	
 	public Category(File file, List<File> quests) {
 		this.id = Integer.parseInt(file.getName().replace(".category", ""));
-		this.quests = new HashMap<Integer, Quest>();
+		this.quests = new HashMap<>();
 		for (File f: quests) {
 			new Quest(this, f);
 		}
@@ -132,8 +138,17 @@ public class Category extends QuestingObject {
 		return quests.values();
 	}
 	
+	public int countQuests(Player p, QuestStatus status) {
+		int i = 0;
+		for(Quest quest : getQuests())
+			if(quest.getStatus(p) == status)
+				++i;
+		return i;
+	}
+	
+	@Deprecated
 	public Set<Quest> getQuests(Player p, QuestStatus status) {
-		Set<Quest> quests = new HashSet<Quest>();
+		Set<Quest> quests = new HashSet<>();
 		for (Quest quest: getQuests()) {
 			if (quest.getStatus(p) == status) quests.add(quest);
 		}
@@ -141,7 +156,7 @@ public class Category extends QuestingObject {
 	}
 	
 	public Set<Quest> getFinishedQuests(Player p) {
-		Set<Quest> quests = new HashSet<Quest>();
+		Set<Quest> quests = new HashSet<>();
 		for (Quest quest: getQuests()) {
 			if (QuestWorld.getInstance().getManager(p).hasFinished(quest)) quests.add(quest);
 		}
@@ -178,13 +193,14 @@ public class Category extends QuestingObject {
 		ItemBuilder.edit(this.item).display(name);
 	}
 	
-	public Quest getParent() {
+	public IQuest getParent() {
 		return this.parent;
 	}
 
-	public void setParent(Quest quest) {
+	@Override
+	public void setParent(IQuest quest) {
 		updateLastModified();
-		this.parent = quest;
+		this.parent = (Quest)quest;
 	}
 
 	@Override

@@ -2,6 +2,7 @@ package me.mrCookieSlime.QuestWorld.quest;
 
 import org.bukkit.entity.Player;
 
+import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuestingObject;
 
 public abstract class QuestingObject implements IQuestingObject {
@@ -21,7 +22,7 @@ public abstract class QuestingObject implements IQuestingObject {
 	}
 	
 	public abstract String getName();
-	public abstract void setParent(Quest quest);
+	public abstract void setParent(IQuest quest);
 	
 	public abstract String getPermission();
 	public abstract void setPermission(String permission);

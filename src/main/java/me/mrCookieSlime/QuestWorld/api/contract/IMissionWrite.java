@@ -6,6 +6,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import me.mrCookieSlime.QuestWorld.api.MissionType;
+import me.mrCookieSlime.QuestWorld.util.BitFlag.BitString;
 
 public interface IMissionWrite extends IMission {
 	void setItem(ItemStack item);
@@ -22,7 +23,28 @@ public interface IMissionWrite extends IMission {
 	void setDescription(String description);
 	void setCustomInt(int customInt);
 	void setSpawnerSupport(boolean acceptsSpawners);
+
+	void setupDialogue(Player p);
 	
 	boolean apply();
 	boolean discard();
+	IMission getSource();
+	
+	public enum Member implements BitString {
+		QUEST,
+		TYPE,
+		ITEM,
+		AMOUNT,
+		ID,
+		ENTITY,
+		LOCATION,
+		NAME,
+		DISPLAY_NAME,
+		TIMEFRAME,
+		DEATH_RESET,
+		LORE,
+		CUSTOM_INT,
+		SPAWNERS_ALLOWED,
+		DIALOGUE,
+	}
 }

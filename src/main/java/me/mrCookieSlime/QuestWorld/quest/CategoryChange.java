@@ -1,28 +1,16 @@
-package me.mrCookieSlime.QuestWorld.api;
+package me.mrCookieSlime.QuestWorld.quest;
 
 import java.util.List;
 
 import org.bukkit.inventory.ItemStack;
 
+import me.mrCookieSlime.QuestWorld.api.contract.ICategoryWrite;
+import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
 import me.mrCookieSlime.QuestWorld.event.CancellableEvent;
 import me.mrCookieSlime.QuestWorld.event.CategoryChangeEvent;
-import me.mrCookieSlime.QuestWorld.quest.Category;
-import me.mrCookieSlime.QuestWorld.quest.Quest;
 import me.mrCookieSlime.QuestWorld.util.BitFlag;
-import me.mrCookieSlime.QuestWorld.util.BitFlag.BitString;
 
-public class CategoryChange extends Category {
-	public enum Member implements BitString {
-		QUESTS,
-		ID,
-		NAME,
-		ITEM,
-		PARENT,
-		PERMISSION,
-		HIDDEN,
-		WORLD_BLACKLIST,
-	}
-	
+public class CategoryChange extends Category implements ICategoryWrite {
 	private long changeBits;
 	private Category origin;
 	public CategoryChange(Category copy) {
@@ -56,8 +44,24 @@ public class CategoryChange extends Category {
 	/**
 	 * Applies all changes held by this object to the original category
 	 */
-	public void apply() {
-		copyTo(origin);
+	@Override
+	public boolean apply() {
+		if(sendEvent()) {
+			copyTo(origin);
+			changeBits = 0;
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	public boolean discard() {
+		if(changeBits != 0) {
+			copy(origin);
+			changeBits = 0;
+			return true;
+		}
+		return false;
 	}
 	
 	/**
@@ -84,7 +88,7 @@ public class CategoryChange extends Category {
 	}
 	
 	@Override
-	public void setParent(Quest quest) {
+	public void setParent(IQuest quest) {
 		super.setParent(quest);
 		changeBits |= BitFlag.getBits(Member.PARENT);
 	}

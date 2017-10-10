@@ -23,18 +23,19 @@ import me.mrCookieSlime.CSCoreLibSetup.CSCoreLibLoader;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.QuestExtension;
 import me.mrCookieSlime.QuestWorld.api.Translator;
+import me.mrCookieSlime.QuestWorld.api.contract.IMission;
+import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
 import me.mrCookieSlime.QuestWorld.api.contract.QuestLoader;
 import me.mrCookieSlime.QuestWorld.command.EditorCommand;
 import me.mrCookieSlime.QuestWorld.command.QuestsCommand;
 import me.mrCookieSlime.QuestWorld.extension.builtin.Builtin;
-import me.mrCookieSlime.QuestWorld.listener.HookInstaller;
+import me.mrCookieSlime.QuestWorld.listener.ExtensionInstaller;
 import me.mrCookieSlime.QuestWorld.listener.MenuListener;
 import me.mrCookieSlime.QuestWorld.listener.PlayerListener;
 import me.mrCookieSlime.QuestWorld.listener.SelfListener;
 import me.mrCookieSlime.QuestWorld.manager.MissionViewer;
 import me.mrCookieSlime.QuestWorld.manager.PlayerManager;
 import me.mrCookieSlime.QuestWorld.quest.Category;
-import me.mrCookieSlime.QuestWorld.quest.Mission;
 import me.mrCookieSlime.QuestWorld.quest.Quest;
 import me.mrCookieSlime.QuestWorld.util.EconWrapper;
 import me.mrCookieSlime.QuestWorld.util.Lang;
@@ -66,7 +67,7 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 	
 	private Lang language;
 	private ExtensionLoader extLoader = null;
-	private HookInstaller hookInstaller = null;
+	private ExtensionInstaller hookInstaller = null;
 	
 	private int questCheckHandle = -1;
 	private int autosaveHandle = -1;
@@ -93,11 +94,11 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 			hookInstaller.add(hook);
 	}
 	
-	public Set<Mission> getMissionsOf(MissionType type) {
+	public Set<IMission> getMissionsOf(MissionType type) {
 		return missionViewer.getMissionsOf(type);
 	}
 	
-	public Set<Mission> getTickingMissions() {
+	public Set<IMission> getTickingMissions() {
 		return missionViewer.getTickingMissions();
 	}
 	
@@ -109,7 +110,7 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 	@Override
 	public void onEnable() {
 		// Initialize all we can before we need CSCoreLib
-		hookInstaller = new HookInstaller(this);
+		hookInstaller = new ExtensionInstaller(this);
 		new Builtin();
 		hookInstaller.addAll(preEnableHooks);
 		
@@ -383,7 +384,7 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 	}
 	
 	public void unregisterCategory(Category category) {
-		for (Quest quest: category.getQuests()) {
+		for (IQuest quest: category.getQuests()) {
 			PlayerManager.clearAllQuestData(quest);
 			new File("plugins/QuestWorld/quests/" + quest.getID() + "-C" + category.getID() + ".quest").delete();
 		}

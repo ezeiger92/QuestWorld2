@@ -10,11 +10,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import me.mrCookieSlime.QuestWorld.QuestWorld;
-import me.mrCookieSlime.QuestWorld.api.MissionChange;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.SinglePrompt;
 import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
+import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
 import me.mrCookieSlime.QuestWorld.util.PlayerTools;
 import me.mrCookieSlime.QuestWorld.util.Text;
 
@@ -124,7 +124,7 @@ public class Mission extends QuestingObject implements IMission {
 		dialogue = new ArrayList<String>();
 		dialogue.addAll(source.dialogue);
 		
-		quest.updateLastModified();
+		updateLastModified();
 	}
 	
 	protected void copyTo(Mission dest) {
@@ -168,12 +168,12 @@ public class Mission extends QuestingObject implements IMission {
 	}
 	
 	protected void setEntity(EntityType entity) {
-		quest.updateLastModified();
+		updateLastModified();
 		this.entity = entity;
 	}
 	
 	protected void setCustomString(String customString) {
-		quest.updateLastModified();
+		updateLastModified();
 		this.customString = customString;
 	}
 
@@ -182,15 +182,16 @@ public class Mission extends QuestingObject implements IMission {
 	}
 
 	protected void setType(MissionType type) {
-		quest.updateLastModified();
+		updateLastModified();
 		this.type = type;
 	}
 
 	protected void setAmount(int amount) {
-		quest.updateLastModified();
+		updateLastModified();
 		this.amount = amount;
 	}
 
+	@Deprecated
 	public String getProgress(Player p) {
 		int progress = QuestWorld.getInstance().getManager(p).getProgress(this);
 		
@@ -210,14 +211,14 @@ public class Mission extends QuestingObject implements IMission {
 	}
 
 	@Override
-	public void setParent(Quest quest) {}
+	public void setParent(IQuest quest) {}
 
 	public Location getLocation() {
 		return location;
 	}
 	
 	protected void setLocation(Location loc) {
-		quest.updateLastModified();
+		updateLastModified();
 		this.location = loc.clone();
 	}
 
@@ -251,7 +252,7 @@ public class Mission extends QuestingObject implements IMission {
 				(c,s) -> {
 					Player p2 = (Player) c.getForWhom();
 					if (s.equalsIgnoreCase("exit()")) {
-						quest.updateLastModified();
+						updateLastModified();
 						PlayerTools.sendTranslation(p2, true, Translation.MISSION_DIALOG_SET, path);
 						QuestBook.openQuestMissionEditor(p2, mission);
 						
@@ -284,7 +285,7 @@ public class Mission extends QuestingObject implements IMission {
 	}
 
 	protected void setDisplayName(String name) {
-		quest.updateLastModified();
+		updateLastModified();
 		this.displayName = name;
 	}
 	
@@ -301,7 +302,7 @@ public class Mission extends QuestingObject implements IMission {
 	}
 	
 	protected void setTimeframe(int timeframe) {
-		quest.updateLastModified();
+		updateLastModified();
 		this.timeframe = timeframe;
 	}
 
@@ -310,7 +311,7 @@ public class Mission extends QuestingObject implements IMission {
 	}
 	
 	protected void setDeathReset(boolean deathReset) {
-		quest.updateLastModified();
+		updateLastModified();
 		this.deathReset = deathReset;
 	}
 
@@ -319,12 +320,12 @@ public class Mission extends QuestingObject implements IMission {
 	}
 	
 	protected void setDescription(String description) {
-		quest.updateLastModified();
+		updateLastModified();
 		this.description = description;
 	}
 
 	protected void setCustomInt(int val) {
-		quest.updateLastModified();
+		updateLastModified();
 		this.customInt = val;
 	}
 
@@ -337,7 +338,13 @@ public class Mission extends QuestingObject implements IMission {
 	}
 
 	protected void setSpawnerSupport(boolean acceptsSpawners) {
-		quest.updateLastModified();
+		updateLastModified();
 		this.spawnersAllowed = acceptsSpawners;
+	}
+	
+	@Override
+	public void updateLastModified() {
+		// TODO Really take a look at this whole system again
+		((Quest)quest).updateLastModified();
 	}
 }

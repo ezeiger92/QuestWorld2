@@ -8,6 +8,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.SinglePrompt;
 import me.mrCookieSlime.QuestWorld.api.Translation;
+import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
 import me.mrCookieSlime.QuestWorld.quest.Category;
 import me.mrCookieSlime.QuestWorld.quest.QBDialogue;
 import me.mrCookieSlime.QuestWorld.quest.Quest;
@@ -49,7 +50,7 @@ public class Buttons {
 		};
 	}
 	
-	public static Consumer<InventoryClickEvent> onQuest(Quest quest) {
+	public static Consumer<InventoryClickEvent> onQuest(IQuest quest) {
 		return event -> {
 			Player p = (Player) event.getWhoClicked();
 			if(event.isRightClick())

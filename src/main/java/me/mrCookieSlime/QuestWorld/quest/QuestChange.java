@@ -1,46 +1,23 @@
-package me.mrCookieSlime.QuestWorld.api;
+package me.mrCookieSlime.QuestWorld.quest;
 
 import java.util.List;
 
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
+import me.mrCookieSlime.QuestWorld.api.contract.IQuestWrite;
 import me.mrCookieSlime.QuestWorld.event.CancellableEvent;
 import me.mrCookieSlime.QuestWorld.event.QuestChangeEvent;
-import me.mrCookieSlime.QuestWorld.quest.Mission;
-import me.mrCookieSlime.QuestWorld.quest.Quest;
 import me.mrCookieSlime.QuestWorld.util.BitFlag;
-import me.mrCookieSlime.QuestWorld.util.BitFlag.BitString;
 
-public class QuestChange extends Quest {
-	public enum Member implements BitString {
-		CATEGORY,
-		ID,
-		COOLDOWN,
-		NAME,
-		ITEM,
-		TASKS,
-		COMMANDS,
-		WORLD_BLACKLIST,
-		REWARDS,
-		MONEY,
-		XP,
-		PARTYSIZE,
-		DISABLEPARTIES,
-		ORDERED,
-		AUTOCLAIM,
-		PARENT,
-		PERMISSION,
-	}
-	
-	private long changeBits;
+public class QuestChange extends Quest implements IQuestWrite {	
+	private long changeBits = 0;
 	private Quest origin;
 	
-	public QuestChange(Quest copy) {
-		super(copy);
-		
-		changeBits = 0;
-		origin = copy;
+	public QuestChange(IQuest copy) {
+		super((Quest)copy);
+		origin = (Quest)copy;
 	}
 	
 	public boolean hasChange(Member field) {
@@ -68,8 +45,24 @@ public class QuestChange extends Quest {
 	/**
 	 * Applies all changes held by this object to the original quest
 	 */
-	public void apply() {
-		copyTo(origin);
+	@Override
+	public boolean apply() {
+		if(sendEvent()) {
+			copyTo(origin);
+			changeBits = 0;
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	public boolean discard() {
+		if(changeBits != 0) {
+			copy(origin);
+			changeBits = 0;
+			return true;
+		}
+		return false;
 	}
 	
 	/**
@@ -150,7 +143,7 @@ public class QuestChange extends Quest {
 	}
 	
 	@Override
-	public void setParent(Quest quest) {
+	public void setParent(IQuest quest) {
 		super.setParent(quest);
 		changeBits |= BitFlag.getBits(Member.PARENT);
 	}

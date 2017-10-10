@@ -18,6 +18,7 @@ import org.bukkit.inventory.meta.SpawnEggMeta;
 
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.Translation;
+import me.mrCookieSlime.QuestWorld.api.annotation.Mutable;
 
 /**
  * This class provides a builder for ItemStacks. It is exactly what you expect,
@@ -25,7 +26,7 @@ import me.mrCookieSlime.QuestWorld.api.Translation;
  * 
  * @author ezeiger92
  */
-public class ItemBuilder {
+public class ItemBuilder implements Cloneable {
 	/**
 	 * 
 	 * @author erik
@@ -51,13 +52,10 @@ public class ItemBuilder {
 	}
 	
 	public static ItemStack clone(ItemStack source) {
-		if(source != null)
-			return source.clone();
-		
-		return null;
+		return (source != null) ? source.clone() : null;
 	}
 	
-	public static ItemBuilder edit(ItemStack stack) {
+	public static @Mutable ItemBuilder edit(@Mutable("Stored and modified by other functions") ItemStack stack) {
 		
 		ItemBuilder res = new ItemBuilder();
 		res.resultStack = stack;
@@ -79,7 +77,7 @@ public class ItemBuilder {
      * @param stack Base item to work with
      */
 	public ItemBuilder(ItemStack stack) {
-		resultStack = new ItemStack(stack);
+		resultStack = stack.clone();
 		
 		if(stack.getType() == Material.AIR)
 			type(Material.BARRIER);
@@ -134,7 +132,7 @@ public class ItemBuilder {
      *
      * @return stack
      */
-	public ItemStack get() {
+	public @Mutable("ItemBuilder holds a reference") ItemStack get() {
 		return resultStack;
 	}
 	
@@ -155,7 +153,7 @@ public class ItemBuilder {
      * 
      * @return this, for chaining
      */
-	public ItemBuilder enchant(Enchantment ench, int level) {
+	public @Mutable ItemBuilder enchant(Enchantment ench, int level) {
 		resultStack.addEnchantment(ench, level);
 		return this;
 	}
@@ -168,7 +166,7 @@ public class ItemBuilder {
      * 
      * @return this, for chaining
      */
-	public ItemBuilder forceEnchant(Enchantment ench, int level) {
+	public @Mutable ItemBuilder forceEnchant(Enchantment ench, int level) {
 		resultStack.addUnsafeEnchantment(ench, level);
 		return this;
 	}
@@ -180,7 +178,7 @@ public class ItemBuilder {
      * 
      * @return this, for chaining
      */
-	public ItemBuilder disenchant(Enchantment ench) {
+	public @Mutable ItemBuilder disenchant(Enchantment ench) {
 		resultStack.removeEnchantment(ench);
 		return this;
 	}
@@ -192,7 +190,7 @@ public class ItemBuilder {
      * 
      * @return this, for chaining
      */
-	public ItemBuilder amount(int amount) {
+	public @Mutable ItemBuilder amount(int amount) {
 		resultStack.setAmount(amount);
 		return this;
 	}
@@ -204,12 +202,12 @@ public class ItemBuilder {
      * 
      * @return this, for chaining
      */
-	public ItemBuilder durability(short durability) {
+	public @Mutable ItemBuilder durability(short durability) {
 		resultStack.setDurability(durability);
 		return this;
 	}
 	
-	public ItemBuilder durability(int durability) {
+	public @Mutable ItemBuilder durability(int durability) {
 		return durability((short)durability);
 	}
 	
@@ -220,7 +218,7 @@ public class ItemBuilder {
      * 
      * @return this, for chaining
      */
-	public ItemBuilder type(Material type) {
+	public @Mutable ItemBuilder type(Material type) {
 		resultStack.setType(type);
 		return this;
 	}
@@ -234,7 +232,7 @@ public class ItemBuilder {
      * @return this, for chaining
      */
 	@SuppressWarnings("deprecation")
-	public ItemBuilder color(DyeColor color) {
+	public @Mutable ItemBuilder color(DyeColor color) {
 		if(resultStack.getType() == Material.INK_SACK)
 			durability(color.getDyeData());
 		else
@@ -243,7 +241,7 @@ public class ItemBuilder {
 		return this;
 	}
 	
-	public ItemBuilder skull(SkullType type) {
+	public @Mutable ItemBuilder skull(SkullType type) {
 		if(resultStack.getType() == Material.SKULL_ITEM)
 			durability(type.ordinal());
 		
@@ -251,7 +249,7 @@ public class ItemBuilder {
 	}
 	
 	@SuppressWarnings("deprecation")
-	public ItemBuilder skull(String playerName) {
+	public @Mutable ItemBuilder skull(String playerName) {
 		skull(SkullType.PLAYER);
 		
 		if(resultStack.getItemMeta() instanceof SkullMeta) {
@@ -264,7 +262,7 @@ public class ItemBuilder {
 		return this;
 	}
 	
-	public ItemBuilder mob(EntityType mob) {
+	public @Mutable ItemBuilder mob(EntityType mob) {
 		if(resultStack.getItemMeta() instanceof SpawnEggMeta) {
 			SpawnEggMeta meta = (SpawnEggMeta) resultStack.getItemMeta();
 			meta.setSpawnedType(mob);
@@ -281,7 +279,7 @@ public class ItemBuilder {
      * 
      * @return this, for chaining
      */
-	public ItemBuilder leather(Color color) {
+	public @Mutable ItemBuilder leather(Color color) {
 		if(resultStack.getItemMeta() instanceof LeatherArmorMeta) {
 			LeatherArmorMeta meta = (LeatherArmorMeta)resultStack.getItemMeta();
 			meta.setColor(color);
@@ -291,39 +289,39 @@ public class ItemBuilder {
 	}
 	
 
-	public ItemBuilder flag(ItemFlag... flags) {
+	public @Mutable ItemBuilder flag(ItemFlag... flags) {
 		ItemMeta stackMeta = resultStack.getItemMeta();
 		stackMeta.addItemFlags(flags);
 		resultStack.setItemMeta(stackMeta);
 		return this;
 	}
 	
-	public ItemBuilder unflag(ItemFlag... flags) {
+	public @Mutable ItemBuilder unflag(ItemFlag... flags) {
 		ItemMeta stackMeta = resultStack.getItemMeta();
 		stackMeta.removeItemFlags(flags);
 		resultStack.setItemMeta(stackMeta);
 		return this;
 	}
 	
-	public ItemBuilder display(String displayName) {
+	public @Mutable ItemBuilder display(String displayName) {
 		ItemMeta stackMeta = resultStack.getItemMeta();
 		stackMeta.setDisplayName(Text.colorize(displayName));
 		resultStack.setItemMeta(stackMeta);
 		return this;
 	}
 	
-	public ItemBuilder lore(String... lore) {
+	public @Mutable ItemBuilder lore(String... lore) {
 		return lore(Arrays.asList(Text.colorizeList(lore)));
 	}
 	
-	public ItemBuilder lore(List<String> lore) {
+	public @Mutable ItemBuilder lore(List<String> lore) {
 		ItemMeta stackMeta = resultStack.getItemMeta();
 		stackMeta.setLore(lore);
 		resultStack.setItemMeta(stackMeta);
 		return this;
 	}
 	
-	public ItemBuilder selector(int index, String... options) {
+	public @Mutable ItemBuilder selector(int index, String... options) {
 		if(options == null || options.length == 0)
 			return this;
 		
@@ -339,5 +337,10 @@ public class ItemBuilder {
 		result[index + 1] = "&2>" + options[index];
 		lore(result);
 		return this;
+	}
+	
+	@Override
+	public ItemBuilder clone() {
+		return new ItemBuilder(resultStack);
 	}
 }

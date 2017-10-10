@@ -2,8 +2,9 @@ package me.mrCookieSlime.QuestWorld.event;
 
 import org.bukkit.event.HandlerList;
 
-import me.mrCookieSlime.QuestWorld.api.QuestChange;
-import me.mrCookieSlime.QuestWorld.quest.Quest;
+import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
+import me.mrCookieSlime.QuestWorld.api.contract.IQuestWrite;
+import me.mrCookieSlime.QuestWorld.quest.QuestChange;
 
 /**
  * An event fired before applying a set of changes to a quest
@@ -15,12 +16,16 @@ public class QuestChangeEvent extends CancellableEvent {
 		this.nextState = nextState;
 	}
 
-	public Quest getQuest() {
+	public IQuest getQuest() {
 		return nextState.getSource();
 	}
 
-	public QuestChange getNextState() {
+	public IQuestWrite getNextState() {
 		return nextState;
+	}
+	
+	public boolean hasChange(IQuestWrite.Member field) {
+		return nextState.hasChange(field);
 	}
 	
 	// Boilerplate copy/paste from CancellableEvent

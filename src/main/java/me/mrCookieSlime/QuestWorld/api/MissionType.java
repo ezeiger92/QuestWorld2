@@ -6,6 +6,7 @@ import me.mrCookieSlime.QuestWorld.api.contract.IMissionWrite;
 import me.mrCookieSlime.QuestWorld.api.menu.Menu;
 import me.mrCookieSlime.QuestWorld.api.menu.MenuData;
 import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
+import me.mrCookieSlime.QuestWorld.quest.MissionChange;
 import me.mrCookieSlime.QuestWorld.util.Log;
 import me.mrCookieSlime.QuestWorld.util.Text;
 
@@ -15,9 +16,9 @@ import java.util.Map;
 import org.bukkit.inventory.ItemStack;
 
 public abstract class MissionType {
-	String name;
-	ItemStack selectorItem;
-	boolean supportsTimeframes, supportsDeathReset;
+	private String name;
+	private ItemStack selectorItem;
+	private boolean supportsTimeframes, supportsDeathReset;
 	private Map<Integer, MenuData> menuData;
 	
 	public MissionType(String name, boolean supportsTimeframes, boolean supportsDeathReset, ItemStack item) {
@@ -121,10 +122,6 @@ public abstract class MissionType {
 		if(supportsTimeframes()) putButton(6, MissionButton.timeframe(changes));
 		putButton(7, MissionButton.missionName(changes));
 		putButton(8, MissionButton.dialogue(changes));
-	}
-	
-	protected boolean migrateFrom(MissionChange changes) {
-		return false;
 	}
 	
 	@Override

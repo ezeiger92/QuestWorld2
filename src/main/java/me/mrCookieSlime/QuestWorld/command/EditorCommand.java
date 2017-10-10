@@ -2,17 +2,15 @@ package me.mrCookieSlime.QuestWorld.command;
 
 
 import me.mrCookieSlime.QuestWorld.QuestWorld;
-import me.mrCookieSlime.QuestWorld.api.QuestChange;
 import me.mrCookieSlime.QuestWorld.api.SinglePrompt;
-import me.mrCookieSlime.QuestWorld.quest.Category;
+import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
+import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
 import me.mrCookieSlime.QuestWorld.quest.QBDialogue;
-import me.mrCookieSlime.QuestWorld.quest.Quest;
 import me.mrCookieSlime.QuestWorld.quest.QuestBook;
+import me.mrCookieSlime.QuestWorld.quest.QuestChange;
 import me.mrCookieSlime.QuestWorld.util.Log;
 import me.mrCookieSlime.QuestWorld.util.PlayerTools;
 import me.mrCookieSlime.QuestWorld.util.Text;
-
-import java.util.Iterator;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -96,27 +94,28 @@ public class EditorCommand implements CommandExecutor {
 		}
 		else if(param.equals("upgrade")) {
 			if(args.length > 1 && args[1].equalsIgnoreCase("confirm")) {
-				int changes = 0;
-				Iterator<Category> categories = QuestWorld.getInstance().getCategories().iterator();
-				while(categories.hasNext()) {
-					Category c = categories.next();
-					Iterator<Quest> quests = c.getQuests().iterator();
-					while(quests.hasNext()) {
-						Quest q = quests.next();
-						if(q.getCooldown() == 0) {
-							q.setCooldown(-1);
-							++changes;
-							String questFile = q.getID() + "-C" + c.getID();
-							Log.info("[Quest World 2] Upgrading "+c.getName()+"."+q.getName()+" ("+questFile+".quest): Cooldown changed from 0 to -1");
+				int changeCount = 0;
+				for(ICategory category : QuestWorld.getInstance().getCategories())
+					for(IQuest quest : category.getQuests())
+						if(quest.getCooldown() == 0) {
+							QuestChange changes = new QuestChange(quest);
+							changes.setCooldown(-1);
+							if(changes.apply()) {
+								++changeCount;
+								String questFile = quest.getID() + "-C" + category.getID();
+								Log.info("[Quest World 2] Upgrading "+category.getName()+"."+quest.getName()+" ("+questFile+".quest): Cooldown changed from 0 to -1");
+							}
+							else {
+								// Some error here 
+							}
 						}
-					}
-				}
+				
 				String s = "s";
-				if(changes == 1)
+				if(changeCount == 1)
 					s = "";
 				
-				String message = "&7Upgrade complete, "+changes+" quest"+s+" were modified";
-				if(changes > 0)
+				String message = "&7Upgrade complete, "+changeCount+" quest"+s+" were modified";
+				if(changeCount > 0)
 					message += ", changes printed in console";
 				
 				sender.sendMessage(Text.colorize(message));
@@ -129,12 +128,18 @@ public class EditorCommand implements CommandExecutor {
 			return true;
 		}
 		else if (args.length == 4 && param.equals("delete_command") && sender instanceof Player) {
-			Quest quest = QuestWorld.getInstance().getCategory(Integer.parseInt(args[1])).getQuest(Integer.parseInt(args[2]));
-			quest.removeCommand(Integer.parseInt(args[3]));
+			IQuest quest = QuestWorld.getInstance().getCategory(Integer.parseInt(args[1])).getQuest(Integer.parseInt(args[2]));
+			
+			QuestChange changes = new QuestChange(quest);
+			changes.removeCommand(Integer.parseInt(args[3]));
+			if(changes.apply()) {
+				
+			}
+			
 			QBDialogue.openCommandEditor((Player) sender, quest);
 		}
 		else if (args.length == 3 && param.equals("add_command") && sender instanceof Player) {
-			Quest quest = QuestWorld.getInstance().getCategory(Integer.parseInt(args[1])).getQuest(Integer.parseInt(args[2]));
+			IQuest quest = QuestWorld.getInstance().getCategory(Integer.parseInt(args[1])).getQuest(Integer.parseInt(args[2]));
 			//sender.sendMessage(Text.colorize("&7Type in your desired Command:"));
 			//QuestWorld.getInstance().storeInput(((Player) sender).getUniqueId(), new Input(InputType.COMMAND_ADD, quest));
 			

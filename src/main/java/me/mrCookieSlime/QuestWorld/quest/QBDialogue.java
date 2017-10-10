@@ -3,9 +3,10 @@ package me.mrCookieSlime.QuestWorld.quest;
 import java.util.List;
 
 import me.mrCookieSlime.QuestWorld.QuestWorld;
-import me.mrCookieSlime.QuestWorld.api.MissionChange;
 import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
+import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
+import me.mrCookieSlime.QuestWorld.api.contract.IQuestingObject;
 import me.mrCookieSlime.QuestWorld.api.menu.Menu;
 import me.mrCookieSlime.QuestWorld.container.PagedMapping;
 import me.mrCookieSlime.QuestWorld.event.CancellableEvent;
@@ -24,7 +25,7 @@ import org.bukkit.entity.Player;
 import com.google.gson.JsonObject;
 
 public class QBDialogue {
-	public static void openDeletionConfirmation(Player p, final QuestingObject q) {
+	public static void openDeletionConfirmation(Player p, final IQuestingObject q) {
 		QuestWorld.getSounds().DestructiveWarning().playTo(p);
 		
 		Menu menu = new Menu(1, "&4&lAre you Sure?");
@@ -133,7 +134,7 @@ public class QBDialogue {
 		menu.openFor(p);
 	}
 
-	public static void openCommandEditor(Player p, Quest quest) {
+	public static void openCommandEditor(Player p, IQuest quest) {
 		try {
 			p.sendMessage(Text.colorize("&7&m----------------------------"));
 			for (int i = 0; i < quest.getCommands().size(); i++) {
@@ -188,7 +189,7 @@ public class QBDialogue {
 		}
 	}
 
-	public static void openQuestRequirementChooser(Player p, final QuestingObject quest) {
+	public static void openQuestRequirementChooser(Player p, final IQuestingObject quest) {
 		QuestWorld.getSounds().EditorClick().playTo(p);
 		
 		Menu menu = new Menu(1, "&c&lQuest Editor");
@@ -215,13 +216,13 @@ public class QBDialogue {
 		menu.openFor(p);
 	}
 
-	public static void openQuestRequirementChooser2(Player p, final QuestingObject q, Category category) {
+	public static void openQuestRequirementChooser2(Player p, final IQuestingObject q, Category category) {
 		QuestWorld.getSounds().EditorClick().playTo(p);
 		
 		Menu menu = new Menu(1, "&c&lQuest Editor");
 		
 		PagedMapping pager = new PagedMapping(45, 9);
-		for(Quest quest : category.getQuests()) {
+		for(IQuest quest : category.getQuests()) {
 			pager.addButton(quest.getID(),
 					new ItemBuilder(quest.getItem()).lore(
 							"",
@@ -231,7 +232,8 @@ public class QBDialogue {
 					event -> {
 						Player p2 = (Player) event.getWhoClicked();
 						QuestWorld.getInstance().getManager(p2).popPage();
-						q.setParent(quest);
+						// TODO this is messy
+						((QuestingObject)q).setParent(quest);
 						if (q instanceof Quest) QuestBook.openQuestEditor(p2, (Quest) q);
 						else QuestBook.openCategoryEditor(p2, (Category) q);
 					}, false

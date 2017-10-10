@@ -1,0 +1,34 @@
+package me.mrCookieSlime.QuestWorld.api.contract;
+
+import java.util.List;
+
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+
+import me.mrCookieSlime.QuestWorld.quest.QuestStatus;
+
+public interface IQuest extends IQuestingObject {
+	int getID();
+	List<? extends IMission> getMissions();
+	ItemStack getItem();
+	ICategory getCategory();
+	List<ItemStack> getRewards();
+	IMission getMission(int i);
+	long getRawCooldown();
+	long getCooldown();
+	int getMoney();
+	int getPartySize();
+	int getXP();
+	IQuest getParent();
+	List<String> getCommands();
+	boolean supportsParties();
+	boolean isOrdered();
+	boolean isAutoClaiming();
+	boolean isWorldEnabled(String world);
+	String getFormattedCooldown();
+	
+	QuestStatus getStatus(Player p);
+	int countFinishedTasks(Player p);
+	String getProgress(Player p);
+	void handoutReward(Player p);
+}

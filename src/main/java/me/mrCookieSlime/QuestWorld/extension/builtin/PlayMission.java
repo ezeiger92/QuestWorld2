@@ -5,12 +5,12 @@ import org.bukkit.Statistic;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import me.mrCookieSlime.QuestWorld.api.MissionChange;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.Ticking;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.menu.MenuData;
 import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
+import me.mrCookieSlime.QuestWorld.quest.MissionChange;
 import me.mrCookieSlime.QuestWorld.util.ItemBuilder;
 import me.mrCookieSlime.QuestWorld.util.Text;
 

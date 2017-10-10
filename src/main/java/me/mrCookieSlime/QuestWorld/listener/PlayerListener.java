@@ -4,10 +4,10 @@ import java.io.File;
 
 import me.mrCookieSlime.QuestWorld.GuideBook;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
+import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
+import me.mrCookieSlime.QuestWorld.api.contract.IMission;
+import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
 import me.mrCookieSlime.QuestWorld.manager.PlayerManager;
-import me.mrCookieSlime.QuestWorld.quest.Category;
-import me.mrCookieSlime.QuestWorld.quest.Mission;
-import me.mrCookieSlime.QuestWorld.quest.Quest;
 import me.mrCookieSlime.QuestWorld.quest.QuestBook;
 import me.mrCookieSlime.QuestWorld.quest.QuestStatus;
 
@@ -35,11 +35,11 @@ public class PlayerListener implements Listener {
 		if (!(e.getEntity() instanceof Player)) return;
 		Player p = (Player) e.getEntity();
 		PlayerManager manager = QuestWorld.getInstance().getManager(p);
-		for (Category category: QuestWorld.getInstance().getCategories()) {
+		for (ICategory category: QuestWorld.getInstance().getCategories()) {
 			if (category.isWorldEnabled(p.getWorld().getName())) {
-				for (Quest quest: category.getQuests()) {
+				for (IQuest quest: category.getQuests()) {
 					if (manager.getStatus(quest).equals(QuestStatus.AVAILABLE) && quest.isWorldEnabled(p.getWorld().getName())) {
-						for (Mission task: quest.getMissions()) {
+						for (IMission task: quest.getMissions()) {
 							if (task.resetsonDeath() && !manager.hasCompletedTask(task) && manager.hasUnlockedTask(task)) {
 								manager.setProgress(task, 0);
 							}

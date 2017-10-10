@@ -8,9 +8,9 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.inventory.ItemStack;
 
 import me.mrCookieSlime.QuestWorld.QuestWorld;
-import me.mrCookieSlime.QuestWorld.api.MissionChange;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
+import me.mrCookieSlime.QuestWorld.quest.MissionChange;
 import me.mrCookieSlime.QuestWorld.util.EntityTools;
 import me.mrCookieSlime.QuestWorld.util.ItemBuilder;
 import me.mrCookieSlime.QuestWorld.util.Text;

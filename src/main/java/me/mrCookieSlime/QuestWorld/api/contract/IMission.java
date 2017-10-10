@@ -7,7 +7,6 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
 
 import me.mrCookieSlime.QuestWorld.api.MissionType;
-import me.mrCookieSlime.QuestWorld.quest.Quest;
 
 public interface IMission extends IQuestingObject {
 	String getID();
@@ -37,5 +36,5 @@ public interface IMission extends IQuestingObject {
 	String getCustomString();
 
 	boolean acceptsSpawners();
-	Quest getQuest();
+	IQuest getQuest();
 }

@@ -2,8 +2,9 @@ package me.mrCookieSlime.QuestWorld.event;
 
 import org.bukkit.event.HandlerList;
 
-import me.mrCookieSlime.QuestWorld.api.MissionChange;
-import me.mrCookieSlime.QuestWorld.quest.Mission;
+import me.mrCookieSlime.QuestWorld.api.contract.IMission;
+import me.mrCookieSlime.QuestWorld.api.contract.IMissionWrite;
+import me.mrCookieSlime.QuestWorld.quest.MissionChange;
 
 public class MissionChangeEvent extends CancellableEvent {
 	private MissionChange nextState;
@@ -12,12 +13,16 @@ public class MissionChangeEvent extends CancellableEvent {
 		this.nextState = nextState;
 	}
 	
-	public Mission getMission() {
+	public IMission getMission() {
 		return nextState.getSource();
 	}
 
-	public MissionChange getNextState() {
+	public IMissionWrite getNextState() {
 		return nextState;
+	}
+	
+	public boolean hasChange(IMissionWrite.Member field) {
+		return nextState.hasChange(field);
 	}
 	
 	// Boilerplate copy/paste from CancellableEvent

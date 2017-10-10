@@ -1,4 +1,4 @@
-package me.mrCookieSlime.QuestWorld.api;
+package me.mrCookieSlime.QuestWorld.quest;
 
 import java.util.List;
 
@@ -7,33 +7,15 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IMissionWrite;
 import me.mrCookieSlime.QuestWorld.event.CancellableEvent;
 import me.mrCookieSlime.QuestWorld.event.MissionChangeEvent;
-import me.mrCookieSlime.QuestWorld.quest.Mission;
 import me.mrCookieSlime.QuestWorld.util.BitFlag;
 import me.mrCookieSlime.QuestWorld.util.BitFlag.BitString;
 
 public class MissionChange extends Mission implements IMissionWrite {
-	public enum Member implements BitString {
-		QUEST,
-		TYPE,
-		ITEM,
-		AMOUNT,
-		ID,
-		ENTITY,
-		LOCATION,
-		NAME,
-		DISPLAY_NAME,
-		TIMEFRAME,
-		DEATH_RESET,
-		LORE,
-		CUSTOM_INT,
-		SPAWNERS_ALLOWED,
-		DIALOGUE,
-	}
-	
 	private long changeBits = 0;
 	private Mission origin;
 	
@@ -107,7 +89,8 @@ public class MissionChange extends Mission implements IMissionWrite {
 	@Override
 	public void setType(MissionType type) {
 		super.setType(type);
-		if(!type.migrateFrom(this)) {
+		// TODO RIP migrateFrom
+		if(true) {
 			loadDefaults();
 			changeBits |= BitString.ALL;
 		}
@@ -172,5 +155,11 @@ public class MissionChange extends Mission implements IMissionWrite {
 	public void setSpawnerSupport(boolean acceptsSpawners) {
 		super.setSpawnerSupport(acceptsSpawners);
 		changeBits |= BitFlag.getBits(Member.SPAWNERS_ALLOWED);
+	}
+	
+	// TODO hacky hacky
+	@Override
+	public void setupDialogue(Player p) {
+		origin.setupDialogue(p);
 	}
 }

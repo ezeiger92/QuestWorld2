@@ -7,7 +7,8 @@ import java.util.List;
 import me.mrCookieSlime.CSCoreLibPlugin.Configuration.Config;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
-import me.mrCookieSlime.QuestWorld.api.QuestChange;
+import me.mrCookieSlime.QuestWorld.api.contract.IMission;
+import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
 import me.mrCookieSlime.QuestWorld.util.ItemBuilder;
 import me.mrCookieSlime.QuestWorld.util.Text;
 
@@ -17,7 +18,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-public class Quest extends QuestingObject {
+public class Quest extends QuestingObject implements IQuest {
 	
 	Category category;
 	int id;
@@ -39,35 +40,42 @@ public class Quest extends QuestingObject {
 	String permission;
 	
 	protected Quest(Quest quest) {
-		quest.copyTo(this);
+		copy(quest);
+	}
+	
+	protected void copy(Quest source) {
+		category = source.category;
+		id       = source.id;
+		cooldown = source.cooldown;
+		name     = source.name;
+		item     = source.item.clone();
+
+		tasks = new ArrayList<>();
+		tasks.addAll(source.tasks);
+		
+		commands = new ArrayList<>();
+		commands.addAll(source.commands);
+		
+		world_blacklist = new ArrayList<>();
+		world_blacklist.addAll(source.world_blacklist);
+		
+		rewards = new ArrayList<>();
+		rewards.addAll(source.rewards);
+
+		money          = source.money;
+		xp             = source.xp;
+		partysize      = source.partysize;
+		disableParties = source.disableParties;
+		ordered        = source.ordered;
+		autoclaim      = source.autoclaim;
+		parent         = source.parent;
+		permission     = source.permission;
+
+		updateLastModified();
 	}
 	
 	protected void copyTo(Quest dest) {
-		dest.category = category;
-		dest.id       = id;
-		dest.cooldown = cooldown;
-		dest.name     = name;
-		dest.item     = item.clone();
-		
-		dest.tasks = new ArrayList<Mission>();
-		dest.tasks.addAll(tasks);
-		dest.commands = new ArrayList<String>();
-		dest.commands.addAll(commands);
-		dest.world_blacklist = new ArrayList<String>();
-		dest.world_blacklist.addAll(world_blacklist);
-		dest.rewards = new ArrayList<ItemStack>();
-		dest.rewards.addAll(rewards);
-		
-		dest.money          = money;
-		dest.xp             = xp;
-		dest.partysize      = partysize;
-		dest.disableParties = disableParties;
-		dest.ordered        = ordered;
-		dest.autoclaim      = autoclaim;
-		dest.parent         = parent;
-		dest.permission     = permission;
-		
-		dest.updateLastModified();
+		dest.copy(this);
 	}
 	
 	public Quest(Category category, File file) {
@@ -104,13 +112,9 @@ public class Quest extends QuestingObject {
 		this.cooldown = -1;
 		this.name = Text.colorize(name);
 		this.item = new ItemBuilder(Material.BOOK_AND_QUILL).display(name).get();
-		
-		this.tasks = new ArrayList<Mission>();
-		this.rewards = new ArrayList<ItemStack>();
+
 		this.money = 0;
 		this.xp = 0;
-		this.commands = new ArrayList<String>();
-		this.world_blacklist = new ArrayList<String>();
 		this.parent = null;
 		this.disableParties = false;
 		this.permission = "";
@@ -197,7 +201,7 @@ public class Quest extends QuestingObject {
 				index++;
 			}
 		}
-		for (Mission mission: tasks) {
+		for (IMission mission: tasks) {
 			cfg.setValue("missions." + mission.getID() + ".type", mission.getType().toString());
 			cfg.setValue("missions." + mission.getID() + ".amount", mission.getAmount());
 			cfg.setValue("missions." + mission.getID() + ".item", new ItemStack(mission.getMissionItem()));
@@ -236,40 +240,19 @@ public class Quest extends QuestingObject {
 		return QuestWorld.getInstance().getManager(p).getStatus(this);
 	}
 	
-	public List<Mission> getFinishedTasks(Player p) {
-		List<Mission> list = new ArrayList<Mission>();
-		for (Mission task: getMissions()) {
-			if (QuestWorld.getInstance().getManager(p).hasCompletedTask(task)) list.add(task);
-		}
-		return list;
+	public int countFinishedTasks(Player p) {
+		int i = 0;
+		for (IMission task: getMissions())
+			if (QuestWorld.getInstance().getManager(p).hasCompletedTask(task))
+				++i;
+		return i;
 	}
 
 	public String getProgress(Player p) {
-		StringBuilder progress = new StringBuilder();
-		float percentage = Math.round((((getFinishedTasks(p).size() * 100.0f) / getMissions().size()) * 100.0f) / 100.0f);
-		
-		if (percentage < 16.0F) progress.append("&4");
-		else if (percentage < 32.0F) progress.append("&c");
-		else if (percentage < 48.0F) progress.append("&6");
-		else if (percentage < 64.0F) progress.append("&e");
-		else if (percentage < 80.0F) progress.append("&2");
-		else progress = progress.append("&a");
-		
-		int rest = 20;
-		for (int i = (int) percentage; i >= 5; i = i - 5) {
-			progress.append(":");
-			rest--;
-		}
-		
-		progress.append("&7");
-		
-		for (int i = 0; i < rest; i++) {
-			progress.append(":");
-		}
-		
-		progress.append(" - " + percentage + "%");
-		
-		return Text.colorize(progress.toString());
+		return Text.progressBar(
+				countFinishedTasks(p),
+				getMissions().size(),
+				null);
 	}
 
 	public List<Mission> getMissions() {
@@ -321,7 +304,7 @@ public class Quest extends QuestingObject {
 		return rewards;
 	}
 	
-	public Mission getMission(int i) {
+	public IMission getMission(int i) {
 		return tasks.size() > i ? tasks.get(i): null;
 	}
 	
@@ -408,13 +391,14 @@ public class Quest extends QuestingObject {
 		return Text.timeFromNum(cooldown);
 	}
 	
-	public Quest getParent() {
+	public IQuest getParent() {
 		return this.parent;
 	}
 
-	public void setParent(Quest quest) {
+	@Override
+	public void setParent(IQuest quest) {
 		updateLastModified();
-		this.parent = quest;
+		this.parent = (Quest)quest;
 	}
 
 	public List<String> getCommands() {

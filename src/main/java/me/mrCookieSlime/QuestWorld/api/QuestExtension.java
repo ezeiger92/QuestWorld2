@@ -13,7 +13,7 @@ public abstract class QuestExtension {
 	private Plugin[] found;
 	private QuestLoader loader = null;
 	
-	public final <T> T getService(Class<T> clazz) {
+	public static final <T> T getService(Class<T> clazz) {
 		RegisteredServiceProvider<T> service = Bukkit.getServer().getServicesManager().getRegistration(clazz);
 		if(service != null)
 			return service.getProvider();

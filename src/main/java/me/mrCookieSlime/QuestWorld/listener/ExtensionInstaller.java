@@ -14,11 +14,11 @@ import org.bukkit.plugin.PluginManager;
 import me.mrCookieSlime.QuestWorld.api.QuestExtension;
 import me.mrCookieSlime.QuestWorld.util.Log;
 
-public class HookInstaller implements Listener {
+public class ExtensionInstaller implements Listener {
 	private List<QuestExtension> hooks = new ArrayList<>();
 	private Plugin parent;
 
-	public HookInstaller(Plugin parent) {
+	public ExtensionInstaller(Plugin parent) {
 		this.parent = parent;
 		PluginManager manager = parent.getServer().getPluginManager();
 		manager.registerEvents(this, parent);
@@ -55,7 +55,6 @@ public class HookInstaller implements Listener {
 	private void initialize(QuestExtension hook) {
 		Log.fine("Installer - Initializing hook: " + hook.getName());
 		hook.init(parent);
-		//parent.registerHook(hook);
 	}
 	
 	@EventHandler

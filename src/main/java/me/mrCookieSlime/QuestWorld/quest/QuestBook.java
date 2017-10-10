@@ -4,14 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import me.mrCookieSlime.QuestWorld.QuestWorld;
-import me.mrCookieSlime.QuestWorld.api.CategoryChange;
 import me.mrCookieSlime.QuestWorld.api.Manual;
-import me.mrCookieSlime.QuestWorld.api.MissionChange;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
-import me.mrCookieSlime.QuestWorld.api.QuestChange;
 import me.mrCookieSlime.QuestWorld.api.SinglePrompt;
 import me.mrCookieSlime.QuestWorld.api.Translation;
+import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
+import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
+import me.mrCookieSlime.QuestWorld.api.contract.IQuestingObject;
 import me.mrCookieSlime.QuestWorld.api.menu.Buttons;
 import me.mrCookieSlime.QuestWorld.api.menu.Menu;
 import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
@@ -61,9 +61,9 @@ public class QuestBook {
 										QuestWorld.translate(Translation.CATEGORY_DESC,
 												String.valueOf(category.getQuests().size()),
 												String.valueOf(category.getFinishedQuests(p).size()),
-												String.valueOf(category.getQuests(p, QuestStatus.AVAILABLE).size()),
-												String.valueOf(category.getQuests(p, QuestStatus.ON_COOLDOWN).size()),
-												String.valueOf(category.getQuests(p, QuestStatus.REWARD_CLAIMABLE).size()),
+												String.valueOf(category.countQuests(p, QuestStatus.AVAILABLE)),
+												String.valueOf(category.countQuests(p, QuestStatus.ON_COOLDOWN)),
+												String.valueOf(category.countQuests(p, QuestStatus.REWARD_CLAIMABLE)),
 												category.getProgress(p)
 										).split("\n")).get(),
 								/*		"",
@@ -96,7 +96,7 @@ public class QuestBook {
 	}
 	
 	public static void openLastMenu(Player p) {
-		QuestingObject last = QuestWorld.getInstance().getManager(p).getLastEntry();
+		IQuestingObject last = QuestWorld.getInstance().getManager(p).getLastEntry();
 		if (last != null) {			
 			if(last instanceof Quest) {
 				Quest q = (Quest)last;
@@ -289,10 +289,11 @@ public class QuestBook {
 		menu.openFor(p);
 	}
 
-	public static void openCategory(Player p, Category category, final boolean back) {
+	public static void openCategory(Player p, ICategory category, final boolean back) {
 		QuestWorld.getSounds().QuestClick().playTo(p);
-		QuestWorld.getInstance().getManager(p).update(false);
-		QuestWorld.getInstance().getManager(p).updateLastEntry(category);
+		PlayerManager manager = QuestWorld.getInstance().getManager(p);
+		manager.update(false);
+		manager.updateLastEntry(category);
 		
 		Menu menu = new Menu(1, QuestWorld.translate(Translation.gui_title));
 		ItemBuilder glassPane = new ItemBuilder(Material.STAINED_GLASS_PANE).color(DyeColor.RED);
@@ -305,7 +306,7 @@ public class QuestBook {
 		
 		view.addFrameButton(4, partyMenuItem(p), Buttons.partyMenu(), true);
 		
-		for (final Quest quest: category.getQuests()) {
+		for (final IQuest quest: category.getQuests()) {
 			glassPane.display(quest.getName());
 			if (QuestWorld.getInstance().getManager(p).getStatus(quest).equals(QuestStatus.LOCKED) || !quest.isWorldEnabled(p.getWorld().getName())) {
 				view.addButton(quest.getID(), glassPane.lore("", QuestWorld.translate(Translation.quests_locked)).getNew(),
@@ -325,7 +326,7 @@ public class QuestBook {
 				lore.add("");
 				lore.add(quest.getProgress(p));
 				lore.add("");
-				lore.add(Text.colorize("&7") + quest.getFinishedTasks(p).size() + "/" + quest.getMissions().size() + QuestWorld.translate(Translation.quests_tasks_completed));
+				lore.add(Text.colorize("&7") + quest.countFinishedTasks(p) + "/" + quest.getMissions().size() + QuestWorld.translate(Translation.quests_tasks_completed));
 				if (QuestWorld.getInstance().getManager(p).getStatus(quest).equals(QuestStatus.REWARD_CLAIMABLE)) {
 					lore.add("");
 					lore.add(QuestWorld.translate(Translation.quests_state_reward_claimable));
@@ -354,7 +355,7 @@ public class QuestBook {
 		menu.openFor(p);
 	}
 	
-	public static void openQuest(final Player p, final Quest quest, final boolean categoryBack, final boolean back) {
+	public static void openQuest(final Player p, final IQuest quest, final boolean categoryBack, final boolean back) {
 		QuestWorld.getSounds().QuestClick().playTo(p);
 		QuestWorld.getInstance().getManager(p).update(false);
 		QuestWorld.getInstance().getManager(p).updateLastEntry(quest);
@@ -373,7 +374,7 @@ public class QuestBook {
 				event -> {
 					Player p2 = (Player) event.getWhoClicked();
 					PlayerManager manager = QuestWorld.getInstance().getManager(p2);
-					for(Mission mission : quest.getMissions()) {
+					for(IMission mission : quest.getMissions()) {
 						if (!manager.hasUnlockedTask(mission)) continue;
 						if (manager.getStatus(quest).equals(QuestStatus.AVAILABLE) && quest.isWorldEnabled(p2.getWorld().getName())) {
 							if (manager.hasCompletedTask(mission)) continue;
@@ -425,18 +426,20 @@ public class QuestBook {
 		
 		ItemBuilder glassPane = new ItemBuilder(Material.STAINED_GLASS_PANE);
 
+		PlayerManager manager = QuestWorld.getInstance().getManager(p);
+		
 		int index = 9;
-		for (final Mission mission: quest.getMissions()) {
+		for (final IMission mission: quest.getMissions()) {
 			ItemStack item = glassPane.get();
-			if (QuestWorld.getInstance().getManager(p).hasUnlockedTask(mission)) {
+			if (manager.hasUnlockedTask(mission)) {
 				ItemBuilder entryItem = new ItemBuilder(mission.getDisplayItem()).display(mission.getText());
 				
 				if(mission.getType() instanceof Manual) {
 					String label = ((Manual) mission.getType()).getLabel();
-					entryItem.lore("", mission.getProgress(p), "", "&r> Click for Manual " + label);
+					entryItem.lore("", manager.progressString(mission), "", "&r> Click for Manual " + label);
 				}
 				else
-					entryItem.lore("", mission.getProgress(p));
+					entryItem.lore("", manager.progressString(mission));
 
 				item = entryItem.get();
 			}
@@ -447,17 +450,17 @@ public class QuestBook {
 			
 			menu.put(index, item, event -> {
 				Player p2 = (Player) event.getWhoClicked();
-				PlayerManager manager = QuestWorld.getInstance().getManager(p2);
+				PlayerManager manager2 = QuestWorld.getInstance().getManager(p2);
 				
-				if (!manager.hasUnlockedTask(mission)) return;
-				if (manager.getStatus(quest).equals(QuestStatus.AVAILABLE) && quest.isWorldEnabled(p2.getWorld().getName())) {
-					if (manager.hasCompletedTask(mission)) return;
+				if (!manager2.hasUnlockedTask(mission)) return;
+				if (manager2.getStatus(quest).equals(QuestStatus.AVAILABLE) && quest.isWorldEnabled(p2.getWorld().getName())) {
+					if (manager2.hasCompletedTask(mission)) return;
 					
 					if(mission.getType() instanceof Manual) {
 						Manual m = (Manual) mission.getType();
 						int progress = m.onManual(p2, mission);
 						if(progress != Manual.FAIL) {
-							manager.setProgress(mission, progress);
+							manager2.setProgress(mission, progress);
 							openQuest(p2, quest, categoryBack, back);
 						}
 					}
@@ -535,7 +538,7 @@ public class QuestBook {
 				if(quests > 0) {
 					int j = 0;
 					List<String> lines = new ArrayList<>();
-					for(Quest q : category.getQuests()) {
+					for(IQuest q : category.getQuests()) {
 						lines.add("&7- " + q.getName());
 						if(++j >= 5)
 							break;
@@ -560,7 +563,7 @@ public class QuestBook {
 		menu.openFor(p);
 	}
 
-	public static void openCategoryQuestEditor(Player p, final Category category) {
+	public static void openCategoryQuestEditor(Player p, final ICategory category) {
 		QuestWorld.getSounds().EditorClick().playTo(p);
 		
 		final Menu menu = new Menu(6, "&3Quest Editor");
@@ -575,7 +578,7 @@ public class QuestBook {
 		});
 
 		for (int i = 0; i < view.getCapacity(); ++i) {
-			Quest quest = category.getQuest(i);
+			IQuest quest = category.getQuest(i);
 			if (quest != null) {
 				view.reserve(1);
 				
@@ -589,7 +592,7 @@ public class QuestBook {
 				if(missions > 0) {
 					int j = 0;
 					List<String> lines = new ArrayList<>();
-					for(Mission m : quest.getMissions()) {
+					for(IMission m : quest.getMissions()) {
 						lines.add("&7- " + m.getText());
 						if(++j >= 5)
 							break;
@@ -745,7 +748,7 @@ public class QuestBook {
 						"&rand will clear all Player's Progress associated",
 						"&rwith those Quests.").get(),
 				event -> {
-					for (Quest quest: category.getQuests()) {
+					for (IQuest quest: category.getQuests()) {
 						PlayerManager.clearAllQuestData(quest);
 					}
 					QuestWorld.getSounds().DestructiveClick().playTo((Player) event.getWhoClicked());
@@ -755,7 +758,7 @@ public class QuestBook {
 		menu.openFor(p);
 	}
 
-	public static void openQuestEditor(Player p, final Quest quest) {
+	public static void openQuestEditor(Player p, final IQuest quest) {
 		QuestWorld.getSounds().EditorClick().playTo(p);
 		
 		final Menu menu = new Menu(6, "&3Quest Editor");
@@ -1056,12 +1059,12 @@ public class QuestBook {
 		}
 		
 		for (int i = 0; i < 9; i++) {
-			final Mission mission = quest.getMission(i);
+			final IMission mission = quest.getMission(i);
 			if (mission == null) {
 				menu.put(45 + i,
 						new ItemBuilder(Material.PAPER).display("&7&o> New Task").get(),
 						event -> {
-							changes.addMission(new Mission(quest, String.valueOf(event.getSlot() + 9), MissionType.valueOf("SUBMIT"), EntityType.PLAYER, "", new ItemStack(Material.STONE), p.getLocation().getBlock().getLocation(), 1, null, 0, false, 0, true, "Hey there! Do this Quest."));
+							changes.addMission(new Mission((Quest)quest, String.valueOf(event.getSlot() + 9), MissionType.valueOf("SUBMIT"), EntityType.PLAYER, "", new ItemStack(Material.STONE), p.getLocation().getBlock().getLocation(), 1, null, 0, false, 0, true, "Hey there! Do this Quest."));
 							if(changes.sendEvent())
 								changes.apply();
 							openQuestEditor((Player) event.getWhoClicked(), quest);
@@ -1086,7 +1089,7 @@ public class QuestBook {
 		menu.openFor(p);
 	}
 
-	public static void openWorldEditor(Player p, final Quest quest) {
+	public static void openWorldEditor(Player p, final IQuest quest) {
 		QuestWorld.getSounds().EditorClick().playTo(p);
 		
 		final Menu menu = new Menu(2, "&3Quest Editor");

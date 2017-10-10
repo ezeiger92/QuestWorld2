@@ -8,7 +8,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
-import me.mrCookieSlime.QuestWorld.api.MissionChange;
 import me.mrCookieSlime.QuestWorld.api.SinglePrompt;
 import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.api.contract.IMissionWrite;
@@ -196,7 +195,7 @@ public class MissionButton {
 							PlayerManager.sendQuestDialogue(p, changes, changes.getDialogue().iterator());
 					}
 					else
-						((MissionChange)changes).getSource().setupDialogue(p);
+						changes.setupDialogue(p);
 						
 					PlayerTools.closeInventoryWithEvent(p);
 				}
@@ -205,7 +204,7 @@ public class MissionButton {
 	
 	public static void apply(InventoryClickEvent event, IMissionWrite changes) {
 		if(changes.apply()) {
-			// TODO remove MissionChange and QuestBook from here, somehow
+			// TODO remove QuestBook from here, somehow
 			QuestBook.openQuestMissionEditor((Player) event.getWhoClicked(), changes);
 		}
 	}

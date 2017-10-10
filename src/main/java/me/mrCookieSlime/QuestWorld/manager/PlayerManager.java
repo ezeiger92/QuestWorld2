@@ -3,7 +3,6 @@ package me.mrCookieSlime.QuestWorld.manager;
 import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -17,16 +16,17 @@ import java.util.function.Predicate;
 import me.mrCookieSlime.CSCoreLibPlugin.Configuration.Config;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.Translation;
+import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
+import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
+import me.mrCookieSlime.QuestWorld.api.contract.IQuestingObject;
 import me.mrCookieSlime.QuestWorld.party.Party;
 import me.mrCookieSlime.QuestWorld.api.Manual;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.Ticking;
 import me.mrCookieSlime.QuestWorld.quest.Category;
-import me.mrCookieSlime.QuestWorld.quest.Mission;
-import me.mrCookieSlime.QuestWorld.quest.Quest;
+//import me.mrCookieSlime.QuestWorld.quest.Quest;
 import me.mrCookieSlime.QuestWorld.quest.QuestStatus;
-import me.mrCookieSlime.QuestWorld.quest.QuestingObject;
 import me.mrCookieSlime.QuestWorld.util.PlayerTools;
 import me.mrCookieSlime.QuestWorld.util.Text;
 
@@ -38,15 +38,11 @@ import org.bukkit.entity.Player;
 
 public class PlayerManager {
 	
-	public static Map<UUID, Quest> autoclaim = new HashMap<UUID, Quest>();
+	public static Map<UUID, IQuest> autoclaim = new HashMap<>();
 	
 	private Config cfg;
 	private UUID uuid;
-	private QuestingObject last;
-
-	private Map<Long, Category> activeCategories;
-	private Map<Long, Quest> activeQuests;
-	private Map<Long, Mission> activeMissions;
+	private IQuestingObject last;
 	
 	private Stack<Integer> pages = new Stack<>();
 	
@@ -85,9 +81,9 @@ public class PlayerManager {
 		Player player = Bukkit.getPlayer(uuid);
 		String worldName = player.getWorld().getName();
 		
-		for(Mission task : QuestWorld.getInstance().getMissionsOf(type)) {
-			Quest quest = task.getQuest();	
-			Category category = quest.getCategory();
+		for(IMission task : QuestWorld.getInstance().getMissionsOf(type)) {
+			IQuest quest = task.getQuest();	
+			ICategory category = quest.getCategory();
 			
 			if (category.isWorldEnabled(worldName) && quest.isWorldEnabled(worldName)) {
 				if (!hasCompletedTask(task) && hasUnlockedTask(task)) {
@@ -115,7 +111,7 @@ public class PlayerManager {
 		return uuid;
 	}
 	
-	public long getCooldownEnd(Quest quest) {
+	public long getCooldownEnd(IQuest quest) {
 		if (!cfg.contains(quest.getCategory().getID() + "." + quest.getID() + ".cooldown")) return -1;
 		try {
 			return new SimpleDateFormat("yyyy-MM-dd-HH-mm").parse(cfg.getString(quest.getCategory().getID() + "." + quest.getID() + ".cooldown")).getTime();
@@ -162,7 +158,7 @@ public class PlayerManager {
 		Player p = Bukkit.getPlayer(uuid);
 		
 		if (p != null && quest_check) {
-			for (Mission task: QuestWorld.getInstance().getTickingMissions()) {
+			for (IMission task: QuestWorld.getInstance().getTickingMissions()) {
 				if (getStatus(task.getQuest()).equals(QuestStatus.AVAILABLE) && !hasCompletedTask(task) && hasUnlockedTask(task)) {
 					Ticking t = (Ticking) task.getType();
 					int progress = t.onTick(p, task);
@@ -173,10 +169,10 @@ public class PlayerManager {
 		}
 		
 		for (Category category: QuestWorld.getInstance().getCategories()) {
-			for (Quest quest: category.getQuests()) {
+			for (IQuest quest: category.getQuests()) {
 				if (getStatus(quest).equals(QuestStatus.AVAILABLE)) {
 					boolean finished = quest.getMissions().size() != 0;
-					for (Mission task: quest.getMissions()) {
+					for (IMission task: quest.getMissions()) {
 						updateTimeframe(this.uuid, task, 0);
 						if (!hasCompletedTask(task)) finished = false;
 					}
@@ -204,7 +200,7 @@ public class PlayerManager {
 		}
 	}
 
-	public QuestStatus getStatus(Quest quest) {
+	public QuestStatus getStatus(IQuest quest) {
 		Player p = Bukkit.getPlayer(uuid);
 		if (quest.getParent() != null && !hasFinished(quest.getParent())) return QuestStatus.LOCKED;
 		if (p != null && !quest.hasPermission(p)) return QuestStatus.LOCKED;
@@ -217,27 +213,40 @@ public class PlayerManager {
 		else return QuestStatus.valueOf(cfg.getString(quest.getCategory().getID() + "." + quest.getID() + ".status"));
 	}
 
-	public boolean hasFinished(Quest quest) {
+	public boolean hasFinished(IQuest quest) {
 		return cfg.getBoolean(quest.getCategory().getID() + "." + quest.getID() + ".finished");
 	}
 
-	public boolean hasCompletedTask(Mission task) {
+	public boolean hasCompletedTask(IMission task) {
 		return getProgress(task) >= getTotal(task);
 	}
 
-	public boolean hasUnlockedTask(Mission task) {
+	public boolean hasUnlockedTask(IMission task) {
 		if (!task.getQuest().isOrdered()) return true;
-		List<Mission> tasks = task.getQuest().getMissions();
+		
+		List<? extends IMission> tasks = task.getQuest().getMissions();
 		int index = tasks.indexOf(task) - 1;
 		if (index < 0) return true;
 		else return hasCompletedTask(tasks.get(index));
 	}
 	
 	public int getProgress(IMission task) {
-		Quest quest = task.getQuest();
+		IQuest quest = task.getQuest();
 		int progress = cfg.getInt(quest.getCategory().getID() + "." + quest.getID() + ".mission." + task.getID() + ".progress");
 		
 		return Math.min(progress, task.getAmount());
+	}
+	
+	
+	//TODO Better place for this
+	public String progressString(IMission task) {
+		int progress = getProgress(task);
+		int amount = task.getAmount();
+		
+		return Text.progressBar(
+				progress,
+				amount,
+				task.getType().progressString(progress / (float)amount, progress, amount));
 	}
 	
 	public int getTotal(IMission task) {
@@ -317,7 +326,7 @@ public class PlayerManager {
 		else player.sendMessage(ChatColor.translateAlternateColorCodes('&', line.replace("<player>", player.getName())));
 	}
 
-	public void completeQuest(Quest quest) {
+	public void completeQuest(IQuest quest) {
 		if (quest.getCooldown() == -1) cfg.setValue(quest.getCategory().getID() + "." + quest.getID() + ".status", QuestStatus.FINISHED.toString());
 		else {
 			if (quest.getCooldown() == 0) cfg.setValue(quest.getCategory().getID() + "." + quest.getID() + ".status", QuestStatus.AVAILABLE.toString());
@@ -326,7 +335,7 @@ public class PlayerManager {
 			String dateString = new SimpleDateFormat("yyyy-MM-dd-HH-mm").format(new Date(System.currentTimeMillis() + quest.getRawCooldown()));
 			
 			cfg.setValue(quest.getCategory().getID() + "." + quest.getID() + ".cooldown", dateString);
-			for (Mission task: quest.getMissions()) {
+			for (IMission task: quest.getMissions()) {
 				 setProgress(task, 0);
 			 }
 		}
@@ -341,11 +350,11 @@ public class PlayerManager {
 		return cfg;
 	}
 	
-	public QuestingObject getLastEntry() {
+	public IQuestingObject getLastEntry() {
 		return last;
 	}
 	
-	public void updateLastEntry(QuestingObject entry) {
+	public void updateLastEntry(IQuestingObject entry) {
 		this.last = entry;
 	}
 	
@@ -357,7 +366,7 @@ public class PlayerManager {
 		StringBuilder progress = new StringBuilder();
 		int done = 0, total = 0;
 		for (Category category: QuestWorld.getInstance().getCategories())  {
-			for (Quest quest: category.getQuests()) {
+			for (IQuest quest: category.getQuests()) {
 				if (hasFinished(quest)) done++;
 				total++;
 			}
@@ -388,36 +397,13 @@ public class PlayerManager {
 		return ChatColor.translateAlternateColorCodes('&', progress.toString());
 	}
 	
-	public void clearQuestData(Quest quest) {
+	public void clearQuestData(IQuest quest) {
 		cfg.setValue(quest.getCategory().getID() + "." + quest.getID(), null);
-	}
-	
-	/**
-	 * 
-	 */
-	public Collection<Category> getAvailableCategories() {
-		return activeCategories.values();
-	}
-	
-	public Collection<Quest> getAvailableQuests() {
-		return activeQuests.values();
-	}
-	
-	public Collection<Mission> getAvailableMissions() {
-		return activeMissions.values();
-	}
-	
-	public void setQuestAvailable(Quest quest, boolean state) {
-		
-	}
-	
-	public void setCategoryAvailable(Category category, boolean state) {
-		
 	}
 	
 	// Right, so this function USED to loop through every file in data-storage/Quest World on
 	// the main thread. W H A T
-	public static void clearAllQuestData(Quest quest) {
+	public static void clearAllQuestData(IQuest quest) {
 		Bukkit.getScheduler().runTaskAsynchronously(QuestWorld.getInstance(), () -> {
 			// First: clear all the quest data on a new thread
 			for (File file: new File("data-storage/Quest World").listFiles()) {
