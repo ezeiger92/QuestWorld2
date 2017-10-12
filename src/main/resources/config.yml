@@ -10,3 +10,6 @@ book:
   on-first-join: true
 dialogue:
   prefix: '&f'
+save:
+  userdata: data-storage/Quest World/
+  questdata: plugins/QuestWorld/quests/

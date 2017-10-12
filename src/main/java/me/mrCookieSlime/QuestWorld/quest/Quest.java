@@ -149,7 +149,7 @@ class Quest extends Renderable implements IQuestWrite {
 	}
 	
 	File getFile() {
-		String path = QuestWorld.getInstance().getConfig().getString("path.questdata");
+		String path = QuestWorld.getInstance().getConfig().getString("save.questdata");
 		return new File(path + id + "-C" + category.getID() + ".quest");
 	}
 	

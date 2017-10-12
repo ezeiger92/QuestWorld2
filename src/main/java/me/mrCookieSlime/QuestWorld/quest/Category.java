@@ -95,7 +95,7 @@ class Category extends Renderable implements ICategoryWrite {
 	}
 	
 	File getFile() {
-		String path = QuestWorld.getInstance().getConfig().getString("path.questdata");
+		String path = QuestWorld.getInstance().getConfig().getString("save.questdata");
 		return new File(path + id + ".category");
 	}
 	

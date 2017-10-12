@@ -58,7 +58,7 @@ public class PlayerManager {
 	}
 	
 	private File getFile() {
-		String path = QuestWorld.getInstance().getConfig().getString("path.userdata");
+		String path = QuestWorld.getInstance().getConfig().getString("save.userdata");
 		return new File(path + uuid.toString() + ".yml");
 	}
 	
