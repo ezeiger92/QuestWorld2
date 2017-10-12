@@ -469,7 +469,7 @@ public class QuestBook {
 						event -> {
 							Player p2 = (Player) event.getWhoClicked();
 							quest.handoutReward(p2);
-							QuestWorld.getSounds().muteNext();
+							// TODO QuestWorld.getSounds().muteNext();
 							openQuest(p2, quest, categoryBack, back);
 						}
 				);

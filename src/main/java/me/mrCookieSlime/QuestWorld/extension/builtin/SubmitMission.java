@@ -42,7 +42,7 @@ public class SubmitMission extends MissionType implements Manual {
 		
 		if(found > 0) {
 			QuestWorld.getSounds().MissionSubmit().playTo(p);
-			QuestWorld.getSounds().muteNext();
+			// TODO QuestWorld.getSounds().muteNext();
 			
 			return current + found;
 		}

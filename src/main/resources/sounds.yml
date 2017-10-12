@@ -1,46 +1,29 @@
 sounds:
   quest:
     click:
-      list:
-      - ENTITY_PLAYER_LEVELUP
-      - LEVEL_UP
+      sound: ENTITY_PLAYER_LEVELUP
       pitch: 0.2
     mission-submit:
-      list:
-      - ENTITY_EXPERIENCE_ORB_PICKUP
+      sound: ENTITY_EXPERIENCE_ORB_PICKUP
       pitch: 0.7
       volume: 0.3
     mission-reject:
-      list:
-      - BLOCK_NOTE_SNARE
-      - NOTE_SNARE
+      sound: BLOCK_NOTE_SNARE
     reward:
-      list:
-      - ENTITY_ITEM_PICKUP
-      - ITEM_PICKUP
+      sound: ENTITY_ITEM_PICKUP
   editor:
     click:
-      list:
-      - UI_BUTTON_CLICK
-      - CLICK
+      sound: UI_BUTTON_CLICK
       pitch: 0.2
     dialog-add:
-      list:
-      - ENTITY_PLAYER_LEVELUP
-      - LEVEL_UP
+      sound: ENTITY_PLAYER_LEVELUP
     destructive-action-warning:
-      list:
-      - NOTE_PLING
-      - BLOCK_NOTE_HARP
+      sound: BLOCK_NOTE_PLING
     destructive-action-click:
-      list:
-      - ENTITY_BAT_DEATH
-      - BAT_DEATH
+      sound: ENTITY_BAT_DEATH
       pitch: 0.5
       volume: 0.5
   party:
     click:
-      list:
-      - BLOCK_NOTE_PLING
-      - NOTE_PLING
+      sound: BLOCK_NOTE_PLING
       pitch: 0.2

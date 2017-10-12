@@ -232,7 +232,7 @@ class Quest extends Renderable implements IQuestWrite {
 				index++;
 			}
 		}
-		for (IMission mission: tasks) {
+		for (Mission mission: tasks) {
 			config.set("missions." + mission.getID() + ".type", mission.getType().toString());
 			config.set("missions." + mission.getID() + ".amount", mission.getAmount());
 			config.set("missions." + mission.getID() + ".item", new ItemStack(mission.getMissionItem()));
@@ -280,7 +280,7 @@ class Quest extends Renderable implements IQuestWrite {
 	
 	public int countFinishedTasks(Player p) {
 		int i = 0;
-		for (IMission task: getMissions())
+		for (Mission task: getMissions())
 			if (QuestWorld.getInstance().getManager(p).hasCompletedTask(task))
 				++i;
 		return i;
@@ -337,7 +337,7 @@ class Quest extends Renderable implements IQuestWrite {
 		return rewards;
 	}
 	
-	public IMission getMission(int i) {
+	public Mission getMission(int i) {
 		return tasks.size() > i ? tasks.get(i): null;
 	}
 	

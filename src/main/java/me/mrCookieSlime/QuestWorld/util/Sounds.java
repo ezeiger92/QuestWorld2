@@ -52,17 +52,8 @@ public class Sounds {
 		}
 		
 		public void playTo(Player p) {
-			if(!mute)
-				p.playSound(p.getLocation(), sound, volume, pitch);
-			mute = false;
+			p.playSound(p.getLocation(), sound, volume, pitch);
 		}
-	}
-	
-	private static boolean mute = false;
-	
-	@Deprecated
-	public void muteNext() {
-		mute = true;
 	}
 	
 	public SoundList QuestClick() {

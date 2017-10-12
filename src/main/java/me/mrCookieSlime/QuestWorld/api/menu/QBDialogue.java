@@ -52,7 +52,7 @@ public class QBDialogue {
 				event -> {
 					Player p2 = (Player) event.getWhoClicked();
 					QuestWorld.getSounds().DestructiveClick().playTo(p2);
-					QuestWorld.getSounds().muteNext();
+					// TODO QuestWorld.getSounds().muteNext();
 					if (q instanceof ICategory) {
 						ICategory category = (ICategory)q;
 						if(CancellableEvent.send(new CategoryDeleteEvent(category))) {
