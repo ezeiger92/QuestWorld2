@@ -35,7 +35,7 @@ public class Buttons {
 			PlayerTools.promptInput(p, new SinglePrompt(
 					PlayerTools.makeTranslation(true, Translation.CATEGORY_NAME_EDIT, defaultCategoryName),
 					(c,s) -> {
-						QuestWorld.getCreator().createCategory(s, id);
+						QuestWorld.renderFactory().createCategory(s, id);
 						PlayerTools.sendTranslation(p, true, Translation.CATEGORY_CREATED, s);
 						QuestBook.openEditor(p);
 
@@ -70,7 +70,7 @@ public class Buttons {
 			PlayerTools.promptInput(p, new SinglePrompt(
 					PlayerTools.makeTranslation(true, Translation.QUEST_NAME_EDIT, defaultQuestName),
 					(c,s) -> {
-						QuestWorld.getCreator().createQuest(s, cat_id+" M "+id);
+						QuestWorld.renderFactory().createQuest(s, cat_id+" M "+id);
 						PlayerTools.sendTranslation(p, true, Translation.QUEST_CREATED, s);
 						QuestBook.openCategoryQuestEditor(p, QuestWorld.getInstance().getCategory(cat_id));
 

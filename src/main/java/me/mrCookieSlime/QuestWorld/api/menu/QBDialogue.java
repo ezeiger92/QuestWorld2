@@ -10,7 +10,7 @@ import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IMissionWrite;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuestWrite;
-import me.mrCookieSlime.QuestWorld.api.contract.IQuestingObject;
+import me.mrCookieSlime.QuestWorld.api.contract.IRenderable;
 import me.mrCookieSlime.QuestWorld.container.PagedMapping;
 import me.mrCookieSlime.QuestWorld.event.CancellableEvent;
 import me.mrCookieSlime.QuestWorld.event.CategoryDeleteEvent;
@@ -28,7 +28,7 @@ import org.bukkit.entity.Player;
 import com.google.gson.JsonObject;
 
 public class QBDialogue {
-	public static void openDeletionConfirmation(Player p, final IQuestingObject q) {
+	public static void openDeletionConfirmation(Player p, final IRenderable q) {
 		QuestWorld.getSounds().DestructiveWarning().playTo(p);
 		
 		Menu menu = new Menu(1, "&4&lAre you Sure?");
@@ -181,11 +181,6 @@ public class QBDialogue {
 				}
 				
 				PlayerTools.tellraw(p, redX.toString(), commandDisplay.toString());
-				/*PlayerTools.tellraw(p, Text.colorize("['', {"
-						+ "'text':'&4X &7" + command + "',"
-						+ "'clickEvent':{'action':'run_command','value':'/questeditor delete_command " + quest.getCategory().getID() + " " + quest.getID() + " " + i + "'},"
-						+ "'hoverEvent':{'action':'show_text','value':'&7Click to remove this Command'}}]")
-						.replaceAll("(?<!\\\\)'", "\\\"").replaceAll("\\\\'", "'"));*/
 			}
 			
 			PlayerTools.tellraw(p, Text.colorize("['', {"
@@ -199,7 +194,7 @@ public class QBDialogue {
 		}
 	}
 
-	public static void openQuestRequirementChooser(Player p, final IQuestingObject quest) {
+	public static void openQuestRequirementChooser(Player p, final IRenderable quest) {
 		QuestWorld.getSounds().EditorClick().playTo(p);
 		
 		Menu menu = new Menu(1, "&c&lQuest Editor");
@@ -226,7 +221,7 @@ public class QBDialogue {
 		menu.openFor(p);
 	}
 
-	private static void openQuestRequirementChooser2(Player p, final IQuestingObject q, ICategory category) {
+	private static void openQuestRequirementChooser2(Player p, final IRenderable q, ICategory category) {
 		QuestWorld.getSounds().EditorClick().playTo(p);
 		
 		Menu menu = new Menu(1, "&c&lQuest Editor");

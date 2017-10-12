@@ -2,7 +2,10 @@ package me.mrCookieSlime.QuestWorld.api.contract;
 
 import org.bukkit.entity.Player;
 
-public interface IQuestingObject {
+import me.mrCookieSlime.QuestWorld.api.annotation.NoImpl;
+
+@NoImpl
+public interface IRenderable {
 	long getLastModified();
 	long getUnique();
 	

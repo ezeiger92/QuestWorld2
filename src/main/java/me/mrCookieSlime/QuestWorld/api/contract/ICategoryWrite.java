@@ -2,8 +2,10 @@ package me.mrCookieSlime.QuestWorld.api.contract;
 
 import org.bukkit.inventory.ItemStack;
 
+import me.mrCookieSlime.QuestWorld.api.annotation.NoImpl;
 import me.mrCookieSlime.QuestWorld.util.BitFlag.BitString;
 
+@NoImpl
 public interface ICategoryWrite extends ICategory {
 	void setItem(ItemStack item);
 	void setName(String name);

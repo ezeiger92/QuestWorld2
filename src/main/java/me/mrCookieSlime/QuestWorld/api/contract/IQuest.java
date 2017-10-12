@@ -6,8 +6,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import me.mrCookieSlime.QuestWorld.api.QuestStatus;
+import me.mrCookieSlime.QuestWorld.api.annotation.NoImpl;
 
-public interface IQuest extends IQuestingObject {
+@NoImpl
+public interface IQuest extends IRenderable {
 	int getID();
 	List<? extends IMission> getMissions();
 	ItemStack getItem();

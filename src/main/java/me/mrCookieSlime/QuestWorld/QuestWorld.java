@@ -38,7 +38,7 @@ import me.mrCookieSlime.QuestWorld.listener.PlayerListener;
 import me.mrCookieSlime.QuestWorld.listener.SelfListener;
 import me.mrCookieSlime.QuestWorld.manager.MissionViewer;
 import me.mrCookieSlime.QuestWorld.manager.PlayerManager;
-import me.mrCookieSlime.QuestWorld.quest.Creator;
+import me.mrCookieSlime.QuestWorld.quest.RenderableFacade;
 import me.mrCookieSlime.QuestWorld.util.EconWrapper;
 import me.mrCookieSlime.QuestWorld.util.Lang;
 import me.mrCookieSlime.QuestWorld.util.Log;
@@ -68,7 +68,7 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 	private Sounds eventSounds;
 	
 	// TODO Make an interface
-	private Creator creator = new Creator();
+	private RenderableFacade facade = new RenderableFacade();
 	
 	private Lang language;
 	private ExtensionLoader extLoader = null;
@@ -247,7 +247,7 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 			int id = Integer.parseInt(file.getName().replace(".category", ""));
 			List<File> files = new ArrayList<File>();
 			if (quests.containsKey(id)) files = quests.get(id);
-			creator.createCategory(file, files);
+			facade.createCategory(file, files);
 		}
 		
 		for (ICategory category: this.categories.values()) {
@@ -510,7 +510,7 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 		return instance.eventSounds;
 	}
 	
-	public static Creator getCreator() {
-		return instance.creator;
+	public static RenderableFacade renderFactory() {
+		return instance.facade;
 	}
 }

@@ -26,7 +26,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-class Mission extends QuestingObject implements IMissionWrite {
+class Mission extends Renderable implements IMissionWrite {
 	
 	Quest quest;
 	MissionType type;

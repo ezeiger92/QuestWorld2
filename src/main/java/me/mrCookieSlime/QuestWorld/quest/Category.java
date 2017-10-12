@@ -20,7 +20,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-class Category extends QuestingObject implements ICategoryWrite {
+class Category extends Renderable implements ICategoryWrite {
 	
 	Map<Integer, Quest> quests;
 	int id;

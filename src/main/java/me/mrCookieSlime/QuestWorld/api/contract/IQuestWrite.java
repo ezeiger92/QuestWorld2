@@ -3,8 +3,10 @@ package me.mrCookieSlime.QuestWorld.api.contract;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import me.mrCookieSlime.QuestWorld.api.annotation.NoImpl;
 import me.mrCookieSlime.QuestWorld.util.BitFlag.BitString;
 
+@NoImpl
 public interface IQuestWrite extends IQuest {
 	void setItemRewards(Player p);
 	void setItem(ItemStack item);

@@ -11,7 +11,7 @@ import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
 
-public class Creator {
+public class RenderableFacade {
 	public Category createCategory(File file, List<File> quests) {
 		return new Category(file, quests);
 	}

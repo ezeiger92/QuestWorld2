@@ -19,7 +19,7 @@ import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
-import me.mrCookieSlime.QuestWorld.api.contract.IQuestingObject;
+import me.mrCookieSlime.QuestWorld.api.contract.IRenderable;
 import me.mrCookieSlime.QuestWorld.party.Party;
 import me.mrCookieSlime.QuestWorld.api.Manual;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
@@ -40,7 +40,7 @@ public class PlayerManager {
 	
 	private Config cfg;
 	private UUID uuid;
-	private IQuestingObject last;
+	private IRenderable last;
 	
 	private Stack<Integer> pages = new Stack<>();
 	
@@ -362,11 +362,11 @@ public class PlayerManager {
 		return cfg;
 	}
 	
-	public IQuestingObject getLastEntry() {
+	public IRenderable getLastEntry() {
 		return last;
 	}
 	
-	public void updateLastEntry(IQuestingObject entry) {
+	public void updateLastEntry(IRenderable entry) {
 		this.last = entry;
 	}
 	

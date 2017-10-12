@@ -4,13 +4,12 @@ import java.util.List;
 
 import org.bukkit.inventory.ItemStack;
 
-import me.mrCookieSlime.QuestWorld.api.contract.ICategoryWrite;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
 import me.mrCookieSlime.QuestWorld.event.CancellableEvent;
 import me.mrCookieSlime.QuestWorld.event.CategoryChangeEvent;
 import me.mrCookieSlime.QuestWorld.util.BitFlag;
 
-class CategoryChange extends Category implements ICategoryWrite {
+class CategoryChange extends Category {
 	private long changeBits = 0;
 	private Category origin;
 	

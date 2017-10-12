@@ -15,7 +15,7 @@ import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IMissionWrite;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuestWrite;
-import me.mrCookieSlime.QuestWorld.api.contract.IQuestingObject;
+import me.mrCookieSlime.QuestWorld.api.contract.IRenderable;
 import me.mrCookieSlime.QuestWorld.container.PagedMapping;
 import me.mrCookieSlime.QuestWorld.manager.PlayerManager;
 import me.mrCookieSlime.QuestWorld.party.Party;
@@ -88,7 +88,7 @@ public class QuestBook {
 	}
 	
 	public static void openLastMenu(Player p) {
-		IQuestingObject last = QuestWorld.getInstance().getManager(p).getLastEntry();
+		IRenderable last = QuestWorld.getInstance().getManager(p).getLastEntry();
 		if (last != null) {			
 			if(last instanceof IQuest) {
 				IQuest q = (IQuest)last;
@@ -1041,7 +1041,7 @@ public class QuestBook {
 				menu.put(45 + i,
 						new ItemBuilder(Material.PAPER).display("&7&o> New Task").get(),
 						event -> {
-							changes.addMission(QuestWorld.getCreator().createMission(
+							changes.addMission(QuestWorld.renderFactory().createMission(
 									quest, String.valueOf(event.getSlot() + 9),  MissionType.valueOf("SUBMIT"),
 									EntityType.PLAYER, "", new ItemStack(Material.STONE),
 									p.getLocation().getBlock().getLocation(), 1, null, 0, false, 0, true,

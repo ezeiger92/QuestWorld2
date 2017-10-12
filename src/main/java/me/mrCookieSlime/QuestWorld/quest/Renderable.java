@@ -3,9 +3,9 @@ package me.mrCookieSlime.QuestWorld.quest;
 import org.bukkit.entity.Player;
 
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
-import me.mrCookieSlime.QuestWorld.api.contract.IQuestingObject;
+import me.mrCookieSlime.QuestWorld.api.contract.IRenderable;
 
-abstract class QuestingObject implements IQuestingObject {
+abstract class Renderable implements IRenderable {
 	private static long s_uniqueId = 0;
 	
 	private final long uniqueId = s_uniqueId++;

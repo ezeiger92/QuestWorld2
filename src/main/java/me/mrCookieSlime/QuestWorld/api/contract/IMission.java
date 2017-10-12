@@ -7,8 +7,10 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
 
 import me.mrCookieSlime.QuestWorld.api.MissionType;
+import me.mrCookieSlime.QuestWorld.api.annotation.NoImpl;
 
-public interface IMission extends IQuestingObject {
+@NoImpl
+public interface IMission extends IRenderable {
 	String getID();
 	int getAmount();
 	String getText();

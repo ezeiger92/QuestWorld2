@@ -7,12 +7,11 @@ import org.bukkit.inventory.ItemStack;
 
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
-import me.mrCookieSlime.QuestWorld.api.contract.IQuestWrite;
 import me.mrCookieSlime.QuestWorld.event.CancellableEvent;
 import me.mrCookieSlime.QuestWorld.event.QuestChangeEvent;
 import me.mrCookieSlime.QuestWorld.util.BitFlag;
 
-class QuestChange extends Quest implements IQuestWrite {	
+class QuestChange extends Quest {	
 	private long changeBits = 0;
 	private Quest origin;
 	
