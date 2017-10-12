@@ -1,8 +1,6 @@
 package me.mrCookieSlime.QuestWorld.util;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Chunk;
-import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.conversations.Conversation;
@@ -141,81 +139,18 @@ public class PlayerTools {
 		Bukkit.getPluginManager().callEvent(new InventoryCloseEvent(p.getOpenInventory()));
 		p.closeInventory();
 	}
-	
-	private interface IReflector {
-		ItemStack pickBlock(Block block) throws Exception;
-	}
-	
-	private static class Reflector implements IReflector {
-		@Override
-		public ItemStack pickBlock(Block block) throws Exception {
-			World w = block.getWorld();
-			Chunk c = block.getChunk();
-			Class<?> serverClass = Bukkit.getServer().getClass();
-			String CBS = serverClass.getName().replaceFirst("[^.]+$", "");
-			String NMS = serverClass.getMethod("getServer").getReturnType().getName().replaceFirst("[^.]+$", "");
-			
-			Object world = w.getClass().getMethod("getHandle").invoke(w);
-			Object chunk = c.getClass().getMethod("getHandle").invoke(c);
-			
-			Object blockposition = Class.forName(NMS + "BlockPosition")
-					.getConstructor(int.class, int.class, int.class)
-					.newInstance(block.getX(), block.getY(), block.getZ());
-			Object iblockdata = chunk.getClass().getMethod("getBlockData", blockposition.getClass()).invoke(chunk, blockposition);
-			
-			Class<?> worldClass = Class.forName(NMS + "World");
-			@SuppressWarnings("deprecation")
-			Object rawblock = Bukkit.getUnsafe().getClass().getMethod("getBlock", Block.class).invoke(null, block);
-			Class<?> iblockclass = Class.forName(NMS + "IBlockData");
-			Object rawitemstack = rawblock.getClass().getMethod("a", worldClass, blockposition.getClass(), iblockclass)
-				.invoke(rawblock, world, blockposition, iblockdata);
 
-			return (ItemStack)Class.forName(CBS + "inventory.CraftItemStack").getMethod("asCraftMirror", rawitemstack.getClass()).invoke(null, rawitemstack);
-		}
-	}
-	
-	private static class NullReflector implements IReflector {
-		@Override
-		public ItemStack pickBlock(Block block) {
-			return null;
-		}
-	}
-	
-	private static IReflector reflector = null;
-	
+	private static boolean noexceptPick = true;
 	public static ItemStack getStackOf(Block block) {
-		ItemStack res = null;
-		if(reflector == null) {
-			reflector = new Reflector();
+		if(noexceptPick)
 			try {
-				res = reflector.pickBlock(block);
+				return Reflect.nmsPickBlock(block);
 			}
 			catch(Exception e) {
-				Log.warning("Unable to reflect \"pickBlock\" method, QuestWorld was not fully prepared for your minecraft version");
+				noexceptPick = false;
+				Log.warning("Failed to reflect \"pickBlock\" method, QuestWorld was not fully prepared for your minecraft version");
 				Log.warning("Falling back to MaterialData comparison for all future checks. Mining quests may not detect blocks as accurately");
-				reflector = new NullReflector();
 			}
-		}
-		else
-			try {
-				res = reflector.pickBlock(block);
-			}
-			catch(Exception e) {
-				Log.severe("Lost ability to reflect \"pickBlock\" method when we previously could!");
-				e.printStackTrace();
-				Log.severe("Block was: " + block.getState().getData().toItemStack(1).serialize().toString());
-				
-				String data = "";
-				for(World w : Bukkit.getWorlds()) {
-					data += w.getName() + " [" + w.getEnvironment().toString() + "] ";
-				}
-				
-				Log.severe("Worlds: " + data);
-			}
-		
-		if(res == null)
-			res = block.getState().getData().toItemStack(1);
-		
-		return res;
+		return block.getState().getData().toItemStack(1);
 	}
 }

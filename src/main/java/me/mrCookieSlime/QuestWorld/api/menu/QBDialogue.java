@@ -183,11 +183,37 @@ public class QBDialogue {
 				PlayerTools.tellraw(p, redX.toString(), commandDisplay.toString());
 			}
 			
-			PlayerTools.tellraw(p, Text.colorize("['', {"
-					+ "'text':'&2+ &7Add more Commands... (Click)',"
-					+ "'clickEvent':{'action':'run_command','value':'/questeditor add_command " + quest.getCategory().getID() + " " + quest.getID() + "'},"
-					+ "'hoverEvent':{'action':'show_text','value':'&7Click to add a new Command'}}]")
-					.replace('\'', '"'));
+			JsonObject greenPlus = new JsonObject();
+			greenPlus.addProperty("text", "+ ");
+			greenPlus.addProperty("color", "dark_green");
+			
+			JsonObject prompt = new JsonObject();
+			prompt.addProperty("text", "Add more Commands... (Click)");
+			prompt.addProperty("color", "gray");
+			{
+				JsonObject clickEvent = new JsonObject();
+				clickEvent.addProperty("action", "run_command");
+				clickEvent.addProperty("value", "/questeditor add_command " + quest.getCategory().getID() + " " + quest.getID());
+				
+				greenPlus.add("clickEvent", clickEvent);
+				prompt.add("clickEvent", clickEvent);
+			}
+			{
+				JsonObject hoverEvent = new JsonObject();
+				hoverEvent.addProperty("action", "show_text");
+				{
+					JsonObject hoverText = new JsonObject();
+					hoverText.addProperty("text", "Click to add a new Command");
+					hoverText.addProperty("color", "gray");
+					
+					hoverEvent.add("value", hoverText);
+				}
+				
+				greenPlus.add("hoverEvent", hoverEvent);
+				prompt.add("hoverEvent", hoverEvent);
+			}
+			
+			PlayerTools.tellraw(p, greenPlus.toString(), prompt.toString());
 			p.sendMessage(Text.colorize("&7&m----------------------------"));
 		} catch (Exception x) {
 			x.printStackTrace();

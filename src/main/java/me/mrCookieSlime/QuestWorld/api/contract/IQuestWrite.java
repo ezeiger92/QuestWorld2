@@ -31,6 +31,8 @@ public interface IQuestWrite extends IQuest {
 	boolean discard();
 	IQuest getSource();
 	
+	void refreshParent();
+	
 	public enum Member implements BitString {
 		CATEGORY,
 		ID,

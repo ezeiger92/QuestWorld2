@@ -8,7 +8,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 
-import me.mrCookieSlime.CSCoreLibPlugin.general.String.StringUtils;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
@@ -17,6 +16,7 @@ import me.mrCookieSlime.QuestWorld.api.menu.MenuData;
 import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
 import me.mrCookieSlime.QuestWorld.util.ItemBuilder;
 import me.mrCookieSlime.QuestWorld.util.PlayerTools;
+import me.mrCookieSlime.QuestWorld.util.Text;
 
 public class MineMission extends MissionType implements Listener {
 	public MineMission() {
@@ -30,7 +30,7 @@ public class MineMission extends MissionType implements Listener {
 	
 	@Override
 	protected String userInstanceDescription(IMission instance) {
-		return "&7Mine " + instance.getAmount() + "x " + StringUtils.formatItemName(instance.getDisplayItem(), false);
+		return "&7Mine " + instance.getAmount() + "x " + Text.itemName(instance.getDisplayItem());
 	}
 	
 	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)

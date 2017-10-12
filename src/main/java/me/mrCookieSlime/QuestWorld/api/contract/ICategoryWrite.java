@@ -20,6 +20,8 @@ public interface ICategoryWrite extends ICategory {
 	boolean discard();
 	ICategory getSource();
 	
+	void refreshParent();
+	
 	public enum Member implements BitString {
 		QUESTS,
 		ID,

@@ -8,7 +8,6 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -17,17 +16,12 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-import me.mrCookieSlime.CSCoreLibPlugin.PluginUtils;
-import me.mrCookieSlime.CSCoreLibPlugin.Configuration.Config;
-import me.mrCookieSlime.CSCoreLibSetup.CSCoreLibLoader;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.QuestExtension;
 import me.mrCookieSlime.QuestWorld.api.Translator;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
-import me.mrCookieSlime.QuestWorld.api.contract.ICategoryWrite;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
-import me.mrCookieSlime.QuestWorld.api.contract.IQuestWrite;
 import me.mrCookieSlime.QuestWorld.api.contract.QuestLoader;
 import me.mrCookieSlime.QuestWorld.command.EditorCommand;
 import me.mrCookieSlime.QuestWorld.command.QuestsCommand;
@@ -44,6 +38,8 @@ import me.mrCookieSlime.QuestWorld.util.Lang;
 import me.mrCookieSlime.QuestWorld.util.Log;
 import me.mrCookieSlime.QuestWorld.util.Sounds;
 
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.AnimalTamer;
 import org.bukkit.entity.Player;
@@ -58,7 +54,7 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 	private static QuestWorld instance = null;
 	private long lastSave;
 
-	private Config cfg, sounds;
+	private FileConfiguration sounds;
 	private MissionViewer missionViewer = new MissionViewer();
 	private Map<String, MissionType> types      = new HashMap<>();
 	private Map<Integer, ICategory>   categories = new HashMap<>();
@@ -114,7 +110,6 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 	
 	@Override
 	public void onEnable() {
-		// Initialize all we can before we need CSCoreLib
 		hookInstaller = new ExtensionInstaller(this);
 		new Builtin();
 		hookInstaller.addAll(preEnableHooks);
@@ -122,11 +117,6 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 		economy = EconWrapper.wrap();
 		if(economy == null)
 			Log.info("No economy (vault) found, money rewards disabled");
-		
-		// Attempt to load Core to continue
-		CSCoreLibLoader loader = new CSCoreLibLoader(this);
-		if(!loader.load())
-			return;
 		
 		if (!new File("data-storage/Quest World").exists()) new File("data-storage/Quest World").mkdirs();
 		if (!new File("plugins/QuestWorld/quests").exists()) new File("plugins/QuestWorld/quests").mkdirs();
@@ -168,12 +158,10 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 	}
 	
 	public void loadConfigs() {
-		PluginUtils utils = new PluginUtils(this);
-		utils.setupMetrics();
-		utils.setupUpdater(77071, getFile());
-
-		utils.setupConfig();
-		cfg = utils.getConfig();
+		if(!getDataFolder().exists())
+			saveDefaultConfig();
+		
+		reloadConfig();
 		
 		//TODO make logger info (and other) levels actually work
 		//Log.setLevel(cfg.getString("options.log-level"));
@@ -181,12 +169,13 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 		File soundFile = new File(getDataFolder(), "sounds.yml");
 		if(!soundFile.exists())
 			try {
-				YamlConfiguration.loadConfiguration(new InputStreamReader(getResource("sounds.yml"))).save(soundFile);
+				sounds = YamlConfiguration.loadConfiguration(new InputStreamReader(getResource("sounds.yml")));
+				sounds.save(soundFile);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-		
-		sounds = new Config("plugins/QuestWorld/sounds.yml");
+		else
+			sounds = YamlConfiguration.loadConfiguration(soundFile);
 
 		// Needs sound config loaded
 		eventSounds = new Sounds();
@@ -200,10 +189,10 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 						getManager(p).update(true);
 				},
 				0L,
-				cfg.getInt("options.quest-check-delay")
+				getConfig().getInt("options.quest-check-delay")
 		);
 		
-		int autosave = cfg.getInt("options.autosave-interval");
+		int autosave = getConfig().getInt("options.autosave-interval");
 		if(autosave > 0) {
 			autosave = autosave * 20 * 60; // minutes to ticks
 			if(autosaveHandle != -1)
@@ -217,19 +206,8 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 		}
 	}
 	
-	private IQuest parentFromConfig(Config cfg) {
-		IQuest parent = null;
-		if (cfg.contains("parent")) {
-			String[] parts = cfg.getString("parent").split("-C");
-			ICategory c = getCategory(Integer.parseInt(parts[0]));
-			if (c != null)
-				parent = c.getQuest(Integer.parseInt(parts[1]));
-		}
-		return parent;
-	}
-	
 	public void load() {
-		Set<File> categories = new HashSet<File>();
+		/*Set<File> categories = new HashSet<File>();
 		Map<Integer, List<File>> quests = new HashMap<Integer, List<File>>();
 		for (File file: new File("plugins/QuestWorld/quests").listFiles()) {
 			if (file.getName().endsWith(".quest")) {
@@ -254,17 +232,14 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 			// Administrative process - bypass events and directly modify data
 			// 99% of the time you should use .getWriter() and .apply()
 			ICategoryWrite c = (ICategoryWrite)category;
-			c.setParent(parentFromConfig(
-				new Config("plugins/QuestWorld/quests/" + category.getID() + ".category")
-			));
+			c.refreshParent();
 			
 			for (IQuest quest: category.getQuests()) {
 				IQuestWrite q = (IQuestWrite)quest;
-				q.setParent(parentFromConfig(
-					new Config("plugins/QuestWorld/quests/" + quest.getID() + "-C" + category.getID() + ".quest")
-				));
+				q.refreshParent();
 			}
-		}
+		}*/
+		facade.load();
 		
 		lastSave = System.currentTimeMillis();
 	}
@@ -484,12 +459,8 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 		
 		return item.isSimilar(SFitem);
 	}
-
-	public Config getCfg() {
-		return cfg;
-	}
 	
-	public Config getSoundCfg() {
+	public ConfigurationSection getSoundCfg() {
 		return sounds;
 	}
 	

@@ -1,11 +1,9 @@
 package me.mrCookieSlime.QuestWorld.util;
 
-import java.util.List;
-
+import org.bukkit.Sound;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 
-import me.mrCookieSlime.CSCoreLibPlugin.Configuration.Config;
-import me.mrCookieSlime.CSCoreLibPlugin.general.audio.Soundboard;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 
 public class Sounds {
@@ -22,44 +20,47 @@ public class Sounds {
 	private final SoundList partyClick = new SoundList("sounds.party.click", 1F, 0.2F);
 
 	public static class SoundList {
-		private List<String> sounds;
+		private Sound sound;
 		private float volume;
 		private float pitch;
 		
-		public SoundList(String path) {
-			this(path, 1F, 1F);
-			
-		}
-		
 		public SoundList(String path, float volume, float pitch) {
-			Config cfg = QuestWorld.getInstance().getSoundCfg();
-			sounds = cfg.getStringList(path + ".list");
+			ConfigurationSection cfg = QuestWorld.getInstance().getSoundCfg();
+			String soundStr = cfg.getString(path + ".sound").toUpperCase();
+			
+			try {
+				sound = Sound.valueOf(soundStr);
+			}
+			catch(Exception e) {
+				sound = null;
+			}
 
 			this.volume = volume;
 			this.pitch = pitch;
 			
 			if(cfg.contains(path + ".volume")) {
-				this.volume = cfg.getFloat(path + ".volume");
+				this.volume = (float) cfg.getDouble(path + ".volume");
 			}
 
 			if(cfg.contains(path + ".pitch")) {
-				this.pitch = cfg.getFloat(path + ".pitch");
+				this.pitch = (float) cfg.getDouble(path + ".pitch");
 			}
 		}
 		
-		public String[] get() {
-			return sounds.toArray(new String[0]);
+		public SoundList(String path) {
+			this(path, 1F, 1F);
 		}
 		
 		public void playTo(Player p) {
 			if(!mute)
-				p.playSound(p.getLocation(), Soundboard.getLegacySounds(get()), volume, pitch);
+				p.playSound(p.getLocation(), sound, volume, pitch);
 			mute = false;
 		}
 	}
 	
 	private static boolean mute = false;
 	
+	@Deprecated
 	public void muteNext() {
 		mute = true;
 	}

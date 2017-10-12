@@ -1,10 +1,10 @@
 package me.mrCookieSlime.QuestWorld.quest;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import me.mrCookieSlime.CSCoreLibPlugin.Configuration.Config;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.QuestStatus;
@@ -15,7 +15,11 @@ import me.mrCookieSlime.QuestWorld.util.ItemBuilder;
 import me.mrCookieSlime.QuestWorld.util.Text;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -41,6 +45,9 @@ class Quest extends Renderable implements IQuestWrite {
 	Quest parent;
 	String permission;
 	
+	FileConfiguration config;
+	
+	// Internal
 	protected Quest(Quest quest) {
 		copy(quest);
 	}
@@ -80,37 +87,41 @@ class Quest extends Renderable implements IQuestWrite {
 		dest.copy(this);
 	}
 	
-	public Quest(Category category, File file) {
+	// Package
+	public Quest(Category category, FileConfiguration file) {
 		this.category = category;
 		
-		Config cfg = new Config(file);
+		config = file;
 		this.id = Integer.parseInt(file.getName().replace(".quest", "").split("-C")[0]);
-		this.cooldown = cfg.getLong("cooldown");
-		this.disableParties = cfg.getBoolean("disable-parties");
-		this.ordered = cfg.getBoolean("in-order");
-		this.autoclaim = cfg.getBoolean("auto-claim");
-		this.name = Text.colorize(cfg.getString("name"));
-		this.item = new ItemBuilder(cfg.getItem("item")).display(name).get();
-		loadMissions(cfg);
-		this.rewards = loadRewards(cfg);
-		this.money = cfg.getInt("rewards.money");
-		this.xp = cfg.getInt("rewards.xp");
-		if (cfg.contains("rewards.commands")) commands = cfg.getStringList("rewards.commands");
-		if (cfg.contains("world-blacklist")) world_blacklist = cfg.getStringList("world-blacklist");
+		this.cooldown = config.getLong("cooldown");
+		this.disableParties = config.getBoolean("disable-parties");
+		this.ordered = config.getBoolean("in-order");
+		this.autoclaim = config.getBoolean("auto-claim");
+		this.name = Text.colorize(config.getString("name"));
+		this.item = new ItemBuilder(config.getItemStack("item")).display(name).get();
+		loadMissions();
+		this.rewards = loadRewards();
+		this.money = config.getInt("rewards.money");
+		this.xp = config.getInt("rewards.xp");
 		
-		if (cfg.contains("min-party-size")) partysize = cfg.getInt("min-party-size");
+		if (config.contains("rewards.commands")) commands = config.getStringList("rewards.commands");
+		if (config.contains("world-blacklist")) world_blacklist = config.getStringList("world-blacklist");
+		
+		if (config.contains("min-party-size")) partysize = config.getInt("min-party-size");
 		else partysize = 1;
 		
-		if (cfg.contains("permission")) this.permission = cfg.getString("permission");
+		if (config.contains("permission")) this.permission = config.getString("permission");
 		else this.permission = "";
 		
 		category.addQuest(this);
 	}
 
+	// External
 	public Quest(String name, String input) {
 		this.category = (Category)QuestWorld.getInstance().getCategory(Integer.parseInt(input.split(" M ")[0]));
 		
 		this.id = Integer.parseInt(input.split(" M ")[1]);
+		config = YamlConfiguration.loadConfiguration(getFile());
 		this.cooldown = -1;
 		this.name = Text.colorize(name);
 		this.item = new ItemBuilder(Material.BOOK_AND_QUILL).display(name).get();
@@ -127,50 +138,69 @@ class Quest extends Renderable implements IQuestWrite {
 		category.addQuest(this);
 	}
 	
-	public void updateParent(Config cfg) {
-		if (cfg.contains("parent")) {
-			Category c = (Category)QuestWorld.getInstance().getCategory(Integer.parseInt(cfg.getString("parent").split("-C")[0]));
-			if (c != null) parent = c.getQuest(Integer.parseInt(cfg.getString("parent").split("-C")[1]));
+	public void refreshParent() {
+		String parentId = config.getString("parent", null);
+		if (parentId != null) {
+			String[] parts = parentId.split("-C");
+			Category c = (Category)QuestWorld.getInstance().getCategory(Integer.parseInt(parts[0]));
+			if (c != null)
+				parent = c.getQuest(Integer.parseInt(parts[1]));
 		}
 	}
+	
+	File getFile() {
+		String path = QuestWorld.getInstance().getConfig().getString("path.questdata");
+		return new File(path + id + "-C" + category.getID() + ".quest");
+	}
+	
+	private Location locationHelper(ConfigurationSection loc) {
+		return new Location(Bukkit.getWorld(loc.getString("world")), loc.getDouble("x"), loc.getDouble("y"),
+				loc.getDouble("z"), (float)loc.getDouble("yaw"), (float)loc.getDouble("pitch"));
+	}
+	
+	private void locationHelper(Location in, ConfigurationSection loc) {
+		loc.set("world", in.getWorld().getName());
+		loc.set("x", in.getX());
+		loc.set("y", in.getY());
+		loc.set("z", in.getZ());
+		loc.set("yaw", (double)in.getYaw());
+		loc.set("pitch", (double)in.getPitch());
+	}
 
-	private void loadMissions(Config cfg) {
-		if (!cfg.contains("missions"))
+	private void loadMissions() {
+		ConfigurationSection missions = config.getConfigurationSection("missions");
+		if (missions == null)
 			return;
 
-		for (String key: cfg.getKeys("missions")) {
-			String prefix = "missions." + key;
+		for (String key: missions.getKeys(false)) {
+			ConfigurationSection mission = missions.getConfigurationSection(key);
 			
-			if(cfg.contains(prefix + ".citizen")) {
-				int customInt = cfg.getInt(prefix + ".citizen");
-				cfg.setValue(prefix + ".citizen", null);
-				cfg.setValue(prefix + ".custom_int", customInt);
-				cfg.save();
+			if(mission.contains("citizen")) {
+				mission.set("custom_int", mission.get("custom_int", mission.get("citizen")));
+				mission.set("citizen", null);
 			}
 			
-			if(cfg.contains(prefix + ".name")) {
-				String customString = cfg.getString(prefix + ".name");
-				cfg.setValue(prefix + ".name", null);
-				cfg.setValue(prefix + ".custom_string", customString);
-				cfg.save();
+			if(mission.contains("name")) {
+				mission.set("custom_string", mission.get("custom_string", mission.get("name")));
+				mission.set("name", null);
 			}
 
 			QuestChange changes = new QuestChange(this);
 			
 			changes.addMission(new Mission(this, key,
-					MissionType.valueOf(cfg.getString(prefix + ".type")),
-					EntityType.valueOf(cfg.getString(prefix + ".entity")),
-					Text.colorize(cfg.getString(prefix + ".custom_string")),
-					cfg.getItem(prefix + ".item"),
-					cfg.getLocation(prefix + ".location"),
-					cfg.getInt(prefix + ".amount"),
-					Text.colorize(cfg.getString(prefix + ".display-name")),
-					cfg.contains(prefix + ".timeframe") ? cfg.getInt(prefix + ".timeframe"): 0,
-					cfg.getBoolean(prefix + ".reset-on-death"),
-					cfg.getInt(prefix + ".custom_int"),
+					MissionType.valueOf(mission.getString("type")),
+					EntityType.valueOf(mission.getString("entity")),
+					Text.colorize(mission.getString("custom_string")),
+					mission.getItemStack("item"),
+					locationHelper(mission.getConfigurationSection("location")),
+					mission.getInt("amount"),
+					Text.colorize(mission.getString("display-name")),
+					mission.getInt("timeframe"),
+					mission.getBoolean("reset-on-death"),
+					mission.getInt("custom_int"),
 					// not exclude = allow, what we want
-					!cfg.getBoolean(prefix + ".exclude-spawners"),
-					Text.colorize(cfg.getString(prefix + ".lore"))));
+					!mission.getBoolean("exclude-spawners"),
+					Text.colorize(mission.getString("lore"))));
 			
 			if(changes.sendEvent())
 				changes.apply();
@@ -178,52 +208,58 @@ class Quest extends Renderable implements IQuestWrite {
 	}
 	
 	public void save() {
-		Config cfg = new Config(new File("plugins/QuestWorld/quests/" + id + "-C" + category.getID() + ".quest"));
-		cfg.setValue("id", id);
-		cfg.setValue("category", category.getID());
-		cfg.setValue("cooldown", String.valueOf(cooldown));
-		cfg.setValue("name", Text.escape(name));
-		cfg.setValue("item", new ItemStack(item));
-		cfg.setValue("rewards.items", null);
-		cfg.setValue("rewards.money", money);
-		cfg.setValue("rewards.xp", xp);
-		cfg.setValue("rewards.commands", commands);
-		cfg.setValue("missions", null);
-		cfg.setValue("permission", permission);
-		cfg.setValue("disable-parties", disableParties);
-		cfg.setValue("in-order", ordered);
-		cfg.setValue("auto-claim", autoclaim);
-		cfg.setValue("world-blacklist", world_blacklist);
-		cfg.setValue("min-party-size", partysize);
+		config.set("id", id);
+		config.set("category", category.getID());
+		config.set("cooldown", String.valueOf(cooldown));
+		config.set("name", Text.escape(name));
+		config.set("item", new ItemStack(item));
+		config.set("rewards.items", null);
+		config.set("rewards.money", money);
+		config.set("rewards.xp", xp);
+		config.set("rewards.commands", commands);
+		config.set("missions", null);
+		config.set("permission", permission);
+		config.set("disable-parties", disableParties);
+		config.set("in-order", ordered);
+		config.set("auto-claim", autoclaim);
+		config.set("world-blacklist", world_blacklist);
+		config.set("min-party-size", partysize);
 		
 		int index = 0;
 		for (ItemStack reward: rewards) {
 			if (reward != null) {
-				cfg.setValue("rewards.items." + index, reward);
+				config.set("rewards.items." + index, reward);
 				index++;
 			}
 		}
 		for (IMission mission: tasks) {
-			cfg.setValue("missions." + mission.getID() + ".type", mission.getType().toString());
-			cfg.setValue("missions." + mission.getID() + ".amount", mission.getAmount());
-			cfg.setValue("missions." + mission.getID() + ".item", new ItemStack(mission.getMissionItem()));
-			cfg.setValue("missions." + mission.getID() + ".entity", mission.getEntity().toString());
-			if (mission.getLocation() != null && mission.getLocation().getWorld() != null) cfg.setValue("missions." + mission.getID() + ".location", mission.getLocation());
-			cfg.setValue("missions." + mission.getID() + ".display-name", Text.escape(mission.getDisplayName()));
-			cfg.setValue("missions." + mission.getID() + ".timeframe", mission.getTimeframe());
-			cfg.setValue("missions." + mission.getID() + ".reset-on-death", mission.resetsonDeath());
-			cfg.setValue("missions." + mission.getID() + ".lore", Text.escape(mission.getDescription()));
+			config.set("missions." + mission.getID() + ".type", mission.getType().toString());
+			config.set("missions." + mission.getID() + ".amount", mission.getAmount());
+			config.set("missions." + mission.getID() + ".item", new ItemStack(mission.getMissionItem()));
+			config.set("missions." + mission.getID() + ".entity", mission.getEntity().toString());
+			// TODO is this check still needed?
+			if (mission.getLocation() != null && mission.getLocation().getWorld() != null)
+				locationHelper(mission.getLocation(), config.createSection("location"));
+			config.set("missions." + mission.getID() + ".display-name", Text.escape(mission.getDisplayName()));
+			config.set("missions." + mission.getID() + ".timeframe", mission.getTimeframe());
+			config.set("missions." + mission.getID() + ".reset-on-death", mission.resetsonDeath());
+			config.set("missions." + mission.getID() + ".lore", Text.escape(mission.getDescription()));
 			// Formerly ".citizen"
-			cfg.setValue("missions." + mission.getID() + ".custom_int", mission.getCustomInt());
+			config.set("missions." + mission.getID() + ".custom_int", mission.getCustomInt());
 			// Formerly ".name"
-			cfg.setValue("missions." + mission.getID() + ".custom_string", Text.escape(mission.getCustomString()));
+			config.set("missions." + mission.getID() + ".custom_string", Text.escape(mission.getCustomString()));
 			
-			cfg.setValue("missions." + mission.getID() + ".exclude-spawners", !mission.acceptsSpawners());
+			config.set("missions." + mission.getID() + ".exclude-spawners", !mission.acceptsSpawners());
 		}
-		if (parent != null) cfg.setValue("parent", String.valueOf(parent.getCategory().getID() + "-C" + parent.getID()));
-		else cfg.setValue("parent", null);
+		if (parent != null) config.set("parent", String.valueOf(parent.getCategory().getID() + "-C" + parent.getID()));
+		else config.set("parent", null);
 		
-		cfg.save();
+		try {
+			config.save(getFile());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public int getID() {
@@ -254,13 +290,15 @@ class Quest extends Renderable implements IQuestWrite {
 		return tasks;
 	}
 	
-	private List<ItemStack> loadRewards(Config cfg) {
-		if (!cfg.contains("rewards.items.0")) return new ArrayList<ItemStack>();
-		List<ItemStack> items = new ArrayList<ItemStack>();
-		for (String key: cfg.getKeys("rewards.items")) {
-			ItemStack item = cfg.getItem("rewards.items." + key);
-			if (item != null) items.add(item);
-		}
+	private List<ItemStack> loadRewards() {
+		List<ItemStack> items = new ArrayList<>();
+		ConfigurationSection rewards = config.getConfigurationSection("rewards.items");
+		if(rewards == null)
+			return items;
+		
+		for(String key : rewards.getKeys(false))
+			items.add(rewards.getItemStack(key));
+		
 		return items;
 	}
 	

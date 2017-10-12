@@ -34,11 +34,6 @@
 			<id>vault-repo</id>
 			<url>http://nexus.hc.to/content/repositories/pub_releases</url>
 		</repository>
-		<!-- Local file repo -->
-		<repository>
-			<id>local-repo</id>
-			<url>file:${basedir}/repo</url>
-		</repository>
 	</repositories>
 	<dependencies>
 		<!-- Bukkit/Spigot dep -->
@@ -53,14 +48,6 @@
 			<groupId>net.milkbowl.vault</groupId>
 			<artifactId>VaultAPI</artifactId>
 			<version>1.6</version>
-			<scope>provided</scope>
-			<optional>true</optional>
-		</dependency>
-		<!-- CS CoreLib dep -->
-		<dependency>
-			<groupId>me.mrcookieslime</groupId>
-			<artifactId>CS-CoreLib</artifactId>
-			<version>1.5.9</version>
 			<scope>provided</scope>
 			<optional>true</optional>
 		</dependency>

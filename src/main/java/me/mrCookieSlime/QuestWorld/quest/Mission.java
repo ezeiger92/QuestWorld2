@@ -236,7 +236,7 @@ class Mission extends Renderable implements IMissionWrite {
 	}
 	
 	public void addDialogueLine(Player p, final String path) {
-		String dprefix = QuestWorld.getInstance().getCfg().getString("dialogue.prefix");
+		String dprefix = QuestWorld.getInstance().getConfig().getString("dialogue.prefix");
 		final Mission mission = this;
 		PlayerTools.promptInput(p, new SinglePrompt(
 				PlayerTools.makeTranslation(true, Translation.MISSION_DIALOG_ADD),

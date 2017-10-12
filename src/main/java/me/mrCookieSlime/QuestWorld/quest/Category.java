@@ -1,13 +1,13 @@
 package me.mrCookieSlime.QuestWorld.quest;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import me.mrCookieSlime.CSCoreLibPlugin.Configuration.Config;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.QuestStatus;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
@@ -17,12 +17,13 @@ import me.mrCookieSlime.QuestWorld.util.ItemBuilder;
 import me.mrCookieSlime.QuestWorld.util.Text;
 
 import org.bukkit.Material;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 class Category extends Renderable implements ICategoryWrite {
 	
-	Map<Integer, Quest> quests;
+	Map<Integer, Quest> quests = new HashMap<>();;
 	int id;
 	String name;
 	ItemStack item;
@@ -31,7 +32,9 @@ class Category extends Renderable implements ICategoryWrite {
 	String permission;
 	boolean hidden;
 	List<String> world_blacklist = new ArrayList<String>();
+	FileConfiguration config;
 	
+	// Interal
 	protected Category(Category cat) {
 		copy(cat);
 	}
@@ -52,41 +55,48 @@ class Category extends Renderable implements ICategoryWrite {
 		dest.copy(this);
 	}
 	
+	// External
 	public Category(String name, int id) {
 		this.id = id;
-		this.quests = new HashMap<>();
-		this.name = Text.colorize(name);
-		this.item = new ItemBuilder(Material.BOOK_AND_QUILL).display(name).get();
-		this.world_blacklist = new ArrayList<String>();
-		this.permission = "";
-		this.hidden = false;
+		name = Text.colorize(name);
+		item = new ItemBuilder(Material.BOOK_AND_QUILL).display(name).get();
+		world_blacklist = new ArrayList<String>();
+		permission = "";
+		hidden = false;
 		
 		QuestWorld.getInstance().registerCategory(this);
 	}
 	
-	public Category(File file, List<File> quests) {
-		this.id = Integer.parseInt(file.getName().replace(".category", ""));
-		this.quests = new HashMap<>();
-		for (File f: quests) {
-			new Quest(this, f);
-		}
-		Config cfg = new Config(file);
-		this.name = Text.colorize(cfg.getString("name"));
-		this.item = cfg.getItem("item");
-		this.item = new ItemBuilder(item).display(name).get();
-		this.hidden = cfg.getBoolean("hidden");
-		if (cfg.contains("permission")) this.permission = cfg.getString("permission");
-		if (cfg.contains("world-blacklist")) world_blacklist = cfg.getStringList("world-blacklist");
-		else this.permission = "";
+	// Package
+	Category(int id, FileConfiguration config, List<FileConfiguration> quests) {
+		this.id = id;
+		if(quests != null)
+			for (FileConfiguration f: quests) {
+				new Quest(this, f);
+			}
+		this.config = config;
+		name = Text.colorize(config.getString("name"));
+		item = new ItemBuilder(config.getItemStack("item")).display(name).get();
+		hidden = config.getBoolean("hidden");
+		permission = config.getString("permission", "");
+		world_blacklist = config.getStringList("world-blacklist");
 		
 		QuestWorld.getInstance().registerCategory(this);
 	}
 	
-	public void updateParent(Config cfg) {
-		if (cfg.contains("parent")) {
-			Category category = (Category)QuestWorld.getInstance().getCategory(Integer.parseInt(cfg.getString("parent").split("-C")[0]));
-			if (category != null) parent = category.getQuest(Integer.parseInt(cfg.getString("parent").split("-C")[1]));
+	public void refreshParent() {
+		String parentId = config.getString("parent", null);
+		if (parentId != null) {
+			String[] parts = parentId.split("-C");
+			Category category = (Category)QuestWorld.getInstance().getCategory(Integer.parseInt(parts[0]));
+			if (category != null)
+				parent = category.getQuest(Integer.parseInt(parts[1]));
 		}
+	}
+	
+	File getFile() {
+		String path = QuestWorld.getInstance().getConfig().getString("path.questdata");
+		return new File(path + id + ".category");
 	}
 	
 	public void addQuest(IQuest quest) {
@@ -115,18 +125,23 @@ class Category extends Renderable implements ICategoryWrite {
 		if(!force && lastSave >= getLastModified())
 			return;
 		
-		Config cfg = new Config(new File("plugins/QuestWorld/quests/" + id + ".category"));
-		cfg.setValue("id", id);
-		cfg.setValue("name", Text.escape(name));
-		cfg.setValue("item", new ItemStack(item));
-		cfg.setValue("permission", permission);
-		cfg.setValue("hidden", this.hidden);
-		cfg.setValue("world-blacklist", world_blacklist);
+		//Config cfg = new Config(new File("plugins/QuestWorld/quests/" + id + ".category"));
+		config.set("id", id);
+		config.set("name", Text.escape(name));
+		config.set("item", item);
+		config.set("permission", permission);
+		config.set("hidden", this.hidden);
+		config.set("world-blacklist", world_blacklist);
 		
-		if (parent != null) cfg.setValue("parent", String.valueOf(parent.getCategory().getID() + "-C" + parent.getID()));
-		else cfg.setValue("parent", null);
+		if (parent != null) config.set("parent", String.valueOf(parent.getCategory().getID() + "-C" + parent.getID()));
+		else config.set("parent", null);
 		
-		cfg.save();
+		try {
+			config.save(getFile());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public int getID() {

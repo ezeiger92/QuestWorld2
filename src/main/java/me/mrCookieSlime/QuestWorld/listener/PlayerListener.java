@@ -52,7 +52,7 @@ public class PlayerListener implements Listener {
 	
 	@EventHandler
 	public void onJoin(PlayerJoinEvent e) {
-		if (!new File("data-storage/Quest World/" + e.getPlayer().getUniqueId() + ".yml").exists() && QuestWorld.getInstance().getCfg().getBoolean("book.on-first-join"))
+		if (!new File("data-storage/Quest World/" + e.getPlayer().getUniqueId() + ".yml").exists() && QuestWorld.getInstance().getConfig().getBoolean("book.on-first-join"))
 			e.getPlayer().getInventory().addItem(GuideBook.get());
 	}
 	

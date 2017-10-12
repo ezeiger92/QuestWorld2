@@ -4,6 +4,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.bukkit.ChatColor;
+import org.bukkit.inventory.ItemStack;
 
 import me.mrCookieSlime.QuestWorld.api.annotation.Nullable;
 
@@ -143,5 +144,17 @@ public class Text {
 				" - ",
 				append
 		);
+	}
+	
+	public static String itemName(ItemStack stack) {
+		if(stack.hasItemMeta() && stack.getItemMeta().hasDisplayName())
+			return stack.getItemMeta().getDisplayName();
+		
+		try {
+			return Reflect.nmsGetItemName(stack);
+		}
+		catch(Exception e) {
+			return niceName(stack.getType().toString());
+		}
 	}
 }

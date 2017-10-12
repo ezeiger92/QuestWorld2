@@ -84,7 +84,7 @@ public class Buttons {
 	
 	public static Consumer<InventoryClickEvent> partyMenu() {
 		return event -> {
-			if (QuestWorld.getInstance().getCfg().getBoolean("party.enabled")) {
+			if (QuestWorld.getInstance().getConfig().getBoolean("party.enabled")) {
 				Player p = (Player) event.getWhoClicked();
 				
 				// TODO openPartyMenu has no way to go back to where it came from, so it always goes to the main menu

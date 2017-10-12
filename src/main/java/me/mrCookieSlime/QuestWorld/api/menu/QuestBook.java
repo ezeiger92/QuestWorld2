@@ -115,7 +115,7 @@ public class QuestBook {
 	}
 	
 	private static ItemStack partyMenuItem(Player p) {
-		if (QuestWorld.getInstance().getCfg().getBoolean("party.enabled")) {
+		if (QuestWorld.getInstance().getConfig().getBoolean("party.enabled")) {
 			return new ItemBuilder(SkullType.PLAYER)
 					.display(QuestWorld.translate(Translation.gui_party)).lore(
 							QuestWorld.getInstance().getManager(p).getProgress(),
@@ -210,10 +210,10 @@ public class QuestBook {
 						.display("&a&lInvite a Player")
 						.lore("",
 								"&rInvites a Player to your Party",
-								"&rMax. Party Members: &e" + QuestWorld.getInstance().getCfg().getInt("party.max-members")).getNew(),
+								"&rMax. Party Members: &e" + QuestWorld.getInstance().getConfig().getInt("party.max-members")).getNew(),
 						event -> {
 							Player p2 = (Player) event.getWhoClicked();
-							if (party.getSize() >= QuestWorld.getInstance().getCfg().getInt("party.max-members"))
+							if (party.getSize() >= QuestWorld.getInstance().getConfig().getInt("party.max-members"))
 								PlayerTools.sendTranslation(p2, true, Translation.PARTY_ERROR_FULL);
 							else {
 								PlayerTools.promptInput(p2, new SinglePrompt(

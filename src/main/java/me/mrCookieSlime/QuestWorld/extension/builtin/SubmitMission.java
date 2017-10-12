@@ -4,13 +4,13 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import me.mrCookieSlime.CSCoreLibPlugin.general.String.StringUtils;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.Manual;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IMissionWrite;
 import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
+import me.mrCookieSlime.QuestWorld.util.Text;
 
 public class SubmitMission extends MissionType implements Manual {
 	public SubmitMission() {
@@ -24,7 +24,7 @@ public class SubmitMission extends MissionType implements Manual {
 	
 	@Override
 	protected String userInstanceDescription(IMission instance) {
-		return "&7Submit " + instance.getAmount() + "x " + StringUtils.formatItemName(instance.getDisplayItem(), false);
+		return "&7Submit " + instance.getAmount() + "x " + Text.itemName(instance.getDisplayItem());
 	}
 
 	@Override

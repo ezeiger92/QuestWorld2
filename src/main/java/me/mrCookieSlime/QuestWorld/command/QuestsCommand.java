@@ -27,7 +27,7 @@ public class QuestsCommand implements CommandExecutor {
 				if (args.length == 2 && args[0].equalsIgnoreCase("accept")) {
 					Party party = QuestWorld.getInstance().getManager(Bukkit.getOfflinePlayer(UUID.fromString(args[1]))).getParty();
 					if (party != null && party.hasInvited(p)) {
-						int maxParty = QuestWorld.getInstance().getCfg().getInt("party.max-members");
+						int maxParty = QuestWorld.getInstance().getConfig().getInt("party.max-members");
 						if (party.getSize() >= maxParty) {
 							PlayerTools.sendTranslation(sender, true, Translation.PARTY_ERROR_FULL, Integer.toString(maxParty));
 						}

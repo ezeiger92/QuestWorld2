@@ -4,13 +4,13 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import me.mrCookieSlime.CSCoreLibPlugin.general.String.StringUtils;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.Ticking;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IMissionWrite;
 import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
+import me.mrCookieSlime.QuestWorld.util.Text;
 
 public class DetectMission extends MissionType implements Ticking {
 	public DetectMission() {
@@ -24,7 +24,7 @@ public class DetectMission extends MissionType implements Ticking {
 	
 	@Override
 	protected String userInstanceDescription(IMission instance) {
-		return "&7Own " + instance.getAmount() + "x " + StringUtils.formatItemName(instance.getDisplayItem(), false);
+		return "&7Own " + instance.getAmount() + "x " + Text.itemName(instance.getDisplayItem());
 	}
 
 	@Override

@@ -6,18 +6,16 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import me.mrCookieSlime.CSCoreLibPlugin.general.Chat.TellRawMessage;
-import me.mrCookieSlime.CSCoreLibPlugin.general.Chat.TellRawMessage.ClickAction;
-import me.mrCookieSlime.CSCoreLibPlugin.general.Chat.TellRawMessage.HoverAction;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.manager.PlayerManager;
 import me.mrCookieSlime.QuestWorld.util.PlayerTools;
-import me.mrCookieSlime.QuestWorld.util.Text;
 
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
+
+import com.google.gson.JsonObject;
 
 public class Party {
 	
@@ -45,20 +43,38 @@ public class Party {
 
 	
 	public static Party create(Player p) {
-		QuestWorld.getInstance().getManager(p).toConfig().setValue("party.associated", p.getUniqueId().toString());
+		QuestWorld.getInstance().getManager(p).toConfig().set("party.associated", p.getUniqueId().toString());
 		return new Party(p.getUniqueId());
 	}
 	
 	public void invitePlayer(Player p) throws Exception {
 		PlayerTools.sendTranslation(p, true, Translation.PARTY_GROUP_INVITE, Bukkit.getOfflinePlayer(leader).getName());
-
-		new TellRawMessage()
-		.addText(Text.colorize("&a&lACCEPT"))
-		.addHoverEvent(HoverAction.SHOW_TEXT, Text.colorize("&7Click to accept this Invitation"))
-		.addClickEvent(ClickAction.RUN_COMMAND, "/quests accept " + leader)
-		.addText(Text.colorize(" &4&lDENY"))
-		.addHoverEvent(HoverAction.SHOW_TEXT, Text.colorize("&7Click to deny this Invitation"))
-		.send(p);
+		
+		JsonObject accept = new JsonObject();
+		accept.addProperty("text", "ACCEPT");
+		accept.addProperty("color", "green");
+		accept.addProperty("bold", true);
+		{
+			JsonObject clickEvent = new JsonObject();
+			clickEvent.addProperty("action", "run_command");
+			clickEvent.addProperty("value", "/quests accept " + leader);
+			
+			accept.add("clickEvent", clickEvent);
+		}
+		{
+			JsonObject hoverEvent = new JsonObject();
+			hoverEvent.addProperty("action", "show_text");
+			{
+				JsonObject hoverText = new JsonObject();
+				hoverText.addProperty("text", "Click to deny this Invitation");
+				hoverText.addProperty("color", "gray");
+				
+				hoverEvent.add("value", hoverText);
+			}
+			
+			accept.add("hoverEvent", hoverEvent);
+		}
+		PlayerTools.tellraw(p, accept.toString());
 		
 		pending.add(p.getUniqueId());
 		save();
@@ -83,7 +99,7 @@ public class Party {
 			}
 			
 			members.remove(target.getUniqueId());
-			QuestWorld.getInstance().getManager(target).toConfig().setValue("party.associated", null);
+			QuestWorld.getInstance().getManager(target).toConfig().set("party.associated", null);
 			save();
 		}
 	}
@@ -97,7 +113,7 @@ public class Party {
 		
 		this.members.add(p.getUniqueId());
 		PlayerTools.sendTranslation(p, true, Translation.PARTY_GROUP_JOIN, p.getName(), Bukkit.getOfflinePlayer(leader).getName());
-		QuestWorld.getInstance().getManager(p).toConfig().setValue("party.associated", leader.toString());
+		QuestWorld.getInstance().getManager(p).toConfig().set("party.associated", leader.toString());
 		if (pending.contains(p.getUniqueId())) pending.remove(p.getUniqueId());
 		save();
 	}
@@ -108,10 +124,10 @@ public class Party {
 	
 	public void abandon() {
 		for (UUID member: members)
-			QuestWorld.getInstance().getManager(Bukkit.getOfflinePlayer(member)).toConfig().setValue("party.associated", null);
+			QuestWorld.getInstance().getManager(Bukkit.getOfflinePlayer(member)).toConfig().set("party.associated", null);
 		
 		members.clear();
-		manager.toConfig().setValue("party.associated", null);
+		manager.toConfig().set("party.associated", null);
 		save();
 	}
 
@@ -131,13 +147,13 @@ public class Party {
 		for (UUID member: members) {
 			list.add(member.toString());
 		}
-		manager.toConfig().setValue("party.members", list);
+		manager.toConfig().set("party.members", list);
 		
 		List<String> invitations = new ArrayList<String>();
 		for (UUID p: pending) {
 			invitations.add(p.toString());
 		}
-		manager.toConfig().setValue("party.pending-requests", invitations);
+		manager.toConfig().set("party.pending-requests", invitations);
 	}
 
 	public boolean isLeader(OfflinePlayer player) {
