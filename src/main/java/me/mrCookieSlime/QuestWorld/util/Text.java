@@ -19,7 +19,7 @@ public class Text {
 	 * @param input A string with "&1" style colors
 	 * @return Colored string
 	 */
-	public static String colorize(String input) {
+	public static String colorize(@Nullable("Returns null") String input) {
 		if(input == null)
 			return null;
 		
@@ -44,7 +44,7 @@ public class Text {
 		return output;
 	}
 	
-	public static String decolor(String input) {
+	public static String decolor(@Nullable("Returns null") String input) {
 		if(input == null)
 			return null;
 		
@@ -69,19 +69,11 @@ public class Text {
 		return output;
 	}
 	
-	public static String escape(String input) {
+	public static String escape(@Nullable("Returns null") String input) {
 		if(input == null)
 			return null;
 		
-		int len = input.length() - 1;
-		char[] inputArray = input.toCharArray();
-		
-		for(int i = 0; i < len; ++i) {
-			char c = inputArray[i];
-			inputArray[i] = (c == colorChar) ? dummyChar : c;
-		}
-		
-		return new String(inputArray);
+		return input.replace(colorChar, dummyChar);
 	}
 	
 	public static String escape(String... inputs) {
@@ -131,13 +123,13 @@ public class Text {
 		
 	private static final String progress_bar = "::::::::::::::::::::";
 	
-	public static String progressBar(int current, int total, @Nullable("defaults to xx%") String append) {
+	public static String progressBar(int current, int total, @Nullable("defaults to xy%") String append) {
 		int length = (current * 20) / total;
 		if(append == null)
 			append = ((current * 100) / total) + "%";
 		
 		return colorize(
-				progress_colors[(current * 6) / total],
+				progress_colors[(current * 5) / total],
 				progress_bar.substring(20 - length),
 				"&7",
 				progress_bar.substring(length),

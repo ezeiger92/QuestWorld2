@@ -18,6 +18,7 @@ import me.mrCookieSlime.QuestWorld.util.Text;
 
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -41,6 +42,7 @@ class Category extends Renderable implements ICategoryWrite {
 	
 	protected void copy(Category source) {
 		id         = source.id;
+		config     = YamlConfiguration.loadConfiguration(getFile());
 		name       = source.name;
 		item       = source.item.clone();
 		parent     = source.parent;
@@ -58,6 +60,7 @@ class Category extends Renderable implements ICategoryWrite {
 	// External
 	public Category(String name, int id) {
 		this.id = id;
+		config = YamlConfiguration.loadConfiguration(getFile());
 		name = Text.colorize(name);
 		item = new ItemBuilder(Material.BOOK_AND_QUILL).display(name).get();
 		world_blacklist = new ArrayList<String>();
@@ -68,12 +71,8 @@ class Category extends Renderable implements ICategoryWrite {
 	}
 	
 	// Package
-	Category(int id, FileConfiguration config, List<FileConfiguration> quests) {
+	Category(int id, FileConfiguration config) {
 		this.id = id;
-		if(quests != null)
-			for (FileConfiguration f: quests) {
-				new Quest(this, f);
-			}
 		this.config = config;
 		name = Text.colorize(config.getString("name"));
 		item = new ItemBuilder(config.getItemStack("item")).display(name).get();
@@ -87,16 +86,16 @@ class Category extends Renderable implements ICategoryWrite {
 	public void refreshParent() {
 		String parentId = config.getString("parent", null);
 		if (parentId != null) {
-			String[] parts = parentId.split("-C");
-			Category category = (Category)QuestWorld.getInstance().getCategory(Integer.parseInt(parts[0]));
-			if (category != null)
-				parent = category.getQuest(Integer.parseInt(parts[1]));
+			int[] parts = RenderableFacade.splitQuestString(parentId);
+			
+			Category c = (Category)QuestWorld.getInstance().getCategory(parts[1]);
+			if (c != null)
+				parent = c.getQuest(parts[0]);
 		}
 	}
 	
 	File getFile() {
-		String path = QuestWorld.getInstance().getConfig().getString("save.questdata");
-		return new File(path + id + ".category");
+		return new File(QuestWorld.getPath("data.questing"), id + ".category");
 	}
 	
 	public void addQuest(IQuest quest) {
@@ -110,7 +109,7 @@ class Category extends Renderable implements ICategoryWrite {
 		// TODO maybe was needed
 		//quest.updateLastModified();
 		quests.remove(quest.getID());
-		new File("plugins/QuestWorld/quests/" + quest.getID() + "-C" + getID() + ".quest").delete();
+		((Quest)quest).getFile().delete();
 	}
 	
 	public void save(boolean force) {
@@ -125,7 +124,6 @@ class Category extends Renderable implements ICategoryWrite {
 		if(!force && lastSave >= getLastModified())
 			return;
 		
-		//Config cfg = new Config(new File("plugins/QuestWorld/quests/" + id + ".category"));
 		config.set("id", id);
 		config.set("name", Text.escape(name));
 		config.set("item", item);

@@ -41,13 +41,13 @@ public class SubmitMission extends MissionType implements Manual {
 			found -= missing.getAmount();
 		
 		if(found > 0) {
-			QuestWorld.getSounds().MissionSubmit().playTo(p);
+			QuestWorld.getSounds().MISSION_SUBMIT.playTo(p);
 			// TODO QuestWorld.getSounds().muteNext();
 			
 			return current + found;
 		}
 		else {
-			QuestWorld.getSounds().MissionReject().playTo(p);
+			QuestWorld.getSounds().MISSION_REJECT.playTo(p);
 			return FAIL;
 		}
 	}

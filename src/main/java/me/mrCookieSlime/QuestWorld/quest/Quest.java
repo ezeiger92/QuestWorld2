@@ -17,6 +17,7 @@ import me.mrCookieSlime.QuestWorld.util.Text;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -55,6 +56,7 @@ class Quest extends Renderable implements IQuestWrite {
 	protected void copy(Quest source) {
 		category = source.category;
 		id       = source.id;
+		config   = YamlConfiguration.loadConfiguration(getFile());
 		cooldown = source.cooldown;
 		name     = source.name;
 		item     = source.item.clone();
@@ -88,11 +90,11 @@ class Quest extends Renderable implements IQuestWrite {
 	}
 	
 	// Package
-	public Quest(Category category, FileConfiguration file) {
+	public Quest(int id, FileConfiguration file, Category category) {
 		this.category = category;
 		
 		config = file;
-		this.id = Integer.parseInt(file.getName().replace(".quest", "").split("-C")[0]);
+		this.id = id;//Integer.parseInt(file.getName().replace(".quest", "").split("-C")[0]);
 		this.cooldown = config.getLong("cooldown");
 		this.disableParties = config.getBoolean("disable-parties");
 		this.ordered = config.getBoolean("in-order");
@@ -117,23 +119,23 @@ class Quest extends Renderable implements IQuestWrite {
 	}
 
 	// External
-	public Quest(String name, String input) {
-		this.category = (Category)QuestWorld.getInstance().getCategory(Integer.parseInt(input.split(" M ")[0]));
+	public Quest(String name, int id, Category category) {
+		this.id = id;
+		this.category = category;
 		
-		this.id = Integer.parseInt(input.split(" M ")[1]);
 		config = YamlConfiguration.loadConfiguration(getFile());
-		this.cooldown = -1;
-		this.name = Text.colorize(name);
-		this.item = new ItemBuilder(Material.BOOK_AND_QUILL).display(name).get();
+		cooldown = -1;
+		name = Text.colorize(name);
+		item = new ItemBuilder(Material.BOOK_AND_QUILL).display(name).get();
 
-		this.money = 0;
-		this.xp = 0;
-		this.parent = null;
-		this.disableParties = false;
-		this.permission = "";
-		this.ordered = false;
-		this.autoclaim = false;
-		this.partysize = 1;
+		money = 0;
+		xp = 0;
+		parent = null;
+		disableParties = false;
+		permission = "";
+		ordered = false;
+		autoclaim = false;
+		partysize = 1;
 		
 		category.addQuest(this);
 	}
@@ -141,21 +143,27 @@ class Quest extends Renderable implements IQuestWrite {
 	public void refreshParent() {
 		String parentId = config.getString("parent", null);
 		if (parentId != null) {
-			String[] parts = parentId.split("-C");
-			Category c = (Category)QuestWorld.getInstance().getCategory(Integer.parseInt(parts[0]));
+			int[] parts = RenderableFacade.splitQuestString(parentId);
+			
+			Category c = (Category)QuestWorld.getInstance().getCategory(parts[1]);
 			if (c != null)
-				parent = c.getQuest(Integer.parseInt(parts[1]));
+				parent = c.getQuest(parts[0]);
 		}
 	}
 	
 	File getFile() {
-		String path = QuestWorld.getInstance().getConfig().getString("save.questdata");
-		return new File(path + id + "-C" + category.getID() + ".quest");
+		return new File(QuestWorld.getPath("data.questing"), id + "-C" + category.getID() + ".quest");
 	}
 	
 	private Location locationHelper(ConfigurationSection loc) {
-		return new Location(Bukkit.getWorld(loc.getString("world")), loc.getDouble("x"), loc.getDouble("y"),
-				loc.getDouble("z"), (float)loc.getDouble("yaw"), (float)loc.getDouble("pitch"));
+		World w = Bukkit.getWorld(loc.getString("world"));
+		double x = loc.getDouble("x");
+		double y = loc.getDouble("y");
+		double z = loc.getDouble("z");
+		float yaw = (float)loc.getDouble("yaw");
+		float pitch = (float)loc.getDouble("pitch");
+		return new Location(w, x, y,
+				z, yaw, pitch);
 	}
 	
 	private void locationHelper(Location in, ConfigurationSection loc) {
@@ -239,7 +247,7 @@ class Quest extends Renderable implements IQuestWrite {
 			config.set("missions." + mission.getID() + ".entity", mission.getEntity().toString());
 			// TODO is this check still needed?
 			if (mission.getLocation() != null && mission.getLocation().getWorld() != null)
-				locationHelper(mission.getLocation(), config.createSection("location"));
+				locationHelper(mission.getLocation(), config.createSection("missions." + mission.getID() + ".location"));
 			config.set("missions." + mission.getID() + ".display-name", Text.escape(mission.getDisplayName()));
 			config.set("missions." + mission.getID() + ".timeframe", mission.getTimeframe());
 			config.set("missions." + mission.getID() + ".reset-on-death", mission.resetsonDeath());
@@ -257,7 +265,6 @@ class Quest extends Renderable implements IQuestWrite {
 		try {
 			config.save(getFile());
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -407,7 +414,7 @@ class Quest extends Renderable implements IQuestWrite {
 		for(ItemStack item : p.getInventory().addItem(itemReward).values())
 			p.getWorld().dropItemNaturally(p.getLocation(), item);
 		
-		QuestWorld.getSounds().QuestReward().playTo(p);
+		QuestWorld.getSounds().QUEST_REWARD.playTo(p);
 		
 		if (xp > 0) p.setLevel(p.getLevel() + xp);
 		if (money > 0 && QuestWorld.getInstance().getEconomy() != null) QuestWorld.getInstance().getEconomy().get().depositPlayer(p, money);

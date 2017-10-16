@@ -14,7 +14,6 @@ import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IMissionWrite;
 import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
 import me.mrCookieSlime.QuestWorld.util.EntityTools;
-import me.mrCookieSlime.QuestWorld.util.ItemBuilder;
 import me.mrCookieSlime.QuestWorld.util.Text;
 
 public class KillMission extends MissionType implements Listener {
@@ -25,7 +24,7 @@ public class KillMission extends MissionType implements Listener {
 	@Override
 	public ItemStack userDisplayItem(IMission instance) {
 		EntityType entity = instance.getEntity();
-		return  new ItemBuilder(EntityTools.getEntityDisplay(entity))
+		return  EntityTools.getEntityDisplay(entity)
 				.display("&7Entity Type: &r" + Text.niceName(entity.name())).get();
 	}
 	
@@ -43,7 +42,7 @@ public class KillMission extends MissionType implements Listener {
 
 		QuestWorld.getInstance().getManager(killer).forEachTaskOf(this, mission -> {
 			return mission.getEntity() == e.getEntityType()
-					&& (mission.acceptsSpawners() || !EntityTools.fromSpawner(e.getEntity()));
+					&& (mission.acceptsSpawners() || !EntityTools.isFromSpawner(e.getEntity()));
 		});
 	}
 	

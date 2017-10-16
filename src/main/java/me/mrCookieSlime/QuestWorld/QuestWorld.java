@@ -4,11 +4,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -36,11 +34,9 @@ import me.mrCookieSlime.QuestWorld.quest.RenderableFacade;
 import me.mrCookieSlime.QuestWorld.util.EconWrapper;
 import me.mrCookieSlime.QuestWorld.util.Lang;
 import me.mrCookieSlime.QuestWorld.util.Log;
+import me.mrCookieSlime.QuestWorld.util.ResourceLoader;
 import me.mrCookieSlime.QuestWorld.util.Sounds;
 
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.AnimalTamer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
@@ -52,9 +48,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 	private static QuestWorld instance = null;
-	private long lastSave;
+	private long lastSave = 0;
 
-	private FileConfiguration sounds;
 	private MissionViewer missionViewer = new MissionViewer();
 	private Map<String, MissionType> types      = new HashMap<>();
 	private Map<Integer, ICategory>   categories = new HashMap<>();
@@ -65,7 +60,9 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 	
 	// TODO Make an interface
 	private RenderableFacade facade = new RenderableFacade();
+
 	
+	private ResourceLoader resources = new ResourceLoader(this);
 	private Lang language;
 	private ExtensionLoader extLoader = null;
 	private ExtensionInstaller hookInstaller = null;
@@ -74,20 +71,23 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 	private int autosaveHandle = -1;
 	
 	public static String translate(Translator key, String... replacements) {
-		return getInstance().language.translate(key, replacements);
+		return instance.language.translate(key, replacements);
 	}
 	
 	public QuestWorld() {
 		instance = this;
 		Log.setLogger(getLogger());
+
+		saveDefaultConfig();
+		getPath("data.extensions");
+		getPath("data.presets");
 		
-		extLoader = new ExtensionLoader(this.getClassLoader(), new File(this.getDataFolder(), "extensions"));
-		language = new Lang("en_us", getDataFolder(), getClassLoader());
-		language.save();
+		extLoader = new ExtensionLoader(getClassLoader(), getPath("data.extensions"));
+		language = new Lang(resources);
 		getServer().getServicesManager().register(QuestLoader.class, this, this, ServicePriority.Normal);
 	}
 	
-	private List<QuestExtension> preEnableHooks = new ArrayList<>();
+	private ArrayList<QuestExtension> preEnableHooks = new ArrayList<>();
 	public void attach(QuestExtension hook) {
 		if(hookInstaller == null)
 			preEnableHooks.add(hook);
@@ -117,18 +117,6 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 		economy = EconWrapper.wrap();
 		if(economy == null)
 			Log.info("No economy (vault) found, money rewards disabled");
-		
-		if (!new File("data-storage/Quest World").exists()) new File("data-storage/Quest World").mkdirs();
-		if (!new File("plugins/QuestWorld/quests").exists()) new File("plugins/QuestWorld/quests").mkdirs();
-		if (!new File("plugins/QuestWorld/dialogues").exists()) new File("plugins/QuestWorld/dialogues").mkdirs();
-		if (!new File("plugins/QuestWorld/presets").exists()) new File("plugins/QuestWorld/presets").mkdirs();
-		
-		if(!getDataFolder().exists())
-			getDataFolder().mkdir();
-		
-		File extensionDir = new File(getDataFolder(), "extensions");
-		if(!extensionDir.exists())
-			extensionDir.mkdir();
 			
 		getServer().getScheduler().scheduleSyncDelayedTask(this, () -> {
 			Log.fine("Retrieving Quest Configuration...");
@@ -158,27 +146,12 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 	}
 	
 	public void loadConfigs() {
-		if(!getDataFolder().exists())
-			saveDefaultConfig();
-		
 		reloadConfig();
 		
 		//TODO make logger info (and other) levels actually work
 		//Log.setLevel(cfg.getString("options.log-level"));
-		
-		File soundFile = new File(getDataFolder(), "sounds.yml");
-		if(!soundFile.exists())
-			try {
-				sounds = YamlConfiguration.loadConfiguration(new InputStreamReader(getResource("sounds.yml")));
-				sounds.save(soundFile);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		else
-			sounds = YamlConfiguration.loadConfiguration(soundFile);
 
-		// Needs sound config loaded
-		eventSounds = new Sounds();
+		eventSounds = new Sounds(resources.loadConfigNoexpect("sounds.yml", true));
 		
 		if(questCheckHandle != -1)
 			getServer().getScheduler().cancelTask(questCheckHandle);
@@ -199,7 +172,7 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 				getServer().getScheduler().cancelTask(autosaveHandle);
 			
 			autosaveHandle = getServer().getScheduler().scheduleSyncRepeatingTask(this,
-					() -> save(),
+					() -> save(true),
 					autosave,
 					autosave
 			);
@@ -207,40 +180,7 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 	}
 	
 	public void load() {
-		/*Set<File> categories = new HashSet<File>();
-		Map<Integer, List<File>> quests = new HashMap<Integer, List<File>>();
-		for (File file: new File("plugins/QuestWorld/quests").listFiles()) {
-			if (file.getName().endsWith(".quest")) {
-				Config cfg = new Config(file);
-				int category = cfg.getInt("category");
-				List<File> files = new ArrayList<File>();
-				if (quests.containsKey(category)) files = quests.get(category);
-				files.add(file);
-				quests.put(category, files);
-			}
-			else if (file.getName().endsWith(".category")) categories.add(file);
-		}
-		
-		for (File file: categories) {
-			int id = Integer.parseInt(file.getName().replace(".category", ""));
-			List<File> files = new ArrayList<File>();
-			if (quests.containsKey(id)) files = quests.get(id);
-			facade.createCategory(file, files);
-		}
-		
-		for (ICategory category: this.categories.values()) {
-			// Administrative process - bypass events and directly modify data
-			// 99% of the time you should use .getWriter() and .apply()
-			ICategoryWrite c = (ICategoryWrite)category;
-			c.refreshParent();
-			
-			for (IQuest quest: category.getQuests()) {
-				IQuestWrite q = (IQuestWrite)quest;
-				q.refreshParent();
-			}
-		}*/
 		facade.load();
-		
 		lastSave = System.currentTimeMillis();
 	}
 	
@@ -280,11 +220,7 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 		
 		lastSave = System.currentTimeMillis();
 	}
-	
-	public void save() {
-		save(false);
-	}
-	
+
 	public void unload() {
 		for(ICategory c : categories.values())
 			c.save(true);
@@ -296,22 +232,22 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 	}
 	
 	public boolean importPreset(String fileName) {
-		File file = new File("plugins/QuestWorld/presets/" + fileName);
+		File file = new File(getPath("data.presets"), fileName);
 		byte[] buffer = new byte[1024];
 		if (!file.exists())
 			return false;
 		
-		QuestWorld.getInstance().unload();
+		unload();
 		try {
 			ZipInputStream input = new ZipInputStream(new FileInputStream(file));
 			ZipEntry entry = input.getNextEntry();
 			
-			for (File f: new File("plugins/QuestWorld/quests").listFiles()) {
+			for (File f: getPath("data.questing").listFiles()) {
 				f.delete();
 			}
 			
 			while (entry != null) {
-				FileOutputStream output = new FileOutputStream(new File("plugins/QuestWorld/quests/" + entry.getName()));
+				FileOutputStream output = new FileOutputStream(new File(getPath("data.questing"), entry.getName()));
 				
 				int length;
 				while ((length = input.read(buffer)) > 0) {
@@ -329,23 +265,23 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 			return false;
 		}
 		
-		QuestWorld.getInstance().load();
+		load();
 		return true;
 	}
 	
 	public boolean exportPreset(String fileName) {
-		File file = new File("plugins/QuestWorld/presets/" + fileName);
+		File file = new File(getPath("data.presets"), fileName);
 		byte[] buffer = new byte[1024];
 		
 		if (file.exists()) file.delete();
 		
-		save(); // Why unload and load in a try/catch block when you can just use a save function?
+		save(true); // Why unload and load in a try/catch block when you can just use a save function?
 		
 		try {
 			file.createNewFile();
 			
 			ZipOutputStream output = new ZipOutputStream(new FileOutputStream(file));
-			for (File f: new File("plugins/QuestWorld/quests").listFiles()) {
+			for (File f: getPath("data.questing").listFiles()) {
 				ZipEntry entry = new ZipEntry(f.getName());
 				output.putNextEntry(entry);
 				FileInputStream input = new FileInputStream(f);
@@ -386,10 +322,10 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 	public void unregisterCategory(ICategory category) {
 		for (IQuest quest: category.getQuests()) {
 			PlayerManager.clearAllQuestData(quest);
-			new File("plugins/QuestWorld/quests/" + quest.getID() + "-C" + category.getID() + ".quest").delete();
+			facade.deleteQuestFile(quest);
 		}
 		categories.remove(category.getID());
-		new File("plugins/QuestWorld/quests/" + category.getID() + ".category").delete();
+		facade.deleteCategoryFile(category);
 	}
 	
 	public void registerManager(PlayerManager manager) {
@@ -409,10 +345,7 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 		return getManager(player.getUniqueId());
 	}
 	
-	public boolean isManagerLoaded(UUID uuid) {
-		return profiles.containsKey(uuid);
-	}
-	
+	@Override
 	public void enable(QuestExtension hook) {
 		for(MissionType type : hook.getMissions())
 			registerMissionType(type);
@@ -460,10 +393,6 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 		return item.isSimilar(SFitem);
 	}
 	
-	public ConfigurationSection getSoundCfg() {
-		return sounds;
-	}
-	
 	public EconWrapper getEconomy() {
 		return economy;
 	}
@@ -483,5 +412,17 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 	
 	public static RenderableFacade renderFactory() {
 		return instance.facade;
+	}
+	
+	public static File getPath(String key) {
+		File result = new File(instance.getDataFolder(), resolvePath(key));
+		if(!result.exists())
+			result.mkdirs();
+		
+		return result;
+	}
+	
+	public static String resolvePath(String key) {
+		return instance.getConfig().getString(key,"");
 	}
 }

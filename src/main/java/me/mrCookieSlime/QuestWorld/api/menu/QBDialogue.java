@@ -1,7 +1,5 @@
 package me.mrCookieSlime.QuestWorld.api.menu;
 
-import java.util.List;
-
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
@@ -29,7 +27,7 @@ import com.google.gson.JsonObject;
 
 public class QBDialogue {
 	public static void openDeletionConfirmation(Player p, final IRenderable q) {
-		QuestWorld.getSounds().DestructiveWarning().playTo(p);
+		QuestWorld.getSounds().DESTRUCTIVE_WARN.playTo(p);
 		
 		Menu menu = new Menu(1, "&4&lAre you Sure?");
 		
@@ -51,7 +49,7 @@ public class QBDialogue {
 				.lore("", "&rThis will delete", tag).get(),
 				event -> {
 					Player p2 = (Player) event.getWhoClicked();
-					QuestWorld.getSounds().DestructiveClick().playTo(p2);
+					QuestWorld.getSounds().DESTRUCTIVE_CLICK.playTo(p2);
 					// TODO QuestWorld.getSounds().muteNext();
 					if (q instanceof ICategory) {
 						ICategory category = (ICategory)q;
@@ -94,7 +92,7 @@ public class QBDialogue {
 	}
 
 	public static void openResetConfirmation(Player p, final IQuest q) {
-		QuestWorld.getSounds().DestructiveWarning().playTo(p);
+		QuestWorld.getSounds().DESTRUCTIVE_WARN.playTo(p);
 		
 		Menu menu = new Menu(1, "&4&lAre you Sure?");
 		
@@ -115,7 +113,7 @@ public class QBDialogue {
 	}
 	
 	public static void openQuestMissionEntityEditor(Player p, final IMission mission) {
-		QuestWorld.getSounds().EditorClick().playTo(p);
+		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
 		
 		IMissionWrite changes = mission.getWriter();
 		//String title = Text.colorize(mission.getQuest().getName() + " &7- &8(Page " + (page+1) + "/" + (lastPage+1) + ")");
@@ -125,11 +123,11 @@ public class QBDialogue {
 		
 		PagedMapping pager = new PagedMapping(45);
 
-		List<EntityType> entities = EntityTools.listAliveEntityTypes();
-		for(int i = 0; i < entities.size(); ++i) {
-			EntityType entity = entities.get(i);
+		EntityType[] entities = EntityTools.aliveEntityTypes();
+		for(int i = 0; i < entities.length; ++i) {
+			EntityType entity = entities[i];
 			pager.addButton(i,
-					new ItemBuilder(EntityTools.getEntityDisplay(entity))
+					EntityTools.getEntityDisplay(entity)
 					.lore(lore)
 					.display("&7Entity Type: &r" + Text.niceName(entity.name())).get(),
 					event -> {
@@ -221,7 +219,7 @@ public class QBDialogue {
 	}
 
 	public static void openQuestRequirementChooser(Player p, final IRenderable quest) {
-		QuestWorld.getSounds().EditorClick().playTo(p);
+		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
 		
 		Menu menu = new Menu(1, "&c&lQuest Editor");
 
@@ -248,7 +246,7 @@ public class QBDialogue {
 	}
 
 	private static void openQuestRequirementChooser2(Player p, final IRenderable q, ICategory category) {
-		QuestWorld.getSounds().EditorClick().playTo(p);
+		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
 		
 		Menu menu = new Menu(1, "&c&lQuest Editor");
 		

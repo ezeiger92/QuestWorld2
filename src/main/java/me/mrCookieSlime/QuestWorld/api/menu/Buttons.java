@@ -62,7 +62,7 @@ public class Buttons {
 		};
 	}
 	
-	public static Consumer<InventoryClickEvent> newQuest(int cat_id, int id) {
+	public static Consumer<InventoryClickEvent> newQuest(ICategory category, int id) {
 		return event -> {
 			Player p = (Player) event.getWhoClicked();
 			String defaultQuestName = QuestWorld.translate(Translation.DEFAULT_QUEST);
@@ -70,9 +70,9 @@ public class Buttons {
 			PlayerTools.promptInput(p, new SinglePrompt(
 					PlayerTools.makeTranslation(true, Translation.QUEST_NAME_EDIT, defaultQuestName),
 					(c,s) -> {
-						QuestWorld.renderFactory().createQuest(s, cat_id+" M "+id);
+						QuestWorld.renderFactory().createQuest(s, id, category);
 						PlayerTools.sendTranslation(p, true, Translation.QUEST_CREATED, s);
-						QuestBook.openCategoryQuestEditor(p, QuestWorld.getInstance().getCategory(cat_id));
+						QuestBook.openCategoryQuestEditor(p, category);
 
 						return true;
 					}

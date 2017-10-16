@@ -108,12 +108,6 @@ class MissionChange extends Mission {
 		super.setLocation(p);
 		changeBits |= BitFlag.getBits(Member.LOCATION);
 	}
-
-	@Override
-	public void addDialogueLine(Player p, final String path) {
-		super.addDialogueLine(p, path);
-		changeBits |= BitFlag.getBits(Member.DIALOGUE);
-	}
 	
 	@Override
 	public void setDisplayName(String name) {

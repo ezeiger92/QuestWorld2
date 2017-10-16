@@ -106,7 +106,7 @@ public class PagedMapping {
 					int nextPage = Math.min(Math.max(0, page + delta), panels.size() - 1);
 					Player p = (Player) event.getWhoClicked();
 
-					QuestWorld.getSounds().EditorClick().playTo(p); // TODO This is not entirely right - not all PagedMappings are editor menus!
+					QuestWorld.getSounds().EDITOR_CLICK.playTo(p); // TODO This is not entirely right - not all PagedMappings are editor menus!
 					build(menu, nextPage);
 					
 					// This logically isn't needed, BUT inventories have a nasty habit of displaying old items when only metadata is

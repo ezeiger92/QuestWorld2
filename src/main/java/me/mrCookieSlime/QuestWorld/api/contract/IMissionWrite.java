@@ -18,7 +18,6 @@ public interface IMissionWrite extends IMission {
 	void setAmount(int amount);
 	void setLocation(Location loc);
 	void setLocation(Player p);
-	void addDialogueLine(Player p, final String path);
 	void setDisplayName(String displayName);
 	void setTimeframe(int timeframe);
 	void setDeathReset(boolean deathReset);

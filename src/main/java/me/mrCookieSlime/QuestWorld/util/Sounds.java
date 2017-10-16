@@ -4,29 +4,31 @@ import org.bukkit.Sound;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 
-import me.mrCookieSlime.QuestWorld.QuestWorld;
-
 public class Sounds {
-	private final SoundList questClick = new SoundList("sounds.quest.click", 1F, 0.2F);
-	private final SoundList missionSubmit = new SoundList("sounds.quest.mission-submit", 0.3F, 0.7F);
-	private final SoundList missionReject = new SoundList("sounds.quest.mission-reject");
-	private final SoundList questReward = new SoundList("sounds.quest.reward");
+	public final SoundList QUEST_CLICK    = new SoundList("sounds.quest.click", 1.0f, 0.2f);
+	public final SoundList MISSION_SUBMIT = new SoundList("sounds.quest.mission-submit", 0.3f, 0.7f);
+	public final SoundList MISSION_REJECT = new SoundList("sounds.quest.mission-reject");
+	public final SoundList QUEST_REWARD   = new SoundList("sounds.quest.reward");
 	
-	private final SoundList editorClick = new SoundList("sounds.editor.click", 1F, 0.2F);
-	private final SoundList dialogAdd = new SoundList("sounds.editor.dialog-add");
-	private final SoundList destructiveWarning = new SoundList("sounds.editor.destructive-action-warning");
-	private final SoundList destructiveClick = new SoundList("sounds.editor.destructive-action-click", 0.5F, 0.5F);
+	public final SoundList EDITOR_CLICK      = new SoundList("sounds.editor.click", 1.0f, 0.2f);
+	public final SoundList DIALOG_ADD        = new SoundList("sounds.editor.dialog-add");
+	public final SoundList DESTRUCTIVE_WARN  = new SoundList("sounds.editor.destructive-action-warning");
+	public final SoundList DESTRUCTIVE_CLICK = new SoundList("sounds.editor.destructive-action-click", 0.5f, 0.5f);
 	
-	private final SoundList partyClick = new SoundList("sounds.party.click", 1F, 0.2F);
+	public final SoundList PARTY_CLICK = new SoundList("sounds.party.click", 1.0f, 0.2f);
+	
+	private final ConfigurationSection config;
+	public Sounds(ConfigurationSection config) {
+		this.config = config;
+	}
 
-	public static class SoundList {
+	public class SoundList {
 		private Sound sound;
 		private float volume;
 		private float pitch;
 		
 		public SoundList(String path, float volume, float pitch) {
-			ConfigurationSection cfg = QuestWorld.getInstance().getSoundCfg();
-			String soundStr = cfg.getString(path + ".sound").toUpperCase();
+			String soundStr = config.getString(path + ".sound").toUpperCase();
 			
 			try {
 				sound = Sound.valueOf(soundStr);
@@ -38,57 +40,19 @@ public class Sounds {
 			this.volume = volume;
 			this.pitch = pitch;
 			
-			if(cfg.contains(path + ".volume")) {
-				this.volume = (float) cfg.getDouble(path + ".volume");
-			}
+			if(config.contains(path + ".volume"))
+				this.volume = (float) config.getDouble(path + ".volume");
 
-			if(cfg.contains(path + ".pitch")) {
-				this.pitch = (float) cfg.getDouble(path + ".pitch");
-			}
+			if(config.contains(path + ".pitch"))
+				this.pitch = (float) config.getDouble(path + ".pitch");
 		}
 		
 		public SoundList(String path) {
-			this(path, 1F, 1F);
+			this(path, 1.0f, 1.0f);
 		}
 		
 		public void playTo(Player p) {
 			p.playSound(p.getLocation(), sound, volume, pitch);
 		}
-	}
-	
-	public SoundList QuestClick() {
-		return questClick;
-	}
-	
-	public SoundList MissionSubmit() {
-		return missionSubmit;
-	}
-	
-	public SoundList MissionReject() {
-		return missionReject;
-	}
-	
-	public SoundList QuestReward() {
-		return questReward;
-	}
-	
-	public SoundList EditorClick() {
-		return editorClick;
-	}
-	
-	public SoundList DialogAdd() {
-		return dialogAdd;
-	}
-	
-	public SoundList DestructiveWarning() {
-		return destructiveWarning;
-	}
-	
-	public SoundList DestructiveClick() {
-		return destructiveClick;
-	}
-	
-	public SoundList PartyClick() {
-		return partyClick;
 	}
 }

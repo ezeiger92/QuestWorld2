@@ -57,9 +57,8 @@ public class PlayerManager {
 		QuestWorld.getInstance().registerManager(this);
 	}
 	
-	private File getFile() {
-		String path = QuestWorld.getInstance().getConfig().getString("save.userdata");
-		return new File(path + uuid.toString() + ".yml");
+	public File getFile() {
+		return new File(QuestWorld.getPath("data.player"), uuid.toString() + ".yml");
 	}
 	
 	public void putPage(int pageNum) {
@@ -430,7 +429,9 @@ public class PlayerManager {
 	public static void clearAllQuestData(IQuest quest) {
 		Bukkit.getScheduler().runTaskAsynchronously(QuestWorld.getInstance(), () -> {
 			// First: clear all the quest data on a new thread
-			for (File file: new File("data-storage/Quest World").listFiles()) {
+			String path = QuestWorld.getInstance().getConfig().getString("save.userdata");
+			
+			for (File file: new File(path).listFiles()) {
 				FileConfiguration cfg = YamlConfiguration.loadConfiguration(file);
 
 				cfg.set(quest.getCategory().getID() + "." + quest.getID(), null);

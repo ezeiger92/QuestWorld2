@@ -56,7 +56,7 @@ public class MissionButton {
 		EntityType entity = changes.getEntity();
 		
 		return new MenuData(
-				new ItemBuilder(EntityTools.getEntityDisplay(entity))
+				EntityTools.getEntityDisplay(entity)
 				.display("&7Entity Type: &r" + Text.niceName(entity.name())).lore(
 						"",
 						"&e> Click to change the Entity").get(),

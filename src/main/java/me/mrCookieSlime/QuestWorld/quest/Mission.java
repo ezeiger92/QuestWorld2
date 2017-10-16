@@ -1,11 +1,9 @@
 package me.mrCookieSlime.QuestWorld.quest;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,6 +43,13 @@ class Mission extends Renderable implements IMissionWrite {
 	
 	ArrayList<String> dialogue = new ArrayList<String>();
 	
+	Mission(String id, Quest quest) {
+		this.id = id;
+		this.quest = quest;
+		loadDefaults();
+	}
+	
+	// TODO id should not be a String
 	public Mission(Quest quest, String id, MissionType type, EntityType entity, String customString,
 			ItemStack item, Location location, int amount, String displayName, int timeframe,
 			boolean deathReset, int customInt, boolean spawnersAllowed, String description) {
@@ -71,17 +76,16 @@ class Mission extends Renderable implements IMissionWrite {
 		changes.apply();
 	}
 	
+	File getDialogueFile() {
+		return new File(QuestWorld.getPath("data.dialogue"), quest.getCategory().getID()
+				+ "+" + quest.getID() + "+" + getID() + ".txt");
+	}
+	
 	private void loadDialogue() {
-		String fileName = quest.getCategory().getID() + "+" + quest.getID() + "+" + getID() + ".txt";
-		File file = new File("plugins/QuestWorld/dialogues/" + fileName);
+		File file = getDialogueFile();
 		if (file.exists()) {
 			try {
-				BufferedReader br = new BufferedReader(new FileReader(file));
-				String line;
-				while ((line = br.readLine()) != null) {
-				   dialogue.add(line);
-				}
-				br.close();
+				dialogue.addAll(Files.readAllLines(file.toPath(), Charset.forName("UTF-8")));
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -227,15 +231,10 @@ class Mission extends Renderable implements IMissionWrite {
 	
 	public void setupDialogue(Player p) {
 		this.dialogue = new ArrayList<String>();
-		String fileName = quest.getCategory().getID() + "+" + quest.getID() + "+" + getID() + ".txt";
-		String path = "plugins/QuestWorld/dialogues/" + fileName;
-		File file = new File(path);
-		if (file.exists()) file.delete();
-		
-		addDialogueLine(p, path);
+		addDialogueLine(p);
 	}
 	
-	public void addDialogueLine(Player p, final String path) {
+	private void addDialogueLine(Player p) {
 		String dprefix = QuestWorld.getInstance().getConfig().getString("dialogue.prefix");
 		final Mission mission = this;
 		PlayerTools.promptInput(p, new SinglePrompt(
@@ -243,28 +242,25 @@ class Mission extends Renderable implements IMissionWrite {
 				(c,s) -> {
 					Player p2 = (Player) c.getForWhom();
 					if (s.equalsIgnoreCase("exit()")) {
-						updateLastModified();
-						PlayerTools.sendTranslation(p2, true, Translation.MISSION_DIALOG_SET, path);
-						QuestBook.openQuestMissionEditor(p2, mission);
+						File file = getDialogueFile();
+						if(file.exists())
+							file.delete();
 						
-						File file = new File(path);
+						updateLastModified();
+						PlayerTools.sendTranslation(p2, true, Translation.MISSION_DIALOG_SET, file.getName());
+						QuestBook.openQuestMissionEditor(p2, mission);
+
 						try {
-							file.createNewFile();
-							
-							BufferedWriter writer = new BufferedWriter(new FileWriter(file, true));
-							for (int i = 0; i < dialogue.size(); i++) {
-								if (i == 0) writer.append(dialogue.get(i));
-								else writer.append("\n" + dialogue.get(i));
-							}
-							writer.close();
+							// The only downside to this is system-specific newlines
+							Files.write(file.toPath(), dialogue, Charset.forName("UTF-8"));
 						} catch (IOException e) {
 							e.printStackTrace();
 						}
 					}
 					else {
 						dialogue.add(dprefix + s);
-						addDialogueLine(p2, path);
-						QuestWorld.getSounds().DialogAdd().playTo(p2);
+						addDialogueLine(p2);
+						QuestWorld.getSounds().DIALOG_ADD.playTo(p2);
 					}
 					return true;
 				}

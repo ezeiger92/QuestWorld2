@@ -30,14 +30,13 @@ import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.SkullType;
 import org.bukkit.World;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 public class QuestBook {
 	
 	public static void openMainMenu(Player p) {
-		QuestWorld.getSounds().QuestClick().playTo(p);
+		QuestWorld.getSounds().QUEST_CLICK.playTo(p);
 		QuestWorld.getInstance().getManager(p).update(false);
 		QuestWorld.getInstance().getManager(p).updateLastEntry(null);
 		
@@ -130,7 +129,7 @@ public class QuestBook {
 	}
 
 	public static void openPartyMembers(final Player p) {
-		QuestWorld.getSounds().PartyClick().playTo(p);
+		QuestWorld.getSounds().PARTY_CLICK.playTo(p);
 		
 		Menu menu = new Menu(1, QuestWorld.translate(Translation.gui_party));
 
@@ -175,7 +174,7 @@ public class QuestBook {
 	}
 
 	public static void openPartyMenu(final Player p) {
-		QuestWorld.getSounds().PartyClick().playTo(p);
+		QuestWorld.getSounds().PARTY_CLICK.playTo(p);
 		
 		Menu menu = new Menu(2, QuestWorld.translate(Translation.gui_party));
 		
@@ -282,7 +281,7 @@ public class QuestBook {
 	}
 
 	public static void openCategory(Player p, ICategory category, final boolean back) {
-		QuestWorld.getSounds().QuestClick().playTo(p);
+		QuestWorld.getSounds().QUEST_CLICK.playTo(p);
 		PlayerManager manager = QuestWorld.getInstance().getManager(p);
 		manager.update(false);
 		manager.updateLastEntry(category);
@@ -348,7 +347,7 @@ public class QuestBook {
 	}
 	
 	public static void openQuest(final Player p, final IQuest quest, final boolean categoryBack, final boolean back) {
-		QuestWorld.getSounds().QuestClick().playTo(p);
+		QuestWorld.getSounds().QUEST_CLICK.playTo(p);
 		QuestWorld.getInstance().getManager(p).update(false);
 		QuestWorld.getInstance().getManager(p).updateLastEntry(quest);
 		
@@ -505,7 +504,7 @@ public class QuestBook {
 	 * 
 	 */
 	public static void openEditor(Player p) {
-		QuestWorld.getSounds().EditorClick().playTo(p);
+		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
 		
 		final Menu menu = new Menu(6, "&3Quest Editor");
 		
@@ -556,7 +555,7 @@ public class QuestBook {
 	}
 
 	public static void openCategoryQuestEditor(Player p, final ICategory category) {
-		QuestWorld.getSounds().EditorClick().playTo(p);
+		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
 		
 		final Menu menu = new Menu(6, "&3Quest Editor");
 
@@ -602,14 +601,14 @@ public class QuestBook {
 						Buttons.onQuest(quest), true);
 			}
 			else
-				view.addButton(i, defaultItem.getNew(), Buttons.newQuest(category.getID(), i), true);
+				view.addButton(i, defaultItem.getNew(), Buttons.newQuest(category, i), true);
 		}
 		view.build(menu, p);
 		menu.openFor(p);
 	}
 
 	public static void openCategoryEditor(Player p, final ICategory category) {
-		QuestWorld.getSounds().EditorClick().playTo(p);
+		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
 		
 		final Menu menu = new Menu(2, "&3Quest Editor");
 		ICategoryWrite changes = category.getWriter();
@@ -741,7 +740,7 @@ public class QuestBook {
 					for (IQuest quest: category.getQuests()) {
 						PlayerManager.clearAllQuestData(quest);
 					}
-					QuestWorld.getSounds().DestructiveClick().playTo((Player) event.getWhoClicked());
+					QuestWorld.getSounds().DESTRUCTIVE_CLICK.playTo((Player) event.getWhoClicked());
 				}
 		);
 		
@@ -749,7 +748,7 @@ public class QuestBook {
 	}
 
 	public static void openQuestEditor(Player p, final IQuest quest) {
-		QuestWorld.getSounds().EditorClick().playTo(p);
+		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
 		
 		final Menu menu = new Menu(6, "&3Quest Editor");
 		IQuestWrite changes = quest.getWriter();
@@ -1025,7 +1024,7 @@ public class QuestBook {
 						"&rwith this Quest.").get(),
 				event -> {
 					PlayerManager.clearAllQuestData(quest);
-					QuestWorld.getSounds().DestructiveClick().playTo((Player) event.getWhoClicked());
+					QuestWorld.getSounds().DESTRUCTIVE_CLICK.playTo((Player) event.getWhoClicked());
 				}
 		);
 		
@@ -1041,11 +1040,7 @@ public class QuestBook {
 				menu.put(45 + i,
 						new ItemBuilder(Material.PAPER).display("&7&o> New Task").get(),
 						event -> {
-							changes.addMission(QuestWorld.renderFactory().createMission(
-									quest, String.valueOf(event.getSlot() + 9),  MissionType.valueOf("SUBMIT"),
-									EntityType.PLAYER, "", new ItemStack(Material.STONE),
-									p.getLocation().getBlock().getLocation(), 1, null, 0, false, 0, true,
-									"Hey there! Do this Quest."));
+							changes.addMission(QuestWorld.renderFactory().createMission(quest, event.getSlot() + 9));
 
 							changes.apply();
 							openQuestEditor((Player) event.getWhoClicked(), quest);
@@ -1071,7 +1066,7 @@ public class QuestBook {
 	}
 
 	public static void openWorldEditor(Player p, final IQuest quest) {
-		QuestWorld.getSounds().EditorClick().playTo(p);
+		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
 		
 		final Menu menu = new Menu(2, "&3Quest Editor");
 		
@@ -1100,7 +1095,7 @@ public class QuestBook {
 	}
 
 	public static void openWorldEditor(Player p, final ICategory category) {
-		QuestWorld.getSounds().EditorClick().playTo(p);
+		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
 		
 		final Menu menu = new Menu(2, "&3Quest Editor");
 		
@@ -1129,7 +1124,7 @@ public class QuestBook {
 	}
 
 	public static void openQuestMissionEditor(Player p, final IMission mission) {
-		QuestWorld.getSounds().EditorClick().playTo(p);
+		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
 		
 		Menu menu = new Menu(2, "&3Quest Editor");
 
@@ -1154,7 +1149,7 @@ public class QuestBook {
 	}
 
 	public static void openMissionSelector(Player p, IMission mission) {
-		QuestWorld.getSounds().EditorClick().playTo(p);
+		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
 
 		IMissionWrite changes = mission.getWriter();
 		final Menu menu = new Menu(3, Text.colorize("&3Mission Selector: " + mission.getQuest().getName()));

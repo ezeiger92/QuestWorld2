@@ -1,7 +1,5 @@
 package me.mrCookieSlime.QuestWorld.listener;
 
-import java.io.File;
-
 import me.mrCookieSlime.QuestWorld.GuideBook;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.QuestStatus;
@@ -52,7 +50,8 @@ public class PlayerListener implements Listener {
 	
 	@EventHandler
 	public void onJoin(PlayerJoinEvent e) {
-		if (!new File("data-storage/Quest World/" + e.getPlayer().getUniqueId() + ".yml").exists() && QuestWorld.getInstance().getConfig().getBoolean("book.on-first-join"))
+		if (!QuestWorld.getInstance().getManager(e.getPlayer()).getFile().exists()
+				&& QuestWorld.getInstance().getConfig().getBoolean("book.on-first-join"))
 			e.getPlayer().getInventory().addItem(GuideBook.get());
 	}
 	
