@@ -59,8 +59,8 @@ class Category extends Renderable implements ICategoryWrite {
 	// External
 	public Category(String name, int id) {
 		this.id = id;
+		this.name = Text.colorize(name);
 		config = YamlConfiguration.loadConfiguration(getFile());
-		name = Text.colorize(name);
 		item = new ItemBuilder(Material.BOOK_AND_QUILL).display(name).get();
 		world_blacklist = new ArrayList<String>();
 		permission = "";

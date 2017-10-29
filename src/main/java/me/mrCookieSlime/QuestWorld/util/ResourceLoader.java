@@ -33,13 +33,15 @@ public class ResourceLoader {
 	public YamlConfiguration loadConfig(String path) throws FileNotFoundException, IOException, InvalidConfigurationException {
 		YamlConfiguration result = new YamlConfiguration();
 		InputStream resource = plugin.getResource(path);
+		File file = relativeFile(path);
 		
 		if(resource != null) {
 			result.setDefaults(YamlConfiguration.loadConfiguration(new InputStreamReader(resource, Charset.forName("UTF-8"))));
-			plugin.saveResource(path, false);
+			if(!file.exists())
+				plugin.saveResource(path, false);
 		}
 		
-		result.load(relativeFile(path));
+		result.load(file);
 		
 		return result;
 	}

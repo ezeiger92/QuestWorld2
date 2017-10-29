@@ -121,10 +121,10 @@ class Quest extends Renderable implements IQuestWrite {
 	public Quest(String name, int id, Category category) {
 		this.id = id;
 		this.category = category;
+		this.name = Text.colorize(name);
 		
 		config = YamlConfiguration.loadConfiguration(getFile());
 		cooldown = -1;
-		name = Text.colorize(name);
 		item = new ItemBuilder(Material.BOOK_AND_QUILL).display(name).get();
 
 		money = 0;
