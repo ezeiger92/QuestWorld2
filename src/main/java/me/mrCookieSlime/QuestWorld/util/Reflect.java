@@ -47,7 +47,7 @@ public class Reflect {
 	public static String nmsGetItemName(ItemStack stack) throws Exception {
 		if(stack.hasItemMeta() && stack.getItemMeta().hasDisplayName())
 			return stack.getItemMeta().getDisplayName();
-		Object rstack = Class.forName(Reflect.CBS + "inventory.CraftItemStack").getMethod("asNmsCopy", ItemStack.class).invoke(null, stack);
+		Object rstack = Class.forName(Reflect.CBS + "inventory.CraftItemStack").getMethod("asNMSCopy", ItemStack.class).invoke(null, stack);
 		return (String)rstack.getClass().getMethod("getName").invoke(rstack);
 	}
 }

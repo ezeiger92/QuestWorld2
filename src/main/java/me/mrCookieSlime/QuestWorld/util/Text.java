@@ -146,6 +146,7 @@ public class Text {
 			return Reflect.nmsGetItemName(stack);
 		}
 		catch(Exception e) {
+			e.printStackTrace();
 			return niceName(stack.getType().toString());
 		}
 	}

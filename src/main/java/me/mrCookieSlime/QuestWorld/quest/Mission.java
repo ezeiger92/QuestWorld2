@@ -93,6 +93,7 @@ class Mission extends Renderable implements IMissionWrite {
 	}
 	
 	protected void loadDefaults() {
+		type = QuestWorld.getMissionType("SUBMIT");
 		item = new ItemStack(Material.STONE);
 		amount = 1;
 		entity = EntityType.PLAYER;
