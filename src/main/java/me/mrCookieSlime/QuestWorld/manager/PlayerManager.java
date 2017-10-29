@@ -221,7 +221,7 @@ public class PlayerManager {
 	}
 
 	public boolean hasCompletedTask(IMission task) {
-		return getProgress(task) >= getTotal(task);
+		return getProgress(task) >= task.getAmount();
 	}
 
 	public boolean hasUnlockedTask(IMission task) {
@@ -266,15 +266,9 @@ public class PlayerManager {
 				null);
 	}
 	
-	public int getTotal(IMission task) {
-		return task.getAmount();
-	}
-	
-	public int addProgress(IMission task, int amount) {
-		int progress = getProgress(task) + amount;
-		int rest = progress - getTotal(task);
-		setProgress(task, rest > 0 ? task.getAmount(): progress);
-		return rest;
+	public void addProgress(IMission task, int amount) {
+		int newProgress = Math.max(getProgress(task) + amount, 0);
+		setProgress(task, Math.min(task.getAmount(), newProgress));
 	}
 
 	public void setProgress(IMission task, int amount) {
@@ -323,20 +317,22 @@ public class PlayerManager {
 			// Previously "check !task.getType().getID().equals("ACCEPT_QUEST_FROM_NPC") && "
 			// This was done to keep quests quiet when interacting with citizens
 			PlayerTools.sendTranslation(player, false, Translation.NOTIFY_COMPLETED, task.getQuest().getName());
-		else {
+		else
 			sendDialogueComponent(player, line);
-			
-			Bukkit.getScheduler().scheduleSyncDelayedTask(QuestWorld.getInstance(),
-					() -> sendDialogue(player, task, dialogue), 70L);
-		}
+		
+		Bukkit.getScheduler().scheduleSyncDelayedTask(QuestWorld.getInstance(),
+				() -> sendDialogue(player, task, dialogue), 70L);
 	}
 
 	private static void sendDialogueComponent(Player player, String line) {
 		if(line.startsWith("/"))
 			Bukkit.dispatchCommand(Bukkit.getConsoleSender(), line.substring(1).replace("<player>", player.getName()));
 
-		else
+		else {
+			line = QuestWorld.getInstance().getConfig().getString("dialogue.prefix") + line;
+			
 			player.sendMessage(Text.colorize(line.replace("<player>", player.getName())));
+		}
 	}
 
 	public void completeQuest(IQuest quest) {

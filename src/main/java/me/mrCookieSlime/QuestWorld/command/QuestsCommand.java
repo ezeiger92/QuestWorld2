@@ -35,6 +35,7 @@ public class QuestsCommand implements CommandExecutor {
 					}
 				}
 				else {
+					// TODO: This is a pretty hefty try block. Bad.
 					try {
 						ICategory category = QuestWorld.getInstance().getCategory(Integer.parseInt(args[0]));
 						if (category != null)  {

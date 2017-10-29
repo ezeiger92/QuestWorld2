@@ -9,6 +9,7 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.inventory.ItemStack;
 
 import me.mrCookieSlime.QuestWorld.QuestWorld;
+import me.mrCookieSlime.QuestWorld.api.Decaying;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IMissionWrite;
@@ -16,9 +17,9 @@ import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
 import me.mrCookieSlime.QuestWorld.util.EntityTools;
 import me.mrCookieSlime.QuestWorld.util.Text;
 
-public class KillMission extends MissionType implements Listener {
+public class KillMission extends MissionType implements Listener, Decaying {
 	public KillMission() {
-		super("KILL", true, true, new ItemStack(Material.IRON_SWORD));
+		super("KILL", true, new ItemStack(Material.IRON_SWORD));
 	}
 	
 	@Override

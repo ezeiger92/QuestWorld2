@@ -190,6 +190,8 @@ class Mission extends Renderable implements IMissionWrite {
 	public void setType(MissionType type) {
 		updateLastModified();
 		this.type = type;
+		// TODO: Something like this
+		// type.attemptUpgrade(this);
 	}
 
 	public void setAmount(int amount) {
@@ -236,7 +238,6 @@ class Mission extends Renderable implements IMissionWrite {
 	}
 	
 	private void addDialogueLine(Player p) {
-		String dprefix = QuestWorld.getInstance().getConfig().getString("dialogue.prefix");
 		final Mission mission = this;
 		PlayerTools.promptInput(p, new SinglePrompt(
 				PlayerTools.makeTranslation(true, Translation.MISSION_DIALOG_ADD),
@@ -259,7 +260,7 @@ class Mission extends Renderable implements IMissionWrite {
 						}
 					}
 					else {
-						dialogue.add(dprefix + s);
+						dialogue.add(s);
 						addDialogueLine(p2);
 						QuestWorld.getSounds().DIALOG_ADD.playTo(p2);
 					}

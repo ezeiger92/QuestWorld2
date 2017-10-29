@@ -1,10 +1,11 @@
-package me.mrCookieSlime.QuestWorld.api;
+package me.mrCookieSlime.QuestWorld;
 
 import java.util.HashMap;
 
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
+import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.util.Log;
 
@@ -23,7 +24,7 @@ public class UnknownMission extends MissionType {
 	}
 
 	private UnknownMission(String name) {
-		super(name, false, false, new ItemStack(Material.BARRIER));
+		super(name, false, new ItemStack(Material.BARRIER));
 	}
 
 	@Override

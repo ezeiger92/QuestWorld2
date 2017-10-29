@@ -20,7 +20,7 @@ import me.mrCookieSlime.QuestWorld.util.Text;
 
 public class LocationMission extends MissionType implements Ticking {
 	public LocationMission() {
-		super("REACH_LOCATION", false, false, new ItemStack(Material.LEATHER_BOOTS));
+		super("REACH_LOCATION", false, new ItemStack(Material.LEATHER_BOOTS));
 	}
 	
 	public static String coordinateString(Location location) {
@@ -56,7 +56,7 @@ public class LocationMission extends MissionType implements Ticking {
 		
 		// Minimum radius is 1, fixes ezeiger92/QuestWorld2#35	
 		if(instance.getCustomInt() <= 0)
-			instance.setCustomInt(1);
+			instance.setCustomInt(3);
 		
 		return false;
 	}

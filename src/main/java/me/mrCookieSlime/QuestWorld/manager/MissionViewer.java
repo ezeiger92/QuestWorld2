@@ -10,6 +10,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 
+import me.mrCookieSlime.QuestWorld.api.Decaying;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.Ticking;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
@@ -26,6 +27,7 @@ import me.mrCookieSlime.QuestWorld.event.QuestDeleteEvent;
 public class MissionViewer implements Listener {
 	private Map<MissionType, Set<IMission>> missions = new HashMap<>();
 	private Set<IMission> ticking_missions = new HashSet<>();
+	private Set<IMission> decaying_missions = new HashSet<>();
 	
 	public Set<IMission> getMissionsOf(MissionType type) {
 		missions.putIfAbsent(type, new HashSet<>());
@@ -34,6 +36,10 @@ public class MissionViewer implements Listener {
 	
 	public Set<IMission> getTickingMissions() {
 		return ticking_missions;
+	}
+	
+	public Set<IMission> getDecayingMissions() {
+		return decaying_missions;
 	}
 	
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -72,6 +78,9 @@ public class MissionViewer implements Listener {
 		
 		if(type instanceof Ticking)
 			ticking_missions.add(mission);
+		
+		if(type instanceof Decaying)
+			decaying_missions.add(mission);
 	}
 	
 	private void removeAll(ICategory category) {
@@ -89,5 +98,8 @@ public class MissionViewer implements Listener {
 		
 		if(mission.getType() instanceof Ticking)
 			ticking_missions.remove(mission);
+		
+		if(mission.getType() instanceof Decaying)
+			decaying_missions.remove(mission);
 	}
 }

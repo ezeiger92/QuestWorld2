@@ -2,8 +2,8 @@ package me.mrCookieSlime.QuestWorld.listener;
 
 import me.mrCookieSlime.QuestWorld.GuideBook;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
+import me.mrCookieSlime.QuestWorld.api.Decaying;
 import me.mrCookieSlime.QuestWorld.api.QuestStatus;
-import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
 import me.mrCookieSlime.QuestWorld.api.menu.QuestBook;
@@ -13,7 +13,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
-import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -29,11 +29,26 @@ public class PlayerListener implements Listener {
 	}
 	
 	@EventHandler
-	public void onDie(EntityDeathEvent e) {
-		if (!(e.getEntity() instanceof Player)) return;
-		Player p = (Player) e.getEntity();
+	public void onDie(PlayerDeathEvent event) {
+		Player p = event.getEntity();
 		PlayerManager manager = QuestWorld.getInstance().getManager(p);
-		for (ICategory category: QuestWorld.getInstance().getCategories()) {
+		String worldName = p.getWorld().getName();
+		
+		for(IMission task : QuestWorld.getInstance().getDecayingMissions()) {
+			IQuest quest = task.getQuest();
+			if (!manager.getStatus(quest).equals(QuestStatus.AVAILABLE)
+					|| !quest.isWorldEnabled(worldName)
+					|| !quest.getCategory().isWorldEnabled(worldName))
+				continue;
+			
+			int amount = ((Decaying) task).onDeath(event, task);
+			if(amount >= 0)
+				manager.setProgress(task, amount);
+			else
+				manager.addProgress(task, amount);
+		}
+		
+		/*for (ICategory category: QuestWorld.getInstance().getCategories()) {
 			if (category.isWorldEnabled(p.getWorld().getName())) {
 				for (IQuest quest: category.getQuests()) {
 					if (manager.getStatus(quest).equals(QuestStatus.AVAILABLE) && quest.isWorldEnabled(p.getWorld().getName())) {
@@ -45,7 +60,7 @@ public class PlayerListener implements Listener {
 					}
 				}
 			}
-		}
+		}*/
 	}
 	
 	@EventHandler

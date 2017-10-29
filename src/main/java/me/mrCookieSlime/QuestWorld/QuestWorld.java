@@ -102,6 +102,10 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 		return missionViewer.getTickingMissions();
 	}
 	
+	public Set<IMission> getDecayingMissions() {
+		return missionViewer.getDecayingMissions();
+	}
+	
 	@Override
 	public void onLoad() {
 		extLoader.loadLocal();
@@ -396,7 +400,7 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 	
 	@SuppressWarnings("unchecked")
 	public static <T extends MissionType> T getMissionType(String typeName) {
-		return (T)instance.types.get(typeName);
+		return (T)instance.types.getOrDefault(typeName, UnknownMission.get(typeName));
 	}
 	
 	public static Sounds getSounds() {

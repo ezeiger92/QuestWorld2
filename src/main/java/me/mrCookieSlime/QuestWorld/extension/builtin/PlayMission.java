@@ -16,7 +16,7 @@ import me.mrCookieSlime.QuestWorld.util.Text;
 
 public class PlayMission extends MissionType implements Ticking {
 	public PlayMission() {
-		super("PLAY_TIME", false, false, new ItemStack(Material.WATCH));
+		super("PLAY_TIME", false, new ItemStack(Material.WATCH));
 	}
 	
 	@Override

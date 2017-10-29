@@ -9,6 +9,7 @@ import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.inventory.ItemStack;
 
 import me.mrCookieSlime.QuestWorld.QuestWorld;
+import me.mrCookieSlime.QuestWorld.api.Decaying;
 import me.mrCookieSlime.QuestWorld.api.Manual;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
@@ -17,9 +18,9 @@ import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
 import me.mrCookieSlime.QuestWorld.util.PlayerTools;
 import me.mrCookieSlime.QuestWorld.util.Text;
 
-public class CraftMission extends MissionType implements Listener {
+public class CraftMission extends MissionType implements Listener, Decaying {
 	public CraftMission() {
-		super("CRAFT", true, true, new ItemStack(Material.WORKBENCH));
+		super("CRAFT", true, new ItemStack(Material.WORKBENCH));
 	}
 	
 	@Override

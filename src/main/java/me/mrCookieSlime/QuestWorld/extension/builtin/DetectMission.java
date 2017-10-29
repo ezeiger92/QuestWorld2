@@ -14,7 +14,7 @@ import me.mrCookieSlime.QuestWorld.util.Text;
 
 public class DetectMission extends MissionType implements Ticking {
 	public DetectMission() {
-		super("DETECT", false, false, new ItemStack(Material.OBSERVER));
+		super("DETECT", false, new ItemStack(Material.OBSERVER));
 	}
 	
 	@Override

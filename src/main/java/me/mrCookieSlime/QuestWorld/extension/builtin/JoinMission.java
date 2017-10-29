@@ -14,7 +14,7 @@ import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
 
 public class JoinMission extends MissionType implements Listener {
 	public JoinMission() {
-		super("JOIN", true, false, new ItemStack(Material.GOLD_NUGGET));
+		super("JOIN", true, new ItemStack(Material.GOLD_NUGGET));
 	}
 	
 	@Override

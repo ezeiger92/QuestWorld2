@@ -15,7 +15,7 @@ import me.mrCookieSlime.QuestWorld.util.ItemBuilder;
 
 public class LevelMission extends MissionType implements Listener {
 	public LevelMission() {
-		super("REACH_LEVEL", false, false, new ItemStack(Material.EXP_BOTTLE));
+		super("REACH_LEVEL", false, new ItemStack(Material.EXP_BOTTLE));
 	}
 	
 	@Override

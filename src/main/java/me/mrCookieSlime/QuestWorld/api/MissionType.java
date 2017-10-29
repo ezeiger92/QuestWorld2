@@ -1,6 +1,5 @@
 package me.mrCookieSlime.QuestWorld.api;
 
-import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IMissionWrite;
 import me.mrCookieSlime.QuestWorld.api.menu.Menu;
@@ -17,15 +16,15 @@ import org.bukkit.inventory.ItemStack;
 public abstract class MissionType {
 	private String name;
 	private ItemStack selectorItem;
-	private boolean supportsTimeframes, supportsDeathReset;
+	private boolean supportsTimeframes/*, supportsDeathReset*/;
 	private Map<Integer, MenuData> menuData;
 	
-	public MissionType(String name, boolean supportsTimeframes, boolean supportsDeathReset, ItemStack item) {
+	public MissionType(String name, boolean supportsTimeframes, /*boolean supportsDeathReset,*/ ItemStack item) {
 		Log.fine("MissionType - Creating: " + name);
 		this.name = name;
 		this.selectorItem = item;
 		this.supportsTimeframes = supportsTimeframes;
-		this.supportsDeathReset = supportsDeathReset;
+		//this.supportsDeathReset = supportsDeathReset;
 		menuData = new HashMap<>();
 	}
 	
@@ -46,7 +45,7 @@ public abstract class MissionType {
 	}
 	
 	private String formatDeathReset(IMission instance) {
-		if(!instance.resetsonDeath() || !supportsDeathReset)
+		if(!instance.resetsonDeath() || !supportsDeathReset())
 			return "";
 		
 		return " &7without dying";
@@ -54,15 +53,6 @@ public abstract class MissionType {
 
 	public ItemStack getSelectorItem() {
 		return selectorItem;
-	}
-
-	public static MissionType valueOf(String id) {
-		MissionType result =  QuestWorld.getInstance().getMissionTypes().get(id);
-		
-		if(result == null)
-			result = UnknownMission.get(id);
-		
-		return result;
 	}
 	
 	public String getName() {
@@ -79,7 +69,8 @@ public abstract class MissionType {
 	}
 
 	public boolean supportsDeathReset() {
-		return supportsDeathReset;
+		return this instanceof Decaying;
+		// return supportsDeathReset;
 	}
 
 	protected void setName(String newName) {

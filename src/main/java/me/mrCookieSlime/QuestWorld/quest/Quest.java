@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import me.mrCookieSlime.QuestWorld.QuestWorld;
-import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.QuestStatus;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
@@ -195,7 +194,7 @@ class Quest extends Renderable implements IQuestWrite {
 			QuestChange changes = new QuestChange(this);
 			
 			changes.addMission(new Mission(this, key,
-					MissionType.valueOf(mission.getString("type")),
+					QuestWorld.getMissionType(mission.getString("type")),
 					EntityType.valueOf(mission.getString("entity")),
 					Text.colorize(mission.getString("custom_string")),
 					mission.getItemStack("item"),

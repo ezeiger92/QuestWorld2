@@ -9,6 +9,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 
 import me.mrCookieSlime.QuestWorld.QuestWorld;
+import me.mrCookieSlime.QuestWorld.api.Decaying;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IMissionWrite;
@@ -18,9 +19,9 @@ import me.mrCookieSlime.QuestWorld.util.ItemBuilder;
 import me.mrCookieSlime.QuestWorld.util.PlayerTools;
 import me.mrCookieSlime.QuestWorld.util.Text;
 
-public class MineMission extends MissionType implements Listener {
+public class MineMission extends MissionType implements Listener, Decaying {
 	public MineMission() {
-		super("MINE_BLOCK", true, true, new ItemStack(Material.IRON_PICKAXE));
+		super("MINE_BLOCK", true, new ItemStack(Material.IRON_PICKAXE));
 	}
 	
 	@Override
