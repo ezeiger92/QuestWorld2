@@ -14,7 +14,7 @@ import me.mrCookieSlime.QuestWorld.util.Text;
 
 public class SubmitMission extends MissionType implements Manual {
 	public SubmitMission() {
-		super("SUBMIT", false, false, new ItemStack(Material.CHEST));
+		super("SUBMIT", false, new ItemStack(Material.CHEST));
 	}
 	
 	@Override
