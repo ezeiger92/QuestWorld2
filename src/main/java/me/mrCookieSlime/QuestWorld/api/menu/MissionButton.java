@@ -190,7 +190,7 @@ public class MissionButton {
 						if (changes.getDialogue().isEmpty())
 							p.sendMessage(Text.colorize("&4No Dialogue found!"));
 						else
-							PlayerManager.sendQuestDialogue(p, changes, changes.getDialogue().iterator());
+							PlayerManager.sendDialogue(p, changes, changes.getDialogue().iterator());
 					}
 					else
 						changes.setupDialogue(p);

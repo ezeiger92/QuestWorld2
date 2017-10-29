@@ -31,24 +31,6 @@ public final class Lang implements Reloadable {
 		}
 		
 		languages.put(langCode.toLowerCase(), config);
-		
-		/*YamlConfiguration langData = new YamlConfiguration();
-		
-		InputStream stream = plugin.getResource(path);
-		if(stream != null) {
-			langData.setDefaults(YamlConfiguration.loadConfiguration(
-					new InputStreamReader(stream, Charset.forName("UTF-8"))
-			));
-			plugin.saveResource(path, false);
-		}
-
-		File langFile = new File(plugin.getDataFolder(), path);
-		try {
-			langData.load(langFile);
-		}
-		catch(Exception e) {
-			throw new IllegalArgumentException("Failed read language \"" + path +"\"", e);
-		}*/
 	}
 	
 	public boolean setLang(String langCode) {

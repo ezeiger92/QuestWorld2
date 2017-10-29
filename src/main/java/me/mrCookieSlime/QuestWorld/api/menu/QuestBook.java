@@ -611,7 +611,7 @@ public class QuestBook {
 		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
 		
 		final Menu menu = new Menu(2, "&3Quest Editor");
-		ICategoryWrite changes = category.getWriter();
+		ICategoryWrite changes = category.getState();
 		
 		menu.put(0,  Proto.MAP_BACK.getItem(), event -> {
 			openEditor((Player) event.getWhoClicked());
@@ -751,7 +751,7 @@ public class QuestBook {
 		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
 		
 		final Menu menu = new Menu(6, "&3Quest Editor");
-		IQuestWrite changes = quest.getWriter();
+		IQuestWrite changes = quest.getState();
 		
 		menu.put(0, ItemBuilder.Proto.MAP_BACK.getItem(), event -> {
 			openCategoryQuestEditor((Player) event.getWhoClicked(), quest.getCategory());
@@ -948,7 +948,7 @@ public class QuestBook {
 						"",
 						"&e> Click to change whether this Quest can be done in Parties or not").get(),
 				event -> {
-					changes.setPartySupport(quest.supportsParties());
+					changes.setPartySupport(!quest.supportsParties());
 					changes.apply();
 					openQuestEditor((Player) event.getWhoClicked(), quest);
 				}
@@ -1080,7 +1080,7 @@ public class QuestBook {
 					new ItemBuilder(Material.GRASS)
 					.display("&r" + world.getName() + ": " + (quest.isWorldEnabled(world.getName()) ? "&2&l\u2714": "&4&l\u2718")).get(),
 					event -> {
-						IQuestWrite changes = quest.getWriter();
+						IQuestWrite changes = quest.getState();
 						changes.toggleWorld(world.getName());
 						if(changes.apply()) {
 						}
@@ -1109,7 +1109,7 @@ public class QuestBook {
 					new ItemBuilder(Material.GRASS)
 					.display("&r" + world.getName() + ": " + (category.isWorldEnabled(world.getName()) ? "&2&l\u2714": "&4&l\u2718")).get(),
 					event -> {
-						ICategoryWrite changes = category.getWriter();
+						ICategoryWrite changes = category.getState();
 						changes.toggleWorld(world.getName());
 						if(changes.apply()) {
 						}
@@ -1133,7 +1133,7 @@ public class QuestBook {
 		});
 		
 		// Mission types now handle their own menu data!
-		mission.getType().buildMenu(mission.getWriter(), menu);
+		mission.getType().buildMenu(mission.getState(), menu);
 		
 		ItemStack missionSelector = new ItemBuilder(mission.getType().getSelectorItem())
 				.display("&7" + mission.getType().toString())
@@ -1151,7 +1151,7 @@ public class QuestBook {
 	public static void openMissionSelector(Player p, IMission mission) {
 		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
 
-		IMissionWrite changes = mission.getWriter();
+		IMissionWrite changes = mission.getState();
 		final Menu menu = new Menu(3, Text.colorize("&3Mission Selector: " + mission.getQuest().getName()));
 
 		PagedMapping view = new PagedMapping(45, 9);

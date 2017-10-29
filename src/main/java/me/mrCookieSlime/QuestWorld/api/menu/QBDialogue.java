@@ -65,7 +65,7 @@ public class QBDialogue {
 						if(CancellableEvent.send(new QuestDeleteEvent(quest))) {
 							PlayerManager.clearAllQuestData(quest);
 							
-							ICategoryWrite changes = quest.getCategory().getWriter();
+							ICategoryWrite changes = quest.getCategory().getState();
 							changes.removeQuest(quest);
 							//changes.apply(); 
 
@@ -77,7 +77,7 @@ public class QBDialogue {
 					else if (q instanceof IMission) {
 						IMission mission = (IMission)q;
 						if(CancellableEvent.send(new MissionDeleteEvent(mission))) {
-							IQuestWrite changes = mission.getQuest().getWriter();
+							IQuestWrite changes = mission.getQuest().getState();
 							changes.removeMission(mission);
 							changes.apply();
 							
@@ -115,7 +115,7 @@ public class QBDialogue {
 	public static void openQuestMissionEntityEditor(Player p, final IMission mission) {
 		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
 		
-		IMissionWrite changes = mission.getWriter();
+		IMissionWrite changes = mission.getState();
 		//String title = Text.colorize(mission.getQuest().getName() + " &7- &8(Page " + (page+1) + "/" + (lastPage+1) + ")");
 		final Menu menu = new Menu(6, "&3Entity Selector: " + mission.getQuest().getName());
 		

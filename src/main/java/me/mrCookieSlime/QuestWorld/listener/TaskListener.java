@@ -5,10 +5,10 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
-
+import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.Plugin;
 
-import me.mrCookieSlime.QuestWorld.util.EntityTools;
+import me.mrCookieSlime.QuestWorld.QuestWorld;
 
 public class TaskListener implements Listener {
 
@@ -19,6 +19,6 @@ public class TaskListener implements Listener {
 	@EventHandler(priority=EventPriority.MONITOR,ignoreCancelled=true)
 	public void onCreatureSpawn(CreatureSpawnEvent e) {
 		if (e.getSpawnReason().equals(SpawnReason.SPAWNER))
-			EntityTools.setFromSpawner(e.getEntity(), true);
+			e.getEntity().setMetadata("spawned_by_spawner", new FixedMetadataValue(QuestWorld.getInstance(), "QuestWorld"));
 	}
 }

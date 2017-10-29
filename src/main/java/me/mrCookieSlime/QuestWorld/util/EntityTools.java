@@ -5,10 +5,7 @@ import java.util.ArrayList;
 import org.bukkit.Material;
 import org.bukkit.SkullType;
 import org.bukkit.entity.EntityType;
-import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.Metadatable;
-
-import me.mrCookieSlime.QuestWorld.QuestWorld;
 
 public class EntityTools {
 	private static final EntityType[] alive;
@@ -50,15 +47,7 @@ public class EntityTools {
 		return ib;
 	}
 	
-	private static final String SPAWNER_KEY = "spawned_by_spawner";
-	public static void setFromSpawner(Metadatable entity, boolean state) {
-		if(state)
-			entity.setMetadata(SPAWNER_KEY, new FixedMetadataValue(QuestWorld.getInstance(), "QuestWorld"));
-		else
-			entity.removeMetadata(SPAWNER_KEY, QuestWorld.getInstance());
-	}
-	
 	public static boolean isFromSpawner(Metadatable entity) {
-		return entity.hasMetadata(SPAWNER_KEY);
+		return entity.hasMetadata("spawned_by_spawner");
 	}
 }

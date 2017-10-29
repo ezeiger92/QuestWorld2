@@ -152,7 +152,7 @@ class MissionChange extends Mission {
 	}
 	
 	@Override
-	public MissionChange getWriter() {
+	public MissionChange getState() {
 		return this;
 	}
 }

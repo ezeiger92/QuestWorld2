@@ -17,7 +17,6 @@ import me.mrCookieSlime.QuestWorld.util.ItemBuilder;
 import me.mrCookieSlime.QuestWorld.util.Text;
 
 import org.bukkit.Material;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -33,7 +32,7 @@ class Category extends Renderable implements ICategoryWrite {
 	String permission;
 	boolean hidden;
 	List<String> world_blacklist = new ArrayList<String>();
-	FileConfiguration config;
+	YamlConfiguration config;
 	
 	// Interal
 	protected Category(Category cat) {
@@ -71,7 +70,7 @@ class Category extends Renderable implements ICategoryWrite {
 	}
 	
 	// Package
-	Category(int id, FileConfiguration config) {
+	Category(int id, YamlConfiguration config) {
 		this.id = id;
 		this.config = config;
 		name = Text.colorize(config.getString("name"));
@@ -246,7 +245,7 @@ class Category extends Renderable implements ICategoryWrite {
 	}
 	
 	@Override
-	public CategoryChange getWriter() {
+	public CategoryChange getState() {
 		return new CategoryChange(this);
 	}
 

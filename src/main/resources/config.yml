@@ -2,7 +2,6 @@ options:
   auto-update: true
   quest-check-delay: 60
   autosave-interval: 5
-  log-level: INFO
 party:
   max-members: 4
   enabled: true

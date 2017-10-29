@@ -40,5 +40,5 @@ public interface IMission extends IRenderable {
 	boolean acceptsSpawners();
 	IQuest getQuest();
 	
-	IMissionWrite getWriter();
+	IMissionWrite getState();
 }

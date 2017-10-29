@@ -122,7 +122,7 @@ class CategoryChange extends Category {
 	}
 	
 	@Override
-	public CategoryChange getWriter() {
+	public CategoryChange getState() {
 		return this;
 	}
 }

@@ -185,7 +185,7 @@ class QuestChange extends Quest {
 	}
 
 	@Override
-	public QuestChange getWriter() {
+	public QuestChange getState() {
 		return this;
 	}
 }

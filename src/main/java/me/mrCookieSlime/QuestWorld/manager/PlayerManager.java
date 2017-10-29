@@ -5,10 +5,8 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Stack;
 import java.util.UUID;
 import java.util.function.BiFunction;
@@ -29,8 +27,6 @@ import me.mrCookieSlime.QuestWorld.util.PlayerTools;
 import me.mrCookieSlime.QuestWorld.util.Text;
 
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.AnimalTamer;
@@ -38,15 +34,13 @@ import org.bukkit.entity.Player;
 
 public class PlayerManager {
 	
-	public static Map<UUID, IQuest> autoclaim = new HashMap<>();
-	
 	private FileConfiguration cfg;
 	private UUID uuid;
 	private IRenderable last;
 	
 	private Stack<Integer> pages = new Stack<>();
 	
-	public PlayerManager(OfflinePlayer p) {
+	public PlayerManager(AnimalTamer p) {
 		this(p.getUniqueId());
 	}
 	
@@ -302,51 +296,47 @@ public class PlayerManager {
 		if(amount == task.getAmount()) {
 			Player player = Bukkit.getPlayer(uuid);
 			if(player != null)
-				sendQuestDialogue(player, task, task.getDialogue().iterator());
-		}
-	}
-
-	public static void sendQuestDialogue(final Player player, final IMission task, final Iterator<String> dialogue) {
-		if (dialogue.hasNext()) {
-			sendDialogueComponent(player, dialogue.next());
-			sendDialogue(player.getUniqueId(), task, dialogue);
-		}
-		else {
-			PlayerTools.sendTranslation(player, false, Translation.NOTIFY_COMPLETED, task.getQuest().getName());
+				sendDialogue(player, task, task.getDialogue().iterator());
 		}
 	}
 	
-	private static void sendDialogue(final UUID uuid, final IMission task, final Iterator<String> dialogue) {
-		if (dialogue.hasNext()) {
-			final String line = dialogue.next();
-			Bukkit.getScheduler().scheduleSyncDelayedTask(QuestWorld.getInstance(), new Runnable() {
-				
-				@Override
-				public void run() {
-					Player player = Bukkit.getPlayer(uuid);
-					if (player != null) {
-						sendDialogueComponent(player, line);
-						sendDialogue(uuid, task, dialogue);
-					}
-				}
-			}, 70L);
-		}
-		else {
-			Player player = Bukkit.getPlayer(uuid);
-
+	
+	public static void sendDialogue(final Player player, final IMission task, final Iterator<String> dialogue) {
+		if(!player.isOnline())
+			return;
+		
+		String line;
+		
+		// Grab a line if we can
+		// Otherwise if there was no dialogue, use the completion placeholder
+		// If there are no lines, and there was dialogue, we're clearly done so return
+		// Refactor for ezeiger92/QuestWorld2#57
+		if(dialogue.hasNext())
+			line = dialogue.next();
+		else if(task.getDialogue().isEmpty())
+			line = "*";
+		else
+			return;
+		
+		if(line.equals("*"))
 			// Change for ezeiger92/QuestWorld2#43 - Remove default complete message if dialog is present
 			// Previously "check !task.getType().getID().equals("ACCEPT_QUEST_FROM_NPC") && "
 			// This was done to keep quests quiet when interacting with citizens
-			if (player != null && task.getDialogue().isEmpty())
-				PlayerTools.sendTranslation(player, false, Translation.NOTIFY_COMPLETED, task.getQuest().getName());
+			PlayerTools.sendTranslation(player, false, Translation.NOTIFY_COMPLETED, task.getQuest().getName());
+		else {
+			sendDialogueComponent(player, line);
+			
+			Bukkit.getScheduler().scheduleSyncDelayedTask(QuestWorld.getInstance(),
+					() -> sendDialogue(player, task, dialogue), 70L);
 		}
 	}
 
 	private static void sendDialogueComponent(Player player, String line) {
-		if (line.startsWith("/")) {
+		if(line.startsWith("/"))
 			Bukkit.dispatchCommand(Bukkit.getConsoleSender(), line.substring(1).replace("<player>", player.getName()));
-		}
-		else player.sendMessage(ChatColor.translateAlternateColorCodes('&', line.replace("<player>", player.getName())));
+
+		else
+			player.sendMessage(Text.colorize(line.replace("<player>", player.getName())));
 	}
 
 	public void completeQuest(IQuest quest) {
@@ -417,7 +407,7 @@ public class PlayerManager {
 		
 		progress.append(" - " + percentage + "%");
 		
-		return ChatColor.translateAlternateColorCodes('&', progress.toString());
+		return Text.colorize(progress.toString());
 	}
 	
 	public void clearQuestData(IQuest quest) {

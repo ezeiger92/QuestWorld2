@@ -17,9 +17,7 @@ import me.mrCookieSlime.QuestWorld.util.Text;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -41,12 +39,14 @@ class Quest extends Renderable implements IQuestWrite {
 	int xp;
 	int partysize;
 	
-	boolean disableParties, ordered, autoclaim;
+	boolean partySupport;
+	boolean ordered;
+	boolean autoclaim;
 	
 	Quest parent;
 	String permission;
 	
-	FileConfiguration config;
+	YamlConfiguration config;
 	
 	// Internal
 	protected Quest(Quest quest) {
@@ -76,7 +76,7 @@ class Quest extends Renderable implements IQuestWrite {
 		money          = source.money;
 		xp             = source.xp;
 		partysize      = source.partysize;
-		disableParties = source.disableParties;
+		partySupport   = source.partySupport;
 		ordered        = source.ordered;
 		autoclaim      = source.autoclaim;
 		parent         = source.parent;
@@ -90,30 +90,29 @@ class Quest extends Renderable implements IQuestWrite {
 	}
 	
 	// Package
-	public Quest(int id, FileConfiguration file, Category category) {
+	public Quest(int id, YamlConfiguration file, Category category) {
 		this.category = category;
+		this.id = id;
 		
 		config = file;
-		this.id = id;//Integer.parseInt(file.getName().replace(".quest", "").split("-C")[0]);
-		this.cooldown = config.getLong("cooldown");
-		this.disableParties = config.getBoolean("disable-parties");
-		this.ordered = config.getBoolean("in-order");
-		this.autoclaim = config.getBoolean("auto-claim");
-		this.name = Text.colorize(config.getString("name"));
-		this.item = new ItemBuilder(config.getItemStack("item")).display(name).get();
+		cooldown     = config.getLong("cooldown");
+		partySupport = !config.getBoolean("disable-parties");
+		ordered      = config.getBoolean("in-order");
+		autoclaim    = config.getBoolean("auto-claim");
+		name         = Text.colorize(config.getString("name"));
+		item         = new ItemBuilder(config.getItemStack("item")).display(name).get();
+		
 		loadMissions();
-		this.rewards = loadRewards();
-		this.money = config.getInt("rewards.money");
-		this.xp = config.getInt("rewards.xp");
 		
-		if (config.contains("rewards.commands")) commands = config.getStringList("rewards.commands");
-		if (config.contains("world-blacklist")) world_blacklist = config.getStringList("world-blacklist");
+		rewards = loadRewards();
+		money   = config.getInt("rewards.money");
+		xp      = config.getInt("rewards.xp");
 		
-		if (config.contains("min-party-size")) partysize = config.getInt("min-party-size");
-		else partysize = 1;
+		commands        = config.getStringList("rewards.commands");
+		world_blacklist = config.getStringList("world-blacklist");
 		
-		if (config.contains("permission")) this.permission = config.getString("permission");
-		else this.permission = "";
+		partysize  = config.getInt("min-party-size", 1);
+		permission = config.getString("permission", "");
 		
 		category.addQuest(this);
 	}
@@ -131,7 +130,7 @@ class Quest extends Renderable implements IQuestWrite {
 		money = 0;
 		xp = 0;
 		parent = null;
-		disableParties = false;
+		partySupport = true;
 		permission = "";
 		ordered = false;
 		autoclaim = false;
@@ -156,14 +155,14 @@ class Quest extends Renderable implements IQuestWrite {
 	}
 	
 	private Location locationHelper(ConfigurationSection loc) {
-		World w = Bukkit.getWorld(loc.getString("world"));
+		/*World w = Bukkit.getWorld(loc.getString("world"));
 		double x = loc.getDouble("x");
 		double y = loc.getDouble("y");
 		double z = loc.getDouble("z");
 		float yaw = (float)loc.getDouble("yaw");
-		float pitch = (float)loc.getDouble("pitch");
-		return new Location(w, x, y,
-				z, yaw, pitch);
+		float pitch = (float)loc.getDouble("pitch");*/
+		return new Location(Bukkit.getWorld(loc.getString("world")), loc.getDouble("x"), loc.getDouble("y"),
+				loc.getDouble("z"), (float)loc.getDouble("yaw"), (float)loc.getDouble("pitch"));
 	}
 	
 	private void locationHelper(Location in, ConfigurationSection loc) {
@@ -227,7 +226,8 @@ class Quest extends Renderable implements IQuestWrite {
 		config.set("rewards.commands", commands);
 		config.set("missions", null);
 		config.set("permission", permission);
-		config.set("disable-parties", disableParties);
+		// TODO: rename to partySupport
+		config.set("disable-parties", !partySupport);
 		config.set("in-order", ordered);
 		config.set("auto-claim", autoclaim);
 		config.set("world-blacklist", world_blacklist);
@@ -476,12 +476,12 @@ class Quest extends Renderable implements IQuestWrite {
 	}
 
 	public boolean supportsParties() {
-		return !disableParties;
+		return partySupport;
 	}
 
-	public void setPartySupport(boolean supportsParties) {
+	public void setPartySupport(boolean partySupport) {
 		updateLastModified();
-		this.disableParties = supportsParties;
+		this.partySupport = partySupport;
 	}
 
 	public boolean isOrdered() {
@@ -512,7 +512,7 @@ class Quest extends Renderable implements IQuestWrite {
 	}
 	
 	@Override
-	public QuestChange getWriter() {
+	public QuestChange getState() {
 		return new QuestChange(this);
 	}
 

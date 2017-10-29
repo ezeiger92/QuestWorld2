@@ -27,7 +27,6 @@ import me.mrCookieSlime.QuestWorld.extension.builtin.Builtin;
 import me.mrCookieSlime.QuestWorld.listener.ExtensionInstaller;
 import me.mrCookieSlime.QuestWorld.listener.MenuListener;
 import me.mrCookieSlime.QuestWorld.listener.PlayerListener;
-import me.mrCookieSlime.QuestWorld.listener.SelfListener;
 import me.mrCookieSlime.QuestWorld.manager.MissionViewer;
 import me.mrCookieSlime.QuestWorld.manager.PlayerManager;
 import me.mrCookieSlime.QuestWorld.quest.RenderableFacade;
@@ -137,19 +136,13 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 		PluginManager pm = getServer().getPluginManager();
 		pm.registerEvents(new PlayerListener(), this);
 		pm.registerEvents(missionViewer, this);
-		pm.registerEvents(new SelfListener(), this);
 		pm.registerEvents(new MenuListener(), this);
 
 		getServer().addRecipe(GuideBook.recipe());
-		
-		
 	}
 	
 	public void loadConfigs() {
 		reloadConfig();
-		
-		//TODO make logger info (and other) levels actually work
-		//Log.setLevel(cfg.getString("options.log-level"));
 
 		eventSounds = new Sounds(resources.loadConfigNoexpect("sounds.yml", true));
 		

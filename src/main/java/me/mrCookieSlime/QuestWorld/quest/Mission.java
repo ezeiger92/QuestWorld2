@@ -336,7 +336,7 @@ class Mission extends Renderable implements IMissionWrite {
 	}
 	
 	@Override
-	public MissionChange getWriter() {
+	public MissionChange getState() {
 		return new MissionChange(this);
 	}
 

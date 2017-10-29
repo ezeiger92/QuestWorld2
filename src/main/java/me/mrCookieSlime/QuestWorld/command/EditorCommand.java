@@ -127,7 +127,7 @@ public class EditorCommand implements CommandExecutor {
 		else if (args.length == 4 && param.equals("delete_command") && sender instanceof Player) {
 			IQuest quest = QuestWorld.getInstance().getCategory(Integer.parseInt(args[1])).getQuest(Integer.parseInt(args[2]));
 			
-			IQuestWrite changes = quest.getWriter();
+			IQuestWrite changes = quest.getState();
 			changes.removeCommand(Integer.parseInt(args[3]));
 			if(changes.apply()) {
 				
@@ -143,7 +143,7 @@ public class EditorCommand implements CommandExecutor {
 			PlayerTools.promptInput(p, new SinglePrompt(
 					"&7Type in your desired Command:",
 					(c,s) -> {
-						IQuestWrite changes = quest.getWriter();
+						IQuestWrite changes = quest.getState();
 						changes.addCommand(ChatColor.stripColor(s));
 						changes.apply();
 

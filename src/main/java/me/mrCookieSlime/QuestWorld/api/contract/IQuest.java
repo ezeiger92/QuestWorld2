@@ -33,5 +33,5 @@ public interface IQuest extends IRenderable {
 	int countFinishedTasks(Player p);
 	void handoutReward(Player p);
 	
-	IQuestWrite getWriter();
+	IQuestWrite getState();
 }

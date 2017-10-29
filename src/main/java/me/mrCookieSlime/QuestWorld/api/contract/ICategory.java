@@ -22,6 +22,6 @@ public interface ICategory extends IRenderable {
 	int countQuests(Player p, QuestStatus onCooldown);
 	int countFinishedQuests(Player p);
 	
-	ICategoryWrite getWriter();
+	ICategoryWrite getState();
 	void save(boolean force);
 }
