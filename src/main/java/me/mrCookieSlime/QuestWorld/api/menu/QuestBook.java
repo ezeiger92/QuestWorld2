@@ -48,7 +48,7 @@ public class QuestBook {
 		for(ICategory category : QuestWorld.getInstance().getCategories()) {
 			if (!category.isHidden()) {
 				if (category.isWorldEnabled(p.getWorld().getName())) {
-					if ((category.getParent() != null && !QuestWorld.getInstance().getManager(p).hasFinished(category.getParent())) || !category.hasPermission(p)) {
+					if ((category.getParent() != null && !QuestWorld.getInstance().getManager(p).hasFinished(category.getParent())) || !category.checkPermission(p)) {
 						view.addButton(category.getID(), new ItemBuilder(Material.BARRIER).display(category.getName()).lore(
 								"",
 								QuestWorld.translate(Translation.quests_locked)).get(),
@@ -1040,7 +1040,7 @@ public class QuestBook {
 				menu.put(45 + i,
 						new ItemBuilder(Material.PAPER).display("&7&o> New Task").get(),
 						event -> {
-							changes.addMission(QuestWorld.renderFactory().createMission(quest, event.getSlot() + 9));
+							changes.addMission(QuestWorld.renderFactory().createMission(event.getSlot() + 9, quest));
 
 							changes.apply();
 							openQuestEditor((Player) event.getWhoClicked(), quest);

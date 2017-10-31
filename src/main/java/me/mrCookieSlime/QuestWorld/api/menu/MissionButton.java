@@ -54,10 +54,14 @@ public class MissionButton {
 	
 	public static MenuData entity(IMissionWrite changes) {
 		EntityType entity = changes.getEntity();
+		String entityName = Text.niceName(entity.toString());
+		
+		if(entity == EntityType.COMPLEX_PART)
+			entityName = "Any Entity";
 		
 		return new MenuData(
 				EntityTools.getEntityDisplay(entity)
-				.display("&7Entity Type: &r" + Text.niceName(entity.name())).lore(
+				.display("&7Entity Type: &r" + entityName).lore(
 						"",
 						"&e> Click to change the Entity").get(),
 				event -> {
@@ -68,6 +72,7 @@ public class MissionButton {
 	
 	public static MenuData location(IMissionWrite changes) {
 		return simpleButton(changes,
+				// TODO: "Location: {print location}"
 				new ItemBuilder(changes.getDisplayItem()).lore(
 						"",
 						"&e> Click to change the Location",

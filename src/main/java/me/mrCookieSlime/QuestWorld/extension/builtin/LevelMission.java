@@ -11,7 +11,6 @@ import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IMissionWrite;
 import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
-import me.mrCookieSlime.QuestWorld.util.ItemBuilder;
 
 public class LevelMission extends MissionType implements Listener {
 	public LevelMission() {
@@ -20,7 +19,7 @@ public class LevelMission extends MissionType implements Listener {
 	
 	@Override
 	public ItemStack userDisplayItem(IMission instance) {
-		return new ItemBuilder(Material.COMMAND).display("&7" + instance.getAmount()).get();
+		return new ItemStack(Material.COMMAND);
 	}
 	
 	@Override

@@ -400,7 +400,11 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 	
 	@SuppressWarnings("unchecked")
 	public static <T extends MissionType> T getMissionType(String typeName) {
-		return (T)instance.types.getOrDefault(typeName, UnknownMission.get(typeName));
+		MissionType result = instance.types.get(typeName);
+		if(result == null)
+			result = UnknownMission.get(typeName);
+		
+		return (T)result;
 	}
 	
 	public static Sounds getSounds() {

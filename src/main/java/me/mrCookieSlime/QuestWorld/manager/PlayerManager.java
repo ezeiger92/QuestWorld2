@@ -13,16 +13,16 @@ import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
 import me.mrCookieSlime.QuestWorld.QuestWorld;
+import me.mrCookieSlime.QuestWorld.api.Manual;
+import me.mrCookieSlime.QuestWorld.api.MissionType;
+import me.mrCookieSlime.QuestWorld.api.QuestStatus;
+import me.mrCookieSlime.QuestWorld.api.Ticking;
 import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
 import me.mrCookieSlime.QuestWorld.api.contract.IRenderable;
 import me.mrCookieSlime.QuestWorld.party.Party;
-import me.mrCookieSlime.QuestWorld.api.Manual;
-import me.mrCookieSlime.QuestWorld.api.MissionType;
-import me.mrCookieSlime.QuestWorld.api.QuestStatus;
-import me.mrCookieSlime.QuestWorld.api.Ticking;
 import me.mrCookieSlime.QuestWorld.util.PlayerTools;
 import me.mrCookieSlime.QuestWorld.util.Text;
 
@@ -206,7 +206,7 @@ public class PlayerManager {
 	public QuestStatus getStatus(IQuest quest) {
 		Player p = Bukkit.getPlayer(uuid);
 		if (quest.getParent() != null && !hasFinished(quest.getParent())) return QuestStatus.LOCKED;
-		if (p != null && !quest.hasPermission(p)) return QuestStatus.LOCKED;
+		if (p != null && !quest.checkPermission(p)) return QuestStatus.LOCKED;
 		if (quest.getPartySize() == 0 && getParty() != null) return QuestStatus.LOCKED_NO_PARTY;
 		if (quest.getPartySize() > 1 && (getParty() == null || getParty().getSize() < quest.getPartySize())) return QuestStatus.LOCKED_PARTY_SIZE;
 		if (!cfg.contains(quest.getCategory().getID() + "." + quest.getID() + ".status")) {

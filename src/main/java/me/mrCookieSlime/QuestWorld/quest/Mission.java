@@ -6,6 +6,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
@@ -13,24 +14,26 @@ import me.mrCookieSlime.QuestWorld.api.SinglePrompt;
 import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IMissionWrite;
-import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
 import me.mrCookieSlime.QuestWorld.api.menu.QuestBook;
 import me.mrCookieSlime.QuestWorld.util.PlayerTools;
+import me.mrCookieSlime.QuestWorld.util.Text;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-class Mission extends Renderable implements IMissionWrite {
+class Mission extends Renderable implements IMissionWrite, ConfigurationSerializable {
 	
 	Quest quest;
 	MissionType type;
 	ItemStack item;
 	int amount;
-	String id;
+	int id;
 	EntityType entity;
 	Location location;
 	String customString;
@@ -43,33 +46,44 @@ class Mission extends Renderable implements IMissionWrite {
 	
 	ArrayList<String> dialogue = new ArrayList<String>();
 	
-	Mission(String id, Quest quest) {
+	// External
+	public Mission(int id, Quest quest) {
 		this.id = id;
 		this.quest = quest;
 		type = QuestWorld.getMissionType("SUBMIT");
 		loadDefaults();
 	}
-	
-	// TODO id should not be a String
-	public Mission(Quest quest, String id, MissionType type, EntityType entity, String customString,
-			ItemStack item, Location location, int amount, String displayName, int timeframe,
-			boolean deathReset, int customInt, boolean spawnersAllowed, String description) {
-		this.quest = quest;
+
+	// Package
+	Mission(int id, ConfigurationSection config, Quest quest) {
 		this.id = id;
-		this.type = type;
-		this.item = item;
-		this.amount = amount;
-		this.entity = entity;
-		this.customString = customString;
-		this.location = location;
-		this.displayName = displayName;
-		this.timeframe = timeframe;
-		this.customInt = customInt;
-		this.deathReset = deathReset;
-		this.description = description == null ? "": description;
-		this.spawnersAllowed = spawnersAllowed;
+		this.quest = quest;
+		
+		if(config.contains("citizen")) {
+			config.set("custom_int", config.get("custom_int", config.get("citizen")));
+			config.set("citizen", null);
+		}
+		
+		if(config.contains("name")) {
+			config.set("custom_string", config.get("custom_string", config.get("name")));
+			config.set("name", null);
+		}
+		
+		type         = QuestWorld.getMissionType(config.getString("type"));
+		entity       = EntityType.valueOf(config.getString("entity"));
+		customString = Text.colorize(config.getString("custom_string", ""));
+		item         = config.getItemStack("item");
+		location     = locationHelper(config.getConfigurationSection("location"));
+		amount       = config.getInt("amount");
+		displayName  = Text.colorize(config.getString("display-name", ""));
+		timeframe    = config.getInt("timeframe");
+		deathReset   = config.getBoolean("reset-on-death");
+		customInt    = config.getInt("custom_int");
+		
+		// not exclude = allow, what we want
+		spawnersAllowed = !config.getBoolean("exclude-spawners");
+		description     = Text.colorize(config.getString("lore", ""));
 		loadDialogue();
-		if (this.customString == null) this.customString = "";
 		
 		// Repair any quests that would have been broken by updates, namely location quests
 		MissionChange changes = new MissionChange(this);
@@ -80,6 +94,40 @@ class Mission extends Renderable implements IMissionWrite {
 	File getDialogueFile() {
 		return new File(QuestWorld.getPath("data.dialogue"), quest.getCategory().getID()
 				+ "+" + quest.getID() + "+" + getID() + ".txt");
+	}
+	
+	void save(ConfigurationSection config) {
+		config.set("type", getType().toString());
+		config.set("amount", getAmount());
+		config.set("item", getMissionItem().clone());
+		config.set("entity", getEntity().toString());
+		// TODO is this check still needed?
+		if (getLocation() != null && getLocation().getWorld() != null)
+			locationHelper(getLocation(), config.createSection("location"));
+		config.set("display-name", Text.escape(getDisplayName()));
+		config.set("timeframe", getTimeframe());
+		config.set("reset-on-death", resetsonDeath());
+		config.set("lore", Text.escape(getDescription()));
+		// Formerly ".citizen"
+		config.set("custom_int", getCustomInt());
+		// Formerly ".name"
+		config.set("custom_string", Text.escape(getCustomString()));
+		
+		config.set("exclude-spawners", !acceptsSpawners());
+	}
+	
+	private Location locationHelper(ConfigurationSection loc) {
+		return new Location(Bukkit.getWorld(loc.getString("world")), loc.getDouble("x"), loc.getDouble("y"),
+				loc.getDouble("z"), (float)loc.getDouble("yaw"), (float)loc.getDouble("pitch"));
+	}
+	
+	private void locationHelper(Location in, ConfigurationSection loc) {
+		loc.set("world", in.getWorld().getName());
+		loc.set("x", in.getX());
+		loc.set("y", in.getY());
+		loc.set("z", in.getZ());
+		loc.set("yaw", (double)in.getYaw());
+		loc.set("pitch", (double)in.getPitch());
 	}
 	
 	private void loadDialogue() {
@@ -137,7 +185,7 @@ class Mission extends Renderable implements IMissionWrite {
 		dest.copy(this);
 	}
 
-	public String getID() {
+	public int getID() {
 		return id;
 	}
 	
@@ -203,14 +251,6 @@ class Mission extends Renderable implements IMissionWrite {
 		return customString;
 	}
 
-	@Override
-	public String getName() {
-		return getText();
-	}
-
-	@Override
-	public void setParent(IQuest quest) {}
-
 	public Location getLocation() {
 		return location;
 	}
@@ -228,9 +268,6 @@ class Mission extends Renderable implements IMissionWrite {
 	public String getPermission() {
 		return null;
 	}
-
-	@Override
-	public void setPermission(String permission) {}
 	
 	public void setupDialogue(Player p) {
 		this.dialogue = new ArrayList<String>();
@@ -238,7 +275,6 @@ class Mission extends Renderable implements IMissionWrite {
 	}
 	
 	private void addDialogueLine(Player p) {
-		final Mission mission = this;
 		PlayerTools.promptInput(p, new SinglePrompt(
 				PlayerTools.makeTranslation(true, Translation.MISSION_DIALOG_ADD),
 				(c,s) -> {
@@ -250,7 +286,7 @@ class Mission extends Renderable implements IMissionWrite {
 						
 						updateLastModified();
 						PlayerTools.sendTranslation(p2, true, Translation.MISSION_DIALOG_SET, file.getName());
-						QuestBook.openQuestMissionEditor(p2, mission);
+						QuestBook.openQuestMissionEditor(p2, this);
 
 						try {
 							// The only downside to this is system-specific newlines
@@ -270,16 +306,16 @@ class Mission extends Renderable implements IMissionWrite {
 	}
 
 	public List<String> getDialogue() {
-		return this.dialogue;
+		return dialogue;
 	}
 
 	public void setDisplayName(String name) {
 		updateLastModified();
-		this.displayName = name;
+		displayName = name;
 	}
 	
 	public String getDisplayName() {
-		return this.displayName;
+		return displayName;
 	}
 	
 	public int getTimeframe() {
@@ -287,7 +323,7 @@ class Mission extends Renderable implements IMissionWrite {
 	}
 	
 	public boolean hasTimeframe() {
-		return this.timeframe > 0;
+		return timeframe > 0;
 	}
 	
 	public void setTimeframe(int timeframe) {
@@ -296,7 +332,7 @@ class Mission extends Renderable implements IMissionWrite {
 	}
 
 	public boolean resetsonDeath() {
-		return this.deathReset;
+		return deathReset;
 	}
 	
 	public void setDeathReset(boolean deathReset) {
@@ -305,7 +341,7 @@ class Mission extends Renderable implements IMissionWrite {
 	}
 
 	public String getDescription() {
-		return this.description;
+		return description;
 	}
 	
 	public void setDescription(String description) {
@@ -315,7 +351,7 @@ class Mission extends Renderable implements IMissionWrite {
 
 	public void setCustomInt(int val) {
 		updateLastModified();
-		this.customInt = val;
+		customInt = val;
 	}
 
 	public int getCustomInt() {
@@ -328,7 +364,7 @@ class Mission extends Renderable implements IMissionWrite {
 
 	public void setSpawnerSupport(boolean acceptsSpawners) {
 		updateLastModified();
-		this.spawnersAllowed = acceptsSpawners;
+		spawnersAllowed = acceptsSpawners;
 	}
 	
 	@Override
@@ -360,5 +396,15 @@ class Mission extends Renderable implements IMissionWrite {
 	@Override
 	public boolean hasChange(Member field) {
 		return true;
+	}
+
+	@Override
+	public Map<String, Object> serialize() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	public static Mission deserialize(Map<String, Object> data) {
+		return null;
 	}
 }

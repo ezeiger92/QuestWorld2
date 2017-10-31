@@ -18,6 +18,9 @@ public interface ICategory extends IRenderable {
 	boolean isHidden();
 	boolean isWorldEnabled(String world);
 	
+	String getName();
+	boolean isValid();
+	
 	String getProgress(Player p);
 	int countQuests(Player p, QuestStatus onCooldown);
 	int countFinishedQuests(Player p);

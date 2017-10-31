@@ -11,7 +11,7 @@ import me.mrCookieSlime.QuestWorld.api.annotation.NoImpl;
 
 @NoImpl
 public interface IMission extends IRenderable {
-	String getID();
+	int getID();
 	int getAmount();
 	String getText();
 	

@@ -25,7 +25,7 @@ public class EntityTools {
 	
 	public static ItemBuilder getEntityDisplay(EntityType type) {
 		ItemBuilder ib = new ItemBuilder(Material.SKULL_ITEM);
-		
+
 		switch(type) {
 			case PLAYER:       ib.skull(SkullType.PLAYER); break;
 			case GIANT:        ib.skull(SkullType.ZOMBIE); break;
@@ -34,6 +34,7 @@ public class EntityTools {
 			case ARMOR_STAND:  ib.type(Material.ARMOR_STAND); break;
 			case SNOWMAN:      ib.type(Material.SNOW_BALL); break;
 			case IRON_GOLEM:   ib.type(Material.IRON_INGOT); break;
+			case COMPLEX_PART: ib.type(Material.NETHER_STAR); break;
 			
 			default:
 				try { 

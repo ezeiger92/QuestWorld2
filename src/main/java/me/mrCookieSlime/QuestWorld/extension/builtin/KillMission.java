@@ -25,8 +25,7 @@ public class KillMission extends MissionType implements Listener, Decaying {
 	@Override
 	public ItemStack userDisplayItem(IMission instance) {
 		EntityType entity = instance.getEntity();
-		return  EntityTools.getEntityDisplay(entity)
-				.display("&7Entity Type: &r" + Text.niceName(entity.name())).get();
+		return EntityTools.getEntityDisplay(entity).get();
 	}
 	
 	@Override

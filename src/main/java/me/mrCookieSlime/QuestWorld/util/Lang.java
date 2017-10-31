@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.bukkit.configuration.file.YamlConfiguration;
+
 import me.mrCookieSlime.QuestWorld.api.Translator;
 
 public final class Lang implements Reloadable {

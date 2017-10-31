@@ -29,6 +29,9 @@ public interface IQuest extends IRenderable {
 	boolean isWorldEnabled(String world);
 	String getFormattedCooldown();
 	
+	String getName();
+	boolean isValid();
+	
 	QuestStatus getStatus(Player p);
 	int countFinishedTasks(Player p);
 	void handoutReward(Player p);

@@ -99,7 +99,7 @@ public class EditorCommand implements CommandExecutor {
 					for(IQuest quest : category.getQuests())
 						if(quest.getCooldown() == 0) {
 							// Administrative process - bypass events and directly modify quest
-							// 99% of the time you should use .getWriter() and .apply()
+							// 99% of the time you should use .getState() and .apply()
 							IQuestWrite q = (IQuestWrite)quest;
 							q.setCooldown(-1);
 							++changeCount;

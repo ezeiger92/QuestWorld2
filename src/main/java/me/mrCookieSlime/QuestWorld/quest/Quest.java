@@ -14,11 +14,9 @@ import me.mrCookieSlime.QuestWorld.util.ItemBuilder;
 import me.mrCookieSlime.QuestWorld.util.Text;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -89,7 +87,7 @@ class Quest extends Renderable implements IQuestWrite {
 	}
 	
 	// Package
-	public Quest(int id, YamlConfiguration file, Category category) {
+	Quest(int id, YamlConfiguration file, Category category) {
 		this.category = category;
 		this.id = id;
 		
@@ -153,63 +151,15 @@ class Quest extends Renderable implements IQuestWrite {
 		return new File(QuestWorld.getPath("data.questing"), id + "-C" + category.getID() + ".quest");
 	}
 	
-	private Location locationHelper(ConfigurationSection loc) {
-		/*World w = Bukkit.getWorld(loc.getString("world"));
-		double x = loc.getDouble("x");
-		double y = loc.getDouble("y");
-		double z = loc.getDouble("z");
-		float yaw = (float)loc.getDouble("yaw");
-		float pitch = (float)loc.getDouble("pitch");*/
-		return new Location(Bukkit.getWorld(loc.getString("world")), loc.getDouble("x"), loc.getDouble("y"),
-				loc.getDouble("z"), (float)loc.getDouble("yaw"), (float)loc.getDouble("pitch"));
-	}
-	
-	private void locationHelper(Location in, ConfigurationSection loc) {
-		loc.set("world", in.getWorld().getName());
-		loc.set("x", in.getX());
-		loc.set("y", in.getY());
-		loc.set("z", in.getZ());
-		loc.set("yaw", (double)in.getYaw());
-		loc.set("pitch", (double)in.getPitch());
-	}
-
 	private void loadMissions() {
 		ConfigurationSection missions = config.getConfigurationSection("missions");
 		if (missions == null)
 			return;
 
 		for (String key: missions.getKeys(false)) {
-			ConfigurationSection mission = missions.getConfigurationSection(key);
-			
-			if(mission.contains("citizen")) {
-				mission.set("custom_int", mission.get("custom_int", mission.get("citizen")));
-				mission.set("citizen", null);
-			}
-			
-			if(mission.contains("name")) {
-				mission.set("custom_string", mission.get("custom_string", mission.get("name")));
-				mission.set("name", null);
-			}
-
 			QuestChange changes = new QuestChange(this);
-			
-			changes.addMission(new Mission(this, key,
-					QuestWorld.getMissionType(mission.getString("type")),
-					EntityType.valueOf(mission.getString("entity")),
-					Text.colorize(mission.getString("custom_string")),
-					mission.getItemStack("item"),
-					locationHelper(mission.getConfigurationSection("location")),
-					mission.getInt("amount"),
-					Text.colorize(mission.getString("display-name")),
-					mission.getInt("timeframe"),
-					mission.getBoolean("reset-on-death"),
-					mission.getInt("custom_int"),
-					// not exclude = allow, what we want
-					!mission.getBoolean("exclude-spawners"),
-					Text.colorize(mission.getString("lore"))));
-			
-			if(changes.sendEvent())
-				changes.apply();
+			changes.addMission(new Mission(Integer.valueOf(key), missions.getConfigurationSection(key), this));
+			changes.apply();
 		}
 	}
 	
@@ -232,31 +182,17 @@ class Quest extends Renderable implements IQuestWrite {
 		config.set("world-blacklist", world_blacklist);
 		config.set("min-party-size", partysize);
 		
-		int index = 0;
+		config.set("rewards.items", rewards);
+		
+		/*int index = 0;
 		for (ItemStack reward: rewards) {
 			if (reward != null) {
 				config.set("rewards.items." + index, reward);
 				index++;
 			}
-		}
+		}*/
 		for (Mission mission: tasks) {
-			config.set("missions." + mission.getID() + ".type", mission.getType().toString());
-			config.set("missions." + mission.getID() + ".amount", mission.getAmount());
-			config.set("missions." + mission.getID() + ".item", new ItemStack(mission.getMissionItem()));
-			config.set("missions." + mission.getID() + ".entity", mission.getEntity().toString());
-			// TODO is this check still needed?
-			if (mission.getLocation() != null && mission.getLocation().getWorld() != null)
-				locationHelper(mission.getLocation(), config.createSection("missions." + mission.getID() + ".location"));
-			config.set("missions." + mission.getID() + ".display-name", Text.escape(mission.getDisplayName()));
-			config.set("missions." + mission.getID() + ".timeframe", mission.getTimeframe());
-			config.set("missions." + mission.getID() + ".reset-on-death", mission.resetsonDeath());
-			config.set("missions." + mission.getID() + ".lore", Text.escape(mission.getDescription()));
-			// Formerly ".citizen"
-			config.set("missions." + mission.getID() + ".custom_int", mission.getCustomInt());
-			// Formerly ".name"
-			config.set("missions." + mission.getID() + ".custom_string", Text.escape(mission.getCustomString()));
-			
-			config.set("missions." + mission.getID() + ".exclude-spawners", !mission.acceptsSpawners());
+			mission.save(config.createSection("missions." + mission.getID()));
 		}
 		if (parent != null) config.set("parent", String.valueOf(parent.getCategory().getID() + "-C" + parent.getID()));
 		else config.set("parent", null);
@@ -297,15 +233,22 @@ class Quest extends Renderable implements IQuestWrite {
 	}
 	
 	private List<ItemStack> loadRewards() {
-		List<ItemStack> items = new ArrayList<>();
+		@SuppressWarnings("unchecked")
+		List<ItemStack> newItems = (List<ItemStack>) config.getList("rewards.items");
+		
+		if(newItems != null)
+			return newItems;
+
+		List<ItemStack> oldItems = new ArrayList<>();
+		
 		ConfigurationSection rewards = config.getConfigurationSection("rewards.items");
 		if(rewards == null)
-			return items;
+			return oldItems;
 		
 		for(String key : rewards.getKeys(false))
-			items.add(rewards.getItemStack(key));
+			oldItems.add(rewards.getItemStack(key));
 		
-		return items;
+		return oldItems;
 	}
 	
 	public void setItemRewards(Player p) {

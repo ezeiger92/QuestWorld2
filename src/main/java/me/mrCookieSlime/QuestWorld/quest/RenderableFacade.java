@@ -19,15 +19,8 @@ public class RenderableFacade {
 		return new Quest(name, id, (Category)category);
 	}
 	
-	/*public Mission createMission(IQuest quest, String id, MissionType type, EntityType entity, String customString,
-			ItemStack item, Location location, int amount, String displayName, int timeframe,
-			boolean deathReset, int customInt, boolean spawnersAllowed, String description) {
-		return new Mission((Quest)quest, id, type, entity, customString, item, location, amount, displayName, timeframe,
-				deathReset, customInt, spawnersAllowed, description);
-	}*/
-	
-	public Mission createMission(IQuest quest, int id) {
-		return new Mission(String.valueOf(id), (Quest)quest);
+	public Mission createMission(int id, IQuest quest) {
+		return new Mission(id, (Quest)quest);
 	}
 	
 	static int[] splitQuestString(String in) {
@@ -85,7 +78,7 @@ public class RenderableFacade {
 		
 		for (ICategory category: categories) {
 			// Administrative process - bypass events and directly modify data
-			// 99% of the time you should use .getWriter() and .apply()
+			// 99% of the time you should use .getState() and .apply()
 			((Category)category).refreshParent();
 			
 			for (IQuest quest: category.getQuests())

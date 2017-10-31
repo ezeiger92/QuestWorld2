@@ -57,7 +57,7 @@ public class QBDialogue {
 							QuestWorld.getInstance().unregisterCategory(category);
 							p2.closeInventory();
 							QuestBook.openEditor(p2);
-							PlayerTools.sendTranslation(p2, true, Translation.CATEGORY_DELETED, q.getName());
+							PlayerTools.sendTranslation(p2, true, Translation.CATEGORY_DELETED, category.getName());
 						}
 					}
 					else if (q instanceof IQuest) {
@@ -71,7 +71,7 @@ public class QBDialogue {
 
 							p2.closeInventory();
 							QuestBook.openCategoryQuestEditor(p2, quest.getCategory());
-							PlayerTools.sendTranslation(p2, true, Translation.QUEST_DELETED, q.getName());
+							PlayerTools.sendTranslation(p2, true, Translation.QUEST_DELETED, quest.getName());
 						}
 					}
 					else if (q instanceof IMission) {
@@ -257,18 +257,27 @@ public class QBDialogue {
 							"",
 							"&7&oClick to select it as a Requirement",
 							"&7&ofor the Quest:",
-							"&r" + q.getName()).get(),
+							"&r" + quest.getName()).get(),
 					event -> {
 						Player p2 = (Player) event.getWhoClicked();
 						QuestWorld.getInstance().getManager(p2).popPage();
-						// TODO this is messy
-						//((QuestingObject)q).setParent(quest);
+
 						if (q instanceof IQuest) {
 							IQuest child = (IQuest)q;
+							
+							IQuestWrite changes = child.getState();
+							changes.setParent(quest);
+							changes.apply();
+							
 							QuestBook.openQuestEditor(p2, child);
 						}
 						else {
 							ICategory child = (ICategory)q;
+							
+							ICategoryWrite changes = child.getState();
+							changes.setParent(quest);
+							changes.apply();
+							
 							QuestBook.openCategoryEditor(p2, child);
 						}
 					}, false

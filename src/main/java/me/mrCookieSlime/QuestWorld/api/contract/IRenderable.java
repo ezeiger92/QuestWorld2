@@ -5,15 +5,11 @@ import org.bukkit.entity.Player;
 import me.mrCookieSlime.QuestWorld.api.annotation.NoImpl;
 
 @NoImpl
-public interface IRenderable {
-	long getLastModified();
-	long getUnique();
-	
-	String getName();
+public interface IRenderable {	
 	String getPermission();
 	
-	boolean hasPermission(Player p);
-	
-	boolean isValid();
-	int hashCode();
+	default boolean checkPermission(Player p) {
+		String permission = getPermission();
+		return permission.equals("") ? true: p.hasPermission(permission);
+	}
 }
