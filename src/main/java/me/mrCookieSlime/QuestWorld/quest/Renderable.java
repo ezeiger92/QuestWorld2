@@ -8,6 +8,11 @@ class Renderable {
 		return uniqueId;
 	}
 	
+	protected final void setUnique(long number) {
+		s_uniqueId = lastModified = number;
+		++s_uniqueId;
+	}
+	
 	private long lastModified = System.currentTimeMillis();
 	public long getLastModified() {
 		return lastModified;

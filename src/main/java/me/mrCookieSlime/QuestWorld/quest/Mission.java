@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -21,19 +22,17 @@ import me.mrCookieSlime.QuestWorld.util.Text;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-class Mission extends Renderable implements IMissionWrite, ConfigurationSerializable {
-	
+class Mission extends Renderable implements IMissionWrite {
+
 	Quest quest;
 	MissionType type;
 	ItemStack item;
 	int amount;
-	int id;
+	int menuIndex;
 	EntityType entity;
 	Location location;
 	String customString;
@@ -44,45 +43,18 @@ class Mission extends Renderable implements IMissionWrite, ConfigurationSerializ
 	int customInt;
 	boolean spawnersAllowed;
 	
-	ArrayList<String> dialogue = new ArrayList<String>();
+	ArrayList<String> dialogue = new ArrayList<>();
 	
 	// External
-	public Mission(int id, Quest quest) {
-		this.id = id;
-		this.quest = quest;
-		type = QuestWorld.getMissionType("SUBMIT");
+	public Mission(int menuIndex, Quest quest) {
 		loadDefaults();
+		this.menuIndex = menuIndex;
+		this.quest = quest;
 	}
 
 	// Package
-	Mission(int id, ConfigurationSection config, Quest quest) {
-		this.id = id;
-		this.quest = quest;
-		
-		if(config.contains("citizen")) {
-			config.set("custom_int", config.get("custom_int", config.get("citizen")));
-			config.set("citizen", null);
-		}
-		
-		if(config.contains("name")) {
-			config.set("custom_string", config.get("custom_string", config.get("name")));
-			config.set("name", null);
-		}
-		
-		type         = QuestWorld.getMissionType(config.getString("type"));
-		entity       = EntityType.valueOf(config.getString("entity"));
-		customString = Text.colorize(config.getString("custom_string", ""));
-		item         = config.getItemStack("item");
-		location     = locationHelper(config.getConfigurationSection("location"));
-		amount       = config.getInt("amount");
-		displayName  = Text.colorize(config.getString("display-name", ""));
-		timeframe    = config.getInt("timeframe");
-		deathReset   = config.getBoolean("reset-on-death");
-		customInt    = config.getInt("custom_int");
-		
-		// not exclude = allow, what we want
-		spawnersAllowed = !config.getBoolean("exclude-spawners");
-		description     = Text.colorize(config.getString("lore", ""));
+	Mission(Map<String, Object> data) {
+		loadMap(data);
 		loadDialogue();
 		
 		// Repair any quests that would have been broken by updates, namely location quests
@@ -91,43 +63,27 @@ class Mission extends Renderable implements IMissionWrite, ConfigurationSerializ
 		changes.apply();
 	}
 	
+	protected void loadDefaults() {
+		loadMap(new HashMap<>());
+	}
+	
+	protected void copy(Mission source) {
+		loadMap(source.serialize());
+		quest = source.quest;
+
+		dialogue = new ArrayList<>();
+		dialogue.addAll(source.dialogue);
+		
+		updateLastModified();
+	}
+	
+	protected void copyTo(Mission dest) {
+		dest.copy(this);
+	}
+	
 	File getDialogueFile() {
 		return new File(QuestWorld.getPath("data.dialogue"), quest.getCategory().getID()
 				+ "+" + quest.getID() + "+" + getID() + ".txt");
-	}
-	
-	void save(ConfigurationSection config) {
-		config.set("type", getType().toString());
-		config.set("amount", getAmount());
-		config.set("item", getMissionItem().clone());
-		config.set("entity", getEntity().toString());
-		// TODO is this check still needed?
-		if (getLocation() != null && getLocation().getWorld() != null)
-			locationHelper(getLocation(), config.createSection("location"));
-		config.set("display-name", Text.escape(getDisplayName()));
-		config.set("timeframe", getTimeframe());
-		config.set("reset-on-death", resetsonDeath());
-		config.set("lore", Text.escape(getDescription()));
-		// Formerly ".citizen"
-		config.set("custom_int", getCustomInt());
-		// Formerly ".name"
-		config.set("custom_string", Text.escape(getCustomString()));
-		
-		config.set("exclude-spawners", !acceptsSpawners());
-	}
-	
-	private Location locationHelper(ConfigurationSection loc) {
-		return new Location(Bukkit.getWorld(loc.getString("world")), loc.getDouble("x"), loc.getDouble("y"),
-				loc.getDouble("z"), (float)loc.getDouble("yaw"), (float)loc.getDouble("pitch"));
-	}
-	
-	private void locationHelper(Location in, ConfigurationSection loc) {
-		loc.set("world", in.getWorld().getName());
-		loc.set("x", in.getX());
-		loc.set("y", in.getY());
-		loc.set("z", in.getZ());
-		loc.set("yaw", (double)in.getYaw());
-		loc.set("pitch", (double)in.getPitch());
 	}
 	
 	private void loadDialogue() {
@@ -140,53 +96,9 @@ class Mission extends Renderable implements IMissionWrite, ConfigurationSerializ
 			}
 		}
 	}
-	
-	protected void loadDefaults() {
-		item = new ItemStack(Material.STONE);
-		amount = 1;
-		entity = EntityType.PLAYER;
-		customString = "";
-		location = new Location(Bukkit.getWorlds().get(0), 0, 64, 0);
-		displayName = null;
-		timeframe = 0;
-		deathReset = false;
-		customInt = 0;
-		spawnersAllowed = true;
-		description = "Hey there! Do this Quest.";
-	}
-	
-	protected Mission(Mission source) {
-		copy(source);
-	}
-	
-	protected void copy(Mission source) {
-		quest = source.quest;
-		type = source.type;
-		item = source.item.clone();
-		amount = source.amount;
-		id = source.id;
-		entity = source.entity;
-		location = source.location.clone();
-		customString = source.customString;
-		displayName = source.displayName;
-		timeframe = source.timeframe;
-		deathReset = source.deathReset;
-		description = source.description;
-		customInt = source.customInt;
-		spawnersAllowed = source.spawnersAllowed;
-
-		dialogue = new ArrayList<String>();
-		dialogue.addAll(source.dialogue);
-		
-		updateLastModified();
-	}
-	
-	protected void copyTo(Mission dest) {
-		dest.copy(this);
-	}
 
 	public int getID() {
-		return id;
+		return menuIndex;
 	}
 	
 	public Quest getQuest() {
@@ -198,7 +110,7 @@ class Mission extends Renderable implements IMissionWrite, ConfigurationSerializ
 	}
 	
 	public String getText() {
-		if (getDisplayName() != null)
+		if (getDisplayName().length() > 0)
 			return getDisplayName();
 
 		return type.userDescription(this);
@@ -209,7 +121,7 @@ class Mission extends Renderable implements IMissionWrite, ConfigurationSerializ
 	}
 
 	public ItemStack getDisplayItem() {
-		return type.userDisplayItem(this);
+		return type.userDisplayItem(this).clone();
 	}
 	
 	public void setItem(ItemStack item) {
@@ -397,14 +309,76 @@ class Mission extends Renderable implements IMissionWrite, ConfigurationSerializ
 	public boolean hasChange(Member field) {
 		return true;
 	}
-
-	@Override
-	public Map<String, Object> serialize() {
-		// TODO Auto-generated method stub
-		return null;
+	
+	private static Location locationHelper(Map<String, Object> data) {
+		String defaultWorld = Bukkit.getWorlds().get(0).getName();
+		return new Location(
+				Bukkit.getWorld((String)data.getOrDefault("world", defaultWorld)),
+				(Double)data.getOrDefault("x", 0.0),
+				(Double)data.getOrDefault("y", 64.0),
+				(Double)data.getOrDefault("z", 0.0),
+				((Double)data.getOrDefault("yaw", 0.0)).floatValue(),
+				((Double)data.getOrDefault("pitch", 0.0)).floatValue());
 	}
 	
-	public static Mission deserialize(Map<String, Object> data) {
-		return null;
+	private static Map<String, Object> locationHelper(Location location) {
+		HashMap<String, Object> result = new HashMap<>();
+		
+		result.put("world", location.getWorld().getName());
+		result.put("x", location.getX());
+		result.put("y", location.getY());
+		result.put("z", location.getZ());
+		result.put("yaw", (double)location.getYaw());
+		result.put("pitch", (double)location.getPitch());
+		
+		return result;
+	}
+
+	public Map<String, Object> serialize() {
+		HashMap<String, Object> result = new HashMap<>();
+
+		result.put("unique",   (int)getUnique());
+		result.put("quest",    quest);
+		result.put("type",     type.toString());
+		result.put("item",     item);
+		result.put("amount",   amount);
+		result.put("entity",   entity.toString());
+		result.put("location", locationHelper(location));
+		result.put("menu_index",    menuIndex);
+		result.put("custom_string", Text.escape(customString));
+		result.put("display-name",  Text.escape(displayName));
+		result.put("timeframe",     timeframe);
+		result.put("deathReset",    deathReset);
+		result.put("lore",          Text.escape(description));
+		result.put("custom_int",    customInt);
+		result.put("exclude-spawners", !spawnersAllowed);
+		
+		return result;
+	}
+
+	@SuppressWarnings("unchecked")
+	private void loadMap(Map<String, Object> data) {
+		setUnique((Integer)data.getOrDefault("unique", (int)getUnique()));
+		
+		quest    = (Quest)data.get("quest");
+		type     = QuestWorld.getMissionType((String)data.getOrDefault("type", "SUBMIT"));
+		item     = (ItemStack)data.getOrDefault("item", new ItemStack(Material.STONE));
+		amount   = (Integer)data.getOrDefault("amount", 1);
+		entity   = EntityType.PLAYER;
+		try { entity = EntityType.valueOf((String)data.get("entity")); }
+		catch(Exception e) {}
+		location = locationHelper((Map<String, Object>)data.get("location"));
+		menuIndex    = (Integer)data.getOrDefault("menu_index", -1);
+		// Chain to handle old name
+		customString = (String)data.getOrDefault("name", "");
+		customString = Text.colorize((String)data.getOrDefault("custom_string", customString));
+		displayName  = Text.colorize((String)data.getOrDefault("display-name", ""));
+		timeframe    = (Integer)data.getOrDefault("timeframe", 0);
+		deathReset   = (Boolean)data.getOrDefault("reset-on-death", false);
+		description  = Text.colorize((String)data.getOrDefault("lore", "Hey there! Do this Quest."));
+		// Chain to handle old name
+		customInt    = (Integer)data.getOrDefault("citizen", 0);
+		customInt    = (Integer)data.getOrDefault("custom_int", customInt);
+		spawnersAllowed = !(Boolean)data.getOrDefault("exclude-spawners", false);
 	}
 }

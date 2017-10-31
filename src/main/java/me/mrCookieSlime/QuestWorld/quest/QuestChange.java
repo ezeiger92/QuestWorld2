@@ -17,6 +17,7 @@ class QuestChange extends Quest {
 	
 	public QuestChange(Quest copy) {
 		super(copy);
+		setUnique(copy.getUnique());
 		origin = copy;
 	}
 	

@@ -32,7 +32,7 @@ public class LocationMission extends MissionType implements Ticking {
 	
 	@Override
 	public ItemStack userDisplayItem(IMission instance) {
-		return getSelectorItem().clone();
+		return new ItemBuilder(getSelectorItem()).display(coordinateString(instance.getLocation())).get();
 	}
 	
 	@Override

@@ -268,4 +268,16 @@ class Category extends Renderable implements ICategoryWrite {
 	public boolean hasChange(Member field) {
 		return true;
 	}
+	
+	Category(Map<String, Object> data) {
+		loadMap(data);
+	}
+	
+	public Map<String, Object> serialize() {
+		return null;
+	}
+	
+	private void loadMap(Map<String, Object> data) {
+		
+	}
 }

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.QuestStatus;
@@ -157,8 +158,19 @@ class Quest extends Renderable implements IQuestWrite {
 			return;
 
 		for (String key: missions.getKeys(false)) {
+			// TODO mess
 			QuestChange changes = new QuestChange(this);
-			changes.addMission(new Mission(Integer.valueOf(key), missions.getConfigurationSection(key), this));
+			Map<String, Object> data = missions.getConfigurationSection(key).getValues(false);
+			// For getValues wont recurse through sections, so we have to manually map to... map
+			data.put("location", ((ConfigurationSection)data.get("location")).getValues(false));
+			
+			data.put("menu_index", Integer.valueOf(key));
+			data.put("quest", this);
+				
+			Mission m = new Mission(data);
+			m.quest = this;
+			//new Mission(Integer.valueOf(key), missions.getConfigurationSection(key), this)
+			changes.addMission(m);
 			changes.apply();
 		}
 	}
@@ -192,7 +204,11 @@ class Quest extends Renderable implements IQuestWrite {
 			}
 		}*/
 		for (Mission mission: tasks) {
-			mission.save(config.createSection("missions." + mission.getID()));
+			Map<String, Object> data = mission.serialize();
+			// TODO keep a quest id
+			data.remove("quest");
+			config.set("missions." + mission.getID(), data);
+			//mission.save(config.createSection("missions." + mission.getID()));
 		}
 		if (parent != null) config.set("parent", String.valueOf(parent.getCategory().getID() + "-C" + parent.getID()));
 		else config.set("parent", null);
@@ -476,5 +492,17 @@ class Quest extends Renderable implements IQuestWrite {
 	@Override
 	public boolean hasChange(Member field) {
 		return true;
+	}
+	
+	Quest(Map<String, Object> data) {
+		loadMap(data);
+	}
+	
+	public Map<String, Object> serialize() {
+		return null;
+	}
+	
+	private void loadMap(Map<String, Object> data) {
+		
 	}
 }

@@ -18,7 +18,8 @@ class MissionChange extends Mission {
 	private Mission origin;
 	
 	public MissionChange(Mission copy) {
-		super(copy);
+		super(copy.serialize());
+		setUnique(copy.getUnique());
 		origin = copy;
 	}
 	
@@ -82,12 +83,12 @@ class MissionChange extends Mission {
 
 	@Override
 	public void setType(MissionType type) {
-		super.setType(type);
 		// TODO RIP migrateFrom
 		if(true) {
 			loadDefaults();
 			changeBits |= BitString.ALL;
 		}
+		super.setType(type);
 		changeBits |= BitFlag.getBits(Member.TYPE);
 	}
 

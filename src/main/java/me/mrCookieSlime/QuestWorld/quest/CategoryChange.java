@@ -15,6 +15,7 @@ class CategoryChange extends Category {
 	
 	public CategoryChange(Category copy) {
 		super(copy);
+		setUnique(copy.getUnique());
 		origin = copy;
 	}
 	
