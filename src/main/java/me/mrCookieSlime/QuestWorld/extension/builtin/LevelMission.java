@@ -9,7 +9,7 @@ import org.bukkit.inventory.ItemStack;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
-import me.mrCookieSlime.QuestWorld.api.contract.IMissionWrite;
+import me.mrCookieSlime.QuestWorld.api.contract.IMissionState;
 import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
 
 public class LevelMission extends MissionType implements Listener {
@@ -33,7 +33,7 @@ public class LevelMission extends MissionType implements Listener {
 	}
 	
 	@Override
-	protected void layoutMenu(IMissionWrite changes) {
+	protected void layoutMenu(IMissionState changes) {
 		super.layoutMenu(changes);
 		putButton(17, MissionButton.amount(changes));
 	}

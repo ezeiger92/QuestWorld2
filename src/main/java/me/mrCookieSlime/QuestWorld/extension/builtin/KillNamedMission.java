@@ -9,14 +9,15 @@ import org.bukkit.inventory.ItemStack;
 
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
-import me.mrCookieSlime.QuestWorld.api.contract.IMissionWrite;
+import me.mrCookieSlime.QuestWorld.api.contract.IMissionState;
 import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
 import me.mrCookieSlime.QuestWorld.util.EntityTools;
 import me.mrCookieSlime.QuestWorld.util.ItemBuilder;
-import me.mrCookieSlime.QuestWorld.util.Text;
 
 public class KillNamedMission extends KillMission {
-	private static enum MatchType {
+	private static final int EXACT = 0;
+	private static final int CONTAINS = 1;
+	/*private static enum MatchType {
 		EXACT,
 		CONTAINS,
 		;
@@ -52,7 +53,7 @@ public class KillNamedMission extends KillMission {
 		case CONTAINS: return pile.contains(search);
 		default:       return false;
 		}
-	}
+	}*/
 	
 	public KillNamedMission() {
 		setName("KILL_NAMED_MOB");
@@ -83,24 +84,21 @@ public class KillNamedMission extends KillMission {
 		QuestWorld.getInstance().getManager(killer).forEachTaskOf(this, mission -> {
 			return mission.getEntity() == e.getEntityType()
 					&& (mission.acceptsSpawners() || !EntityTools.isFromSpawner(e.getEntity()))
-					&& search(MatchType.at(mission.getCustomInt()), mission.getCustomString(), name);
+					&& ((mission.getCustomInt() == EXACT && mission.getCustomString().equals(name))
+					|| (mission.getCustomInt() == CONTAINS && mission.getCustomString().contains(name)));
 		});
 	}
 	
 	@Override
-	protected void layoutMenu(IMissionWrite changes) {
+	protected void layoutMenu(IMissionState changes) {
 		super.layoutMenu(changes);
 		putButton(12, MissionButton.entityName(changes));
 		putButton(16, MissionButton.simpleButton(
 				changes,
 				new ItemBuilder(Material.BEDROCK).display("&7Match Type")	
-				.selector(changes.getSource().getCustomInt(), MatchType.stringValues()).get(),
+				.selector(changes.getSource().getCustomInt(), "Exact", "Contains").get(),
 				event -> {
-					int delta = 1;
-					if(event.isRightClick())
-						delta = -1;
-					
-					changes.setCustomInt(MatchType.at(changes.getCustomInt()).scroll(delta).ordinal());
+					changes.setCustomInt(1 - changes.getCustomInt());
 					if(changes.apply()) {
 						
 					}

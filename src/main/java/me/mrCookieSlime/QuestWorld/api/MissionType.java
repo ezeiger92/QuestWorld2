@@ -1,7 +1,7 @@
 package me.mrCookieSlime.QuestWorld.api;
 
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
-import me.mrCookieSlime.QuestWorld.api.contract.IMissionWrite;
+import me.mrCookieSlime.QuestWorld.api.contract.IMissionState;
 import me.mrCookieSlime.QuestWorld.api.menu.Menu;
 import me.mrCookieSlime.QuestWorld.api.menu.MenuData;
 import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
@@ -77,7 +77,7 @@ public abstract class MissionType {
 		name = newName;
 	}
 	
-	public boolean attemptUpgrade(IMissionWrite instance) {
+	public boolean attemptUpgrade(IMissionState instance) {
 		return false;
 	}
 	
@@ -85,7 +85,8 @@ public abstract class MissionType {
 		selectorItem = material.clone();
 	}
 	
-	public String progressString(float percent, int current, int total) {
+	public String progressString(int current, int total) {
+		float percent = current / (float)total;
 		return Math.round(percent * 100) + "% (" + current + "/" + total + ")";
 	}
 	
@@ -101,13 +102,13 @@ public abstract class MissionType {
 		return menuData.remove(index);
 	}
 	
-	public final void buildMenu(IMissionWrite changes, Menu menu) {
+	public final void buildMenu(IMissionState changes, Menu menu) {
 		layoutMenu(changes);
 		for(Map.Entry<Integer, MenuData> entry : menuData.entrySet())
 			menu.put(entry.getKey(), entry.getValue().getItem(), entry.getValue().getHandler());
 	}
 	
-	protected void layoutMenu(IMissionWrite changes) {
+	protected void layoutMenu(IMissionState changes) {
 		if(supportsDeathReset()) putButton(5, MissionButton.deathReset(changes));
 		if(supportsTimeframes()) putButton(6, MissionButton.timeframe(changes));
 		putButton(7, MissionButton.missionName(changes));

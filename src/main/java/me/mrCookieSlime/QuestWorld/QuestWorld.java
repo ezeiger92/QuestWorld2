@@ -213,7 +213,7 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 			c.save(force);
 		
 		for(PlayerManager p : profiles.values())
-			p.save();
+			p.getTracker().save();
 		
 		lastSave = System.currentTimeMillis();
 	}
@@ -224,7 +224,7 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 		categories.clear();
 		
 		for(PlayerManager p : profiles.values())
-			p.save();
+			p.getTracker().save();
 		profiles.clear();
 	}
 	
@@ -334,12 +334,21 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 	}
 	
 	public PlayerManager getManager(UUID uuid) {
-		return profiles.containsKey(uuid) ? profiles.get(uuid): new PlayerManager(uuid);
+		PlayerManager manager = profiles.get(uuid);
+		if(manager == null) {
+			manager = new PlayerManager(uuid);
+			profiles.put(uuid, manager);
+		}
+		return manager;
 	}
 	
 	// This was changed to AnimalTamer because it's the most basic interface with getUniqueId
 	public PlayerManager getManager(AnimalTamer player) {
 		return getManager(player.getUniqueId());
+	}
+	
+	public Collection<PlayerManager> getManagers() {
+		return profiles.values();
 	}
 	
 	@Override

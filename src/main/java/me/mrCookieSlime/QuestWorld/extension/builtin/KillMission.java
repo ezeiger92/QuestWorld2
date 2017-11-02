@@ -12,7 +12,7 @@ import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.Decaying;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
-import me.mrCookieSlime.QuestWorld.api.contract.IMissionWrite;
+import me.mrCookieSlime.QuestWorld.api.contract.IMissionState;
 import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
 import me.mrCookieSlime.QuestWorld.util.EntityTools;
 import me.mrCookieSlime.QuestWorld.util.Text;
@@ -47,7 +47,7 @@ public class KillMission extends MissionType implements Listener, Decaying {
 	}
 	
 	@Override
-	protected void layoutMenu(IMissionWrite changes) {
+	protected void layoutMenu(IMissionState changes) {
 		super.layoutMenu(changes);
 		putButton(10, MissionButton.entity(changes));
 		putButton(11, MissionButton.spawnersAllowed(changes));

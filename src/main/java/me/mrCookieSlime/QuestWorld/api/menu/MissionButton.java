@@ -10,7 +10,7 @@ import org.bukkit.inventory.ItemStack;
 
 import me.mrCookieSlime.QuestWorld.api.SinglePrompt;
 import me.mrCookieSlime.QuestWorld.api.Translation;
-import me.mrCookieSlime.QuestWorld.api.contract.IMissionWrite;
+import me.mrCookieSlime.QuestWorld.api.contract.IMissionState;
 import me.mrCookieSlime.QuestWorld.manager.PlayerManager;
 import me.mrCookieSlime.QuestWorld.util.EntityTools;
 import me.mrCookieSlime.QuestWorld.util.ItemBuilder;
@@ -18,7 +18,7 @@ import me.mrCookieSlime.QuestWorld.util.PlayerTools;
 import me.mrCookieSlime.QuestWorld.util.Text;
 
 public class MissionButton {
-	public static MenuData item(IMissionWrite changes) {
+	public static MenuData item(IMissionState changes) {
 		return simpleButton(changes,
 				new ItemBuilder(changes.getMissionItem()).lore(
 						"",
@@ -33,11 +33,11 @@ public class MissionButton {
 		);
 	}
 
-	public static MenuData amount(IMissionWrite changes) {
+	public static MenuData amount(IMissionState changes) {
 		return amount(changes, 16);
 	}
 	
-	public static MenuData amount(IMissionWrite changes, int groupSize) {
+	public static MenuData amount(IMissionState changes, int groupSize) {
 		return simpleButton(changes,
 				new ItemBuilder(Material.REDSTONE).display("&7Amount: &b" + changes.getAmount()).lore(
 						"",
@@ -52,7 +52,7 @@ public class MissionButton {
 		);
 	}
 	
-	public static MenuData entity(IMissionWrite changes) {
+	public static MenuData entity(IMissionState changes) {
 		EntityType entity = changes.getEntity();
 		String entityName = Text.niceName(entity.toString());
 		
@@ -70,7 +70,7 @@ public class MissionButton {
 		);
 	}
 	
-	public static MenuData location(IMissionWrite changes) {
+	public static MenuData location(IMissionState changes) {
 		return simpleButton(changes,
 				// TODO: "Location: {print location}"
 				new ItemBuilder(changes.getDisplayItem()).lore(
@@ -83,7 +83,7 @@ public class MissionButton {
 		);
 	}
 	
-	public static MenuData entityName(IMissionWrite changes) {
+	public static MenuData entityName(IMissionState changes) {
 		return new MenuData(
 				new ItemBuilder(Material.NAME_TAG)
 				.display("&r" + changes.getCustomString()).lore(
@@ -108,7 +108,7 @@ public class MissionButton {
 		);
 	}
 	
-	public static MenuData missionName(IMissionWrite changes) {
+	public static MenuData missionName(IMissionState changes) {
 		return new MenuData(
 				new ItemBuilder(Material.NAME_TAG).display("").lore(
 						changes.getText(),
@@ -140,7 +140,7 @@ public class MissionButton {
 		);
 	}
 
-	public static MenuData timeframe(IMissionWrite changes) {
+	public static MenuData timeframe(IMissionState changes) {
 		return simpleButton(changes,
 				new ItemBuilder(Material.WATCH)
 				.display("&7Complete Mission within: &b" + Text.timeFromNum(changes.getTimeframe())).lore(
@@ -156,7 +156,7 @@ public class MissionButton {
 		);
 	}
 	
-	public static MenuData deathReset(IMissionWrite changes) {
+	public static MenuData deathReset(IMissionState changes) {
 		return simpleButton(changes,
 				new ItemBuilder(Material.SKULL_ITEM)
 				.display("&7Resets on Death: " + (changes.resetsonDeath() ? "&2&l\u2714": "&4&l\u2718")).lore(
@@ -169,7 +169,7 @@ public class MissionButton {
 		);
 	}
 	
-	public static MenuData spawnersAllowed(IMissionWrite changes) {
+	public static MenuData spawnersAllowed(IMissionState changes) {
 		return simpleButton(changes,
 				new ItemBuilder(Material.MOB_SPAWNER)
 				.display("&7Allow Mobs from Spawners: " + (changes.acceptsSpawners() ? "&2&l\u2714": "&4&l\u2718")).lore(
@@ -182,7 +182,7 @@ public class MissionButton {
 		);
 	}
 	
-	public static MenuData dialogue(IMissionWrite changes) {
+	public static MenuData dialogue(IMissionState changes) {
 		return new MenuData(
 				new ItemBuilder(Material.PAPER).display("&rDialogue").lore(
 						"",
@@ -205,14 +205,14 @@ public class MissionButton {
 		);
 	}
 	
-	public static void apply(InventoryClickEvent event, IMissionWrite changes) {
+	public static void apply(InventoryClickEvent event, IMissionState changes) {
 		if(changes.apply()) {
 			// TODO remove QuestBook from here, somehow
 			QuestBook.openQuestMissionEditor((Player) event.getWhoClicked(), changes);
 		}
 	}
 
-	public static MenuData simpleButton(IMissionWrite changes, ItemStack item, Consumer<InventoryClickEvent> action)  {
+	public static MenuData simpleButton(IMissionState changes, ItemStack item, Consumer<InventoryClickEvent> action)  {
 		return new MenuData(item, action.andThen(event -> apply(event, changes)));
 	}
 	

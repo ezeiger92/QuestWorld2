@@ -9,22 +9,24 @@ import me.mrCookieSlime.QuestWorld.api.QuestStatus;
 import me.mrCookieSlime.QuestWorld.api.annotation.NoImpl;
 
 @NoImpl
-public interface ICategory extends IRenderable {
+public interface ICategory extends IStateful {
 	int getID();
-	ItemStack getItem();
-	IQuest getQuest(int i);
-	Collection<? extends IQuest> getQuests();
-	IQuest getParent();
 	boolean isHidden();
+	String getName();
+	String getPermission();
+	ItemStack getItem();
+	IQuest getParent();
+	Collection<? extends IQuest> getQuests();
+	// getWorlds
+
+	IQuest getQuest(int i);
 	boolean isWorldEnabled(String world);
 	
-	String getName();
-	boolean isValid();
-	
-	String getProgress(Player p);
-	int countQuests(Player p, QuestStatus onCooldown);
+	int countQuests(Player p, QuestStatus status);
 	int countFinishedQuests(Player p);
 	
-	ICategoryWrite getState();
+	@Override
+	ICategoryState getState();
+	@Deprecated
 	void save(boolean force);
 }

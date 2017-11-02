@@ -7,8 +7,13 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 
+import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.menu.Menu;
+import me.mrCookieSlime.QuestWorld.event.CategoryDeleteEvent;
+import me.mrCookieSlime.QuestWorld.event.MissionDeleteEvent;
+import me.mrCookieSlime.QuestWorld.event.QuestDeleteEvent;
 import me.mrCookieSlime.QuestWorld.manager.MenuManager;
+import me.mrCookieSlime.QuestWorld.manager.PlayerManager;
 
 public class MenuListener implements Listener {
 
@@ -42,5 +47,26 @@ public class MenuListener implements Listener {
 					event.setCancelled(true);
 					return;
 				}
+	}
+	
+	@EventHandler(ignoreCancelled = true)
+	public void onCategoryDelete(CategoryDeleteEvent event) {
+		for(PlayerManager manager : QuestWorld.getInstance().getManagers()) {
+			if(event.getCategory() == manager.getLastEntry() ||
+					event.getCategory().getQuests().contains(manager.getLastEntry()))
+				manager.setLastEntry(null);
+		}
+	}
+	
+	@EventHandler(ignoreCancelled = true)
+	public void onQuestDelete(QuestDeleteEvent event) {
+		for(PlayerManager manager : QuestWorld.getInstance().getManagers()) {
+			if(event.getQuest() == manager.getLastEntry())
+				manager.setLastEntry(event.getQuest().getCategory());
+		}
+	}
+	
+	@EventHandler(ignoreCancelled = true)
+	public void onMissionDelete(MissionDeleteEvent event) {
 	}
 }

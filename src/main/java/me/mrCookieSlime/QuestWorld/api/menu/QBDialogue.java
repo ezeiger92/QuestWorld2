@@ -3,12 +3,12 @@ package me.mrCookieSlime.QuestWorld.api.menu;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
-import me.mrCookieSlime.QuestWorld.api.contract.ICategoryWrite;
+import me.mrCookieSlime.QuestWorld.api.contract.ICategoryState;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
-import me.mrCookieSlime.QuestWorld.api.contract.IMissionWrite;
+import me.mrCookieSlime.QuestWorld.api.contract.IMissionState;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
-import me.mrCookieSlime.QuestWorld.api.contract.IQuestWrite;
-import me.mrCookieSlime.QuestWorld.api.contract.IRenderable;
+import me.mrCookieSlime.QuestWorld.api.contract.IQuestState;
+import me.mrCookieSlime.QuestWorld.api.contract.IStateful;
 import me.mrCookieSlime.QuestWorld.container.PagedMapping;
 import me.mrCookieSlime.QuestWorld.event.CancellableEvent;
 import me.mrCookieSlime.QuestWorld.event.CategoryDeleteEvent;
@@ -26,7 +26,7 @@ import org.bukkit.entity.Player;
 import com.google.gson.JsonObject;
 
 public class QBDialogue {
-	public static void openDeletionConfirmation(Player p, final IRenderable q) {
+	public static void openDeletionConfirmation(Player p, final IStateful q) {
 		QuestWorld.getSounds().DESTRUCTIVE_WARN.playTo(p);
 		
 		Menu menu = new Menu(1, "&4&lAre you Sure?");
@@ -65,7 +65,7 @@ public class QBDialogue {
 						if(CancellableEvent.send(new QuestDeleteEvent(quest))) {
 							PlayerManager.clearAllQuestData(quest);
 							
-							ICategoryWrite changes = quest.getCategory().getState();
+							ICategoryState changes = quest.getCategory().getState();
 							changes.removeQuest(quest);
 							//changes.apply(); 
 
@@ -77,7 +77,7 @@ public class QBDialogue {
 					else if (q instanceof IMission) {
 						IMission mission = (IMission)q;
 						if(CancellableEvent.send(new MissionDeleteEvent(mission))) {
-							IQuestWrite changes = mission.getQuest().getState();
+							IQuestState changes = mission.getQuest().getState();
 							changes.removeMission(mission);
 							changes.apply();
 							
@@ -115,7 +115,7 @@ public class QBDialogue {
 	public static void openQuestMissionEntityEditor(Player p, final IMission mission) {
 		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
 		
-		IMissionWrite changes = mission.getState();
+		IMissionState changes = mission.getState();
 		//String title = Text.colorize(mission.getQuest().getName() + " &7- &8(Page " + (page+1) + "/" + (lastPage+1) + ")");
 		final Menu menu = new Menu(6, "&3Entity Selector: " + mission.getQuest().getName());
 		
@@ -218,7 +218,7 @@ public class QBDialogue {
 		}
 	}
 
-	public static void openQuestRequirementChooser(Player p, final IRenderable quest) {
+	public static void openQuestRequirementChooser(Player p, final IStateful quest) {
 		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
 		
 		Menu menu = new Menu(1, "&c&lQuest Editor");
@@ -245,7 +245,7 @@ public class QBDialogue {
 		menu.openFor(p);
 	}
 
-	private static void openQuestRequirementChooser2(Player p, final IRenderable q, ICategory category) {
+	private static void openQuestRequirementChooser2(Player p, final IStateful q, ICategory category) {
 		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
 		
 		Menu menu = new Menu(1, "&c&lQuest Editor");
@@ -265,7 +265,7 @@ public class QBDialogue {
 						if (q instanceof IQuest) {
 							IQuest child = (IQuest)q;
 							
-							IQuestWrite changes = child.getState();
+							IQuestState changes = child.getState();
 							changes.setParent(quest);
 							changes.apply();
 							
@@ -274,7 +274,7 @@ public class QBDialogue {
 						else {
 							ICategory child = (ICategory)q;
 							
-							ICategoryWrite changes = child.getState();
+							ICategoryState changes = child.getState();
 							changes.setParent(quest);
 							changes.apply();
 							

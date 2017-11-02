@@ -9,7 +9,7 @@ import me.mrCookieSlime.QuestWorld.api.QuestStatus;
 import me.mrCookieSlime.QuestWorld.api.annotation.NoImpl;
 
 @NoImpl
-public interface IQuest extends IRenderable {
+public interface IQuest extends IStateful {
 	int getID();
 	List<? extends IMission> getMissions();
 	ItemStack getItem();
@@ -28,13 +28,13 @@ public interface IQuest extends IRenderable {
 	boolean isAutoClaiming();
 	boolean isWorldEnabled(String world);
 	String getFormattedCooldown();
+	String getPermission();
 	
 	String getName();
-	boolean isValid();
 	
 	QuestStatus getStatus(Player p);
 	int countFinishedTasks(Player p);
 	void handoutReward(Player p);
 	
-	IQuestWrite getState();
+	IQuestState getState();
 }

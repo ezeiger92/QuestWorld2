@@ -65,7 +65,7 @@ public class PlayerListener implements Listener {
 	
 	@EventHandler
 	public void onJoin(PlayerJoinEvent e) {
-		if (!QuestWorld.getInstance().getManager(e.getPlayer()).getFile().exists()
+		if (!QuestWorld.getInstance().getManager(e.getPlayer()).getTracker().exists()
 				&& QuestWorld.getInstance().getConfig().getBoolean("book.on-first-join"))
 			e.getPlayer().getInventory().addItem(GuideBook.get());
 	}

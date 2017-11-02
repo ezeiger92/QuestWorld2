@@ -3,15 +3,15 @@ package me.mrCookieSlime.QuestWorld.event;
 import org.bukkit.event.HandlerList;
 
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
-import me.mrCookieSlime.QuestWorld.api.contract.IQuestWrite;
+import me.mrCookieSlime.QuestWorld.api.contract.IQuestState;
 
 /**
  * An event fired before applying a set of changes to a quest
  */
 public class QuestChangeEvent extends CancellableEvent {
-	private IQuestWrite nextState;
+	private IQuestState nextState;
 
-	public QuestChangeEvent(IQuestWrite nextState) {
+	public QuestChangeEvent(IQuestState nextState) {
 		this.nextState = nextState;
 	}
 
@@ -19,11 +19,11 @@ public class QuestChangeEvent extends CancellableEvent {
 		return nextState.getSource();
 	}
 
-	public IQuestWrite getNextState() {
+	public IQuestState getNextState() {
 		return nextState;
 	}
 	
-	public boolean hasChange(IQuestWrite.Member field) {
+	public boolean hasChange(IQuestState.Member field) {
 		return nextState.hasChange(field);
 	}
 	

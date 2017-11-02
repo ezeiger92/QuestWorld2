@@ -3,12 +3,12 @@ package me.mrCookieSlime.QuestWorld.event;
 import org.bukkit.event.HandlerList;
 
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
-import me.mrCookieSlime.QuestWorld.api.contract.IMissionWrite;
+import me.mrCookieSlime.QuestWorld.api.contract.IMissionState;
 
 public class MissionChangeEvent extends CancellableEvent {
-	private IMissionWrite nextState;
+	private IMissionState nextState;
 	
-	public MissionChangeEvent(IMissionWrite nextState) {
+	public MissionChangeEvent(IMissionState nextState) {
 		this.nextState = nextState;
 	}
 	
@@ -16,11 +16,11 @@ public class MissionChangeEvent extends CancellableEvent {
 		return nextState.getSource();
 	}
 
-	public IMissionWrite getNextState() {
+	public IMissionState getNextState() {
 		return nextState;
 	}
 	
-	public boolean hasChange(IMissionWrite.Member field) {
+	public boolean hasChange(IMissionState.Member field) {
 		return nextState.hasChange(field);
 	}
 	

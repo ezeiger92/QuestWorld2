@@ -10,7 +10,7 @@ import me.mrCookieSlime.QuestWorld.api.annotation.NoImpl;
 import me.mrCookieSlime.QuestWorld.util.BitFlag.BitString;
 
 @NoImpl
-public interface IMissionWrite extends IMission {
+public interface IMissionState extends IMission {
 	void setItem(ItemStack item);
 	void setEntity(EntityType entity);
 	void setCustomString(String customString);

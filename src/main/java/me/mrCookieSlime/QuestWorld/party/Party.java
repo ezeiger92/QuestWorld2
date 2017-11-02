@@ -1,9 +1,7 @@
 package me.mrCookieSlime.QuestWorld.party;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 import me.mrCookieSlime.QuestWorld.QuestWorld;
@@ -20,30 +18,21 @@ import com.google.gson.JsonObject;
 public class Party {
 	
 	UUID leader;
-	Set<UUID> members;
 	PlayerManager manager;
-	Set<UUID> pending;
+	ArrayList<UUID> members = new ArrayList<>();
+	ArrayList<UUID> pending = new ArrayList<>();
 
 	public Party(UUID uuid) {
 		this.leader = uuid;
 		this.manager = QuestWorld.getInstance().getManager(Bukkit.getOfflinePlayer(uuid));
-		members = new HashSet<UUID>();
-		pending = new HashSet<UUID>();
-		if (manager.toConfig().contains("party.members")) {
-			for (String member: manager.toConfig().getStringList("party.members")) {
-				members.add(UUID.fromString(member));
-			}
-		}
-		if (manager.toConfig().contains("party.pending-requests")) {
-			for (String request: manager.toConfig().getStringList("party.pending-requests")) {
-				pending.add(UUID.fromString(request));
-			}
-		}
+		
+		members.addAll(manager.getTracker().getPartyMembers());
+		pending.addAll(manager.getTracker().getPartyPending());
 	}
 
 	
 	public static Party create(Player p) {
-		QuestWorld.getInstance().getManager(p).toConfig().set("party.associated", p.getUniqueId().toString());
+		QuestWorld.getInstance().getManager(p).getTracker().setPartyLeader(p.getUniqueId());
 		return new Party(p.getUniqueId());
 	}
 	
@@ -99,7 +88,7 @@ public class Party {
 			}
 			
 			members.remove(target.getUniqueId());
-			QuestWorld.getInstance().getManager(target).toConfig().set("party.associated", null);
+			QuestWorld.getInstance().getManager(target).getTracker().setPartyLeader(null);
 			save();
 		}
 	}
@@ -113,7 +102,7 @@ public class Party {
 		
 		this.members.add(p.getUniqueId());
 		PlayerTools.sendTranslation(p, true, Translation.PARTY_GROUP_JOIN, p.getName(), Bukkit.getOfflinePlayer(leader).getName());
-		QuestWorld.getInstance().getManager(p).toConfig().set("party.associated", leader.toString());
+		QuestWorld.getInstance().getManager(p).getTracker().setPartyLeader(leader);
 		if (pending.contains(p.getUniqueId())) pending.remove(p.getUniqueId());
 		save();
 	}
@@ -124,10 +113,10 @@ public class Party {
 	
 	public void abandon() {
 		for (UUID member: members)
-			QuestWorld.getInstance().getManager(Bukkit.getOfflinePlayer(member)).toConfig().set("party.associated", null);
+			QuestWorld.getInstance().getManager(member).getTracker().setPartyLeader(null);
 		
 		members.clear();
-		manager.toConfig().set("party.associated", null);
+		manager.getTracker().setPartyLeader(null);
 		save();
 	}
 
@@ -147,13 +136,13 @@ public class Party {
 		for (UUID member: members) {
 			list.add(member.toString());
 		}
-		manager.toConfig().set("party.members", list);
+		manager.getTracker().setPartyMembers(members);
 		
 		List<String> invitations = new ArrayList<String>();
 		for (UUID p: pending) {
 			invitations.add(p.toString());
 		}
-		manager.toConfig().set("party.pending-requests", invitations);
+		manager.getTracker().setPartyPending(pending);
 	}
 
 	public boolean isLeader(OfflinePlayer player) {

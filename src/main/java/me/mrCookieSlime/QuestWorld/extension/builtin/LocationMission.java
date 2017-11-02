@@ -10,7 +10,7 @@ import me.mrCookieSlime.QuestWorld.api.SinglePrompt;
 import me.mrCookieSlime.QuestWorld.api.Ticking;
 import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
-import me.mrCookieSlime.QuestWorld.api.contract.IMissionWrite;
+import me.mrCookieSlime.QuestWorld.api.contract.IMissionState;
 import me.mrCookieSlime.QuestWorld.api.menu.MenuData;
 import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
 import me.mrCookieSlime.QuestWorld.api.menu.QuestBook;
@@ -46,7 +46,7 @@ public class LocationMission extends MissionType implements Ticking {
 	}
 	
 	@Override
-	public boolean attemptUpgrade(IMissionWrite instance) {
+	public boolean attemptUpgrade(IMissionState instance) {
 		int oldStyleRadius = instance.getAmount();
 		if(oldStyleRadius > 1) {
 			instance.setAmount(1);
@@ -77,7 +77,7 @@ public class LocationMission extends MissionType implements Ticking {
 	}
 	
 	@Override
-	protected void layoutMenu(IMissionWrite changes) {
+	protected void layoutMenu(IMissionState changes) {
 		super.layoutMenu(changes);
 		putButton(10, MissionButton.location(changes));
 		putButton(11, new MenuData(

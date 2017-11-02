@@ -10,7 +10,7 @@ import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.annotation.NoImpl;
 
 @NoImpl
-public interface IMission extends IRenderable {
+public interface IMission extends IStateful {
 	int getID();
 	int getAmount();
 	String getText();
@@ -40,5 +40,5 @@ public interface IMission extends IRenderable {
 	boolean acceptsSpawners();
 	IQuest getQuest();
 	
-	IMissionWrite getState();
+	IMissionState getState();
 }

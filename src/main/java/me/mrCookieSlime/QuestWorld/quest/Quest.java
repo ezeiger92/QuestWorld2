@@ -10,7 +10,7 @@ import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.QuestStatus;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
-import me.mrCookieSlime.QuestWorld.api.contract.IQuestWrite;
+import me.mrCookieSlime.QuestWorld.api.contract.IQuestState;
 import me.mrCookieSlime.QuestWorld.util.ItemBuilder;
 import me.mrCookieSlime.QuestWorld.util.Text;
 
@@ -21,7 +21,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-class Quest extends Renderable implements IQuestWrite {
+class Quest extends Renderable implements IQuestState {
 	
 	Category category;
 	int id;
@@ -462,11 +462,6 @@ class Quest extends Renderable implements IQuestWrite {
 
 	public boolean isWorldEnabled(String world) {
 		return !world_blacklist.contains(world);
-	}
-
-	@Override
-	public boolean isValid() {
-		return category.isValid() && (category.getQuest(id) != null);
 	}
 	
 	@Override

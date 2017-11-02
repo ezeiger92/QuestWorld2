@@ -7,7 +7,7 @@ import me.mrCookieSlime.QuestWorld.api.annotation.NoImpl;
 import me.mrCookieSlime.QuestWorld.util.BitFlag.BitString;
 
 @NoImpl
-public interface IQuestWrite extends IQuest {
+public interface IQuestState extends IQuest {
 	void setItemRewards(Player p);
 	void setItem(ItemStack item);
 	void toggleWorld(String world);

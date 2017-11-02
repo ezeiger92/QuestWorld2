@@ -1,10 +1,6 @@
 package me.mrCookieSlime.QuestWorld.manager;
 
 import java.io.File;
-import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Stack;
@@ -21,24 +17,23 @@ import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
-import me.mrCookieSlime.QuestWorld.api.contract.IRenderable;
+import me.mrCookieSlime.QuestWorld.api.contract.IStateful;
 import me.mrCookieSlime.QuestWorld.party.Party;
 import me.mrCookieSlime.QuestWorld.util.PlayerTools;
 import me.mrCookieSlime.QuestWorld.util.Text;
 
 import org.bukkit.Bukkit;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.AnimalTamer;
 import org.bukkit.entity.Player;
 
 public class PlayerManager {
 	
-	private FileConfiguration cfg;
 	private UUID uuid;
-	private IRenderable last;
+	private IStateful last;
 	
 	private Stack<Integer> pages = new Stack<>();
+	
+	private final ProgressTracker tracker;
 	
 	public PlayerManager(AnimalTamer p) {
 		this(p.getUniqueId());
@@ -46,13 +41,7 @@ public class PlayerManager {
 	
 	public PlayerManager(UUID uuid) {
 		this.uuid = uuid;
-		this.cfg = YamlConfiguration.loadConfiguration(getFile());
-		
-		QuestWorld.getInstance().registerManager(this);
-	}
-	
-	public File getFile() {
-		return new File(QuestWorld.getPath("data.player"), uuid.toString() + ".yml");
+		tracker = new ProgressTracker(uuid);
 	}
 	
 	public void putPage(int pageNum) {
@@ -81,9 +70,8 @@ public class PlayerManager {
 		
 		for(IMission task : QuestWorld.getInstance().getMissionsOf(type)) {
 			IQuest quest = task.getQuest();	
-			ICategory category = quest.getCategory();
 			
-			if (category.isWorldEnabled(worldName) && quest.isWorldEnabled(worldName)) {
+			if (quest.getCategory().isWorldEnabled(worldName) && quest.isWorldEnabled(worldName)) {
 				if (!hasCompletedTask(task) && hasUnlockedTask(task)) {
 					if (getStatus(quest).equals(QuestStatus.AVAILABLE)) {
 						int progress = overwriteProgress ? 0 : getProgress(task);
@@ -97,17 +85,8 @@ public class PlayerManager {
 	}
 	
 	public void unload() {
-		save();
+		tracker.save();
 		QuestWorld.getInstance().unregisterManager(this);
-	}
-
-	public void save() {
-		try {
-			cfg.save(getFile());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 
 	public UUID getUUID() {
@@ -115,42 +94,30 @@ public class PlayerManager {
 	}
 	
 	public long getCooldownEnd(IQuest quest) {
-		if (!cfg.contains(quest.getCategory().getID() + "." + quest.getID() + ".cooldown")) return -1;
-		try {
-			return new SimpleDateFormat("yyyy-MM-dd-HH-mm").parse(cfg.getString(quest.getCategory().getID() + "." + quest.getID() + ".cooldown")).getTime();
-		} catch (ParseException e) {
-			e.printStackTrace();
-			return -1;
-		}
-	}
-	
-	public long getCompletionDate(IMission task) {
-		if (!cfg.contains(task.getQuest().getCategory().getID() + "." + task.getQuest().getID() + ".mission." + task.getID() + ".complete-until")) return 0;
-		return cfg.getLong(task.getQuest().getCategory().getID() + "." + task.getQuest().getID() + ".mission." + task.getID() + ".complete-until");
+		return tracker.getQuestRefresh(quest);
 	}
 	
 	public boolean isWithinTimeframe(IMission task) {
-		long date = getCompletionDate(task);
+		long date = tracker.getMissionCompleted(task);
 		if (date == 0) return true;
 		return date > System.currentTimeMillis();
 	}
 	
 	public static boolean updateTimeframe(UUID uuid, IMission task, int amount) {
 		if (task.getTimeframe() == 0) return true;
-		PlayerManager manager = QuestWorld.getInstance().getManager(Bukkit.getOfflinePlayer(uuid));
-		FileConfiguration cfg = manager.toConfig();
+		PlayerManager manager = QuestWorld.getInstance().getManager(uuid);
 		Player p = Bukkit.getPlayer(uuid);
 
 		if (!manager.isWithinTimeframe(task)) {
-			cfg.set(task.getQuest().getCategory().getID() + "." + task.getQuest().getID() + ".mission." + task.getID() + ".complete-until", null);
-			cfg.set(task.getQuest().getCategory().getID() + "." + task.getQuest().getID() + ".mission." + task.getID() + ".progress", 0);
+			manager.tracker.setMissionCompleted(task, null);
+			manager.tracker.setMissionProgress(task, 0);
 			if (p != null) {
 				PlayerTools.sendTranslation(p, false, Translation.NOTIFY_TIME_FAIL, task.getQuest().getName());
 			}
 			return false;
 		}
 		else if (manager.getProgress(task) == 0 && amount > 0) {
-			cfg.set(task.getQuest().getCategory().getID() + "." + task.getQuest().getID() + ".mission." + task.getID() + ".complete-until", (long) (System.currentTimeMillis() + (task.getTimeframe() * 60 * 1000)));
+			manager.tracker.setMissionCompleted(task, System.currentTimeMillis() + task.getTimeframe() * 60 * 1000);
 			if (p != null) 
 				PlayerTools.sendTranslation(p, false, Translation.NOTIFY_TIME_START, task.getText(), Text.timeFromNum(task.getTimeframe()));
 		}
@@ -181,24 +148,17 @@ public class PlayerManager {
 					}
 					
 					if (finished) {
-						cfg.set(quest.getCategory().getID() + "." + quest.getID() + ".finished", true);
+						tracker.setQuestFinished(quest, true);
 						
-						if (!quest.isAutoClaiming()) cfg.set(quest.getCategory().getID() + "." + quest.getID() + ".status", QuestStatus.REWARD_CLAIMABLE.toString());
-						else {
-							if (p == null) cfg.set(quest.getCategory().getID() + "." + quest.getID() + ".status", QuestStatus.REWARD_CLAIMABLE.toString());
-							else quest.handoutReward(p);
-						}
+						if (!quest.isAutoClaiming() || p == null)
+							tracker.setQuestStatus(quest, QuestStatus.REWARD_CLAIMABLE);
+						else
+							quest.handoutReward(p);
 					}
 				}
-				else if (getStatus(quest).equals(QuestStatus.ON_COOLDOWN)) {
-					try {
-						if (!new SimpleDateFormat("yyyy-MM-dd-HH-mm").parse(cfg.getString(quest.getCategory().getID() + "." + quest.getID() + ".cooldown")).after(new Date())) {
-							 cfg.set(quest.getCategory().getID() + "." + quest.getID() + ".status", QuestStatus.AVAILABLE.toString());
-						}
-					} catch (ParseException e) {
-						e.printStackTrace();
-					}
-				}
+				else if(getStatus(quest).equals(QuestStatus.ON_COOLDOWN))
+					if(tracker.getQuestRefresh(quest) <= System.currentTimeMillis())
+						tracker.setQuestStatus(quest, QuestStatus.AVAILABLE);
 			}
 		}
 	}
@@ -206,18 +166,15 @@ public class PlayerManager {
 	public QuestStatus getStatus(IQuest quest) {
 		Player p = Bukkit.getPlayer(uuid);
 		if (quest.getParent() != null && !hasFinished(quest.getParent())) return QuestStatus.LOCKED;
-		if (p != null && !quest.checkPermission(p)) return QuestStatus.LOCKED;
+		if (p != null && !PlayerTools.checkPermission(p, quest.getPermission())) return QuestStatus.LOCKED;
 		if (quest.getPartySize() == 0 && getParty() != null) return QuestStatus.LOCKED_NO_PARTY;
 		if (quest.getPartySize() > 1 && (getParty() == null || getParty().getSize() < quest.getPartySize())) return QuestStatus.LOCKED_PARTY_SIZE;
-		if (!cfg.contains(quest.getCategory().getID() + "." + quest.getID() + ".status")) {
-			cfg.set(quest.getCategory().getID() + "." + quest.getID() + ".status", QuestStatus.AVAILABLE.toString());
-			return QuestStatus.AVAILABLE;
-		}
-		else return QuestStatus.valueOf(cfg.getString(quest.getCategory().getID() + "." + quest.getID() + ".status"));
+		
+		return tracker.getQuestStatus(quest);
 	}
 
 	public boolean hasFinished(IQuest quest) {
-		return cfg.getBoolean(quest.getCategory().getID() + "." + quest.getID() + ".finished");
+		return tracker.isQuestFinished(quest);
 	}
 
 	public boolean hasCompletedTask(IMission task) {
@@ -234,22 +191,9 @@ public class PlayerManager {
 	}
 	
 	public int getProgress(IMission task) {
-		IQuest quest = task.getQuest();
-		int progress = cfg.getInt(quest.getCategory().getID() + "." + quest.getID() + ".mission." + task.getID() + ".progress");
+		int progress = tracker.getMissionProgress(task);
 		
 		return Math.min(progress, task.getAmount());
-	}
-	
-	
-	//TODO Better place for these
-	public String progressString(IMission task) {
-		int progress = getProgress(task);
-		int amount = task.getAmount();
-		
-		return Text.progressBar(
-				progress,
-				amount,
-				task.getType().progressString(progress / (float)amount, progress, amount));
 	}
 	
 	public String progressString(IQuest quest) {
@@ -284,8 +228,7 @@ public class PlayerManager {
 		if (!updateTimeframe(uuid, task, amount))
 			return;
 		
-		QuestWorld.getInstance().getManager(uuid).toConfig()
-		.set(task.getQuest().getCategory().getID() + "." + task.getQuest().getID() + ".mission." + task.getID() + ".progress", amount);
+		QuestWorld.getInstance().getManager(uuid).tracker.setMissionProgress(task, amount);
 		
 		if(amount == task.getAmount()) {
 			Player player = Bukkit.getPlayer(uuid);
@@ -336,14 +279,18 @@ public class PlayerManager {
 	}
 
 	public void completeQuest(IQuest quest) {
-		if (quest.getCooldown() == -1) cfg.set(quest.getCategory().getID() + "." + quest.getID() + ".status", QuestStatus.FINISHED.toString());
+		if (quest.getCooldown() == -1)
+			tracker.setQuestStatus(quest, QuestStatus.FINISHED);
+		
 		else {
-			if (quest.getCooldown() == 0) cfg.set(quest.getCategory().getID() + "." + quest.getID() + ".status", QuestStatus.AVAILABLE.toString());
-			else cfg.set(quest.getCategory().getID() + "." + quest.getID() + ".status", QuestStatus.ON_COOLDOWN.toString());
+			if (quest.getCooldown() == 0)
+				tracker.setQuestStatus(quest, QuestStatus.AVAILABLE);
 			
-			String dateString = new SimpleDateFormat("yyyy-MM-dd-HH-mm").format(new Date(System.currentTimeMillis() + quest.getRawCooldown()));
+			else {
+				tracker.setQuestStatus(quest, QuestStatus.ON_COOLDOWN);
+				tracker.setQuestRefresh(quest, System.currentTimeMillis() + quest.getRawCooldown());
+			}
 			
-			cfg.set(quest.getCategory().getID() + "." + quest.getID() + ".cooldown", dateString);
 			for (IMission task: quest.getMissions()) {
 				 setProgress(task, 0);
 			 }
@@ -351,63 +298,42 @@ public class PlayerManager {
 	}
 	
 	public Party getParty() {
-		if (!cfg.contains("party.associated")) return null;
-		else return new Party(UUID.fromString(cfg.getString("party.associated")));
-	}
-
-	public FileConfiguration toConfig() {
-		return cfg;
+		UUID leader = tracker.getPartyLeader();
+		if(leader != null)
+			return new Party(leader);
+		return null;
 	}
 	
-	public IRenderable getLastEntry() {
+	public ProgressTracker getTracker() {
+		return tracker;
+	}
+	
+	public IStateful getLastEntry() {
 		return last;
 	}
 	
-	public void updateLastEntry(IRenderable entry) {
+	public void setLastEntry(IStateful entry) {
 		this.last = entry;
 	}
 	
-	public int getLevel() {
-		return 0;
-	}
-	
+	@Deprecated
 	public String getProgress() {
-		StringBuilder progress = new StringBuilder();
-		int done = 0, total = 0;
+		int done = 0;
+		int total = 0;
+
 		for (ICategory category: QuestWorld.getInstance().getCategories())  {
-			for (IQuest quest: category.getQuests()) {
-				if (hasFinished(quest)) done++;
-				total++;
-			}
-		}
-		float percentage = Math.round((((done * 100.0f) / total) * 100.0f) / 100.0f);
-		
-		if (percentage < 16.0F) progress.append("&4");
-		else if (percentage < 32.0F) progress.append("&c");
-		else if (percentage < 48.0F) progress.append("&6");
-		else if (percentage < 64.0F) progress.append("&e");
-		else if (percentage < 80.0F) progress.append("&2");
-		else progress = progress.append("&a");
-		
-		int rest = 20;
-		for (int i = (int) percentage; i >= 5; i = i - 5) {
-			progress.append(":");
-			rest--;
+			total += category.getQuests().size();
+			
+			for (IQuest quest: category.getQuests())
+				if (hasFinished(quest))
+					++done;
 		}
 		
-		progress.append("&7");
-		
-		for (int i = 0; i < rest; i++) {
-			progress.append(":");
-		}
-		
-		progress.append(" - " + percentage + "%");
-		
-		return Text.colorize(progress.toString());
+		return Text.progressBar(done, total, null);
 	}
 	
 	public void clearQuestData(IQuest quest) {
-		cfg.set(quest.getCategory().getID() + "." + quest.getID(), null);
+		tracker.clearQuest(quest);
 	}
 	
 	// Right, so this function USED to loop through every file in data-storage/Quest World on
@@ -415,18 +341,13 @@ public class PlayerManager {
 	public static void clearAllQuestData(IQuest quest) {
 		Bukkit.getScheduler().runTaskAsynchronously(QuestWorld.getInstance(), () -> {
 			// First: clear all the quest data on a new thread
-			String path = QuestWorld.getInstance().getConfig().getString("save.userdata");
+			File path = QuestWorld.getPath("data.player");
 			
-			for (File file: new File(path).listFiles()) {
-				FileConfiguration cfg = YamlConfiguration.loadConfiguration(file);
-
-				cfg.set(quest.getCategory().getID() + "." + quest.getID(), null);
-				try {
-					cfg.save(file);
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+			for (File file: path.listFiles()) {
+				String uuid = file.getName().substring(0, file.getName().length() - 4);
+				ProgressTracker t = new ProgressTracker(UUID.fromString(uuid));
+				t.clearQuest(quest);
+				t.save();
 			}
 
 			// Second: go back to the main thread and make sure all player managers know what happened

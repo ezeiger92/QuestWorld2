@@ -5,7 +5,7 @@ import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.SinglePrompt;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
-import me.mrCookieSlime.QuestWorld.api.contract.IQuestWrite;
+import me.mrCookieSlime.QuestWorld.api.contract.IQuestState;
 import me.mrCookieSlime.QuestWorld.api.menu.QBDialogue;
 import me.mrCookieSlime.QuestWorld.api.menu.QuestBook;
 import me.mrCookieSlime.QuestWorld.util.Log;
@@ -100,7 +100,7 @@ public class EditorCommand implements CommandExecutor {
 						if(quest.getCooldown() == 0) {
 							// Administrative process - bypass events and directly modify quest
 							// 99% of the time you should use .getState() and .apply()
-							IQuestWrite q = (IQuestWrite)quest;
+							IQuestState q = (IQuestState)quest;
 							q.setCooldown(-1);
 							++changeCount;
 							String questFile = quest.getID() + "-C" + category.getID();
@@ -127,7 +127,7 @@ public class EditorCommand implements CommandExecutor {
 		else if (args.length == 4 && param.equals("delete_command") && sender instanceof Player) {
 			IQuest quest = QuestWorld.getInstance().getCategory(Integer.parseInt(args[1])).getQuest(Integer.parseInt(args[2]));
 			
-			IQuestWrite changes = quest.getState();
+			IQuestState changes = quest.getState();
 			changes.removeCommand(Integer.parseInt(args[3]));
 			if(changes.apply()) {
 				
@@ -143,7 +143,7 @@ public class EditorCommand implements CommandExecutor {
 			PlayerTools.promptInput(p, new SinglePrompt(
 					"&7Type in your desired Command:",
 					(c,s) -> {
-						IQuestWrite changes = quest.getState();
+						IQuestState changes = quest.getState();
 						changes.addCommand(ChatColor.stripColor(s));
 						changes.apply();
 

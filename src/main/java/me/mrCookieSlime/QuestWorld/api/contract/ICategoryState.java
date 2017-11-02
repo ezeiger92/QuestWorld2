@@ -6,22 +6,22 @@ import me.mrCookieSlime.QuestWorld.api.annotation.NoImpl;
 import me.mrCookieSlime.QuestWorld.util.BitFlag.BitString;
 
 @NoImpl
-public interface ICategoryWrite extends ICategory {
-	void setItem(ItemStack item);
+public interface ICategoryState extends ICategory {
+	// setID
+	void setHidden(boolean hidden);
 	void setName(String name);
 	void setPermission(String permission);
-	void setHidden(boolean hidden);
-	void toggleWorld(String world);
+	void setItem(ItemStack item);
 	void setParent(IQuest object);
+	// setQuests
+	// setWorlds
+	
 	void addQuest(IQuest quest);
 	void removeQuest(IQuest quest);
+	void toggleWorld(String world);
+
 	
-	boolean apply();
-	boolean discard();
 	ICategory getSource();
-	
-	void refreshParent();
-	
 	public enum Member implements BitString {
 		QUESTS,
 		ID,

@@ -14,7 +14,7 @@ import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.SinglePrompt;
 import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
-import me.mrCookieSlime.QuestWorld.api.contract.IMissionWrite;
+import me.mrCookieSlime.QuestWorld.api.contract.IMissionState;
 import me.mrCookieSlime.QuestWorld.api.menu.QuestBook;
 import me.mrCookieSlime.QuestWorld.util.PlayerTools;
 import me.mrCookieSlime.QuestWorld.util.Text;
@@ -26,7 +26,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-class Mission extends Renderable implements IMissionWrite {
+class Mission extends Renderable implements IMissionState {
 
 	Quest quest;
 	MissionType type;
@@ -98,6 +98,7 @@ class Mission extends Renderable implements IMissionWrite {
 	}
 
 	public int getID() {
+		// TODO: return unique;
 		return menuIndex;
 	}
 	
@@ -174,11 +175,6 @@ class Mission extends Renderable implements IMissionWrite {
 
 	public void setLocation(Player p) {
 		setLocation(p.getLocation().getBlock().getLocation());
-	}
-
-	@Override
-	public String getPermission() {
-		return null;
 	}
 	
 	public void setupDialogue(Player p) {
@@ -344,13 +340,13 @@ class Mission extends Renderable implements IMissionWrite {
 		result.put("amount",   amount);
 		result.put("entity",   entity.toString());
 		result.put("location", locationHelper(location));
-		result.put("menu_index",    menuIndex);
-		result.put("custom_string", Text.escape(customString));
-		result.put("display-name",  Text.escape(displayName));
-		result.put("timeframe",     timeframe);
-		result.put("deathReset",    deathReset);
-		result.put("lore",          Text.escape(description));
-		result.put("custom_int",    customInt);
+		result.put("index",     menuIndex);
+		result.put("custom_string",  Text.escape(customString));
+		result.put("display-name",   Text.escape(displayName));
+		result.put("timeframe",      timeframe);
+		result.put("reset-on-death", deathReset);
+		result.put("lore",           Text.escape(description));
+		result.put("custom_int",     customInt);
 		result.put("exclude-spawners", !spawnersAllowed);
 		
 		return result;
@@ -368,7 +364,7 @@ class Mission extends Renderable implements IMissionWrite {
 		try { entity = EntityType.valueOf((String)data.get("entity")); }
 		catch(Exception e) {}
 		location = locationHelper((Map<String, Object>)data.get("location"));
-		menuIndex    = (Integer)data.getOrDefault("menu_index", -1);
+		menuIndex    = (Integer)data.getOrDefault("index", -1);
 		// Chain to handle old name
 		customString = (String)data.getOrDefault("name", "");
 		customString = Text.colorize((String)data.getOrDefault("custom_string", customString));

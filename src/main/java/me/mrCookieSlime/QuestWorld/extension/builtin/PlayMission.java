@@ -8,7 +8,7 @@ import org.bukkit.inventory.ItemStack;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.Ticking;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
-import me.mrCookieSlime.QuestWorld.api.contract.IMissionWrite;
+import me.mrCookieSlime.QuestWorld.api.contract.IMissionState;
 import me.mrCookieSlime.QuestWorld.api.menu.MenuData;
 import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
 import me.mrCookieSlime.QuestWorld.util.ItemBuilder;
@@ -30,7 +30,8 @@ public class PlayMission extends MissionType implements Ticking {
 	}
 	
 	@Override
-	public String progressString(float percent, int current, int total) {
+	public String progressString(int current, int total) {
+		float percent = current / (float)total;
 		int remaining = total - current;
 		return Math.round(percent * 100) + "% (" + Text.timeFromNum(remaining) + " remaining)";
 	}
@@ -41,7 +42,7 @@ public class PlayMission extends MissionType implements Ticking {
 	}
 	
 	@Override
-	protected void layoutMenu(IMissionWrite changes) {
+	protected void layoutMenu(IMissionState changes) {
 		super.layoutMenu(changes);
 		putButton(17, new MenuData(
 				new ItemBuilder(Material.WATCH).display("&7Time: &b" + Text.timeFromNum(changes.getAmount())).lore(

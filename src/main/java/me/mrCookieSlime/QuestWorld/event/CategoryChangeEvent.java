@@ -3,12 +3,12 @@ package me.mrCookieSlime.QuestWorld.event;
 import org.bukkit.event.HandlerList;
 
 import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
-import me.mrCookieSlime.QuestWorld.api.contract.ICategoryWrite;
+import me.mrCookieSlime.QuestWorld.api.contract.ICategoryState;
 
 public class CategoryChangeEvent extends CancellableEvent {
-	private ICategoryWrite nextState;
+	private ICategoryState nextState;
 	
-	public CategoryChangeEvent(ICategoryWrite nextState) {
+	public CategoryChangeEvent(ICategoryState nextState) {
 		this.nextState = nextState;
 	}
 	
@@ -16,11 +16,11 @@ public class CategoryChangeEvent extends CancellableEvent {
 		return nextState.getSource();
 	}
 
-	public ICategoryWrite getNextState() {
+	public ICategoryState getNextState() {
 		return nextState;
 	}
 	
-	public boolean hasChange(ICategoryWrite.Member field) {
+	public boolean hasChange(ICategoryState.Member field) {
 		return nextState.hasChange(field);
 	}
 	

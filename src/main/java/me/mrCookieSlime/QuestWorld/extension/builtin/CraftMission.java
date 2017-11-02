@@ -13,7 +13,7 @@ import me.mrCookieSlime.QuestWorld.api.Decaying;
 import me.mrCookieSlime.QuestWorld.api.Manual;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
-import me.mrCookieSlime.QuestWorld.api.contract.IMissionWrite;
+import me.mrCookieSlime.QuestWorld.api.contract.IMissionState;
 import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
 import me.mrCookieSlime.QuestWorld.util.PlayerTools;
 import me.mrCookieSlime.QuestWorld.util.Text;
@@ -25,7 +25,6 @@ public class CraftMission extends MissionType implements Listener, Decaying {
 	
 	@Override
 	public ItemStack userDisplayItem(IMission instance) {
-		
 		return instance.getMissionItem().clone();
 	}
 	
@@ -93,7 +92,7 @@ public class CraftMission extends MissionType implements Listener, Decaying {
 	}
 	
 	@Override
-	protected void layoutMenu(IMissionWrite changes) {
+	protected void layoutMenu(IMissionState changes) {
 		super.layoutMenu(changes);
 		putButton(10, MissionButton.item(changes));
 		putButton(17, MissionButton.amount(changes));

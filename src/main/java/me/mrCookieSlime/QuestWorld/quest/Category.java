@@ -11,7 +11,7 @@ import java.util.Map;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.QuestStatus;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
-import me.mrCookieSlime.QuestWorld.api.contract.ICategoryWrite;
+import me.mrCookieSlime.QuestWorld.api.contract.ICategoryState;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
 import me.mrCookieSlime.QuestWorld.util.ItemBuilder;
 import me.mrCookieSlime.QuestWorld.util.Text;
@@ -21,41 +21,18 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-class Category extends Renderable implements ICategoryWrite {
+class Category extends Renderable implements ICategoryState {
+	private int id;
+	private boolean hidden;
+	private String name;
+	private String permission;
+	private ItemStack item;
+	private Quest parent;
+	private Map<Integer, Quest> quests = new HashMap<>();
+	private List<String> world_blacklist = new ArrayList<String>();
 	
-	Map<Integer, Quest> quests = new HashMap<>();;
-	int id;
-	String name;
-	ItemStack item;
-	
-	Quest parent;
-	String permission;
-	boolean hidden;
-	List<String> world_blacklist = new ArrayList<String>();
-	YamlConfiguration config;
-	
-	// Interal
-	protected Category(Category cat) {
-		copy(cat);
-	}
-	
-	protected void copy(Category source) {
-		id         = source.id;
-		config     = YamlConfiguration.loadConfiguration(getFile());
-		name       = source.name;
-		item       = source.item.clone();
-		parent     = source.parent;
-		permission = source.permission;
-		hidden     = source.hidden;
-		
-		world_blacklist = new ArrayList<>();
-		world_blacklist.addAll(source.world_blacklist);
-	}
-	
-	protected void copyTo(Category dest) {
-		dest.copy(this);
-	}
-	
+	private YamlConfiguration config;
+
 	// External
 	public Category(String name, int id) {
 		this.id = id;
@@ -81,6 +58,123 @@ class Category extends Renderable implements ICategoryWrite {
 		
 		QuestWorld.getInstance().registerCategory(this);
 	}
+	
+	// Interal
+	protected Category(Category cat) {
+		copy(cat);
+	}
+	
+	protected void copy(Category source) {
+		id         = source.id;
+		config     = YamlConfiguration.loadConfiguration(getFile());
+		name       = source.name;
+		item       = source.item.clone();
+		parent     = source.parent;
+		permission = source.permission;
+		hidden     = source.hidden;
+		
+		world_blacklist = new ArrayList<>();
+		world_blacklist.addAll(source.world_blacklist);
+	}
+	
+	protected void copyTo(Category dest) {
+		dest.copy(this);
+	}
+	
+	//// ICategory Impl
+	@Override
+	public int getID() {
+		return id;
+	}
+	
+	@Override
+	public boolean isHidden() {
+		return this.hidden;
+	}
+	
+	@Override
+	public String getName() {
+		return name;
+	}
+	
+	@Override
+	public String getPermission() {
+		return permission;
+	}
+
+	@Override
+	public ItemStack getItem() {
+		return item.clone();
+	}
+	
+	@Override
+	public IQuest getParent() {
+		return this.parent;
+	}
+	
+	@Override
+	public Collection<Quest> getQuests() {
+		return quests.values();
+	}
+
+	@Override
+	public Quest getQuest(int i) {
+		return quests.get(i);
+	}
+	
+	@Override
+	public boolean isWorldEnabled(String world) {
+		return !world_blacklist.contains(world);
+	}
+
+	@Override
+	public int countQuests(Player p, QuestStatus status) {
+		int i = 0;
+		for(Quest quest : getQuests())
+			if(quest.getStatus(p) == status)
+				++i;
+		return i;
+	}
+	
+	@Override
+	public int countFinishedQuests(Player p) {
+		int i = 0;
+		for(Quest quest : getQuests())
+			if(QuestWorld.getInstance().getManager(p).hasFinished(quest))
+				++i;
+		return i;
+	}
+	
+	@Override
+	public CategoryChange getState() {
+		return new CategoryChange(this);
+	}
+
+	//// ICategoryState Impl
+	public void setName(String name) {
+		updateLastModified();
+		this.name = Text.colorize(name);
+		ItemBuilder.edit(this.item).display(name);
+	}
+
+	@Override
+	public void setParent(IQuest quest) {
+		updateLastModified();
+		this.parent = (Quest)quest;
+	}
+
+	@Override
+	public void setPermission(String permission) {
+		updateLastModified();
+		this.permission = permission;
+	}
+	
+	public void setHidden(boolean hidden) {
+		updateLastModified();
+		this.hidden = hidden;
+	}
+	
+	//// DONE
 	
 	public void refreshParent() {
 		String parentId = config.getString("parent", null);
@@ -111,6 +205,7 @@ class Category extends Renderable implements ICategoryWrite {
 		((Quest)quest).getFile().delete();
 	}
 	
+	@Deprecated
 	public void save(boolean force) {
 		long lastSave = QuestWorld.getInstance().getLastSaved();
 		for (Quest quest: quests.values()) {
@@ -140,45 +235,8 @@ class Category extends Renderable implements ICategoryWrite {
 			e.printStackTrace();
 		}
 	}
-
-	public int getID() {
-		return id;
-	}
-
-	public ItemStack getItem() {
-		return item.clone();
-	}
 	
-	public Collection<Quest> getQuests() {
-		return quests.values();
-	}
 	
-	public int countQuests(Player p, QuestStatus status) {
-		int i = 0;
-		for(Quest quest : getQuests())
-			if(quest.getStatus(p) == status)
-				++i;
-		return i;
-	}
-	
-	public int countFinishedQuests(Player p) {
-		int i = 0;
-		for(Quest quest : getQuests())
-			if(QuestWorld.getInstance().getManager(p).hasFinished(quest))
-				++i;
-		return i;
-	}
-
-	public String getProgress(Player p) {
-		return Text.progressBar(
-				countFinishedQuests(p),
-				getQuests().size(),
-				null);
-	}
-
-	public Quest getQuest(int i) {
-		return quests.get(i);
-	}
 
 	public void setItem(ItemStack item) {
 		updateLastModified();
@@ -188,75 +246,12 @@ class Category extends Renderable implements ICategoryWrite {
 			this.item = item.clone();
 	}
 
-	@Override
-	public String getName() {
-		return name;
-	}
 
-	public void setName(String name) {
-		updateLastModified();
-		this.name = Text.colorize(name);
-		ItemBuilder.edit(this.item).display(name);
-	}
-	
-	public IQuest getParent() {
-		return this.parent;
-	}
-
-	@Override
-	public void setParent(IQuest quest) {
-		updateLastModified();
-		this.parent = (Quest)quest;
-	}
-
-	@Override
-	public String getPermission() {
-		return permission;
-	}
-
-	@Override
-	public void setPermission(String permission) {
-		updateLastModified();
-		this.permission = permission;
-	}
-	
-	public void setHidden(boolean hidden) {
-		updateLastModified();
-		this.hidden = hidden;
-	}
-	
-	public boolean isHidden() {
-		return this.hidden;
-	}
-
-	public boolean isWorldEnabled(String world) {
-		return !world_blacklist.contains(world);
-	}
 
 	public void toggleWorld(String world) {
 		updateLastModified();
 		if (world_blacklist.contains(world)) world_blacklist.remove(world);
 		else world_blacklist.add(world);
-	}
-	
-	@Override
-	public boolean isValid() {
-		return QuestWorld.getInstance().getCategory(id) != null;
-	}
-	
-	@Override
-	public CategoryChange getState() {
-		return new CategoryChange(this);
-	}
-
-	@Override
-	public boolean apply() {
-		return true;
-	}
-
-	@Override
-	public boolean discard() {
-		return false;
 	}
 
 	@Override
