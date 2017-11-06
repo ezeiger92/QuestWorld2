@@ -1,13 +1,14 @@
 package me.mrCookieSlime.QuestWorld.listener;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 
-import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.menu.Menu;
 import me.mrCookieSlime.QuestWorld.event.CategoryDeleteEvent;
 import me.mrCookieSlime.QuestWorld.event.MissionDeleteEvent;
@@ -51,7 +52,8 @@ public class MenuListener implements Listener {
 	
 	@EventHandler(ignoreCancelled = true)
 	public void onCategoryDelete(CategoryDeleteEvent event) {
-		for(PlayerManager manager : QuestWorld.getInstance().getManagers()) {
+		for(Player p : Bukkit.getOnlinePlayers()) {
+			PlayerManager manager = PlayerManager.of(p);
 			if(event.getCategory() == manager.getLastEntry() ||
 					event.getCategory().getQuests().contains(manager.getLastEntry()))
 				manager.setLastEntry(null);
@@ -60,7 +62,8 @@ public class MenuListener implements Listener {
 	
 	@EventHandler(ignoreCancelled = true)
 	public void onQuestDelete(QuestDeleteEvent event) {
-		for(PlayerManager manager : QuestWorld.getInstance().getManagers()) {
+		for(Player p : Bukkit.getOnlinePlayers()) {
+			PlayerManager manager = PlayerManager.of(p);
 			if(event.getQuest() == manager.getLastEntry())
 				manager.setLastEntry(event.getQuest().getCategory());
 		}

@@ -2,7 +2,8 @@ package me.mrCookieSlime.QuestWorld.quest;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.lang.ref.WeakReference;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,105 +12,137 @@ import java.util.Map;
 
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
-import me.mrCookieSlime.QuestWorld.api.SinglePrompt;
-import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IMissionState;
-import me.mrCookieSlime.QuestWorld.api.menu.QuestBook;
-import me.mrCookieSlime.QuestWorld.util.PlayerTools;
 import me.mrCookieSlime.QuestWorld.util.Text;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 class Mission extends Renderable implements IMissionState {
 
-	Quest quest;
-	MissionType type;
-	ItemStack item;
-	int amount;
-	int menuIndex;
-	EntityType entity;
-	Location location;
-	String customString;
-	String displayName;
-	int timeframe;
-	boolean deathReset;
-	String description;
-	int customInt;
-	boolean spawnersAllowed;
-	
-	ArrayList<String> dialogue = new ArrayList<>();
-	
-	// External
+	private boolean spawnersAllowed;
+	private int amount;
+	private int customInt;
+	private String customString;
+	private String description;
+	private ArrayList<String> dialogue = new ArrayList<>();
+	private String displayName;
+	private EntityType entity;
+	private int index;
+	private Location location;
+	private ItemStack item;
+	private WeakReference<Quest> quest;
+	private int timeframe;
+	private MissionType type;
+	private boolean deathReset;
+
 	public Mission(int menuIndex, Quest quest) {
 		loadDefaults();
-		this.menuIndex = menuIndex;
-		this.quest = quest;
+		this.index = menuIndex;
+		this.quest = new WeakReference<>(quest);
 	}
 
-	// Package
-	Mission(Map<String, Object> data) {
+	public Mission(Map<String, Object> data) {
 		loadMap(data);
 		loadDialogue();
 		
 		// Repair any quests that would have been broken by updates, namely location quests
-		MissionChange changes = new MissionChange(this);
+		MissionState changes = new MissionState(this);
 		type.attemptUpgrade(changes);
 		changes.apply();
 	}
-	
-	protected void loadDefaults() {
-		loadMap(new HashMap<>());
-	}
-	
-	protected void copy(Mission source) {
-		loadMap(source.serialize());
-		quest = source.quest;
 
-		dialogue = new ArrayList<>();
-		dialogue.addAll(source.dialogue);
-		
-		updateLastModified();
-	}
-	
-	protected void copyTo(Mission dest) {
-		dest.copy(this);
-	}
-	
-	File getDialogueFile() {
-		return new File(QuestWorld.getPath("data.dialogue"), quest.getCategory().getID()
-				+ "+" + quest.getID() + "+" + getID() + ".txt");
-	}
-	
-	private void loadDialogue() {
-		File file = getDialogueFile();
-		if (file.exists()) {
-			try {
-				dialogue.addAll(Files.readAllLines(file.toPath(), Charset.forName("UTF-8")));
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
+	@Override
+	public boolean acceptsSpawners() {
+		return spawnersAllowed;
 	}
 
-	public int getID() {
-		// TODO: return unique;
-		return menuIndex;
-	}
-	
-	public Quest getQuest() {
-		return quest;
-	}
-
+	@Override
 	public int getAmount() {
 		return amount;
 	}
+
+	@Override
+	public int getCustomInt() {
+		return customInt;
+	}
 	
+	@Override
+	public String getCustomString() {
+		return customString;
+	}
+
+	@Override
+	public String getDescription() {
+		return description;
+	}
+	
+	@Override
+	public ArrayList<String> getDialogue() {
+		return new ArrayList<>(dialogue);
+	}
+	
+	@Override
+	public String getDisplayName() {
+		return displayName;
+	}
+	
+	@Override
+	public EntityType getEntity() {
+		return entity;
+	}
+
+	@Override
+	public int getIndex() {
+		// TODO: return unique;
+		return index;
+	}
+
+	@Override
+	public Location getLocation() {
+		return location;
+	}
+	
+	@Override
+	public ItemStack getMissionItem() {
+		return item.clone();
+	}
+	
+	@Override
+	public Quest getQuest() {
+		return quest.get();
+	}
+	
+	@Override
+	public int getTimeframe() {
+		return timeframe;
+	}
+
+	@Override
+	public MissionType getType() {
+		return type;
+	}
+
+	@Override
+	public boolean resetsonDeath() {
+		return deathReset;
+	}
+
+	@Override
+	public ItemStack getDisplayItem() {
+		return type.userDisplayItem(this).clone();
+	}
+	
+	@Override
+	public MissionState getState() {
+		return new MissionState(this);
+	}
+	
+	@Override
 	public String getText() {
 		if (getDisplayName().length() > 0)
 			return getDisplayName();
@@ -117,173 +150,112 @@ class Mission extends Renderable implements IMissionState {
 		return type.userDescription(this);
 	}
 	
-	public ItemStack getMissionItem() {
-		return item;
+	@Deprecated
+	@Override
+	public String getDialogueFilename() {
+		return getDialogueFile().getName();
 	}
 
-	public ItemStack getDisplayItem() {
-		return type.userDisplayItem(this).clone();
+	public HashMap<String, Object> serialize() {
+		HashMap<String, Object> result = new HashMap<>();
+
+		result.put("unique",   (int)getUnique());
+		result.put("quest",    getQuest());
+		result.put("type",     type.toString());
+		result.put("item",     item);
+		result.put("amount",   amount);
+		result.put("entity",   entity.toString());
+		result.put("location", locationHelper(location));
+		result.put("index",     index);
+		result.put("custom_string",  Text.escape(customString));
+		result.put("display-name",   Text.escape(displayName));
+		result.put("timeframe",      timeframe);
+		result.put("reset-on-death", deathReset);
+		result.put("lore",           Text.escape(description));
+		result.put("custom_int",     customInt);
+		result.put("exclude-spawners", !spawnersAllowed);
+		
+		return result;
+	}
+
+	@Override
+	public void setAmount(int amount) {
+		updateLastModified();
+		this.amount = amount;
+	}
+
+	@Override
+	public void setCustomInt(int val) {
+		updateLastModified();
+		customInt = val;
 	}
 	
-	public void setItem(ItemStack item) {
-		this.item = item.clone();
-		this.item.setAmount(1);
+	@Override
+	public void setCustomString(String customString) {
+		updateLastModified();
+		this.customString = customString;
 	}
 	
-	public EntityType getEntity() {
-		return entity;
+	@Override
+	public void setDeathReset(boolean deathReset) {
+		updateLastModified();
+		this.deathReset = deathReset;
 	}
 	
+	@Override
+	public void setDescription(String description) {
+		updateLastModified();
+		this.description = description;
+	}
+	
+	@Override
+	public void setDialogue(List<String> dialogue) {
+		this.dialogue.clear();
+		this.dialogue.addAll(dialogue);
+	}
+
+	@Override
+	public void setDisplayName(String name) {
+		updateLastModified();
+		displayName = name;
+	}
+	
+	@Override
 	public void setEntity(EntityType entity) {
 		updateLastModified();
 		this.entity = entity;
 	}
 	
-	public void setCustomString(String customString) {
+	@Override
+	public void setItem(ItemStack item) {
+		this.item = item.clone();
+		this.item.setAmount(1);
+	}
+	
+	@Override
+	public void setLocation(Location loc) {
 		updateLastModified();
-		this.customString = customString;
+		this.location = loc.clone();
 	}
 
-	public MissionType getType() {
-		return type;
+	@Override
+	public void setSpawnerSupport(boolean acceptsSpawners) {
+		updateLastModified();
+		spawnersAllowed = acceptsSpawners;
 	}
 
+	@Override
 	public void setType(MissionType type) {
 		updateLastModified();
 		this.type = type;
 		// TODO: Something like this
 		// type.attemptUpgrade(this);
 	}
-
-	public void setAmount(int amount) {
-		updateLastModified();
-		this.amount = amount;
-	}
 	
-	public String getCustomString() {
-		return customString;
-	}
-
-	public Location getLocation() {
-		return location;
-	}
-	
-	public void setLocation(Location loc) {
-		updateLastModified();
-		this.location = loc.clone();
-	}
-
-	public void setLocation(Player p) {
-		setLocation(p.getLocation().getBlock().getLocation());
-	}
-	
-	public void setupDialogue(Player p) {
-		this.dialogue = new ArrayList<String>();
-		addDialogueLine(p);
-	}
-	
-	private void addDialogueLine(Player p) {
-		PlayerTools.promptInput(p, new SinglePrompt(
-				PlayerTools.makeTranslation(true, Translation.MISSION_DIALOG_ADD),
-				(c,s) -> {
-					Player p2 = (Player) c.getForWhom();
-					if (s.equalsIgnoreCase("exit()")) {
-						File file = getDialogueFile();
-						if(file.exists())
-							file.delete();
-						
-						updateLastModified();
-						PlayerTools.sendTranslation(p2, true, Translation.MISSION_DIALOG_SET, file.getName());
-						QuestBook.openQuestMissionEditor(p2, this);
-
-						try {
-							// The only downside to this is system-specific newlines
-							Files.write(file.toPath(), dialogue, Charset.forName("UTF-8"));
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
-					}
-					else {
-						dialogue.add(s);
-						addDialogueLine(p2);
-						QuestWorld.getSounds().DIALOG_ADD.playTo(p2);
-					}
-					return true;
-				}
-		));
-	}
-
-	public List<String> getDialogue() {
-		return dialogue;
-	}
-
-	public void setDisplayName(String name) {
-		updateLastModified();
-		displayName = name;
-	}
-	
-	public String getDisplayName() {
-		return displayName;
-	}
-	
-	public int getTimeframe() {
-		return timeframe;
-	}
-	
-	public boolean hasTimeframe() {
-		return timeframe > 0;
-	}
-	
+	@Override
 	public void setTimeframe(int timeframe) {
 		updateLastModified();
 		this.timeframe = timeframe;
-	}
-
-	public boolean resetsonDeath() {
-		return deathReset;
-	}
-	
-	public void setDeathReset(boolean deathReset) {
-		updateLastModified();
-		this.deathReset = deathReset;
-	}
-
-	public String getDescription() {
-		return description;
-	}
-	
-	public void setDescription(String description) {
-		updateLastModified();
-		this.description = description;
-	}
-
-	public void setCustomInt(int val) {
-		updateLastModified();
-		customInt = val;
-	}
-
-	public int getCustomInt() {
-		return customInt;
-	}
-
-	public boolean acceptsSpawners() {
-		return spawnersAllowed;
-	}
-
-	public void setSpawnerSupport(boolean acceptsSpawners) {
-		updateLastModified();
-		spawnersAllowed = acceptsSpawners;
-	}
-	
-	@Override
-	public void updateLastModified() {
-		// TODO Really take a look at this whole system again
-		((Quest)quest).updateLastModified();
-	}
-	
-	@Override
-	public MissionChange getState() {
-		return new MissionChange(this);
 	}
 
 	@Override
@@ -306,57 +278,61 @@ class Mission extends Renderable implements IMissionState {
 		return true;
 	}
 	
-	private static Location locationHelper(Map<String, Object> data) {
-		String defaultWorld = Bukkit.getWorlds().get(0).getName();
-		return new Location(
-				Bukkit.getWorld((String)data.getOrDefault("world", defaultWorld)),
-				(Double)data.getOrDefault("x", 0.0),
-				(Double)data.getOrDefault("y", 64.0),
-				(Double)data.getOrDefault("z", 0.0),
-				((Double)data.getOrDefault("yaw", 0.0)).floatValue(),
-				((Double)data.getOrDefault("pitch", 0.0)).floatValue());
+	@Override
+	protected void updateLastModified() {
+		// TODO Really take a look at this whole system again
+		getQuest().updateLastModified();
 	}
 	
-	private static Map<String, Object> locationHelper(Location location) {
-		HashMap<String, Object> result = new HashMap<>();
+	protected void copy(Mission source) {
+		loadMap(source.serialize());
+		quest = source.quest;
+
+		dialogue = new ArrayList<>();
+		dialogue.addAll(source.dialogue);
 		
-		result.put("world", location.getWorld().getName());
-		result.put("x", location.getX());
-		result.put("y", location.getY());
-		result.put("z", location.getZ());
-		result.put("yaw", (double)location.getYaw());
-		result.put("pitch", (double)location.getPitch());
-		
-		return result;
+		updateLastModified();
+	}
+	
+	protected void copyTo(Mission dest) {
+		dest.copy(this);
+	}
+	
+	protected void loadDefaults() {
+		loadMap(new HashMap<>());
 	}
 
-	public Map<String, Object> serialize() {
-		HashMap<String, Object> result = new HashMap<>();
-
-		result.put("unique",   (int)getUnique());
-		result.put("quest",    quest);
-		result.put("type",     type.toString());
-		result.put("item",     item);
-		result.put("amount",   amount);
-		result.put("entity",   entity.toString());
-		result.put("location", locationHelper(location));
-		result.put("index",     menuIndex);
-		result.put("custom_string",  Text.escape(customString));
-		result.put("display-name",   Text.escape(displayName));
-		result.put("timeframe",      timeframe);
-		result.put("reset-on-death", deathReset);
-		result.put("lore",           Text.escape(description));
-		result.put("custom_int",     customInt);
-		result.put("exclude-spawners", !spawnersAllowed);
+	protected void saveDialogue() {
+		File file = getDialogueFile();
+		if(file.exists())
+			file.delete();
 		
-		return result;
+		updateLastModified();
+		
+		try {
+			// The only downside to this is system-specific newlines
+			Files.write(file.toPath(), dialogue, StandardCharsets.UTF_8);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private void loadDialogue() {
+		File file = getDialogueFile();
+		if (file.exists()) {
+			try {
+				dialogue.addAll(Files.readAllLines(file.toPath(), StandardCharsets.UTF_8));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	@SuppressWarnings("unchecked")
 	private void loadMap(Map<String, Object> data) {
 		setUnique((Integer)data.getOrDefault("unique", (int)getUnique()));
 		
-		quest    = (Quest)data.get("quest");
+		quest    = new WeakReference<>((Quest)data.get("quest"));
 		type     = QuestWorld.getMissionType((String)data.getOrDefault("type", "SUBMIT"));
 		item     = (ItemStack)data.getOrDefault("item", new ItemStack(Material.STONE));
 		amount   = (Integer)data.getOrDefault("amount", 1);
@@ -364,7 +340,7 @@ class Mission extends Renderable implements IMissionState {
 		try { entity = EntityType.valueOf((String)data.get("entity")); }
 		catch(Exception e) {}
 		location = locationHelper((Map<String, Object>)data.get("location"));
-		menuIndex    = (Integer)data.getOrDefault("index", -1);
+		index    = (Integer)data.getOrDefault("index", -1);
 		// Chain to handle old name
 		customString = (String)data.getOrDefault("name", "");
 		customString = Text.colorize((String)data.getOrDefault("custom_string", customString));
@@ -376,5 +352,34 @@ class Mission extends Renderable implements IMissionState {
 		customInt    = (Integer)data.getOrDefault("citizen", 0);
 		customInt    = (Integer)data.getOrDefault("custom_int", customInt);
 		spawnersAllowed = !(Boolean)data.getOrDefault("exclude-spawners", false);
+	}
+	
+	private static Location locationHelper(Map<String, Object> data) {
+		String defaultWorld = Bukkit.getWorlds().get(0).getName();
+		return new Location(
+				Bukkit.getWorld((String)data.getOrDefault("world", defaultWorld)),
+				(Double)data.getOrDefault("x", 0.0),
+				(Double)data.getOrDefault("y", 64.0),
+				(Double)data.getOrDefault("z", 0.0),
+				((Double)data.getOrDefault("yaw", 0.0)).floatValue(),
+				((Double)data.getOrDefault("pitch", 0.0)).floatValue());
+	}
+	
+	private static HashMap<String, Object> locationHelper(Location location) {
+		HashMap<String, Object> result = new HashMap<>();
+		
+		result.put("world", location.getWorld().getName());
+		result.put("x", location.getX());
+		result.put("y", location.getY());
+		result.put("z", location.getZ());
+		result.put("yaw", (double)location.getYaw());
+		result.put("pitch", (double)location.getPitch());
+		
+		return result;
+	}
+	
+	private File getDialogueFile() {
+		return new File(QuestWorld.getPath("data.dialogue"), getQuest().getCategory().getID()
+				+ "+" + getQuest().getID() + "+" + getIndex() + ".txt");
 	}
 }

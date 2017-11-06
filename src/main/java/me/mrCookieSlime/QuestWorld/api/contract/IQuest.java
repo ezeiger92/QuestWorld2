@@ -5,7 +5,6 @@ import java.util.List;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import me.mrCookieSlime.QuestWorld.api.QuestStatus;
 import me.mrCookieSlime.QuestWorld.api.annotation.NoImpl;
 
 @NoImpl
@@ -32,8 +31,6 @@ public interface IQuest extends IStateful {
 	
 	String getName();
 	
-	QuestStatus getStatus(Player p);
-	int countFinishedTasks(Player p);
 	void handoutReward(Player p);
 	
 	IQuestState getState();

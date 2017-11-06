@@ -14,6 +14,7 @@ import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IMissionState;
 import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
+import me.mrCookieSlime.QuestWorld.manager.PlayerManager;
 import me.mrCookieSlime.QuestWorld.util.Text;
 
 public class FishMission extends MissionType implements Listener, Decaying {
@@ -23,7 +24,7 @@ public class FishMission extends MissionType implements Listener, Decaying {
 	
 	@Override
 	public ItemStack userDisplayItem(IMission instance) {
-		return instance.getMissionItem().clone();
+		return instance.getMissionItem();
 	}
 	
 	@Override
@@ -36,8 +37,8 @@ public class FishMission extends MissionType implements Listener, Decaying {
 		if (!(e.getCaught() instanceof Item)) return;
 		ItemStack caught = ((Item)e.getCaught()).getItemStack();
 
-		QuestWorld.getInstance().getManager(e.getPlayer()).forEachTaskOf(this, (mission, needed) -> {
-			if(QuestWorld.getInstance().isItemSimiliar(caught, mission.getMissionItem()))
+		PlayerManager.of(e.getPlayer()).forEachTaskOf(this, (mission, needed) -> {
+			if(QuestWorld.get().isItemSimiliar(caught, mission.getMissionItem()))
 				return caught.getAmount();
 			
 			return Manual.FAIL;

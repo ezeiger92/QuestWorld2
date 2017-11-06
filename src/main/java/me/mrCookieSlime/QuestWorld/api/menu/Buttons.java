@@ -10,6 +10,7 @@ import me.mrCookieSlime.QuestWorld.api.SinglePrompt;
 import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
+import me.mrCookieSlime.QuestWorld.manager.PlayerManager;
 import me.mrCookieSlime.QuestWorld.util.PlayerTools;
 
 public class Buttons {
@@ -21,7 +22,7 @@ public class Buttons {
 			else if(event.isShiftClick())
 				QuestBook.openCategoryEditor(p, category);
 			else {
-				QuestWorld.getInstance().getManager(p).putPage(0);
+				PlayerManager.of(p).putPage(0);
 				QuestBook.openCategoryQuestEditor(p, category);
 			}
 		};
@@ -84,12 +85,12 @@ public class Buttons {
 	
 	public static Consumer<InventoryClickEvent> partyMenu() {
 		return event -> {
-			if (QuestWorld.getInstance().getConfig().getBoolean("party.enabled")) {
+			if (QuestWorld.get().getConfig().getBoolean("party.enabled")) {
 				Player p = (Player) event.getWhoClicked();
 				
 				// TODO openPartyMenu has no way to go back to where it came from, so it always goes to the main menu
 				// As a result, we need to clear pages to avoid odd behavior. RIP.
-				QuestWorld.getInstance().getManager(p).clearPages();
+				PlayerManager.of(p).clearPages();
 				QuestBook.openPartyMenu(p);
 			}
 		};

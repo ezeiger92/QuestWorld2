@@ -2,12 +2,12 @@ package me.mrCookieSlime.QuestWorld.quest;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import me.mrCookieSlime.QuestWorld.QuestWorld;
-import me.mrCookieSlime.QuestWorld.api.QuestStatus;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuestState;
@@ -23,7 +23,7 @@ import org.bukkit.inventory.ItemStack;
 
 class Quest extends Renderable implements IQuestState {
 	
-	Category category;
+	WeakReference<Category> category;
 	int id;
 	long cooldown;
 	String name;
@@ -41,7 +41,7 @@ class Quest extends Renderable implements IQuestState {
 	boolean ordered;
 	boolean autoclaim;
 	
-	Quest parent;
+	WeakReference<Quest> parent;
 	String permission;
 	
 	YamlConfiguration config;
@@ -89,7 +89,7 @@ class Quest extends Renderable implements IQuestState {
 	
 	// Package
 	Quest(int id, YamlConfiguration file, Category category) {
-		this.category = category;
+		this.category = new WeakReference<>(category);
 		this.id = id;
 		
 		config = file;
@@ -118,7 +118,7 @@ class Quest extends Renderable implements IQuestState {
 	// External
 	public Quest(String name, int id, Category category) {
 		this.id = id;
-		this.category = category;
+		this.category = new WeakReference<>(category);
 		this.name = Text.colorize(name);
 		
 		config = YamlConfiguration.loadConfiguration(getFile());
@@ -142,14 +142,14 @@ class Quest extends Renderable implements IQuestState {
 		if (parentId != null) {
 			int[] parts = RenderableFacade.splitQuestString(parentId);
 			
-			Category c = (Category)QuestWorld.getInstance().getCategory(parts[1]);
+			Category c = (Category)QuestWorld.get().getCategory(parts[1]);
 			if (c != null)
-				parent = c.getQuest(parts[0]);
+				parent = new WeakReference<>(c.getQuest(parts[0]));
 		}
 	}
 	
 	File getFile() {
-		return new File(QuestWorld.getPath("data.questing"), id + "-C" + category.getID() + ".quest");
+		return new File(QuestWorld.getPath("data.questing"), id + "-C" + getCategory().getID() + ".quest");
 	}
 	
 	private void loadMissions() {
@@ -159,17 +159,15 @@ class Quest extends Renderable implements IQuestState {
 
 		for (String key: missions.getKeys(false)) {
 			// TODO mess
-			QuestChange changes = new QuestChange(this);
+			QuestState changes = new QuestState(this);
 			Map<String, Object> data = missions.getConfigurationSection(key).getValues(false);
-			// For getValues wont recurse through sections, so we have to manually map to... map
+			// getValues wont recurse through sections, so we have to manually map to... map
 			data.put("location", ((ConfigurationSection)data.get("location")).getValues(false));
 			
 			data.put("menu_index", Integer.valueOf(key));
 			data.put("quest", this);
 				
 			Mission m = new Mission(data);
-			m.quest = this;
-			//new Mission(Integer.valueOf(key), missions.getConfigurationSection(key), this)
 			changes.addMission(m);
 			changes.apply();
 		}
@@ -177,7 +175,7 @@ class Quest extends Renderable implements IQuestState {
 	
 	public void save() {
 		config.set("id", id);
-		config.set("category", category.getID());
+		config.set("category", getCategory().getID());
 		config.set("cooldown", String.valueOf(cooldown));
 		config.set("name", Text.escape(name));
 		config.set("item", new ItemStack(item));
@@ -207,9 +205,10 @@ class Quest extends Renderable implements IQuestState {
 			Map<String, Object> data = mission.serialize();
 			// TODO keep a quest id
 			data.remove("quest");
-			config.set("missions." + mission.getID(), data);
+			config.set("missions." + mission.getIndex(), data);
 			//mission.save(config.createSection("missions." + mission.getID()));
 		}
+		Quest parent = getParent();
 		if (parent != null) config.set("parent", String.valueOf(parent.getCategory().getID() + "-C" + parent.getID()));
 		else config.set("parent", null);
 		
@@ -229,19 +228,7 @@ class Quest extends Renderable implements IQuestState {
 	}
 
 	public Category getCategory() {
-		return category;
-	}
-
-	public QuestStatus getStatus(Player p) {
-		return QuestWorld.getInstance().getManager(p).getStatus(this);
-	}
-	
-	public int countFinishedTasks(Player p) {
-		int i = 0;
-		for (Mission task: getMissions())
-			if (QuestWorld.getInstance().getManager(p).hasCompletedTask(task))
-				++i;
-		return i;
+		return category.get();
 	}
 
 	public List<Mission> getMissions() {
@@ -308,16 +295,16 @@ class Quest extends Renderable implements IQuestState {
 	
 	public void addMission(IMission mission) {
 		updateLastModified();
-		if(mission instanceof MissionChange)
-			tasks.add(((MissionChange)mission).getSource());
+		if(mission instanceof MissionState)
+			tasks.add(((MissionState)mission).getSource());
 		else
 			tasks.add((Mission)mission);
 	}
 	
 	public void removeMission(IMission mission) {
 		updateLastModified();
-		if(mission instanceof MissionChange)
-			tasks.remove(((MissionChange)mission).getSource());
+		if(mission instanceof MissionState)
+			tasks.remove(((MissionState)mission).getSource());
 		else
 			tasks.remove((Mission)mission);
 	}
@@ -368,20 +355,17 @@ class Quest extends Renderable implements IQuestState {
 	}
 	
 	public void handoutReward(Player p) {
-		ItemStack[] itemReward = rewards.toArray(new ItemStack[0]);
+		ItemStack[] itemReward = rewards.toArray(new ItemStack[rewards.size()]);
 		for(ItemStack item : p.getInventory().addItem(itemReward).values())
 			p.getWorld().dropItemNaturally(p.getLocation(), item);
 		
 		QuestWorld.getSounds().QUEST_REWARD.playTo(p);
 		
 		if (xp > 0) p.setLevel(p.getLevel() + xp);
-		if (money > 0 && QuestWorld.getInstance().getEconomy() != null) QuestWorld.getInstance().getEconomy().get().depositPlayer(p, money);
+		if (money > 0 && QuestWorld.get().getEconomy() != null) QuestWorld.get().getEconomy().get().depositPlayer(p, money);
 		
-		for (String command: commands) {
+		for (String command: commands) 
 			Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command.replaceAll("@p", p.getName()));
-		}
-		
-		QuestWorld.getInstance().getManager(p).completeQuest(this);
 	}
 
 	public String getFormattedCooldown() {
@@ -395,17 +379,20 @@ class Quest extends Renderable implements IQuestState {
 		return Text.timeFromNum(cooldown);
 	}
 	
-	public IQuest getParent() {
-		return this.parent;
+	public Quest getParent() {
+		return parent.get();
 	}
 
 	@Override
 	public void setParent(IQuest quest) {
 		updateLastModified();
-		if(quest instanceof QuestChange)
-			parent = ((QuestChange)quest).getSource();
+		Quest parent;
+		if(quest instanceof QuestState)
+			parent = ((QuestState)quest).getSource();
 		else
 			parent = (Quest)quest;
+		
+		this.parent = new WeakReference<>(parent);
 	}
 
 	public List<String> getCommands() {
@@ -465,8 +452,8 @@ class Quest extends Renderable implements IQuestState {
 	}
 	
 	@Override
-	public QuestChange getState() {
-		return new QuestChange(this);
+	public QuestState getState() {
+		return new QuestState(this);
 	}
 
 	@Override

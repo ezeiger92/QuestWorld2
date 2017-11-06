@@ -129,7 +129,7 @@ public class ProgressTracker {
 	
 	//// MISSION
 	private static String path(IMission mission) {
-		return path(mission.getQuest()) + ".mission." + mission.getID();
+		return path(mission.getQuest()) + ".mission." + mission.getIndex();
 	}
 	
 	public int getMissionProgress(IMission mission) {

@@ -1,8 +1,9 @@
 package me.mrCookieSlime.QuestWorld.api.contract;
 
+import java.util.List;
+
 import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import me.mrCookieSlime.QuestWorld.api.MissionType;
@@ -11,25 +12,24 @@ import me.mrCookieSlime.QuestWorld.util.BitFlag.BitString;
 
 @NoImpl
 public interface IMissionState extends IMission {
-	void setItem(ItemStack item);
-	void setEntity(EntityType entity);
-	void setCustomString(String customString);
-	void setType(MissionType type);
 	void setAmount(int amount);
-	void setLocation(Location loc);
-	void setLocation(Player p);
-	void setDisplayName(String displayName);
-	void setTimeframe(int timeframe);
+	void setCustomString(String customString);
+	void setCustomInt(int customInt);
 	void setDeathReset(boolean deathReset);
 	void setDescription(String description);
-	void setCustomInt(int customInt);
+	void setDialogue(List<String> dialogue);
+	void setDisplayName(String displayName);
+	void setEntity(EntityType entity);
+	void setItem(ItemStack item);
+	void setLocation(Location loc);
 	void setSpawnerSupport(boolean acceptsSpawners);
+	void setType(MissionType type);
+	void setTimeframe(int timeframe);
 
-	void setupDialogue(Player p);
-	
-	boolean apply();
-	boolean discard();
+	boolean  apply();
+	boolean  discard();
 	IMission getSource();
+	boolean  hasChange(Member field);
 	
 	public enum Member implements BitString {
 		QUEST,
@@ -48,5 +48,4 @@ public interface IMissionState extends IMission {
 		SPAWNERS_ALLOWED,
 		DIALOGUE,
 	}
-	boolean hasChange(Member field);
 }

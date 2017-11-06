@@ -54,7 +54,7 @@ public class QBDialogue {
 					if (q instanceof ICategory) {
 						ICategory category = (ICategory)q;
 						if(CancellableEvent.send(new CategoryDeleteEvent(category))) {
-							QuestWorld.getInstance().unregisterCategory(category);
+							QuestWorld.get().unregisterCategory(category);
 							p2.closeInventory();
 							QuestBook.openEditor(p2);
 							PlayerTools.sendTranslation(p2, true, Translation.CATEGORY_DELETED, category.getName());
@@ -224,13 +224,13 @@ public class QBDialogue {
 		Menu menu = new Menu(1, "&c&lQuest Editor");
 
 		PagedMapping pager = new PagedMapping(45, 9);
-		for(ICategory category : QuestWorld.getInstance().getCategories()) {
+		for(ICategory category : QuestWorld.get().getCategories()) {
 			pager.addButton(category.getID(), new ItemBuilder(category.getItem()).lore(
 					"",
 					"&7&oLeft Click to open").get(),
 					event -> {
 						Player p2 = (Player)event.getWhoClicked();
-						QuestWorld.getInstance().getManager(p2).putPage(0);
+						PlayerManager.of(p2).putPage(0);
 						openQuestRequirementChooser2(p2, quest, category);
 					}, true
 			);
@@ -260,7 +260,7 @@ public class QBDialogue {
 							"&r" + quest.getName()).get(),
 					event -> {
 						Player p2 = (Player) event.getWhoClicked();
-						QuestWorld.getInstance().getManager(p2).popPage();
+						PlayerManager.of(p2).popPage();
 
 						if (q instanceof IQuest) {
 							IQuest child = (IQuest)q;

@@ -19,7 +19,7 @@ public class DetectMission extends MissionType implements Ticking {
 	
 	@Override
 	public ItemStack userDisplayItem(IMission instance) {
-		return instance.getMissionItem().clone();
+		return instance.getMissionItem();
 	}
 	
 	@Override
@@ -32,7 +32,7 @@ public class DetectMission extends MissionType implements Ticking {
 		int amount = 0;
 		for (int i = 0; i < 36; i++) {
 			ItemStack current = p.getInventory().getItem(i);
-			if (QuestWorld.getInstance().isItemSimiliar(current, mission.getMissionItem())) amount = amount + current.getAmount();
+			if (QuestWorld.get().isItemSimiliar(current, mission.getMissionItem())) amount = amount + current.getAmount();
 		}
 		
 		if (amount >= mission.getAmount()) {

@@ -14,6 +14,7 @@ import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.QuestStatus;
 import me.mrCookieSlime.QuestWorld.api.Ticking;
 import me.mrCookieSlime.QuestWorld.api.Translation;
+import me.mrCookieSlime.QuestWorld.api.annotation.Nullable;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
@@ -25,8 +26,20 @@ import me.mrCookieSlime.QuestWorld.util.Text;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.AnimalTamer;
 import org.bukkit.entity.Player;
+import org.bukkit.metadata.Metadatable;
 
 public class PlayerManager {
+	
+	public static PlayerManager of(Metadatable player) {
+		return (PlayerManager)player.getMetadata("questworld.playermanager").get(0).value();
+	}
+
+	public static PlayerManager of(UUID uuid) {
+		Player p = Bukkit.getPlayer(uuid);
+		if(p != null)
+			return of(p);
+		return new PlayerManager(uuid);
+	}
 	
 	private UUID uuid;
 	private IStateful last;
@@ -59,6 +72,29 @@ public class PlayerManager {
 		pages.clear();
 	}
 	
+	public int countQuests(@Nullable ICategory root, @Nullable QuestStatus status) {
+		if(root != null)
+			return _countQuests(root, status);
+		
+		int result = 0;
+		for(ICategory category : QuestWorld.get().getCategories())
+			result += _countQuests(category, status);
+
+		return result;
+	}
+	
+	private int _countQuests(ICategory category, @Nullable QuestStatus status) {
+		if(status == null)
+			return category.getQuests().size();
+
+		int result = 0;
+		for(IQuest quest : category.getQuests())
+			if(getStatus(quest) == status)
+				++result;
+		
+		return result;
+	}
+	
 	public void forEachTaskOf(MissionType type, Predicate<IMission> condition) {
 		forEachTaskOf(type, (m,i) -> condition.test(m) ? 1 : Manual.FAIL, false);
 	}
@@ -68,7 +104,7 @@ public class PlayerManager {
 		Player player = Bukkit.getPlayer(uuid);
 		String worldName = player.getWorld().getName();
 		
-		for(IMission task : QuestWorld.getInstance().getMissionsOf(type)) {
+		for(IMission task : QuestWorld.get().getMissionsOf(type)) {
 			IQuest quest = task.getQuest();	
 			
 			if (quest.getCategory().isWorldEnabled(worldName) && quest.isWorldEnabled(worldName)) {
@@ -86,7 +122,6 @@ public class PlayerManager {
 	
 	public void unload() {
 		tracker.save();
-		QuestWorld.getInstance().unregisterManager(this);
 	}
 
 	public UUID getUUID() {
@@ -105,8 +140,8 @@ public class PlayerManager {
 	
 	public static boolean updateTimeframe(UUID uuid, IMission task, int amount) {
 		if (task.getTimeframe() == 0) return true;
-		PlayerManager manager = QuestWorld.getInstance().getManager(uuid);
 		Player p = Bukkit.getPlayer(uuid);
+		PlayerManager manager = of(p);
 
 		if (!manager.isWithinTimeframe(task)) {
 			manager.tracker.setMissionCompleted(task, null);
@@ -128,7 +163,7 @@ public class PlayerManager {
 		Player p = Bukkit.getPlayer(uuid);
 		
 		if (p != null && quest_check) {
-			for (IMission task: QuestWorld.getInstance().getTickingMissions()) {
+			for (IMission task: QuestWorld.get().getTickingMissions()) {
 				if (getStatus(task.getQuest()).equals(QuestStatus.AVAILABLE) && !hasCompletedTask(task) && hasUnlockedTask(task)) {
 					Ticking t = (Ticking) task.getType();
 					int progress = t.onTick(p, task);
@@ -138,7 +173,7 @@ public class PlayerManager {
 			}
 		}
 		
-		for (ICategory category: QuestWorld.getInstance().getCategories()) {
+		for (ICategory category: QuestWorld.get().getCategories()) {
 			for (IQuest quest: category.getQuests()) {
 				if (getStatus(quest).equals(QuestStatus.AVAILABLE)) {
 					boolean finished = quest.getMissions().size() != 0;
@@ -152,8 +187,11 @@ public class PlayerManager {
 						
 						if (!quest.isAutoClaiming() || p == null)
 							tracker.setQuestStatus(quest, QuestStatus.REWARD_CLAIMABLE);
-						else
+						else {
+							// TODO manually handout and complete... reconsider
 							quest.handoutReward(p);
+							completeQuest(quest);
+						}
 					}
 				}
 				else if(getStatus(quest).equals(QuestStatus.ON_COOLDOWN))
@@ -196,6 +234,24 @@ public class PlayerManager {
 		return Math.min(progress, task.getAmount());
 	}
 	
+	public int getProgress(IQuest quest) {
+		int progress = 0;
+		for(IMission task : quest.getMissions())
+			if(hasCompletedTask(task))
+				++progress;
+		
+		return progress;
+	}
+	
+	public int getProgress(ICategory category) {
+		int progress = 0;
+		for(IQuest quest : category.getQuests())
+			if(hasFinished(quest))
+				++progress;
+		
+		return progress;
+	}
+	
 	public String progressString(IQuest quest) {
 		int progress = 0;
 		for(IMission mission : quest.getMissions())
@@ -228,7 +284,7 @@ public class PlayerManager {
 		if (!updateTimeframe(uuid, task, amount))
 			return;
 		
-		QuestWorld.getInstance().getManager(uuid).tracker.setMissionProgress(task, amount);
+		PlayerManager.of(uuid).tracker.setMissionProgress(task, amount);
 		
 		if(amount == task.getAmount()) {
 			Player player = Bukkit.getPlayer(uuid);
@@ -263,7 +319,7 @@ public class PlayerManager {
 		else
 			sendDialogueComponent(player, line);
 		
-		Bukkit.getScheduler().scheduleSyncDelayedTask(QuestWorld.getInstance(),
+		Bukkit.getScheduler().scheduleSyncDelayedTask(QuestWorld.get(),
 				() -> sendDialogue(player, task, dialogue), 70L);
 	}
 
@@ -272,7 +328,7 @@ public class PlayerManager {
 			Bukkit.dispatchCommand(Bukkit.getConsoleSender(), line.substring(1).replace("<player>", player.getName()));
 
 		else {
-			line = QuestWorld.getInstance().getConfig().getString("dialogue.prefix") + line;
+			line = QuestWorld.get().getConfig().getString("dialogue.prefix") + line;
 			
 			player.sendMessage(Text.colorize(line.replace("<player>", player.getName())));
 		}
@@ -321,7 +377,7 @@ public class PlayerManager {
 		int done = 0;
 		int total = 0;
 
-		for (ICategory category: QuestWorld.getInstance().getCategories())  {
+		for (ICategory category: QuestWorld.get().getCategories())  {
 			total += category.getQuests().size();
 			
 			for (IQuest quest: category.getQuests())
@@ -339,7 +395,7 @@ public class PlayerManager {
 	// Right, so this function USED to loop through every file in data-storage/Quest World on
 	// the main thread. W H A T
 	public static void clearAllQuestData(IQuest quest) {
-		Bukkit.getScheduler().runTaskAsynchronously(QuestWorld.getInstance(), () -> {
+		Bukkit.getScheduler().runTaskAsynchronously(QuestWorld.get(), () -> {
 			// First: clear all the quest data on a new thread
 			File path = QuestWorld.getPath("data.player");
 			
@@ -351,9 +407,9 @@ public class PlayerManager {
 			}
 
 			// Second: go back to the main thread and make sure all player managers know what happened
-			Bukkit.getScheduler().callSyncMethod(QuestWorld.getInstance(), () -> {
-				for(AnimalTamer player : Bukkit.getOnlinePlayers())
-					QuestWorld.getInstance().getManager(player.getUniqueId()).clearQuestData(quest);
+			Bukkit.getScheduler().callSyncMethod(QuestWorld.get(), () -> {
+				for(Metadatable player : Bukkit.getOnlinePlayers())
+					of(player).clearQuestData(quest);
 				
 				return false;
 			});

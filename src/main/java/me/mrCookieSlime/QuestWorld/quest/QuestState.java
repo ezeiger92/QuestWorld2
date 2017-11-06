@@ -11,11 +11,11 @@ import me.mrCookieSlime.QuestWorld.event.CancellableEvent;
 import me.mrCookieSlime.QuestWorld.event.QuestChangeEvent;
 import me.mrCookieSlime.QuestWorld.util.BitFlag;
 
-class QuestChange extends Quest {	
+class QuestState extends Quest {	
 	private long changeBits = 0;
 	private Quest origin;
 	
-	public QuestChange(Quest copy) {
+	public QuestState(Quest copy) {
 		super(copy);
 		setUnique(copy.getUnique());
 		origin = copy;
@@ -186,7 +186,7 @@ class QuestChange extends Quest {
 	}
 
 	@Override
-	public QuestChange getState() {
+	public QuestState getState() {
 		return this;
 	}
 }

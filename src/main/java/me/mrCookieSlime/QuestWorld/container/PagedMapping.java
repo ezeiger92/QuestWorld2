@@ -5,7 +5,6 @@ import java.util.ListIterator;
 import java.util.function.Consumer;
 
 import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
@@ -13,6 +12,7 @@ import org.bukkit.inventory.ItemStack;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.api.menu.Menu;
+import me.mrCookieSlime.QuestWorld.manager.PlayerManager;
 import me.mrCookieSlime.QuestWorld.util.ItemBuilder;
 
 public class PagedMapping {
@@ -67,20 +67,20 @@ public class PagedMapping {
 	
 	public void addButton(int index, ItemStack item, Consumer<InventoryClickEvent> button, boolean isNavButton) {
 		findPanel(index).addButton(index % pageSize, item, isNavButton ? event -> {
-			QuestWorld.getInstance().getManager((OfflinePlayer) event.getWhoClicked()).putPage(currentPage);
+			PlayerManager.of(event.getWhoClicked()).putPage(currentPage);
 			button.accept(event);
 		} : button);
 	}
 
 	public void addFrameButton(int index, ItemStack item, Consumer<InventoryClickEvent> button, boolean isNavButton) {
 		frame.addButton(index, item, isNavButton ? event -> {
-			QuestWorld.getInstance().getManager((OfflinePlayer) event.getWhoClicked()).putPage(currentPage);
+			PlayerManager.of(event.getWhoClicked()).putPage(currentPage);
 			button.accept(event);
 		} : button);
 	}
 	
 	public void build(Menu menu, Player p) {
-		int page = QuestWorld.getInstance().getManager(p).popPage();
+		int page = PlayerManager.of(p).popPage();
 		if(page >= panels.size()) {
 			page = 0;
 		}

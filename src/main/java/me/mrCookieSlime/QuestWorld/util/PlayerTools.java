@@ -88,7 +88,7 @@ public class PlayerTools {
 	private static ConversationFactory factory;
 	public static ConversationFactory getConversationFactory() {
 		if(factory == null)
-			factory = new ConversationFactory(QuestWorld.getInstance());
+			factory = new ConversationFactory(QuestWorld.get());
 		return factory;
 	}
 	public static void promptInput(Player p, Prompt prompt) {
@@ -121,7 +121,7 @@ public class PlayerTools {
 			public void onLeave(PlayerQuitEvent event) {
 				HandlerList.unregisterAll(this);
 			}
-		}, QuestWorld.getInstance());
+		}, QuestWorld.get());
 	}
 	
 	public static boolean checkPermission(Player p, String permission) {

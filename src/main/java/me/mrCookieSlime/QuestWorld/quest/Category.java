@@ -2,6 +2,7 @@ package me.mrCookieSlime.QuestWorld.quest;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -9,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 
 import me.mrCookieSlime.QuestWorld.QuestWorld;
-import me.mrCookieSlime.QuestWorld.api.QuestStatus;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategoryState;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
@@ -18,7 +18,6 @@ import me.mrCookieSlime.QuestWorld.util.Text;
 
 import org.bukkit.Material;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 class Category extends Renderable implements ICategoryState {
@@ -27,7 +26,7 @@ class Category extends Renderable implements ICategoryState {
 	private String name;
 	private String permission;
 	private ItemStack item;
-	private Quest parent;
+	private WeakReference<Quest> parent;
 	private Map<Integer, Quest> quests = new HashMap<>();
 	private List<String> world_blacklist = new ArrayList<String>();
 	
@@ -43,7 +42,7 @@ class Category extends Renderable implements ICategoryState {
 		permission = "";
 		hidden = false;
 		
-		QuestWorld.getInstance().registerCategory(this);
+		QuestWorld.get().registerCategory(this);
 	}
 	
 	// Package
@@ -56,7 +55,7 @@ class Category extends Renderable implements ICategoryState {
 		permission = config.getString("permission", "");
 		world_blacklist = config.getStringList("world-blacklist");
 		
-		QuestWorld.getInstance().registerCategory(this);
+		QuestWorld.get().registerCategory(this);
 	}
 	
 	// Interal
@@ -69,7 +68,7 @@ class Category extends Renderable implements ICategoryState {
 		config     = YamlConfiguration.loadConfiguration(getFile());
 		name       = source.name;
 		item       = source.item.clone();
-		parent     = source.parent;
+		parent     = new WeakReference<>(source.getParent());
 		permission = source.permission;
 		hidden     = source.hidden;
 		
@@ -108,8 +107,8 @@ class Category extends Renderable implements ICategoryState {
 	}
 	
 	@Override
-	public IQuest getParent() {
-		return this.parent;
+	public Quest getParent() {
+		return this.parent.get();
 	}
 	
 	@Override
@@ -126,28 +125,10 @@ class Category extends Renderable implements ICategoryState {
 	public boolean isWorldEnabled(String world) {
 		return !world_blacklist.contains(world);
 	}
-
-	@Override
-	public int countQuests(Player p, QuestStatus status) {
-		int i = 0;
-		for(Quest quest : getQuests())
-			if(quest.getStatus(p) == status)
-				++i;
-		return i;
-	}
 	
 	@Override
-	public int countFinishedQuests(Player p) {
-		int i = 0;
-		for(Quest quest : getQuests())
-			if(QuestWorld.getInstance().getManager(p).hasFinished(quest))
-				++i;
-		return i;
-	}
-	
-	@Override
-	public CategoryChange getState() {
-		return new CategoryChange(this);
+	public CategoryState getState() {
+		return new CategoryState(this);
 	}
 
 	//// ICategoryState Impl
@@ -160,7 +141,7 @@ class Category extends Renderable implements ICategoryState {
 	@Override
 	public void setParent(IQuest quest) {
 		updateLastModified();
-		this.parent = (Quest)quest;
+		this.parent = new WeakReference<>((Quest)quest);
 	}
 
 	@Override
@@ -181,9 +162,9 @@ class Category extends Renderable implements ICategoryState {
 		if (parentId != null) {
 			int[] parts = RenderableFacade.splitQuestString(parentId);
 			
-			Category c = (Category)QuestWorld.getInstance().getCategory(parts[1]);
+			Category c = (Category)QuestWorld.get().getCategory(parts[1]);
 			if (c != null)
-				parent = c.getQuest(parts[0]);
+				parent = new WeakReference<>(c.getQuest(parts[0]));
 		}
 	}
 	
@@ -192,22 +173,20 @@ class Category extends Renderable implements ICategoryState {
 	}
 	
 	public void addQuest(IQuest quest) {
-		if(quest instanceof QuestChange)
-			quests.put(quest.getID(), ((QuestChange)quest).getSource());
+		if(quest instanceof QuestState)
+			quests.put(quest.getID(), ((QuestState)quest).getSource());
 		else
 			quests.put(quest.getID(), (Quest)quest);
 	}
 	
 	public void removeQuest(IQuest quest) {
-		// TODO maybe was needed
-		//quest.updateLastModified();
 		quests.remove(quest.getID());
 		((Quest)quest).getFile().delete();
 	}
 	
 	@Deprecated
 	public void save(boolean force) {
-		long lastSave = QuestWorld.getInstance().getLastSaved();
+		long lastSave = QuestWorld.get().getLastSaved();
 		for (Quest quest: quests.values()) {
 			// Forcing save or quest appears changed
 			if(force || lastSave < quest.getLastModified())
@@ -225,6 +204,7 @@ class Category extends Renderable implements ICategoryState {
 		config.set("hidden", this.hidden);
 		config.set("world-blacklist", world_blacklist);
 		
+		Quest parent = getParent();
 		if (parent != null) config.set("parent", String.valueOf(parent.getCategory().getID() + "-C" + parent.getID()));
 		else config.set("parent", null);
 		

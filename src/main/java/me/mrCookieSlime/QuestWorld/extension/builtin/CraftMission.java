@@ -15,6 +15,7 @@ import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IMissionState;
 import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
+import me.mrCookieSlime.QuestWorld.manager.PlayerManager;
 import me.mrCookieSlime.QuestWorld.util.PlayerTools;
 import me.mrCookieSlime.QuestWorld.util.Text;
 
@@ -25,7 +26,7 @@ public class CraftMission extends MissionType implements Listener, Decaying {
 	
 	@Override
 	public ItemStack userDisplayItem(IMission instance) {
-		return instance.getMissionItem().clone();
+		return instance.getMissionItem();
 	}
 	
 	@Override
@@ -83,8 +84,8 @@ public class CraftMission extends MissionType implements Listener, Decaying {
 		
 		Player player = (Player)e.getWhoClicked();
 
-		QuestWorld.getInstance().getManager(player).forEachTaskOf(this, (mission, needed) -> {
-			if(QuestWorld.getInstance().isItemSimiliar(test, mission.getMissionItem()))
+		PlayerManager.of(player).forEachTaskOf(this, (mission, needed) -> {
+			if(QuestWorld.get().isItemSimiliar(test, mission.getMissionItem()))
 				return test.getAmount();
 			
 			return Manual.FAIL;

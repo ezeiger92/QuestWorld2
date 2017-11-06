@@ -9,11 +9,11 @@ import me.mrCookieSlime.QuestWorld.event.CancellableEvent;
 import me.mrCookieSlime.QuestWorld.event.CategoryChangeEvent;
 import me.mrCookieSlime.QuestWorld.util.BitFlag;
 
-class CategoryChange extends Category {
+class CategoryState extends Category {
 	private long changeBits = 0;
 	private Category origin;
 	
-	public CategoryChange(Category copy) {
+	public CategoryState(Category copy) {
 		super(copy);
 		setUnique(copy.getUnique());
 		origin = copy;
@@ -123,7 +123,7 @@ class CategoryChange extends Category {
 	}
 	
 	@Override
-	public CategoryChange getState() {
+	public CategoryState getState() {
 		return this;
 	}
 }

@@ -19,6 +19,6 @@ public class TaskListener implements Listener {
 	@EventHandler(priority=EventPriority.MONITOR,ignoreCancelled=true)
 	public void onCreatureSpawn(CreatureSpawnEvent e) {
 		if (e.getSpawnReason().equals(SpawnReason.SPAWNER))
-			e.getEntity().setMetadata("spawned_by_spawner", new FixedMetadataValue(QuestWorld.getInstance(), "QuestWorld"));
+			e.getEntity().setMetadata("spawned_by_spawner", new FixedMetadataValue(QuestWorld.get(), "QuestWorld"));
 	}
 }

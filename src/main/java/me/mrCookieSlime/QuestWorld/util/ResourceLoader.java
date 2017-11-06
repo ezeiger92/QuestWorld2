@@ -5,7 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -27,7 +27,7 @@ public class ResourceLoader {
 	}
 	
 	public YamlConfiguration loadJarConfig(String jarPath) {
-		return YamlConfiguration.loadConfiguration(new InputStreamReader(plugin.getResource(jarPath), Charset.forName("UTF-8")));
+		return YamlConfiguration.loadConfiguration(new InputStreamReader(plugin.getResource(jarPath), StandardCharsets.UTF_8));
 	}
 	
 	public YamlConfiguration loadConfig(String path) throws FileNotFoundException, IOException, InvalidConfigurationException {
@@ -36,7 +36,7 @@ public class ResourceLoader {
 		File file = relativeFile(path);
 		
 		if(resource != null) {
-			result.setDefaults(YamlConfiguration.loadConfiguration(new InputStreamReader(resource, Charset.forName("UTF-8"))));
+			result.setDefaults(YamlConfiguration.loadConfiguration(new InputStreamReader(resource, StandardCharsets.UTF_8)));
 			if(!file.exists())
 				plugin.saveResource(path, false);
 		}

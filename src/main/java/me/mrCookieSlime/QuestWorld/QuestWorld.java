@@ -9,7 +9,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -36,7 +35,6 @@ import me.mrCookieSlime.QuestWorld.util.Log;
 import me.mrCookieSlime.QuestWorld.util.ResourceLoader;
 import me.mrCookieSlime.QuestWorld.util.Sounds;
 
-import org.bukkit.entity.AnimalTamer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
@@ -52,9 +50,8 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 	private MissionViewer missionViewer = new MissionViewer();
 	private Map<String, MissionType> types      = new HashMap<>();
 	private Map<Integer, ICategory>   categories = new HashMap<>();
-	private Map<UUID, PlayerManager>  profiles   = new HashMap<>();
 	
-	private EconWrapper economy = null;
+	private EconWrapper economy;
 	private Sounds eventSounds;
 	
 	// TODO Make an interface
@@ -63,14 +60,14 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 	
 	private ResourceLoader resources = new ResourceLoader(this);
 	private Lang language;
-	private ExtensionLoader extLoader = null;
+	private ExtensionLoader extLoader;
 	private ExtensionInstaller hookInstaller = null;
 	
 	private int questCheckHandle = -1;
 	private int autosaveHandle = -1;
 	
 	public static String translate(Translator key, String... replacements) {
-		return instance.language.translate(key, replacements);
+		return get().language.translate(key, replacements);
 	}
 	
 	public QuestWorld() {
@@ -116,6 +113,8 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 		hookInstaller = new ExtensionInstaller(this);
 		new Builtin();
 		hookInstaller.addAll(preEnableHooks);
+		preEnableHooks.clear();
+		preEnableHooks = null;
 		
 		economy = EconWrapper.wrap();
 		if(economy == null)
@@ -156,7 +155,7 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 		questCheckHandle = getServer().getScheduler().scheduleSyncRepeatingTask(this,
 				() -> {
 					for (Player p: getServer().getOnlinePlayers())
-						getManager(p).update(true);
+						PlayerManager.of(p).update(true);
 				},
 				0L,
 				getConfig().getInt("options.quest-check-delay")
@@ -188,8 +187,6 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 	
 	public void reloadQuests() {
 		categories.clear();
-		profiles.clear();
-		
 		load();
 	}
 	
@@ -211,9 +208,9 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 	public void save(boolean force) {
 		for(ICategory c : categories.values())
 			c.save(force);
-		
-		for(PlayerManager p : profiles.values())
-			p.getTracker().save();
+
+		for(Player p : getServer().getOnlinePlayers())
+			PlayerManager.of(p).getTracker().save();
 		
 		lastSave = System.currentTimeMillis();
 	}
@@ -223,9 +220,8 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 			c.save(true);
 		categories.clear();
 		
-		for(PlayerManager p : profiles.values())
-			p.getTracker().save();
-		profiles.clear();
+		for(Player p : getServer().getOnlinePlayers())
+			PlayerManager.of(p).getTracker().save();
 	}
 	
 	public boolean importPreset(String fileName) {
@@ -300,7 +296,7 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 		return true;
 	}
 
-	public static QuestWorld getInstance() {
+	public static QuestWorld get() {
 		return instance;
 	}
 	
@@ -323,32 +319,6 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 		}
 		categories.remove(category.getID());
 		facade.deleteCategoryFile(category);
-	}
-	
-	public void registerManager(PlayerManager manager) {
-		this.profiles.put(manager.getUUID(), manager);
-	}
-	
-	public void unregisterManager(PlayerManager manager) {
-		this.profiles.remove(manager.getUUID());
-	}
-	
-	public PlayerManager getManager(UUID uuid) {
-		PlayerManager manager = profiles.get(uuid);
-		if(manager == null) {
-			manager = new PlayerManager(uuid);
-			profiles.put(uuid, manager);
-		}
-		return manager;
-	}
-	
-	// This was changed to AnimalTamer because it's the most basic interface with getUniqueId
-	public PlayerManager getManager(AnimalTamer player) {
-		return getManager(player.getUniqueId());
-	}
-	
-	public Collection<PlayerManager> getManagers() {
-		return profiles.values();
 	}
 	
 	@Override
@@ -409,7 +379,7 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 	
 	@SuppressWarnings("unchecked")
 	public static <T extends MissionType> T getMissionType(String typeName) {
-		MissionType result = instance.types.get(typeName);
+		MissionType result = get().types.get(typeName);
 		if(result == null)
 			result = UnknownMission.get(typeName);
 		
@@ -417,15 +387,15 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 	}
 	
 	public static Sounds getSounds() {
-		return instance.eventSounds;
+		return get().eventSounds;
 	}
 	
 	public static RenderableFacade renderFactory() {
-		return instance.facade;
+		return get().facade;
 	}
 	
 	public static File getPath(String key) {
-		File result = new File(instance.getDataFolder(), resolvePath(key));
+		File result = new File(get().getDataFolder(), resolvePath(key));
 		if(!result.exists())
 			result.mkdirs();
 		
@@ -433,6 +403,6 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 	}
 	
 	public static String resolvePath(String key) {
-		return instance.getConfig().getString(key,"");
+		return get().getConfig().getString(key,"");
 	}
 }

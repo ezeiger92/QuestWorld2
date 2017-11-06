@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import me.mrCookieSlime.QuestWorld.api.MissionType;
@@ -13,11 +12,11 @@ import me.mrCookieSlime.QuestWorld.event.MissionChangeEvent;
 import me.mrCookieSlime.QuestWorld.util.BitFlag;
 import me.mrCookieSlime.QuestWorld.util.BitFlag.BitString;
 
-class MissionChange extends Mission {
+class MissionState extends Mission {
 	private long changeBits = 0;
 	private Mission origin;
 	
-	public MissionChange(Mission copy) {
+	public MissionState(Mission copy) {
 		super(copy.serialize());
 		setUnique(copy.getUnique());
 		origin = copy;
@@ -25,10 +24,6 @@ class MissionChange extends Mission {
 	
 	public boolean hasChange(Member field) {
 		return (changeBits & BitFlag.getBits(field)) != 0;
-	}
-	
-	public List<Member> getChanges() {
-		return BitFlag.getFlags(Member.values(), changeBits);
 	}
 	
 	public Mission getSource() {
@@ -39,6 +34,7 @@ class MissionChange extends Mission {
 	public boolean apply() {
 		if(sendEvent()) {
 			copyTo(origin);
+			origin.saveDialogue();
 			changeBits = 0;
 			return true;
 		}
@@ -103,12 +99,6 @@ class MissionChange extends Mission {
 		super.setLocation(loc);
 		changeBits |= BitFlag.getBits(Member.LOCATION);
 	}
-
-	@Override
-	public void setLocation(Player p) {
-		super.setLocation(p);
-		changeBits |= BitFlag.getBits(Member.LOCATION);
-	}
 	
 	@Override
 	public void setDisplayName(String name) {
@@ -146,14 +136,14 @@ class MissionChange extends Mission {
 		changeBits |= BitFlag.getBits(Member.SPAWNERS_ALLOWED);
 	}
 	
-	// TODO hacky hacky
 	@Override
-	public void setupDialogue(Player p) {
-		origin.setupDialogue(p);
+	public void setDialogue(List<String> dialgoue) {
+		
+		changeBits |= BitFlag.getBits(Member.DIALOGUE);
 	}
 	
 	@Override
-	public MissionChange getState() {
+	public MissionState getState() {
 		return this;
 	}
 }

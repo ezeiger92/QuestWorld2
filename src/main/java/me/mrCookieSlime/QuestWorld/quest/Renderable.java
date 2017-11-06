@@ -18,7 +18,7 @@ class Renderable {
 		return lastModified;
 	}
 	
-	public void updateLastModified() {
+	protected void updateLastModified() {
 		lastModified = System.currentTimeMillis();
 	}
 

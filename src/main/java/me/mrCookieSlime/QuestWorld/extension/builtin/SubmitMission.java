@@ -10,6 +10,7 @@ import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IMissionState;
 import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
+import me.mrCookieSlime.QuestWorld.manager.PlayerManager;
 import me.mrCookieSlime.QuestWorld.util.Text;
 
 public class SubmitMission extends MissionType implements Manual {
@@ -19,7 +20,7 @@ public class SubmitMission extends MissionType implements Manual {
 	
 	@Override
 	public ItemStack userDisplayItem(IMission instance) {
-		return instance.getMissionItem().clone();
+		return instance.getMissionItem();
 	}
 	
 	@Override
@@ -29,11 +30,11 @@ public class SubmitMission extends MissionType implements Manual {
 
 	@Override
 	public int onManual(Player p, IMission mission) {
-		int current =  QuestWorld.getInstance().getManager(p).getProgress(mission);
+		int current =  PlayerManager.of(p).getProgress(mission);
 		int needed = mission.getAmount() - current;
 		int found = needed;
 		
-		ItemStack search = mission.getMissionItem().clone();
+		ItemStack search = mission.getMissionItem();
 		search.setAmount(needed);
 		
 		ItemStack missing = p.getInventory().removeItem(search).get(0);

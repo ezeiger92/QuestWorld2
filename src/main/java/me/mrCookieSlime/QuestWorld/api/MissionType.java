@@ -37,7 +37,7 @@ public abstract class MissionType {
 	public abstract ItemStack userDisplayItem(IMission instance);
 	
 	private String formatTimeframe(IMission instance) {
-		if(!instance.hasTimeframe() || !supportsTimeframes)
+		if(instance.getTimeframe() == 0 || !supportsTimeframes)
 			return "";
 		long duration = instance.getTimeframe();
 		

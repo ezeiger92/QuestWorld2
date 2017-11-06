@@ -8,13 +8,13 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 
-import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.Decaying;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IMissionState;
 import me.mrCookieSlime.QuestWorld.api.menu.MenuData;
 import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
+import me.mrCookieSlime.QuestWorld.manager.PlayerManager;
 import me.mrCookieSlime.QuestWorld.util.ItemBuilder;
 import me.mrCookieSlime.QuestWorld.util.PlayerTools;
 import me.mrCookieSlime.QuestWorld.util.Text;
@@ -26,7 +26,7 @@ public class MineMission extends MissionType implements Listener, Decaying {
 	
 	@Override
 	public ItemStack userDisplayItem(IMission instance) {
-		return instance.getMissionItem().clone();
+		return instance.getMissionItem();
 	}
 	
 	@Override
@@ -36,7 +36,7 @@ public class MineMission extends MissionType implements Listener, Decaying {
 	
 	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
 	public void onMine(BlockBreakEvent e) {
-		QuestWorld.getInstance().getManager(e.getPlayer()).forEachTaskOf(this, mission -> {
+		PlayerManager.of(e.getPlayer()).forEachTaskOf(this, mission -> {
 			ItemStack is = PlayerTools.getStackOf(e.getBlock());
 			return is.isSimilar(mission.getMissionItem());
 		});

@@ -1,5 +1,6 @@
 package me.mrCookieSlime.QuestWorld.api.menu;
 
+import java.util.List;
 import java.util.function.Consumer;
 
 import org.bukkit.Material;
@@ -8,6 +9,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
+import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.SinglePrompt;
 import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.api.contract.IMissionState;
@@ -78,7 +80,7 @@ public class MissionButton {
 						"&e> Click to change the Location",
 						"&eto your current Position").get(),
 				event -> {
-					changes.setLocation((Player)event.getWhoClicked());
+					changes.setLocation(event.getWhoClicked().getLocation().getBlock().getLocation());
 				}
 		);
 	}
@@ -130,7 +132,7 @@ public class MissionButton {
 									changes.setDisplayName(s);
 									if(changes.apply()) {
 										PlayerTools.sendTranslation(p, true, Translation.MISSION_NAME_SET);
-										QuestBook.openQuestMissionEditor(p, changes);
+										QuestBook.openQuestMissionEditor(p, changes.getSource());
 									}
 									return true;
 								}
@@ -196,11 +198,31 @@ public class MissionButton {
 							p.sendMessage(Text.colorize("&4No Dialogue found!"));
 						else
 							PlayerManager.sendDialogue(p, changes, changes.getDialogue().iterator());
+						return;
 					}
-					else
-						changes.setupDialogue(p);
-						
+					
+					List<String> dialogue = changes.getDialogue();
+					dialogue.clear();
+					
 					PlayerTools.closeInventoryWithEvent(p);
+					PlayerTools.promptInput(p, new SinglePrompt(
+							PlayerTools.makeTranslation(true, Translation.MISSION_DIALOG_ADD),
+							(c,s) -> {
+								Player p2 = (Player) c.getForWhom();
+								if (s.equalsIgnoreCase("exit()")) {
+									changes.setDialogue(dialogue);
+									if(changes.apply()) {
+										PlayerTools.sendTranslation(p2, true, Translation.MISSION_DIALOG_SET, changes.getDialogueFilename());
+									}
+									QuestBook.openQuestMissionEditor(p2, changes.getSource());
+									return true;
+								}
+								
+								dialogue.add(s);
+								QuestWorld.getSounds().DIALOG_ADD.playTo(p2);
+								return false;
+							}
+					));
 				}
 		);
 	}

@@ -7,10 +7,10 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.inventory.ItemStack;
 
-import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IMissionState;
 import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
+import me.mrCookieSlime.QuestWorld.manager.PlayerManager;
 import me.mrCookieSlime.QuestWorld.util.EntityTools;
 import me.mrCookieSlime.QuestWorld.util.ItemBuilder;
 
@@ -81,7 +81,7 @@ public class KillNamedMission extends KillMission {
 		if(name == null)
 			return;
 		
-		QuestWorld.getInstance().getManager(killer).forEachTaskOf(this, mission -> {
+		PlayerManager.of(killer).forEachTaskOf(this, mission -> {
 			return mission.getEntity() == e.getEntityType()
 					&& (mission.acceptsSpawners() || !EntityTools.isFromSpawner(e.getEntity()))
 					&& ((mission.getCustomInt() == EXACT && mission.getCustomString().equals(name))
