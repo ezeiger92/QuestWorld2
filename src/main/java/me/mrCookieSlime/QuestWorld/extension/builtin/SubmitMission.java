@@ -6,11 +6,11 @@ import org.bukkit.inventory.ItemStack;
 
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.Manual;
+import me.mrCookieSlime.QuestWorld.api.MissionSet;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IMissionState;
 import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
-import me.mrCookieSlime.QuestWorld.manager.PlayerManager;
 import me.mrCookieSlime.QuestWorld.util.Text;
 
 public class SubmitMission extends MissionType implements Manual {
@@ -29,13 +29,12 @@ public class SubmitMission extends MissionType implements Manual {
 	}
 
 	@Override
-	public int onManual(Player p, IMission mission) {
-		int current =  PlayerManager.of(p).getProgress(mission);
-		int needed = mission.getAmount() - current;
-		int found = needed;
+	public void onManual(Player p, MissionSet.Result result) {
+		IMission mission = result.getMission();
+		int found = result.getRemaining();
 		
 		ItemStack search = mission.getMissionItem();
-		search.setAmount(needed);
+		search.setAmount(found);
 		
 		ItemStack missing = p.getInventory().removeItem(search).get(0);
 		if(missing != null)
@@ -44,12 +43,10 @@ public class SubmitMission extends MissionType implements Manual {
 		if(found > 0) {
 			QuestWorld.getSounds().MISSION_SUBMIT.playTo(p);
 			// TODO QuestWorld.getSounds().muteNext();
-			
-			return current + found;
+			result.addProgress(found);
 		}
 		else {
 			QuestWorld.getSounds().MISSION_REJECT.playTo(p);
-			return FAIL;
 		}
 	}
 	

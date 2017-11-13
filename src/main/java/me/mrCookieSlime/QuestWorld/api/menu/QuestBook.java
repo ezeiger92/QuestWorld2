@@ -5,6 +5,7 @@ import java.util.List;
 
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.Manual;
+import me.mrCookieSlime.QuestWorld.api.MissionSet;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.QuestStatus;
 import me.mrCookieSlime.QuestWorld.api.SinglePrompt;
@@ -103,7 +104,7 @@ public class QuestBook {
 	}
 	
 	private static ItemStack partyMenuItem(Player p) {
-		String progress = PlayerManager.of(p).getProgress();
+		String progress = PlayerManager.of(p).progressString();
 		if (QuestWorld.get().getConfig().getBoolean("party.enabled")) {
 			return new ItemBuilder(SkullType.PLAYER)
 					.display(QuestWorld.translate(Translation.gui_party)).lore(
@@ -362,12 +363,8 @@ public class QuestBook {
 							if (manager2.hasCompletedTask(mission)) continue;
 							
 							if(mission.getType() instanceof Manual) {
-								Manual m = (Manual) mission.getType();
-								int progress = m.onManual(p2, mission);
-								if(progress != Manual.FAIL) {
-									manager2.setProgress(mission, progress);
-									openQuest(p2, quest, categoryBack, back);
-								}
+								((Manual) mission.getType()).onManual(p2, new MissionSet.Result(mission, manager2));
+								openQuest(p2, quest, categoryBack, back);
 							}
 						}
 					}
@@ -440,12 +437,8 @@ public class QuestBook {
 					if (manager2.hasCompletedTask(mission)) return;
 					
 					if(mission.getType() instanceof Manual) {
-						Manual m = (Manual) mission.getType();
-						int progress = m.onManual(p2, mission);
-						if(progress != Manual.FAIL) {
-							manager2.setProgress(mission, progress);
-							openQuest(p2, quest, categoryBack, back);
-						}
+						((Manual) mission.getType()).onManual(p2, new MissionSet.Result(mission, manager2));
+						openQuest(p2, quest, categoryBack, back);
 					}
 				}
 			});

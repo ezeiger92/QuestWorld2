@@ -5,6 +5,7 @@ import org.bukkit.Statistic;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import me.mrCookieSlime.QuestWorld.api.MissionSet;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.Ticking;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
@@ -37,8 +38,8 @@ public class PlayMission extends MissionType implements Ticking {
 	}
 	
 	@Override
-	public int onManual(Player player, IMission mission) {
-		return player.getStatistic(Statistic.PLAY_ONE_TICK) / 20 / 60;
+	public void onManual(Player player, MissionSet.Result result) {
+		result.setProgress(player.getStatistic(Statistic.PLAY_ONE_TICK) / 20 / 60);
 	}
 	
 	@Override

@@ -59,16 +59,9 @@ class Quest extends Renderable implements IQuestState {
 		name     = source.name;
 		item     = source.item.clone();
 
-		tasks = new ArrayList<>();
 		tasks.addAll(source.tasks);
-		
-		commands = new ArrayList<>();
 		commands.addAll(source.commands);
-		
-		world_blacklist = new ArrayList<>();
 		world_blacklist.addAll(source.world_blacklist);
-		
-		rewards = new ArrayList<>();
 		rewards.addAll(source.rewards);
 
 		money          = source.money;
@@ -194,13 +187,6 @@ class Quest extends Renderable implements IQuestState {
 		
 		config.set("rewards.items", rewards);
 		
-		/*int index = 0;
-		for (ItemStack reward: rewards) {
-			if (reward != null) {
-				config.set("rewards.items." + index, reward);
-				index++;
-			}
-		}*/
 		for (Mission mission: tasks) {
 			Map<String, Object> data = mission.serialize();
 			// TODO keep a quest id
@@ -467,7 +453,7 @@ class Quest extends Renderable implements IQuestState {
 	}
 
 	@Override
-	public IQuest getSource() {
+	public Quest getSource() {
 		return this;
 	}
 

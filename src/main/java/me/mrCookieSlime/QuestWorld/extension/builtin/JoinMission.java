@@ -6,11 +6,11 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
 
+import me.mrCookieSlime.QuestWorld.api.MissionSet;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IMissionState;
 import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
-import me.mrCookieSlime.QuestWorld.manager.PlayerManager;
 
 public class JoinMission extends MissionType implements Listener {
 	public JoinMission() {
@@ -29,7 +29,8 @@ public class JoinMission extends MissionType implements Listener {
 	
 	@EventHandler
 	public void onJoin(PlayerJoinEvent e) {
-		PlayerManager.of(e.getPlayer()).forEachTaskOf(this, mission -> true);
+		for(MissionSet.Result r : MissionSet.of(this, e.getPlayer()))
+			r.addProgress(1);
 	}
 	
 	@Override

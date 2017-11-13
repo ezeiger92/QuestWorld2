@@ -14,7 +14,7 @@ class CategoryState extends Category {
 	private Category origin;
 	
 	public CategoryState(Category copy) {
-		super(copy);
+		super(copy.serialize());
 		setUnique(copy.getUnique());
 		origin = copy;
 	}

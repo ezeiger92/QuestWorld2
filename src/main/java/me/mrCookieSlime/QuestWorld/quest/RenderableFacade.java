@@ -93,4 +93,10 @@ public class RenderableFacade {
 	public void deleteCategoryFile(ICategory category) {
 		((Category)category).getFile().delete();
 	}
+	
+	public void save(boolean force) {
+		for(ICategory c : QuestWorld.get().getCategories()) {
+			((Category)c).save(force);
+		}
+	}
 }

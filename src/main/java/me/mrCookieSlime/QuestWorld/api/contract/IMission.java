@@ -31,7 +31,4 @@ public interface IMission extends IStateful {
 	@Override
 	IMissionState getState();
 	String        getText();
-	
-	@Deprecated
-	String getDialogueFilename();
 }

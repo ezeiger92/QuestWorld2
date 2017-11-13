@@ -9,11 +9,11 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.inventory.ItemStack;
 
 import me.mrCookieSlime.QuestWorld.api.Decaying;
+import me.mrCookieSlime.QuestWorld.api.MissionSet;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IMissionState;
 import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
-import me.mrCookieSlime.QuestWorld.manager.PlayerManager;
 import me.mrCookieSlime.QuestWorld.util.EntityTools;
 import me.mrCookieSlime.QuestWorld.util.Text;
 
@@ -40,10 +40,12 @@ public class KillMission extends MissionType implements Listener, Decaying {
 		if(killer == null)
 			return;
 
-		PlayerManager.of(killer).forEachTaskOf(this, mission -> {
-			return mission.getEntity() == e.getEntityType()
-					&& (mission.acceptsSpawners() || !EntityTools.isFromSpawner(e.getEntity()));
-		});
+		for(MissionSet.Result r : MissionSet.of(this, killer)) {
+			IMission mission = r.getMission();
+			if(mission.getEntity() == e.getEntityType()
+				&& (mission.acceptsSpawners() || !EntityTools.isFromSpawner(e.getEntity())))
+				r.addProgress(1);
+		}
 	}
 	
 	@Override

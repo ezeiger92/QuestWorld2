@@ -7,14 +7,13 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.inventory.ItemStack;
 
-import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.Decaying;
-import me.mrCookieSlime.QuestWorld.api.Manual;
+import me.mrCookieSlime.QuestWorld.api.MissionSet;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IMissionState;
 import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
-import me.mrCookieSlime.QuestWorld.manager.PlayerManager;
+import me.mrCookieSlime.QuestWorld.util.ItemBuilder;
 import me.mrCookieSlime.QuestWorld.util.Text;
 
 public class FishMission extends MissionType implements Listener, Decaying {
@@ -34,15 +33,13 @@ public class FishMission extends MissionType implements Listener, Decaying {
 	
 	@EventHandler
 	public void onFish(PlayerFishEvent e) {
-		if (!(e.getCaught() instanceof Item)) return;
+		if (!(e.getCaught() instanceof Item))
+			return;
 		ItemStack caught = ((Item)e.getCaught()).getItemStack();
 
-		PlayerManager.of(e.getPlayer()).forEachTaskOf(this, (mission, needed) -> {
-			if(QuestWorld.get().isItemSimiliar(caught, mission.getMissionItem()))
-				return caught.getAmount();
-			
-			return Manual.FAIL;
-		}, false);
+		for(MissionSet.Result r : MissionSet.of(this, e.getPlayer()))
+			if(ItemBuilder.compareItems(caught, r.getMission().getMissionItem()))
+				r.addProgress(caught.getAmount());
 	}
 	
 	@Override

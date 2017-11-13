@@ -14,6 +14,7 @@ import me.mrCookieSlime.QuestWorld.api.SinglePrompt;
 import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.api.contract.IMissionState;
 import me.mrCookieSlime.QuestWorld.manager.PlayerManager;
+import me.mrCookieSlime.QuestWorld.manager.ProgressTracker;
 import me.mrCookieSlime.QuestWorld.util.EntityTools;
 import me.mrCookieSlime.QuestWorld.util.ItemBuilder;
 import me.mrCookieSlime.QuestWorld.util.PlayerTools;
@@ -212,7 +213,8 @@ public class MissionButton {
 								if (s.equalsIgnoreCase("exit()")) {
 									changes.setDialogue(dialogue);
 									if(changes.apply()) {
-										PlayerTools.sendTranslation(p2, true, Translation.MISSION_DIALOG_SET, changes.getDialogueFilename());
+										String filename = ProgressTracker.dialogueFile(changes.getSource()).getName();
+										PlayerTools.sendTranslation(p2, true, Translation.MISSION_DIALOG_SET, filename);
 									}
 									QuestBook.openQuestMissionEditor(p2, changes.getSource());
 									return true;

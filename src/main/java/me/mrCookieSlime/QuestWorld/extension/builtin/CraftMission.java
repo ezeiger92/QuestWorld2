@@ -8,14 +8,13 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.inventory.ItemStack;
 
-import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.Decaying;
-import me.mrCookieSlime.QuestWorld.api.Manual;
+import me.mrCookieSlime.QuestWorld.api.MissionSet;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IMissionState;
 import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
-import me.mrCookieSlime.QuestWorld.manager.PlayerManager;
+import me.mrCookieSlime.QuestWorld.util.ItemBuilder;
 import me.mrCookieSlime.QuestWorld.util.PlayerTools;
 import me.mrCookieSlime.QuestWorld.util.Text;
 
@@ -83,13 +82,10 @@ public class CraftMission extends MissionType implements Listener, Decaying {
 		test.setAmount(recipeAmount);
 		
 		Player player = (Player)e.getWhoClicked();
-
-		PlayerManager.of(player).forEachTaskOf(this, (mission, needed) -> {
-			if(QuestWorld.get().isItemSimiliar(test, mission.getMissionItem()))
-				return test.getAmount();
-			
-			return Manual.FAIL;
-		}, false);
+		
+		for(MissionSet.Result r : MissionSet.of(this, player))
+			if(ItemBuilder.compareItems(test, r.getMission().getMissionItem()))
+				r.addProgress(test.getAmount());
 	}
 	
 	@Override

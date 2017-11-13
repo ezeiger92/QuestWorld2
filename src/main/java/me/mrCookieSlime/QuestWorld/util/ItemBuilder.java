@@ -55,6 +55,37 @@ public class ItemBuilder implements Cloneable {
 		return (source != null) ? source.clone() : null;
 	}
 	
+	public static boolean compareItems(ItemStack left, ItemStack right) {
+		if(left == null || right == null)
+			return left == right;
+
+		boolean wildcardLore = false;
+		
+		if(left.hasItemMeta()) {
+			ItemMeta meta = left.getItemMeta();
+			wildcardLore = meta.hasLore() && meta.getLore().get(0).equals("*");
+		}
+		
+		if(!wildcardLore && right.hasItemMeta()) {
+			ItemMeta meta = right.getItemMeta();
+			wildcardLore = meta.hasLore() && meta.getLore().get(0).equals("*");
+		}
+		
+		if(wildcardLore) {
+			left = left.clone();
+			ItemMeta meta = left.getItemMeta();
+			meta.setLore(null);
+			left.setItemMeta(meta);
+			
+			right = right.clone();
+			meta = right.getItemMeta();
+			meta.setLore(null);
+			right.setItemMeta(meta);
+		}
+		
+		return left.isSimilar(right);
+	}
+	
 	public static @Mutable ItemBuilder edit(@Mutable("Stored and modified by other functions") ItemStack stack) {
 		
 		ItemBuilder res = new ItemBuilder();

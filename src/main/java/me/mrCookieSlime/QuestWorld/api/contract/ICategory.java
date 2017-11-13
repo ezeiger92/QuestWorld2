@@ -23,6 +23,4 @@ public interface ICategory extends IStateful {
 
 	@Override
 	ICategoryState getState();
-	@Deprecated
-	void save(boolean force);
 }

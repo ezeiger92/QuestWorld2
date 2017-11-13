@@ -45,6 +45,10 @@ class Category extends Renderable implements ICategoryState {
 		QuestWorld.get().registerCategory(this);
 	}
 	
+	public Category(Map<String, Object> data) {
+		loadMap(data);
+	}
+	
 	// Package
 	Category(int id, YamlConfiguration config) {
 		this.id = id;
@@ -56,28 +60,6 @@ class Category extends Renderable implements ICategoryState {
 		world_blacklist = config.getStringList("world-blacklist");
 		
 		QuestWorld.get().registerCategory(this);
-	}
-	
-	// Interal
-	protected Category(Category cat) {
-		copy(cat);
-	}
-	
-	protected void copy(Category source) {
-		id         = source.id;
-		config     = YamlConfiguration.loadConfiguration(getFile());
-		name       = source.name;
-		item       = source.item.clone();
-		parent     = new WeakReference<>(source.getParent());
-		permission = source.permission;
-		hidden     = source.hidden;
-		
-		world_blacklist = new ArrayList<>();
-		world_blacklist.addAll(source.world_blacklist);
-	}
-	
-	protected void copyTo(Category dest) {
-		dest.copy(this);
 	}
 	
 	//// ICategory Impl
@@ -184,7 +166,6 @@ class Category extends Renderable implements ICategoryState {
 		((Quest)quest).getFile().delete();
 	}
 	
-	@Deprecated
 	public void save(boolean force) {
 		long lastSave = QuestWorld.get().getLastSaved();
 		for (Quest quest: quests.values()) {
@@ -215,8 +196,6 @@ class Category extends Renderable implements ICategoryState {
 			e.printStackTrace();
 		}
 	}
-	
-	
 
 	public void setItem(ItemStack item) {
 		updateLastModified();
@@ -225,8 +204,6 @@ class Category extends Renderable implements ICategoryState {
 		else
 			this.item = item.clone();
 	}
-
-
 
 	public void toggleWorld(String world) {
 		updateLastModified();
@@ -244,15 +221,47 @@ class Category extends Renderable implements ICategoryState {
 		return true;
 	}
 	
-	Category(Map<String, Object> data) {
-		loadMap(data);
+	public Map<String, Object> serialize() {
+		HashMap<String, Object> result = new HashMap<>();
+		
+		result.put("unique", (int)getUnique());
+		result.put("index", id);
+		result.put("hidden", hidden);
+		result.put("name", Text.escape(name));
+		result.put("permission", permission);
+		result.put("item", item);
+		result.put("parent", getParent() == null ? null : (int)getParent().getUnique());
+		result.put("world-blacklist", world_blacklist);
+		
+		return result;
 	}
 	
-	public Map<String, Object> serialize() {
-		return null;
+	protected void copy(Category source) {
+		id         = source.id;
+		config     = YamlConfiguration.loadConfiguration(getFile());
+		name       = source.name;
+		item       = source.item.clone();
+		parent     = new WeakReference<>(source.getParent());
+		permission = source.permission;
+		hidden     = source.hidden;
+		
+		world_blacklist = new ArrayList<>();
+		world_blacklist.addAll(source.world_blacklist);
+	}
+	
+	protected void copyTo(Category dest) {
+		dest.copy(this);
 	}
 	
 	private void loadMap(Map<String, Object> data) {
-		
+		setUnique((Integer)data.getOrDefault("unique", (int)getUnique()));
+		/*private int id;
+		private boolean hidden;
+		private String name;
+		private String permission;
+		private ItemStack item;
+		private WeakReference<Quest> parent;
+		private Map<Integer, Quest> quests = new HashMap<>();
+		private List<String> world_blacklist = */
 	}
 }

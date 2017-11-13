@@ -37,8 +37,6 @@ import me.mrCookieSlime.QuestWorld.util.Sounds;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -206,8 +204,7 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 	}
 
 	public void save(boolean force) {
-		for(ICategory c : categories.values())
-			c.save(force);
+		facade.save(force);
 
 		for(Player p : getServer().getOnlinePlayers())
 			PlayerManager.of(p).getTracker().save();
@@ -216,8 +213,7 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 	}
 
 	public void unload() {
-		for(ICategory c : categories.values())
-			c.save(true);
+		facade.save(true);
 		categories.clear();
 		
 		for(Player p : getServer().getOnlinePlayers())
@@ -336,39 +332,7 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 			getServer().getPluginManager().registerEvents((Listener)type, this);
 		}
 	}
-	
-	public boolean isItemSimiliar(ItemStack item, ItemStack SFitem) {
-		if(item == null || SFitem == null)
-			return item == SFitem;
-		
-		boolean wildcardLeft = false;
-		boolean wildcardRight = false;
-		
-		if(item.hasItemMeta()) {
-			ItemMeta meta = item.getItemMeta();
-			wildcardLeft = meta.hasLore() && meta.getLore().get(0).equals("*");
-		}
-		
-		if(SFitem.hasItemMeta()) {
-			ItemMeta meta = SFitem.getItemMeta();
-			wildcardRight = meta.hasLore() && meta.getLore().get(0).equals("*");
-		}
-		
-		if(wildcardLeft || wildcardRight) {
-			item = item.clone();
-			ItemMeta meta = item.getItemMeta();
-			meta.setLore(null);
-			item.setItemMeta(meta);
-			
-			SFitem = SFitem.clone();
-			meta = SFitem.getItemMeta();
-			meta.setLore(null);
-			SFitem.setItemMeta(meta);
-		}
-		
-		return item.isSimilar(SFitem);
-	}
-	
+
 	public EconWrapper getEconomy() {
 		return economy;
 	}

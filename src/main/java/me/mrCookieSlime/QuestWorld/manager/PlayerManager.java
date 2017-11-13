@@ -1,15 +1,14 @@
 package me.mrCookieSlime.QuestWorld.manager;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Stack;
 import java.util.UUID;
-import java.util.function.BiFunction;
-import java.util.function.Predicate;
 
 import me.mrCookieSlime.QuestWorld.QuestWorld;
-import me.mrCookieSlime.QuestWorld.api.Manual;
+import me.mrCookieSlime.QuestWorld.api.MissionSet;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.QuestStatus;
 import me.mrCookieSlime.QuestWorld.api.Ticking;
@@ -24,7 +23,6 @@ import me.mrCookieSlime.QuestWorld.util.PlayerTools;
 import me.mrCookieSlime.QuestWorld.util.Text;
 
 import org.bukkit.Bukkit;
-import org.bukkit.entity.AnimalTamer;
 import org.bukkit.entity.Player;
 import org.bukkit.metadata.Metadatable;
 
@@ -47,10 +45,6 @@ public class PlayerManager {
 	private Stack<Integer> pages = new Stack<>();
 	
 	private final ProgressTracker tracker;
-	
-	public PlayerManager(AnimalTamer p) {
-		this(p.getUniqueId());
-	}
 	
 	public PlayerManager(UUID uuid) {
 		this.uuid = uuid;
@@ -95,11 +89,8 @@ public class PlayerManager {
 		return result;
 	}
 	
-	public void forEachTaskOf(MissionType type, Predicate<IMission> condition) {
-		forEachTaskOf(type, (m,i) -> condition.test(m) ? 1 : Manual.FAIL, false);
-	}
-	
-	public void forEachTaskOf(MissionType type, BiFunction<IMission, Integer, Integer> condition, boolean overwriteProgress) {
+	public List<IMission> getActiveMissions(MissionType type) {
+		List<IMission> result = new ArrayList<>();
 		
 		Player player = Bukkit.getPlayer(uuid);
 		String worldName = player.getWorld().getName();
@@ -107,17 +98,13 @@ public class PlayerManager {
 		for(IMission task : QuestWorld.get().getMissionsOf(type)) {
 			IQuest quest = task.getQuest();	
 			
-			if (quest.getCategory().isWorldEnabled(worldName) && quest.isWorldEnabled(worldName)) {
-				if (!hasCompletedTask(task) && hasUnlockedTask(task)) {
-					if (getStatus(quest).equals(QuestStatus.AVAILABLE)) {
-						int progress = overwriteProgress ? 0 : getProgress(task);
-						int result = condition.apply(task, task.getAmount() - progress);
-						if(result != Manual.FAIL)
-							setProgress(task, result + progress);
-					}
-				}
-			}
+			if (quest.getCategory().isWorldEnabled(worldName) && quest.isWorldEnabled(worldName)
+				&& !hasCompletedTask(task) && hasUnlockedTask(task)
+				&& getStatus(quest).equals(QuestStatus.AVAILABLE))
+				result.add(task);
 		}
+		
+		return result;
 	}
 	
 	public void unload() {
@@ -165,10 +152,7 @@ public class PlayerManager {
 		if (p != null && quest_check) {
 			for (IMission task: QuestWorld.get().getTickingMissions()) {
 				if (getStatus(task.getQuest()).equals(QuestStatus.AVAILABLE) && !hasCompletedTask(task) && hasUnlockedTask(task)) {
-					Ticking t = (Ticking) task.getType();
-					int progress = t.onTick(p, task);
-					if(progress != Manual.FAIL)
-						setProgress(task, progress);
+					((Ticking) task.getType()).onTick(p, new MissionSet.Result(task, this));
 				}
 			}
 		}
@@ -260,11 +244,24 @@ public class PlayerManager {
 		
 		int amount = quest.getMissions().size();
 		
-		return Text.progressBar(
-				progress,
-				amount,
-				null);
+		return Text.progressBar( progress, amount, null);
 	}
+	
+	public String progressString() {
+		int done = 0;
+		int total = 0;
+
+		for (ICategory category: QuestWorld.get().getCategories())  {
+			total += category.getQuests().size();
+			
+			for (IQuest quest: category.getQuests())
+				if (hasFinished(quest))
+					++done;
+		}
+		
+		return Text.progressBar(done, total, null);
+	}
+	
 	
 	public void addProgress(IMission task, int amount) {
 		int newProgress = Math.max(getProgress(task) + amount, 0);
@@ -371,23 +368,6 @@ public class PlayerManager {
 	public void setLastEntry(IStateful entry) {
 		this.last = entry;
 	}
-	
-	@Deprecated
-	public String getProgress() {
-		int done = 0;
-		int total = 0;
-
-		for (ICategory category: QuestWorld.get().getCategories())  {
-			total += category.getQuests().size();
-			
-			for (IQuest quest: category.getQuests())
-				if (hasFinished(quest))
-					++done;
-		}
-		
-		return Text.progressBar(done, total, null);
-	}
-	
 	public void clearQuestData(IQuest quest) {
 		tracker.clearQuest(quest);
 	}

@@ -5,6 +5,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import me.mrCookieSlime.QuestWorld.api.MissionSet;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.SinglePrompt;
 import me.mrCookieSlime.QuestWorld.api.Ticking;
@@ -61,14 +62,15 @@ public class LocationMission extends MissionType implements Ticking {
 		return false;
 	}
 	
+	protected boolean withinRadius(Location left, Location right, int radius) {
+		return left.getWorld() == right.getWorld() && left.distanceSquared(right) <= radius * radius;
+	}
+	
 	@Override
-	public int onManual(Player p, IMission mission) {
-		if (mission.getLocation().getWorld().getName().equals(p.getWorld().getName())
-				&& mission.getLocation().distanceSquared(p.getLocation()) < mission.getCustomInt() * mission.getCustomInt()) {
-			return 1;
-		}
-		
-		return FAIL;
+	public void onManual(Player p, MissionSet.Result result) {
+		IMission mission = result.getMission();
+		if(withinRadius(mission.getLocation(), p.getLocation(), mission.getCustomInt()))
+			result.addProgress(1);
 	}
 	
 	@Override

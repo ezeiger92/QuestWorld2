@@ -3,6 +3,7 @@ package me.mrCookieSlime.QuestWorld.listener;
 import me.mrCookieSlime.QuestWorld.GuideBook;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.Decaying;
+import me.mrCookieSlime.QuestWorld.api.MissionSet;
 import me.mrCookieSlime.QuestWorld.api.QuestStatus;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
@@ -11,7 +12,6 @@ import me.mrCookieSlime.QuestWorld.manager.PlayerManager;
 
 import java.util.UUID;
 
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -45,11 +45,7 @@ public class PlayerListener implements Listener {
 					|| !quest.getCategory().isWorldEnabled(worldName))
 				continue;
 			
-			int amount = ((Decaying) task).onDeath(event, task);
-			if(amount >= 0)
-				manager.setProgress(task, amount);
-			else
-				manager.addProgress(task, amount);
+			((Decaying) task).onDeath(event, new MissionSet.Result(task, manager));
 		}
 	}
 	
@@ -57,7 +53,7 @@ public class PlayerListener implements Listener {
 	public void onJoin(PlayerJoinEvent e) {
 		final UUID uuid = e.getPlayer().getUniqueId();
 		e.getPlayer().setMetadata("questworld.playermanager", new LazyMetadataValue(QuestWorld.get(), () ->
-			new PlayerManager(Bukkit.getPlayer(uuid))
+			new PlayerManager(uuid)
 		));
 		
 		if (QuestWorld.get().getConfig().getBoolean("book.on-first-join") &&

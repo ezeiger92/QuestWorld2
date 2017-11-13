@@ -1,10 +1,6 @@
 package me.mrCookieSlime.QuestWorld.quest;
 
-import java.io.File;
-import java.io.IOException;
 import java.lang.ref.WeakReference;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,8 +8,8 @@ import java.util.Map;
 
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
-import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IMissionState;
+import me.mrCookieSlime.QuestWorld.manager.ProgressTracker;
 import me.mrCookieSlime.QuestWorld.util.Text;
 
 import org.bukkit.Bukkit;
@@ -48,7 +44,7 @@ class Mission extends Renderable implements IMissionState {
 
 	public Mission(Map<String, Object> data) {
 		loadMap(data);
-		loadDialogue();
+		ProgressTracker.loadDialogue(this);
 		
 		// Repair any quests that would have been broken by updates, namely location quests
 		MissionState changes = new MissionState(this);
@@ -149,12 +145,6 @@ class Mission extends Renderable implements IMissionState {
 
 		return type.userDescription(this);
 	}
-	
-	@Deprecated
-	@Override
-	public String getDialogueFilename() {
-		return getDialogueFile().getName();
-	}
 
 	public HashMap<String, Object> serialize() {
 		HashMap<String, Object> result = new HashMap<>();
@@ -166,7 +156,7 @@ class Mission extends Renderable implements IMissionState {
 		result.put("amount",   amount);
 		result.put("entity",   entity.toString());
 		result.put("location", locationHelper(location));
-		result.put("index",     index);
+		result.put("index",    index);
 		result.put("custom_string",  Text.escape(customString));
 		result.put("display-name",   Text.escape(displayName));
 		result.put("timeframe",      timeframe);
@@ -269,7 +259,7 @@ class Mission extends Renderable implements IMissionState {
 	}
 
 	@Override
-	public IMission getSource() {
+	public Mission getSource() {
 		return this;
 	}
 
@@ -300,32 +290,6 @@ class Mission extends Renderable implements IMissionState {
 	
 	protected void loadDefaults() {
 		loadMap(new HashMap<>());
-	}
-
-	protected void saveDialogue() {
-		File file = getDialogueFile();
-		if(file.exists())
-			file.delete();
-		
-		updateLastModified();
-		
-		try {
-			// The only downside to this is system-specific newlines
-			Files.write(file.toPath(), dialogue, StandardCharsets.UTF_8);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	private void loadDialogue() {
-		File file = getDialogueFile();
-		if (file.exists()) {
-			try {
-				dialogue.addAll(Files.readAllLines(file.toPath(), StandardCharsets.UTF_8));
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -376,10 +340,5 @@ class Mission extends Renderable implements IMissionState {
 		result.put("pitch", (double)location.getPitch());
 		
 		return result;
-	}
-	
-	private File getDialogueFile() {
-		return new File(QuestWorld.getPath("data.dialogue"), getQuest().getCategory().getID()
-				+ "+" + getQuest().getID() + "+" + getIndex() + ".txt");
 	}
 }

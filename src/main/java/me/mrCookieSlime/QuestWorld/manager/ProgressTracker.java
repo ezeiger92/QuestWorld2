@@ -2,6 +2,8 @@ package me.mrCookieSlime.QuestWorld.manager;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -14,6 +16,7 @@ import com.google.common.collect.Lists;
 import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.QuestStatus;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
+import me.mrCookieSlime.QuestWorld.api.contract.IMissionState;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
 
 public class ProgressTracker {
@@ -130,6 +133,39 @@ public class ProgressTracker {
 	//// MISSION
 	private static String path(IMission mission) {
 		return path(mission.getQuest()) + ".mission." + mission.getIndex();
+	}
+	
+	public static File dialogueFile(IMission mission) {
+		return new File(QuestWorld.getPath("data.dialogue"), mission.getQuest().getCategory().getID()
+				+ "+" + mission.getQuest().getID() + "+" + mission.getIndex() + ".txt");
+	}
+	
+	public static void saveDialogue(IMission mission) {
+		File file = dialogueFile(mission);
+		if(file.exists())
+			file.delete();
+		
+		try {
+			// The only downside to this is system-specific newlines
+			Files.write(file.toPath(), mission.getDialogue(), StandardCharsets.UTF_8);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static void loadDialogue(IMission mission) {
+		File file = dialogueFile(mission);
+		if (file.exists()) {
+			IMissionState state = mission.getState();
+			try {
+				state.setDialogue(Files.readAllLines(file.toPath(), StandardCharsets.UTF_8));
+			} catch (IOException e) {
+				e.printStackTrace();
+				return;
+			}
+			
+			state.apply();
+		}
 	}
 	
 	public int getMissionProgress(IMission mission) {
