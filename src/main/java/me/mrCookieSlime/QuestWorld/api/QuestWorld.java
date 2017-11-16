@@ -25,37 +25,36 @@ public final class QuestWorld {
 		QuestWorld.api = api;
 	}
 	
-	@SuppressWarnings("unchecked")
 	public static final <T extends MissionType> T getMissionType(String typeName) {
-		return (T)api.missionTypeOf(typeName);
+		return api.getMissionType(typeName);
 	}
 	
 	public static final Map<String, MissionType> getMissionTypes() {
-		return api.missionTypes();
+		return api.getMissionTypes();
 	}
 	
 	public static final MissionViewer getViewer() {
-		return api.missionViewer();
+		return api.getViewer();
 	}
 	
 	public static final Economy getEconomy() {
-		return api.economy();
+		return api.getEconomy();
 	}
 	
 	public static final IFacade getFacade() {
-		return api.facade();
+		return api.getFacade();
 	}
 	
 	public static final Sounds getSounds() {
-		return api.sounds();
+		return api.getSounds();
 	}
 	
 	public static String translate(Translator key, String... replacements) {
-		return api.translation(key, replacements);
+		return api.translate(key, replacements);
 	}
 	
 	public static Plugin getPlugin() {
-		return api.plugin();
+		return api.getPlugin();
 	}
 	
 	public static QuestingAPI getAPI() {

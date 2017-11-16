@@ -11,12 +11,12 @@ import me.mrCookieSlime.QuestWorld.util.Sounds;
 import net.milkbowl.vault.economy.Economy;
 
 public interface QuestingAPI {
-	MissionType missionTypeOf(String typeName);
-	Map<String, MissionType> missionTypes();
-	MissionViewer missionViewer();
-	Economy economy();
-	IFacade facade();
-	Sounds sounds();
-	String translation(Translator key, String... replacements);
-	Plugin plugin();
+	<T extends MissionType> T getMissionType(String typeName);
+	Map<String, MissionType> getMissionTypes();
+	MissionViewer getViewer();
+	Economy getEconomy();
+	IFacade getFacade();
+	Sounds getSounds();
+	String translate(Translator key, String... replacements);
+	Plugin getPlugin();
 }

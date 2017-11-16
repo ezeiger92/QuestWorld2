@@ -38,12 +38,13 @@ public class QuestingImpl implements QuestingAPI, Reloadable {
 	}
 	
 	@Override
-	public MissionType missionTypeOf(String typeName) {
-		return types.get(typeName);
+	@SuppressWarnings("unchecked")
+	public <T extends MissionType> T getMissionType(String typeName) {
+		return (T)types.get(typeName);
 	}
 
 	@Override
-	public Map<String, MissionType> missionTypes() {
+	public Map<String, MissionType> getMissionTypes() {
 		return immutableTypes;
 	}
 	
@@ -52,7 +53,7 @@ public class QuestingImpl implements QuestingAPI, Reloadable {
 	}
 	
 	@Override
-	public MissionViewer missionViewer() {
+	public MissionViewer getViewer() {
 		return viewer;
 	}
 	
@@ -66,27 +67,27 @@ public class QuestingImpl implements QuestingAPI, Reloadable {
 	}
 	
 	@Override
-	public Economy economy() {
+	public Economy getEconomy() {
 		return econ;
 	}
 	
 	@Override
-	public RenderableFacade facade() {
+	public RenderableFacade getFacade() {
 		return facade;
 	}
 	
 	@Override
-	public Sounds sounds() {
+	public Sounds getSounds() {
 		return eventSounds;
 	}
 	
 	@Override
-	public String translation(Translator key, String... replacements) {
+	public String translate(Translator key, String... replacements) {
 		return language.translate(key, replacements);
 	}
 	
 	@Override
-	public QuestWorldPlugin plugin() {
+	public QuestWorldPlugin getPlugin() {
 		return questWorld;
 	}
 

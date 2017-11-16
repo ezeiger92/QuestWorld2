@@ -74,14 +74,14 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener, QuestLoade
 		preEnableHooks = null;
 		
 		api.initEconomy();
-		if(api.economy() == null)
+		if(api.getEconomy() == null)
 			Log.info("No economy (vault) found, money rewards disabled");
 			
 		getServer().getScheduler().scheduleSyncDelayedTask(this, () -> {
 			Log.fine("Retrieving Quest Configuration...");
 			load();
-			int categories = api.facade().getCategories().size(), quests = 0;
-			for (ICategory category:api.facade().getCategories())
+			int categories = api.getFacade().getCategories().size(), quests = 0;
+			for (ICategory category:api.getFacade().getCategories())
 				quests += category.getQuests().size();
 
 			Log.fine("Successfully loaded " + categories + " Categories");
@@ -95,7 +95,7 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener, QuestLoade
 
 		PluginManager pm = getServer().getPluginManager();
 		pm.registerEvents(new PlayerListener(), this);
-		pm.registerEvents(api.missionViewer(), this);
+		pm.registerEvents(api.getViewer(), this);
 		pm.registerEvents(new MenuListener(), this);
 
 		getServer().addRecipe(GuideBook.recipe());
@@ -133,7 +133,7 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener, QuestLoade
 	}
 	
 	public void load() {
-		api.facade().load();
+		api.getFacade().load();
 		lastSave = System.currentTimeMillis();
 	}
 	
@@ -143,7 +143,7 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener, QuestLoade
 	}
 	
 	public void reloadQuests() {
-		api.facade().unload();
+		api.getFacade().unload();
 		load();
 	}
 	
@@ -163,7 +163,7 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener, QuestLoade
 	}
 
 	public void save(boolean force) {
-		api.facade().save(force);
+		api.getFacade().save(force);
 
 		for(Player p : getServer().getOnlinePlayers())
 			PlayerManager.of(p).getTracker().save();
@@ -172,8 +172,8 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener, QuestLoade
 	}
 
 	public void unload() {
-		api.facade().save(true);
-		api.facade().unload();
+		api.getFacade().save(true);
+		api.getFacade().unload();
 		
 		for(Player p : getServer().getOnlinePlayers())
 			PlayerManager.of(p).getTracker().save();
