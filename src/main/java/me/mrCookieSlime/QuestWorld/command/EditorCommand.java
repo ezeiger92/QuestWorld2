@@ -2,6 +2,7 @@ package me.mrCookieSlime.QuestWorld.command;
 
 
 import me.mrCookieSlime.QuestWorld.QuestWorld;
+import me.mrCookieSlime.QuestWorld.api.QuestingAPI;
 import me.mrCookieSlime.QuestWorld.api.SinglePrompt;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
@@ -20,6 +21,11 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 public class EditorCommand implements CommandExecutor {
+	
+	private final QuestWorld plugin;
+	public EditorCommand(QuestWorld plugin) {
+		this.plugin = plugin;
+	}
 	
 	private void help(String label, CommandSender sender) {
 		sender.sendMessage(Text.colorize("&4Usage: &c/", label, " <gui/save/upgrade/import <File>/export <File>/reload <config/quests/all>"));
@@ -44,7 +50,7 @@ public class EditorCommand implements CommandExecutor {
 				return true;
 			}
 			args[1] += ".zip";
-			if(QuestWorld.get().importPreset(args[1]))
+			if(plugin.importPreset(args[1]))
 				sender.sendMessage(Text.colorize("&7Successfully installed the Preset &a", args[1]));
 			else
 				sender.sendMessage(Text.colorize("&cThe Preset &4", args[1], " &ccould not be installed"));
@@ -55,7 +61,7 @@ public class EditorCommand implements CommandExecutor {
 				return true;
 			}
 			args[1] += ".zip";
-			if(QuestWorld.get().exportPreset(args[1]))
+			if(plugin.exportPreset(args[1]))
 				sender.sendMessage(Text.colorize("&7Successfully saved the Preset &a", args[1]));
 			else
 				sender.sendMessage(Text.colorize("&cCould not save Preset &a", args[1]));
@@ -70,21 +76,21 @@ public class EditorCommand implements CommandExecutor {
 		}
 		else if(param.equals("save")) {
 			// Command, force save, this is probably desired over an incremental save
-			QuestWorld.get().save(true);
+			plugin.save(true);
 			sender.sendMessage(Text.colorize("&7Saved all quests to disk"));
 		}
 		else if(param.equals("reload")) {
 			if(args.length > 1 && args[1].equalsIgnoreCase("config")) {
-				QuestWorld.get().reloadQWConfig();
+				plugin.reloadQWConfig();
 				sender.sendMessage(Text.colorize("&7Reloaded config from disk"));
 			}
 			else if(args.length > 1 && args[1].equalsIgnoreCase("quests")) {
-				QuestWorld.get().reloadQuests();
+				plugin.reloadQuests();
 				sender.sendMessage(Text.colorize("&7Reloaded all quests from disk"));
 			}
 			else if(args.length > 1 && args[1].equalsIgnoreCase("all")) {
-				QuestWorld.get().reloadQWConfig();
-				QuestWorld.get().reloadQuests();
+				plugin.reloadQWConfig();
+				plugin.reloadQuests();
 				sender.sendMessage(Text.colorize("&7Reloaded config and all quests from disk"));
 			}
 			else {
@@ -96,7 +102,7 @@ public class EditorCommand implements CommandExecutor {
 		else if(param.equals("upgrade")) {
 			if(args.length > 1 && args[1].equalsIgnoreCase("confirm")) {
 				int changeCount = 0;
-				for(ICategory category : QuestWorld.get().getCategories())
+				for(ICategory category : QuestingAPI.getFacade().getCategories())
 					for(IQuest quest : category.getQuests())
 						if(quest.getCooldown() == 0) {
 							// Administrative process - bypass events and directly modify quest
@@ -126,7 +132,7 @@ public class EditorCommand implements CommandExecutor {
 			return true;
 		}
 		else if (args.length == 4 && param.equals("delete_command") && sender instanceof Player) {
-			IQuest quest = QuestWorld.get().getCategory(Integer.parseInt(args[1])).getQuest(Integer.parseInt(args[2]));
+			IQuest quest = QuestingAPI.getFacade().getCategory(Integer.parseInt(args[1])).getQuest(Integer.parseInt(args[2]));
 			
 			IQuestState changes = quest.getState();
 			changes.removeCommand(Integer.parseInt(args[3]));
@@ -137,7 +143,7 @@ public class EditorCommand implements CommandExecutor {
 			QBDialogue.openCommandEditor((Player) sender, quest);
 		}
 		else if (args.length == 3 && param.equals("add_command") && sender instanceof Player) {
-			IQuest quest = QuestWorld.get().getCategory(Integer.parseInt(args[1])).getQuest(Integer.parseInt(args[2]));
+			IQuest quest = QuestingAPI.getFacade().getCategory(Integer.parseInt(args[1])).getQuest(Integer.parseInt(args[2]));
 			//sender.sendMessage(Text.colorize("&7Type in your desired Command:"));
 			//QuestWorld.getInstance().storeInput(((Player) sender).getUniqueId(), new Input(InputType.COMMAND_ADD, quest));
 			

@@ -5,6 +5,7 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapelessRecipe;
 
+import me.mrCookieSlime.QuestWorld.api.QuestingAPI;
 import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.util.ItemBuilder;
 
@@ -27,8 +28,8 @@ public class GuideBook {
 	}
 	
 	private GuideBook() {
-		String display = QuestWorld.translate(Translation.BOOK_DISPLAY);
-		String[] lore = QuestWorld.translate(Translation.BOOK_LORE).split("\n");
+		String display = QuestingAPI.translate(Translation.BOOK_DISPLAY);
+		String[] lore = QuestingAPI.translate(Translation.BOOK_LORE).split("\n");
 		
 		guide = new ItemBuilder(Material.ENCHANTED_BOOK).display(display).lore(lore).get();
 	}

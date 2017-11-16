@@ -153,18 +153,18 @@ public class ProgressTracker {
 		}
 	}
 	
-	public static void loadDialogue(IMission mission) {
+	public static void loadDialogue(IMissionState mission) {
 		File file = dialogueFile(mission);
 		if (file.exists()) {
-			IMissionState state = mission.getState();
+			//IMissionState state = mission.getState();
 			try {
-				state.setDialogue(Files.readAllLines(file.toPath(), StandardCharsets.UTF_8));
+				mission.setDialogue(Files.readAllLines(file.toPath(), StandardCharsets.UTF_8));
 			} catch (IOException e) {
 				e.printStackTrace();
 				return;
 			}
 			
-			state.apply();
+			//state.apply();
 		}
 	}
 	

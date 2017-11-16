@@ -3,11 +3,11 @@ package me.mrCookieSlime.QuestWorld.api.menu;
 import java.util.ArrayList;
 import java.util.List;
 
-import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.Manual;
 import me.mrCookieSlime.QuestWorld.api.MissionSet;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.QuestStatus;
+import me.mrCookieSlime.QuestWorld.api.QuestingAPI;
 import me.mrCookieSlime.QuestWorld.api.SinglePrompt;
 import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
@@ -37,23 +37,23 @@ import org.bukkit.inventory.ItemStack;
 public class QuestBook {
 	
 	public static void openMainMenu(Player p) {
-		QuestWorld.getSounds().QUEST_CLICK.playTo(p);
+		QuestingAPI.getSounds().QUEST_CLICK.playTo(p);
 		PlayerManager manager = PlayerManager.of(p);
 		manager.update(false);
 		manager.setLastEntry(null);
 		
-		Menu menu = new Menu(1, QuestWorld.translate(Translation.gui_title));
+		Menu menu = new Menu(1, QuestingAPI.translate(Translation.gui_title));
 	
 		PagedMapping view = new PagedMapping(45, 9);
 		view.addFrameButton(4, partyMenuItem(p), Buttons.partyMenu(), true);
 
-		for(ICategory category : QuestWorld.get().getCategories()) {
+		for(ICategory category : QuestingAPI.getFacade().getCategories()) {
 			if (!category.isHidden()) {
 				if (category.isWorldEnabled(p.getWorld().getName())) {
 					if ((category.getParent() != null && !manager.hasFinished(category.getParent())) || !PlayerTools.checkPermission(p, category.getPermission())) {
 						view.addButton(category.getID(), new ItemBuilder(Material.BARRIER).display(category.getName()).lore(
 								"",
-								QuestWorld.translate(Translation.quests_locked)).get(),
+								QuestingAPI.translate(Translation.quests_locked)).get(),
 								null, false);
 					}
 					else {
@@ -62,7 +62,7 @@ public class QuestBook {
 						int finishedCount = manager.getProgress(category);
 						view.addButton(category.getID(),
 								new ItemBuilder(category.getItem()).lore(
-										QuestWorld.translate(Translation.CATEGORY_DESC,
+										QuestingAPI.translate(Translation.CATEGORY_DESC,
 												String.valueOf(questCount),
 												String.valueOf(finishedCount),
 												String.valueOf(manager.countQuests(category, QuestStatus.AVAILABLE)),
@@ -81,7 +81,7 @@ public class QuestBook {
 				else {
 					view.addButton(category.getID(), new ItemBuilder(Material.BARRIER).display(category.getName()).lore(
 							"",
-							QuestWorld.translate(Translation.quests_locked_in_world)).get(),
+							QuestingAPI.translate(Translation.quests_locked_in_world)).get(),
 							null, false);
 				}
 			}
@@ -105,12 +105,12 @@ public class QuestBook {
 	
 	private static ItemStack partyMenuItem(Player p) {
 		String progress = PlayerManager.of(p).progressString();
-		if (QuestWorld.get().getConfig().getBoolean("party.enabled")) {
+		if (QuestingAPI.getPlugin().getConfig().getBoolean("party.enabled")) {
 			return new ItemBuilder(SkullType.PLAYER)
-					.display(QuestWorld.translate(Translation.gui_party)).lore(
+					.display(QuestingAPI.translate(Translation.gui_party)).lore(
 							progress,
 							"",
-							QuestWorld.translate(Translation.button_open)).get();
+							QuestingAPI.translate(Translation.button_open)).get();
 		}
 		
 		return new ItemBuilder(Material.ENCHANTED_BOOK)
@@ -120,13 +120,13 @@ public class QuestBook {
 	}
 
 	public static void openPartyMembers(final Player p) {
-		QuestWorld.getSounds().PARTY_CLICK.playTo(p);
+		QuestingAPI.getSounds().PARTY_CLICK.playTo(p);
 		
-		Menu menu = new Menu(1, QuestWorld.translate(Translation.gui_party));
+		Menu menu = new Menu(1, QuestingAPI.translate(Translation.gui_party));
 
 		ItemBuilder skull = new ItemBuilder(SkullType.PLAYER);
 		menu.put(4,
-				skull.display(QuestWorld.translate(Translation.gui_party)).lore("", QuestWorld.translate(Translation.button_back_party)).get(),
+				skull.display(QuestingAPI.translate(Translation.gui_party)).lore("", QuestingAPI.translate(Translation.button_back_party)).get(),
 				event -> {
 					openPartyMenu((Player) event.getWhoClicked());
 				}
@@ -165,13 +165,13 @@ public class QuestBook {
 	}
 
 	public static void openPartyMenu(final Player p) {
-		QuestWorld.getSounds().PARTY_CLICK.playTo(p);
+		QuestingAPI.getSounds().PARTY_CLICK.playTo(p);
 		
-		Menu menu = new Menu(2, QuestWorld.translate(Translation.gui_party));
+		Menu menu = new Menu(2, QuestingAPI.translate(Translation.gui_party));
 		
-		menu.put(4, new ItemBuilder(Material.MAP).display(QuestWorld.translate(Translation.gui_title)).lore(
+		menu.put(4, new ItemBuilder(Material.MAP).display(QuestingAPI.translate(Translation.gui_title)).lore(
 				"",
-				QuestWorld.translate(Translation.button_back_quests)).get(),
+				QuestingAPI.translate(Translation.button_back_quests)).get(),
 				event -> {
 					openMainMenu((Player) event.getWhoClicked());
 				}
@@ -200,10 +200,10 @@ public class QuestBook {
 						.display("&a&lInvite a Player")
 						.lore("",
 								"&rInvites a Player to your Party",
-								"&rMax. Party Members: &e" + QuestWorld.get().getConfig().getInt("party.max-members")).getNew(),
+								"&rMax. Party Members: &e" + QuestingAPI.getPlugin().getConfig().getInt("party.max-members")).getNew(),
 						event -> {
 							Player p2 = (Player) event.getWhoClicked();
-							if (party.getSize() >= QuestWorld.get().getConfig().getInt("party.max-members"))
+							if (party.getSize() >= QuestingAPI.getPlugin().getConfig().getInt("party.max-members"))
 								PlayerTools.sendTranslation(p2, true, Translation.PARTY_ERROR_FULL);
 							else {
 								PlayerTools.promptInput(p2, new SinglePrompt(
@@ -272,12 +272,12 @@ public class QuestBook {
 	}
 
 	public static void openCategory(Player p, ICategory category, final boolean back) {
-		QuestWorld.getSounds().QUEST_CLICK.playTo(p);
+		QuestingAPI.getSounds().QUEST_CLICK.playTo(p);
 		PlayerManager manager = PlayerManager.of(p);
 		manager.update(false);
 		manager.setLastEntry(category);
 		
-		Menu menu = new Menu(1, QuestWorld.translate(Translation.gui_title));
+		Menu menu = new Menu(1, QuestingAPI.translate(Translation.gui_title));
 		ItemBuilder glassPane = new ItemBuilder(Material.STAINED_GLASS_PANE).color(DyeColor.RED);
 		PagedMapping view = new PagedMapping(45, 9);
 		
@@ -291,7 +291,7 @@ public class QuestBook {
 		for (final IQuest quest: category.getQuests()) {
 			glassPane.display(quest.getName());
 			if (manager.getStatus(quest).equals(QuestStatus.LOCKED) || !quest.isWorldEnabled(p.getWorld().getName())) {
-				view.addButton(quest.getID(), glassPane.lore("", QuestWorld.translate(Translation.quests_locked)).getNew(),
+				view.addButton(quest.getID(), glassPane.lore("", QuestingAPI.translate(Translation.quests_locked)).getNew(),
 						null, false);
 			}
 			else if (manager.getStatus(quest).equals(QuestStatus.LOCKED_NO_PARTY)) {
@@ -308,18 +308,18 @@ public class QuestBook {
 				lore.add("");
 				lore.add(manager.progressString(quest));
 				lore.add("");
-				lore.add(Text.colorize("&7") + manager.getProgress(quest) + "/" + quest.getMissions().size() + QuestWorld.translate(Translation.quests_tasks_completed));
+				lore.add(Text.colorize("&7") + manager.getProgress(quest) + "/" + quest.getMissions().size() + QuestingAPI.translate(Translation.quests_tasks_completed));
 				if (manager.getStatus(quest).equals(QuestStatus.REWARD_CLAIMABLE)) {
 					lore.add("");
-					lore.add(QuestWorld.translate(Translation.quests_state_reward_claimable));
+					lore.add(QuestingAPI.translate(Translation.quests_state_reward_claimable));
 				}
 				else if (manager.getStatus(quest).equals(QuestStatus.ON_COOLDOWN)) {
 					lore.add("");
-					lore.add(QuestWorld.translate(Translation.quests_state_cooldown));
+					lore.add(QuestingAPI.translate(Translation.quests_state_cooldown));
 				}
 				else if (manager.hasFinished(quest)) {
 					lore.add("");
-					lore.add(QuestWorld.translate(Translation.quests_state_completed));
+					lore.add(QuestingAPI.translate(Translation.quests_state_completed));
 				}
 				for(int i = 0; i < lore.size(); ++i)
 					lore.set(i, Text.colorize(lore.get(i)));
@@ -338,12 +338,12 @@ public class QuestBook {
 	}
 	
 	public static void openQuest(final Player p, final IQuest quest, final boolean categoryBack, final boolean back) {
-		QuestWorld.getSounds().QUEST_CLICK.playTo(p);
+		QuestingAPI.getSounds().QUEST_CLICK.playTo(p);
 		PlayerManager manager = PlayerManager.of(p);
 		manager.update(false);
 		manager.setLastEntry(quest);
 		
-		Menu menu = new Menu(3, QuestWorld.translate(Translation.gui_title));
+		Menu menu = new Menu(3, QuestingAPI.translate(Translation.gui_title));
 		
 		if (back) {
 			menu.put(0, ItemBuilder.Proto.MAP_BACK.getItem(), event -> {
@@ -363,7 +363,9 @@ public class QuestBook {
 							if (manager2.hasCompletedTask(mission)) continue;
 							
 							if(mission.getType() instanceof Manual) {
-								((Manual) mission.getType()).onManual(p2, new MissionSet.Result(mission, manager2));
+								MissionSet.Result entry = new MissionSet.Result(mission, manager2.getProgress(mission));
+								((Manual) mission.getType()).onManual(p2, entry);
+								manager2.setProgress(mission, entry.getProgress());
 								openQuest(p2, quest, categoryBack, back);
 							}
 						}
@@ -377,7 +379,7 @@ public class QuestBook {
 				long remaining = (manager.getCooldownEnd(quest) - System.currentTimeMillis() + 59999) / 60 / 1000;
 				cooldown = Text.timeFromNum(remaining) + " remaining";
 			}
-			menu.put(8, new ItemBuilder(Material.WATCH).display(QuestWorld.translate(Translation.quests_display_cooldown)).lore(
+			menu.put(8, new ItemBuilder(Material.WATCH).display(QuestingAPI.translate(Translation.quests_display_cooldown)).lore(
 					"",
 					"&b" + cooldown).get(),
 					null
@@ -385,8 +387,8 @@ public class QuestBook {
 		}
 		
 		int rewardIndex = 2;
-		if (quest.getMoney() > 0 && QuestWorld.get().getEconomy() != null) {
-			menu.put(rewardIndex, new ItemBuilder(Material.GOLD_INGOT).display(QuestWorld.translate(Translation.quests_display_monetary)).lore(
+		if (quest.getMoney() > 0 && QuestingAPI.getEconomy() != null) {
+			menu.put(rewardIndex, new ItemBuilder(Material.GOLD_INGOT).display(QuestingAPI.translate(Translation.quests_display_monetary)).lore(
 					"",
 					"&6$" + quest.getMoney()).get(),
 					null
@@ -395,7 +397,7 @@ public class QuestBook {
 		}
 		
 		if (quest.getXP() > 0) {
-			menu.put(rewardIndex, new ItemBuilder(Material.EXP_BOTTLE).display(QuestWorld.translate(Translation.quests_display_exp)).lore(
+			menu.put(rewardIndex, new ItemBuilder(Material.EXP_BOTTLE).display(QuestingAPI.translate(Translation.quests_display_exp)).lore(
 					"",
 					"&a" + quest.getXP() + " Level").get(),
 					null
@@ -426,7 +428,7 @@ public class QuestBook {
 			else
 				item = glassPane.color(DyeColor.RED)
 				.display("&7&kSOMEWEIRDMISSION")
-				.lore("", QuestWorld.translate(Translation.task_locked)).getNew();
+				.lore("", QuestingAPI.translate(Translation.task_locked)).getNew();
 			
 			menu.put(index, item, event -> {
 				Player p2 = (Player) event.getWhoClicked();
@@ -437,7 +439,9 @@ public class QuestBook {
 					if (manager2.hasCompletedTask(mission)) return;
 					
 					if(mission.getType() instanceof Manual) {
-						((Manual) mission.getType()).onManual(p2, new MissionSet.Result(mission, manager2));
+						MissionSet.Result entry = new MissionSet.Result(mission, manager2.getProgress(mission));
+						((Manual) mission.getType()).onManual(p2, entry);
+						manager2.setProgress(mission, entry.getProgress());
 						openQuest(p2, quest, categoryBack, back);
 					}
 				}
@@ -449,7 +453,7 @@ public class QuestBook {
 			if (manager.getStatus(quest).equals(QuestStatus.REWARD_CLAIMABLE)) {
 				menu.put(i + 18,
 						glassPane.color(DyeColor.PURPLE)
-						.display(QuestWorld.translate(Translation.quests_state_reward_claim)).get(),
+						.display(QuestingAPI.translate(Translation.quests_state_reward_claim)).get(),
 						event -> {
 							Player p2 = (Player) event.getWhoClicked();
 							// TODO manually handout and complete... reconsider
@@ -463,14 +467,14 @@ public class QuestBook {
 			else if (manager.getStatus(quest).equals(QuestStatus.ON_COOLDOWN)) {
 				menu.put(i + 18,
 						glassPane.color(DyeColor.YELLOW)
-						.display(QuestWorld.translate(Translation.quests_state_cooldown)).get(),
+						.display(QuestingAPI.translate(Translation.quests_state_cooldown)).get(),
 						null
 				);
 			}
 			else {
 				menu.put(i + 18,
 						glassPane.color(DyeColor.GRAY)
-						.display(QuestWorld.translate(Translation.quests_display_rewards)).get(),
+						.display(QuestingAPI.translate(Translation.quests_display_rewards)).get(),
 						null);
 			}
 		}
@@ -491,7 +495,7 @@ public class QuestBook {
 	 * 
 	 */
 	public static void openEditor(Player p) {
-		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
+		QuestingAPI.getSounds().EDITOR_CLICK.playTo(p);
 		
 		final Menu menu = new Menu(6, "&3Quest Editor");
 		
@@ -502,7 +506,7 @@ public class QuestBook {
 		view.reserve(1);
 		
 		for(int i = 0; i < view.getCapacity(); ++i) {
-			ICategory category = QuestWorld.get().getCategory(i);
+			ICategory category = QuestingAPI.getFacade().getCategory(i);
 			if(category != null) {
 				view.reserve(1);
 				
@@ -542,7 +546,7 @@ public class QuestBook {
 	}
 
 	public static void openCategoryQuestEditor(Player p, final ICategory category) {
-		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
+		QuestingAPI.getSounds().EDITOR_CLICK.playTo(p);
 		
 		final Menu menu = new Menu(6, "&3Quest Editor");
 
@@ -595,7 +599,7 @@ public class QuestBook {
 	}
 
 	public static void openCategoryEditor(Player p, final ICategory category) {
-		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
+		QuestingAPI.getSounds().EDITOR_CLICK.playTo(p);
 		
 		final Menu menu = new Menu(2, "&3Quest Editor");
 		ICategoryState changes = category.getState();
@@ -727,7 +731,7 @@ public class QuestBook {
 					for (IQuest quest: category.getQuests()) {
 						PlayerManager.clearAllQuestData(quest);
 					}
-					QuestWorld.getSounds().DESTRUCTIVE_CLICK.playTo((Player) event.getWhoClicked());
+					QuestingAPI.getSounds().DESTRUCTIVE_CLICK.playTo((Player) event.getWhoClicked());
 				}
 		);
 		
@@ -735,7 +739,7 @@ public class QuestBook {
 	}
 
 	public static void openQuestEditor(Player p, final IQuest quest) {
-		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
+		QuestingAPI.getSounds().EDITOR_CLICK.playTo(p);
 		
 		final Menu menu = new Menu(6, "&3Quest Editor");
 		IQuestState changes = quest.getState();
@@ -831,7 +835,7 @@ public class QuestBook {
 				}
 		);
 		
-		if (QuestWorld.get().getEconomy() != null) {
+		if (QuestingAPI.getEconomy() != null) {
 			menu.put(13,
 					new ItemBuilder(Material.GOLD_INGOT)
 					.display("&7Monetary Reward: &6$" + quest.getMoney()).lore(
@@ -1011,7 +1015,7 @@ public class QuestBook {
 						"&rwith this Quest.").get(),
 				event -> {
 					PlayerManager.clearAllQuestData(quest);
-					QuestWorld.getSounds().DESTRUCTIVE_CLICK.playTo((Player) event.getWhoClicked());
+					QuestingAPI.getSounds().DESTRUCTIVE_CLICK.playTo((Player) event.getWhoClicked());
 				}
 		);
 		
@@ -1027,7 +1031,7 @@ public class QuestBook {
 				menu.put(45 + i,
 						new ItemBuilder(Material.PAPER).display("&7&o> New Task").get(),
 						event -> {
-							changes.addMission(QuestWorld.renderFactory().createMission(event.getSlot() + 9, quest));
+							changes.addMission(QuestingAPI.getFacade().createMission(event.getSlot() + 9, quest));
 
 							changes.apply();
 							openQuestEditor((Player) event.getWhoClicked(), quest);
@@ -1053,7 +1057,7 @@ public class QuestBook {
 	}
 
 	public static void openWorldEditor(Player p, final IQuest quest) {
-		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
+		QuestingAPI.getSounds().EDITOR_CLICK.playTo(p);
 		
 		final Menu menu = new Menu(2, "&3Quest Editor");
 		
@@ -1082,7 +1086,7 @@ public class QuestBook {
 	}
 
 	public static void openWorldEditor(Player p, final ICategory category) {
-		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
+		QuestingAPI.getSounds().EDITOR_CLICK.playTo(p);
 		
 		final Menu menu = new Menu(2, "&3Quest Editor");
 		
@@ -1111,7 +1115,7 @@ public class QuestBook {
 	}
 
 	public static void openQuestMissionEditor(Player p, final IMission mission) {
-		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
+		QuestingAPI.getSounds().EDITOR_CLICK.playTo(p);
 		
 		Menu menu = new Menu(2, "&3Quest Editor");
 
@@ -1136,7 +1140,7 @@ public class QuestBook {
 	}
 
 	public static void openMissionSelector(Player p, IMission mission) {
-		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
+		QuestingAPI.getSounds().EDITOR_CLICK.playTo(p);
 
 		IMissionState changes = mission.getState();
 		final Menu menu = new Menu(3, Text.colorize("&3Mission Selector: " + mission.getQuest().getName()));
@@ -1146,7 +1150,7 @@ public class QuestBook {
 			openQuestMissionEditor((Player) event.getWhoClicked(), mission);
 		});
 		int i = 0;
-		for(MissionType type : QuestWorld.get().getMissionTypes().values()) {
+		for(MissionType type : QuestingAPI.getMissionTypes().values()) {
 			String name = Text.niceName(type.getName());
 			view.addButton(i,
 					new ItemBuilder(type.getSelectorItem()).display("&f" + name).get(),

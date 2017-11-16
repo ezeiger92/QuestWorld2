@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import me.mrCookieSlime.QuestWorld.QuestWorld;
+import me.mrCookieSlime.QuestWorld.api.QuestingAPI;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategoryState;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
@@ -42,7 +43,7 @@ class Category extends Renderable implements ICategoryState {
 		permission = "";
 		hidden = false;
 		
-		QuestWorld.get().registerCategory(this);
+		QuestingAPI.getFacade().registerCategory(this);
 	}
 	
 	public Category(Map<String, Object> data) {
@@ -59,7 +60,7 @@ class Category extends Renderable implements ICategoryState {
 		permission = config.getString("permission", "");
 		world_blacklist = config.getStringList("world-blacklist");
 		
-		QuestWorld.get().registerCategory(this);
+		QuestingAPI.getFacade().registerCategory(this);
 	}
 	
 	//// ICategory Impl
@@ -90,7 +91,9 @@ class Category extends Renderable implements ICategoryState {
 	
 	@Override
 	public Quest getParent() {
-		return this.parent.get();
+		if(parent == null)
+			return null;
+		return parent.get();
 	}
 	
 	@Override
@@ -144,7 +147,7 @@ class Category extends Renderable implements ICategoryState {
 		if (parentId != null) {
 			int[] parts = RenderableFacade.splitQuestString(parentId);
 			
-			Category c = (Category)QuestWorld.get().getCategory(parts[1]);
+			Category c = (Category)QuestingAPI.getFacade().getCategory(parts[1]);
 			if (c != null)
 				parent = new WeakReference<>(c.getQuest(parts[0]));
 		}
@@ -167,7 +170,7 @@ class Category extends Renderable implements ICategoryState {
 	}
 	
 	public void save(boolean force) {
-		long lastSave = QuestWorld.get().getLastSaved();
+		long lastSave = QuestingAPI.getFacade().getLastSave();
 		for (Quest quest: quests.values()) {
 			// Forcing save or quest appears changed
 			if(force || lastSave < quest.getLastModified())
@@ -253,15 +256,23 @@ class Category extends Renderable implements ICategoryState {
 		dest.copy(this);
 	}
 	
+	WeakReference<Quest> fancyParentResolveFunction(Integer id) {
+		if(id == null)
+			return null;
+		
+		return null;
+	}
+	
+	@SuppressWarnings("unchecked")
 	private void loadMap(Map<String, Object> data) {
 		setUnique((Integer)data.getOrDefault("unique", (int)getUnique()));
-		/*private int id;
-		private boolean hidden;
-		private String name;
-		private String permission;
-		private ItemStack item;
-		private WeakReference<Quest> parent;
-		private Map<Integer, Quest> quests = new HashMap<>();
-		private List<String> world_blacklist = */
+		
+		id = (Integer)data.getOrDefault("index", -1);
+		hidden = (Boolean)data.getOrDefault("hidden", false);
+		name = Text.colorize((String)data.getOrDefault("name", ""));
+		permission = (String)data.getOrDefault("permission", "");
+		item = (ItemStack)data.getOrDefault("item", new ItemStack(Material.STONE));
+		parent = fancyParentResolveFunction((Integer)data.getOrDefault("parent", null));
+		world_blacklist = (List<String>)data.getOrDefault("world-blacklist", new ArrayList<>());
 	}
 }

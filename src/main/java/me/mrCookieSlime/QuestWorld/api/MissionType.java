@@ -16,15 +16,14 @@ import org.bukkit.inventory.ItemStack;
 public abstract class MissionType {
 	private String name;
 	private ItemStack selectorItem;
-	private boolean supportsTimeframes/*, supportsDeathReset*/;
+	private boolean supportsTimeframes;
 	private Map<Integer, MenuData> menuData;
 	
-	public MissionType(String name, boolean supportsTimeframes, /*boolean supportsDeathReset,*/ ItemStack item) {
+	public MissionType(String name, boolean supportsTimeframes, ItemStack item) {
 		Log.fine("MissionType - Creating: " + name);
 		this.name = name;
 		this.selectorItem = item;
 		this.supportsTimeframes = supportsTimeframes;
-		//this.supportsDeathReset = supportsDeathReset;
 		menuData = new HashMap<>();
 	}
 	
@@ -70,7 +69,6 @@ public abstract class MissionType {
 
 	public boolean supportsDeathReset() {
 		return this instanceof Decaying;
-		// return supportsDeathReset;
 	}
 
 	protected void setName(String newName) {

@@ -1,4 +1,4 @@
-package me.mrCookieSlime.QuestWorld.manager;
+package me.mrCookieSlime.QuestWorld.api;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -10,9 +10,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 
-import me.mrCookieSlime.QuestWorld.api.Decaying;
-import me.mrCookieSlime.QuestWorld.api.MissionType;
-import me.mrCookieSlime.QuestWorld.api.Ticking;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IMissionState;
@@ -30,8 +27,13 @@ public class MissionViewer implements Listener {
 	private Set<IMission> decaying_missions = new HashSet<>();
 	
 	public Set<IMission> getMissionsOf(MissionType type) {
-		missions.putIfAbsent(type, new HashSet<>());
-		return missions.get(type);
+		Set<IMission> result = missions.get(type);
+		if(result == null) {
+			result = new HashSet<>();
+			missions.put(type, result);
+		}
+		
+		return result;
 	}
 	
 	public Set<IMission> getTickingMissions() {

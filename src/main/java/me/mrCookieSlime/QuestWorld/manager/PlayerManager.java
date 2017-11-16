@@ -11,6 +11,7 @@ import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.MissionSet;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.QuestStatus;
+import me.mrCookieSlime.QuestWorld.api.QuestingAPI;
 import me.mrCookieSlime.QuestWorld.api.Ticking;
 import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.api.annotation.Nullable;
@@ -71,7 +72,7 @@ public class PlayerManager {
 			return _countQuests(root, status);
 		
 		int result = 0;
-		for(ICategory category : QuestWorld.get().getCategories())
+		for(ICategory category : QuestingAPI.getFacade().getCategories())
 			result += _countQuests(category, status);
 
 		return result;
@@ -95,7 +96,7 @@ public class PlayerManager {
 		Player player = Bukkit.getPlayer(uuid);
 		String worldName = player.getWorld().getName();
 		
-		for(IMission task : QuestWorld.get().getMissionsOf(type)) {
+		for(IMission task : QuestingAPI.getViewer().getMissionsOf(type)) {
 			IQuest quest = task.getQuest();	
 			
 			if (quest.getCategory().isWorldEnabled(worldName) && quest.isWorldEnabled(worldName)
@@ -150,14 +151,16 @@ public class PlayerManager {
 		Player p = Bukkit.getPlayer(uuid);
 		
 		if (p != null && quest_check) {
-			for (IMission task: QuestWorld.get().getTickingMissions()) {
+			for (IMission task: QuestingAPI.getViewer().getTickingMissions()) {
 				if (getStatus(task.getQuest()).equals(QuestStatus.AVAILABLE) && !hasCompletedTask(task) && hasUnlockedTask(task)) {
-					((Ticking) task.getType()).onTick(p, new MissionSet.Result(task, this));
+					MissionSet.Result entry = new MissionSet.Result(task, getProgress(task));
+					((Ticking) task.getType()).onTick(p, entry);
+					setProgress(task, entry.getProgress());
 				}
 			}
 		}
 		
-		for (ICategory category: QuestWorld.get().getCategories()) {
+		for (ICategory category: QuestingAPI.getFacade().getCategories()) {
 			for (IQuest quest: category.getQuests()) {
 				if (getStatus(quest).equals(QuestStatus.AVAILABLE)) {
 					boolean finished = quest.getMissions().size() != 0;
@@ -251,7 +254,7 @@ public class PlayerManager {
 		int done = 0;
 		int total = 0;
 
-		for (ICategory category: QuestWorld.get().getCategories())  {
+		for (ICategory category: QuestingAPI.getFacade().getCategories())  {
 			total += category.getQuests().size();
 			
 			for (IQuest quest: category.getQuests())
@@ -316,7 +319,7 @@ public class PlayerManager {
 		else
 			sendDialogueComponent(player, line);
 		
-		Bukkit.getScheduler().scheduleSyncDelayedTask(QuestWorld.get(),
+		Bukkit.getScheduler().scheduleSyncDelayedTask(QuestingAPI.getPlugin(),
 				() -> sendDialogue(player, task, dialogue), 70L);
 	}
 
@@ -325,7 +328,7 @@ public class PlayerManager {
 			Bukkit.dispatchCommand(Bukkit.getConsoleSender(), line.substring(1).replace("<player>", player.getName()));
 
 		else {
-			line = QuestWorld.get().getConfig().getString("dialogue.prefix") + line;
+			line = QuestingAPI.getPlugin().getConfig().getString("dialogue.prefix") + line;
 			
 			player.sendMessage(Text.colorize(line.replace("<player>", player.getName())));
 		}
@@ -375,7 +378,7 @@ public class PlayerManager {
 	// Right, so this function USED to loop through every file in data-storage/Quest World on
 	// the main thread. W H A T
 	public static void clearAllQuestData(IQuest quest) {
-		Bukkit.getScheduler().runTaskAsynchronously(QuestWorld.get(), () -> {
+		Bukkit.getScheduler().runTaskAsynchronously(QuestingAPI.getPlugin(), () -> {
 			// First: clear all the quest data on a new thread
 			File path = QuestWorld.getPath("data.player");
 			
@@ -387,7 +390,7 @@ public class PlayerManager {
 			}
 
 			// Second: go back to the main thread and make sure all player managers know what happened
-			Bukkit.getScheduler().callSyncMethod(QuestWorld.get(), () -> {
+			Bukkit.getScheduler().callSyncMethod(QuestingAPI.getPlugin(), () -> {
 				for(Metadatable player : Bukkit.getOnlinePlayers())
 					of(player).clearQuestData(quest);
 				

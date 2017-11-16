@@ -6,8 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import me.mrCookieSlime.QuestWorld.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
+import me.mrCookieSlime.QuestWorld.api.QuestingAPI;
 import me.mrCookieSlime.QuestWorld.api.contract.IMissionState;
 import me.mrCookieSlime.QuestWorld.manager.ProgressTracker;
 import me.mrCookieSlime.QuestWorld.util.Text;
@@ -45,7 +45,9 @@ class Mission extends Renderable implements IMissionState {
 	public Mission(Map<String, Object> data) {
 		loadMap(data);
 		ProgressTracker.loadDialogue(this);
-		
+	}
+	
+	public void sanitize() {
 		// Repair any quests that would have been broken by updates, namely location quests
 		MissionState changes = new MissionState(this);
 		type.attemptUpgrade(changes);
@@ -147,7 +149,7 @@ class Mission extends Renderable implements IMissionState {
 	}
 
 	public HashMap<String, Object> serialize() {
-		HashMap<String, Object> result = new HashMap<>();
+		HashMap<String, Object> result = new HashMap<>(20);
 
 		result.put("unique",   (int)getUnique());
 		result.put("quest",    getQuest());
@@ -297,7 +299,7 @@ class Mission extends Renderable implements IMissionState {
 		setUnique((Integer)data.getOrDefault("unique", (int)getUnique()));
 		
 		quest    = new WeakReference<>((Quest)data.get("quest"));
-		type     = QuestWorld.getMissionType((String)data.getOrDefault("type", "SUBMIT"));
+		type     = QuestingAPI.getMissionType((String)data.getOrDefault("type", "SUBMIT"));
 		item     = (ItemStack)data.getOrDefault("item", new ItemStack(Material.STONE));
 		amount   = (Integer)data.getOrDefault("amount", 1);
 		entity   = EntityType.PLAYER;

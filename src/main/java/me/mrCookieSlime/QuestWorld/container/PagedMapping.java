@@ -9,7 +9,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
-import me.mrCookieSlime.QuestWorld.QuestWorld;
+import me.mrCookieSlime.QuestWorld.api.QuestingAPI;
 import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.api.menu.Menu;
 import me.mrCookieSlime.QuestWorld.manager.PlayerManager;
@@ -93,11 +93,11 @@ public class PagedMapping {
 		
 		panels.get(page).build(menu, 9, activeSize);
 		
-		String display = QuestWorld.translate(Translation.NAV_DISPLAY, String.valueOf(page + 1), String.valueOf(panels.size()));
+		String display = QuestingAPI.translate(Translation.NAV_DISPLAY, String.valueOf(page + 1), String.valueOf(panels.size()));
 
-		String nextPre = QuestWorld.translate(page < panels.size() - 1 ? Translation.NAV_NEXT : Translation.NAV_NEXTBAD);
-		String prevPre = QuestWorld.translate(page > 0 ? Translation.NAV_PREV : Translation.NAV_PREVBAD);
-		String[] lore = QuestWorld.translate(Translation.NAV_LORE, nextPre, prevPre).split("\n");
+		String nextPre = QuestingAPI.translate(page < panels.size() - 1 ? Translation.NAV_NEXT : Translation.NAV_NEXTBAD);
+		String prevPre = QuestingAPI.translate(page > 0 ? Translation.NAV_PREV : Translation.NAV_PREVBAD);
+		String[] lore = QuestingAPI.translate(Translation.NAV_LORE, nextPre, prevPre).split("\n");
 
 		frame.addButton(1,
 				new ItemBuilder(Material.PAPER).amount(page + 1).display(display).lore(lore).get(),
@@ -106,7 +106,7 @@ public class PagedMapping {
 					int nextPage = Math.min(Math.max(0, page + delta), panels.size() - 1);
 					Player p = (Player) event.getWhoClicked();
 
-					QuestWorld.getSounds().EDITOR_CLICK.playTo(p); // TODO This is not entirely right - not all PagedMappings are editor menus!
+					QuestingAPI.getSounds().EDITOR_CLICK.playTo(p); // TODO This is not entirely right - not all PagedMappings are editor menus!
 					build(menu, nextPage);
 					
 					// This logically isn't needed, BUT inventories have a nasty habit of displaying old items when only metadata is

@@ -1,10 +1,9 @@
 package me.mrCookieSlime.QuestWorld.api;
 
-import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.RegisteredServiceProvider;
 
 import me.mrCookieSlime.QuestWorld.api.contract.QuestLoader;
+import me.mrCookieSlime.QuestWorld.util.BukkitService;
 import me.mrCookieSlime.QuestWorld.util.Log;
 
 public abstract class QuestExtension {
@@ -13,17 +12,9 @@ public abstract class QuestExtension {
 	private Plugin[] found;
 	private QuestLoader loader = null;
 	
-	public static final <T> T getService(Class<T> clazz) {
-		RegisteredServiceProvider<T> service = Bukkit.getServer().getServicesManager().getRegistration(clazz);
-		if(service != null)
-			return service.getProvider();
-		
-		return null;
-	}
-	
 	public QuestExtension() {
 		setup();
-		loader = getService(QuestLoader.class);
+		loader = BukkitService.get(QuestLoader.class);
 		
 		requirements = getDepends();
 		if(requirements == null)

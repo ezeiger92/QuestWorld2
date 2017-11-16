@@ -27,7 +27,9 @@ public class ExtensionInstaller implements Listener {
 	public void add(QuestExtension hook) {
 		PluginManager manager = parent.getServer().getPluginManager();
 		
-		Log.fine("Installer - Adding hook: " + hook.getName());
+		String name = hookName(hook);
+		
+		Log.fine("Installer - Adding hook: " + name);
 		
 		String[] reqs = hook.getDepends();
 		if(reqs != null)
@@ -38,11 +40,11 @@ public class ExtensionInstaller implements Listener {
 			}
 		
 		if(hook.isReady()) {
-			Log.fine("Installer - Dependencies found: " + hook.getName());
-			initialize(hook);
+			Log.fine("Installer - Dependencies found: " + name);
+			initialize(hook, name);
 		}
 		else {
-			Log.fine("Installer - Listening for dependencies: " + hook.getName());
+			Log.fine("Installer - Listening for dependencies: " + name);
 			hooks.add(hook);
 		}
 	}
@@ -52,9 +54,30 @@ public class ExtensionInstaller implements Listener {
 			add(hook);
 	}
 	
-	private void initialize(QuestExtension hook) {
-		Log.fine("Installer - Initializing hook: " + hook.getName());
-		hook.init(parent);
+	private void initialize(QuestExtension hook, String name) {
+		Log.fine("Installer - Initializing hook: " + name);
+		
+		try {
+			hook.init(parent);
+		}
+		catch(Throwable e) {
+			Log.warning("Error initializing hook: " + name);
+			e.printStackTrace();
+		}
+	}
+	
+	private String hookName(QuestExtension hook) {
+		String hookName;
+		try {
+			hookName = hook.getName();
+		}
+		catch(Throwable e) {
+			hookName = hook.getClass().getSimpleName();
+			Log.warning("Error getting hook name for class " + hookName);
+			e.printStackTrace();
+		}
+		
+		return hookName;
 	}
 	
 	@EventHandler
@@ -66,8 +89,9 @@ public class ExtensionInstaller implements Listener {
 			hook.enablePlugin(event.getPlugin());
 			
 			if(hook.isReady()) {
-				Log.fine("Installer - Dependencies loaded: " + hook.getName());
-				initialize(hook);
+				String name = hookName(hook);
+				Log.fine("Installer - Dependencies loaded: " + name);
+				initialize(hook, name);
 				iterator.remove();
 			}
 		}
