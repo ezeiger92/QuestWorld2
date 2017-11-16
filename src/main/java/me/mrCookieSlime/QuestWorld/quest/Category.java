@@ -9,8 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import me.mrCookieSlime.QuestWorld.QuestWorld;
-import me.mrCookieSlime.QuestWorld.api.QuestingAPI;
+import me.mrCookieSlime.QuestWorld.QuestWorldPlugin;
+import me.mrCookieSlime.QuestWorld.api.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategoryState;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
@@ -43,7 +43,7 @@ class Category extends Renderable implements ICategoryState {
 		permission = "";
 		hidden = false;
 		
-		QuestingAPI.getFacade().registerCategory(this);
+		QuestWorld.getFacade().registerCategory(this);
 	}
 	
 	public Category(Map<String, Object> data) {
@@ -60,7 +60,7 @@ class Category extends Renderable implements ICategoryState {
 		permission = config.getString("permission", "");
 		world_blacklist = config.getStringList("world-blacklist");
 		
-		QuestingAPI.getFacade().registerCategory(this);
+		QuestWorld.getFacade().registerCategory(this);
 	}
 	
 	//// ICategory Impl
@@ -147,14 +147,14 @@ class Category extends Renderable implements ICategoryState {
 		if (parentId != null) {
 			int[] parts = RenderableFacade.splitQuestString(parentId);
 			
-			Category c = (Category)QuestingAPI.getFacade().getCategory(parts[1]);
+			Category c = (Category)QuestWorld.getFacade().getCategory(parts[1]);
 			if (c != null)
 				parent = new WeakReference<>(c.getQuest(parts[0]));
 		}
 	}
 	
 	File getFile() {
-		return new File(QuestWorld.getPath("data.questing"), id + ".category");
+		return new File(QuestWorldPlugin.getPath("data.questing"), id + ".category");
 	}
 	
 	public void addQuest(IQuest quest) {
@@ -170,7 +170,7 @@ class Category extends Renderable implements ICategoryState {
 	}
 	
 	public void save(boolean force) {
-		long lastSave = QuestingAPI.getFacade().getLastSave();
+		long lastSave = QuestWorld.getFacade().getLastSave();
 		for (Quest quest: quests.values()) {
 			// Forcing save or quest appears changed
 			if(force || lastSave < quest.getLastModified())

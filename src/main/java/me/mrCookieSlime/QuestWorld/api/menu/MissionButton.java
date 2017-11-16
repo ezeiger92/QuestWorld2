@@ -9,7 +9,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
-import me.mrCookieSlime.QuestWorld.api.QuestingAPI;
+import me.mrCookieSlime.QuestWorld.api.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.SinglePrompt;
 import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.api.contract.IMissionState;
@@ -221,7 +221,7 @@ public class MissionButton {
 								}
 								
 								dialogue.add(s);
-								QuestingAPI.getSounds().DIALOG_ADD.playTo(p2);
+								QuestWorld.getSounds().DIALOG_ADD.playTo(p2);
 								return false;
 							}
 					));

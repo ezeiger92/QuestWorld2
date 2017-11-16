@@ -7,7 +7,7 @@ import java.util.HashMap;
 
 import org.bukkit.configuration.file.YamlConfiguration;
 
-import me.mrCookieSlime.QuestWorld.QuestWorld;
+import me.mrCookieSlime.QuestWorld.QuestWorldPlugin;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
 import me.mrCookieSlime.QuestWorld.api.contract.IFacade;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
@@ -71,7 +71,7 @@ public class RenderableFacade implements IFacade {
 		ArrayList<ParseData> categoryData = new ArrayList<>();
 		HashMap<Integer, ArrayList<ParseData>> questData = new HashMap<>();
 		
-		for (File file: QuestWorld.getPath("data.questing").listFiles()) {
+		for (File file: QuestWorldPlugin.getPath("data.questing").listFiles()) {
 			String fileName = file.getName();
 			if (fileName.endsWith(".quest")) {
 				int[] parts = splitQuestString(fileName.substring(0, fileName.length() - 6));

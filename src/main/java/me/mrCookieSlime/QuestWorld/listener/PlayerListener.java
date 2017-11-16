@@ -4,7 +4,7 @@ import me.mrCookieSlime.QuestWorld.GuideBook;
 import me.mrCookieSlime.QuestWorld.api.Decaying;
 import me.mrCookieSlime.QuestWorld.api.MissionSet;
 import me.mrCookieSlime.QuestWorld.api.QuestStatus;
-import me.mrCookieSlime.QuestWorld.api.QuestingAPI;
+import me.mrCookieSlime.QuestWorld.api.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
 import me.mrCookieSlime.QuestWorld.api.menu.QuestBook;
@@ -38,7 +38,7 @@ public class PlayerListener implements Listener {
 		PlayerManager manager = PlayerManager.of(p);
 		String worldName = p.getWorld().getName();
 		
-		for(IMission task : QuestingAPI.getViewer().getDecayingMissions()) {
+		for(IMission task : QuestWorld.getViewer().getDecayingMissions()) {
 			IQuest quest = task.getQuest();
 			if (!manager.getStatus(quest).equals(QuestStatus.AVAILABLE)
 					|| !quest.isWorldEnabled(worldName)
@@ -54,11 +54,11 @@ public class PlayerListener implements Listener {
 	@EventHandler
 	public void onJoin(PlayerJoinEvent e) {
 		final UUID uuid = e.getPlayer().getUniqueId();
-		e.getPlayer().setMetadata("questworld.playermanager", new LazyMetadataValue(QuestingAPI.getPlugin(), () ->
+		e.getPlayer().setMetadata("questworld.playermanager", new LazyMetadataValue(QuestWorld.getPlugin(), () ->
 			new PlayerManager(uuid)
 		));
 		
-		if (QuestingAPI.getPlugin().getConfig().getBoolean("book.on-first-join") &&
+		if (QuestWorld.getPlugin().getConfig().getBoolean("book.on-first-join") &&
 				!PlayerManager.of(e.getPlayer()).getTracker().exists())
 			e.getPlayer().getInventory().addItem(GuideBook.get());
 	}

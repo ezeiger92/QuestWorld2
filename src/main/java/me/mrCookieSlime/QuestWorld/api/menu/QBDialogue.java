@@ -1,6 +1,6 @@
 package me.mrCookieSlime.QuestWorld.api.menu;
 
-import me.mrCookieSlime.QuestWorld.api.QuestingAPI;
+import me.mrCookieSlime.QuestWorld.api.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategoryState;
@@ -27,7 +27,7 @@ import com.google.gson.JsonObject;
 
 public class QBDialogue {
 	public static void openDeletionConfirmation(Player p, final IStateful q) {
-		QuestingAPI.getSounds().DESTRUCTIVE_WARN.playTo(p);
+		QuestWorld.getSounds().DESTRUCTIVE_WARN.playTo(p);
 		
 		Menu menu = new Menu(1, "&4&lAre you Sure?");
 		
@@ -49,12 +49,12 @@ public class QBDialogue {
 				.lore("", "&rThis will delete", tag).get(),
 				event -> {
 					Player p2 = (Player) event.getWhoClicked();
-					QuestingAPI.getSounds().DESTRUCTIVE_CLICK.playTo(p2);
+					QuestWorld.getSounds().DESTRUCTIVE_CLICK.playTo(p2);
 					// TODO QuestWorld.getSounds().muteNext();
 					if (q instanceof ICategory) {
 						ICategory category = (ICategory)q;
 						if(CancellableEvent.send(new CategoryDeleteEvent(category))) {
-							QuestingAPI.getFacade().unregisterCategory(category);
+							QuestWorld.getFacade().unregisterCategory(category);
 							p2.closeInventory();
 							QuestBook.openEditor(p2);
 							PlayerTools.sendTranslation(p2, true, Translation.CATEGORY_DELETED, category.getName());
@@ -92,7 +92,7 @@ public class QBDialogue {
 	}
 
 	public static void openResetConfirmation(Player p, final IQuest q) {
-		QuestingAPI.getSounds().DESTRUCTIVE_WARN.playTo(p);
+		QuestWorld.getSounds().DESTRUCTIVE_WARN.playTo(p);
 		
 		Menu menu = new Menu(1, "&4&lAre you Sure?");
 		
@@ -113,7 +113,7 @@ public class QBDialogue {
 	}
 	
 	public static void openQuestMissionEntityEditor(Player p, final IMission mission) {
-		QuestingAPI.getSounds().EDITOR_CLICK.playTo(p);
+		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
 		
 		IMissionState changes = mission.getState();
 		//String title = Text.colorize(mission.getQuest().getName() + " &7- &8(Page " + (page+1) + "/" + (lastPage+1) + ")");
@@ -219,12 +219,12 @@ public class QBDialogue {
 	}
 
 	public static void openQuestRequirementChooser(Player p, final IStateful quest) {
-		QuestingAPI.getSounds().EDITOR_CLICK.playTo(p);
+		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
 		
 		Menu menu = new Menu(1, "&c&lQuest Editor");
 
 		PagedMapping pager = new PagedMapping(45, 9);
-		for(ICategory category : QuestingAPI.getFacade().getCategories()) {
+		for(ICategory category : QuestWorld.getFacade().getCategories()) {
 			pager.addButton(category.getID(), new ItemBuilder(category.getItem()).lore(
 					"",
 					"&7&oLeft Click to open").get(),
@@ -246,7 +246,7 @@ public class QBDialogue {
 	}
 
 	private static void openQuestRequirementChooser2(Player p, final IStateful q, ICategory category) {
-		QuestingAPI.getSounds().EDITOR_CLICK.playTo(p);
+		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
 		
 		Menu menu = new Menu(1, "&c&lQuest Editor");
 		

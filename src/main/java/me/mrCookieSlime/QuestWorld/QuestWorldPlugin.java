@@ -28,8 +28,8 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
-	private static QuestWorld instance = null;
+public class QuestWorldPlugin extends JavaPlugin implements Listener, QuestLoader {
+	private static QuestWorldPlugin instance = null;
 	private long lastSave = 0;
 
 	private QuestingImpl api = new QuestingImpl(this);
@@ -40,7 +40,7 @@ public class QuestWorld extends JavaPlugin implements Listener, QuestLoader {
 	private int questCheckHandle = -1;
 	private int autosaveHandle = -1;
 	
-	public QuestWorld() {
+	public QuestWorldPlugin() {
 		instance = this;
 		Log.setLogger(getLogger());
 

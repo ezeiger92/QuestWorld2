@@ -5,7 +5,7 @@ import java.util.function.Consumer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
-import me.mrCookieSlime.QuestWorld.api.QuestingAPI;
+import me.mrCookieSlime.QuestWorld.api.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.SinglePrompt;
 import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
@@ -31,12 +31,12 @@ public class Buttons {
 	public static Consumer<InventoryClickEvent> newCategory(int id) {
 		return event -> {
 			Player p = (Player) event.getWhoClicked();
-			String defaultCategoryName = QuestingAPI.translate(Translation.DEFAULT_CATEGORY);
+			String defaultCategoryName = QuestWorld.translate(Translation.DEFAULT_CATEGORY);
 			
 			PlayerTools.promptInput(p, new SinglePrompt(
 					PlayerTools.makeTranslation(true, Translation.CATEGORY_NAME_EDIT, defaultCategoryName),
 					(c,s) -> {
-						QuestingAPI.getFacade().createCategory(s, id);
+						QuestWorld.getFacade().createCategory(s, id);
 						PlayerTools.sendTranslation(p, true, Translation.CATEGORY_CREATED, s);
 						QuestBook.openEditor(p);
 
@@ -66,12 +66,12 @@ public class Buttons {
 	public static Consumer<InventoryClickEvent> newQuest(ICategory category, int id) {
 		return event -> {
 			Player p = (Player) event.getWhoClicked();
-			String defaultQuestName = QuestingAPI.translate(Translation.DEFAULT_QUEST);
+			String defaultQuestName = QuestWorld.translate(Translation.DEFAULT_QUEST);
 			
 			PlayerTools.promptInput(p, new SinglePrompt(
 					PlayerTools.makeTranslation(true, Translation.QUEST_NAME_EDIT, defaultQuestName),
 					(c,s) -> {
-						QuestingAPI.getFacade().createQuest(s, id, category);
+						QuestWorld.getFacade().createQuest(s, id, category);
 						PlayerTools.sendTranslation(p, true, Translation.QUEST_CREATED, s);
 						QuestBook.openCategoryQuestEditor(p, category);
 
@@ -85,7 +85,7 @@ public class Buttons {
 	
 	public static Consumer<InventoryClickEvent> partyMenu() {
 		return event -> {
-			if (QuestingAPI.getPlugin().getConfig().getBoolean("party.enabled")) {
+			if (QuestWorld.getPlugin().getConfig().getBoolean("party.enabled")) {
 				Player p = (Player) event.getWhoClicked();
 				
 				// TODO openPartyMenu has no way to go back to where it came from, so it always goes to the main menu

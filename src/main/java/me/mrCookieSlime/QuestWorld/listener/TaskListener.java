@@ -8,7 +8,7 @@ import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.Plugin;
 
-import me.mrCookieSlime.QuestWorld.api.QuestingAPI;
+import me.mrCookieSlime.QuestWorld.api.QuestWorld;
 
 public class TaskListener implements Listener {
 
@@ -19,6 +19,6 @@ public class TaskListener implements Listener {
 	@EventHandler(priority=EventPriority.MONITOR,ignoreCancelled=true)
 	public void onCreatureSpawn(CreatureSpawnEvent e) {
 		if (e.getSpawnReason().equals(SpawnReason.SPAWNER))
-			e.getEntity().setMetadata("spawned_by_spawner", new FixedMetadataValue(QuestingAPI.getPlugin(), "QuestWorld"));
+			e.getEntity().setMetadata("spawned_by_spawner", new FixedMetadataValue(QuestWorld.getPlugin(), "QuestWorld"));
 	}
 }

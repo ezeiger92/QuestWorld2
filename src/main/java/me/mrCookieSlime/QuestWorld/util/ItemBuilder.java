@@ -16,7 +16,7 @@ import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.inventory.meta.SpawnEggMeta;
 
-import me.mrCookieSlime.QuestWorld.api.QuestingAPI;
+import me.mrCookieSlime.QuestWorld.api.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.api.annotation.Mutable;
 
@@ -35,7 +35,7 @@ public class ItemBuilder implements Cloneable {
 	public static enum Proto {
 		RED_WOOL(new ItemBuilder(Material.WOOL).color(DyeColor.RED).get()),
 		LIME_WOOL(new ItemBuilder(Material.WOOL).color(DyeColor.LIME).get()),
-		MAP_BACK(new ItemBuilder(Material.MAP).display(QuestingAPI.translate(Translation.button_back_general)).get()),
+		MAP_BACK(new ItemBuilder(Material.MAP).display(QuestWorld.translate(Translation.button_back_general)).get()),
 		;
 		private ItemStack item;
 		Proto(ItemStack item) {

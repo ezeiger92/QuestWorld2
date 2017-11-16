@@ -17,7 +17,7 @@ import org.bukkit.inventory.CraftingInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import me.mrCookieSlime.QuestWorld.api.QuestingAPI;
+import me.mrCookieSlime.QuestWorld.api.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.api.Translator;
 
@@ -78,9 +78,9 @@ public class PlayerTools {
 	}
 	
 	public static String makeTranslation(boolean prefixed, Translator key, String... replacements) {
-		String text = QuestingAPI.translate(key, replacements);
+		String text = QuestWorld.translate(key, replacements);
 		if(!text.isEmpty() && prefixed)
-			text = QuestingAPI.translate(Translation.DEFAULT_PREFIX) + text;
+			text = QuestWorld.translate(Translation.DEFAULT_PREFIX) + text;
 
 		return Text.colorize(text);
 	}
@@ -88,7 +88,7 @@ public class PlayerTools {
 	private static ConversationFactory factory;
 	public static ConversationFactory getConversationFactory() {
 		if(factory == null)
-			factory = new ConversationFactory(QuestingAPI.getPlugin());
+			factory = new ConversationFactory(QuestWorld.getPlugin());
 		return factory;
 	}
 	public static void promptInput(Player p, Prompt prompt) {
@@ -121,7 +121,7 @@ public class PlayerTools {
 			public void onLeave(PlayerQuitEvent event) {
 				HandlerList.unregisterAll(this);
 			}
-		}, QuestingAPI.getPlugin());
+		}, QuestWorld.getPlugin());
 	}
 	
 	public static boolean checkPermission(Player p, String permission) {

@@ -7,7 +7,7 @@ import org.bukkit.inventory.ItemStack;
 import me.mrCookieSlime.QuestWorld.api.Manual;
 import me.mrCookieSlime.QuestWorld.api.MissionSet;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
-import me.mrCookieSlime.QuestWorld.api.QuestingAPI;
+import me.mrCookieSlime.QuestWorld.api.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IMissionState;
 import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
@@ -41,12 +41,12 @@ public class SubmitMission extends MissionType implements Manual {
 			found -= missing.getAmount();
 		
 		if(found > 0) {
-			QuestingAPI.getSounds().MISSION_SUBMIT.playTo(p);
+			QuestWorld.getSounds().MISSION_SUBMIT.playTo(p);
 			// TODO QuestWorld.getSounds().muteNext();
 			result.addProgress(found);
 		}
 		else {
-			QuestingAPI.getSounds().MISSION_REJECT.playTo(p);
+			QuestWorld.getSounds().MISSION_REJECT.playTo(p);
 		}
 	}
 	

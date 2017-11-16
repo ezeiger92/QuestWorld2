@@ -7,8 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import me.mrCookieSlime.QuestWorld.QuestWorld;
-import me.mrCookieSlime.QuestWorld.api.QuestingAPI;
+import me.mrCookieSlime.QuestWorld.QuestWorldPlugin;
+import me.mrCookieSlime.QuestWorld.api.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuestState;
@@ -136,14 +136,14 @@ class Quest extends Renderable implements IQuestState {
 		if (parentId != null) {
 			int[] parts = RenderableFacade.splitQuestString(parentId);
 			
-			Category c = (Category)QuestingAPI.getFacade().getCategory(parts[1]);
+			Category c = (Category)QuestWorld.getFacade().getCategory(parts[1]);
 			if (c != null)
 				parent = new WeakReference<>(c.getQuest(parts[0]));
 		}
 	}
 	
 	File getFile() {
-		return new File(QuestWorld.getPath("data.questing"), id + "-C" + getCategory().getID() + ".quest");
+		return new File(QuestWorldPlugin.getPath("data.questing"), id + "-C" + getCategory().getID() + ".quest");
 	}
 	
 	private void loadMissions() {
@@ -347,10 +347,10 @@ class Quest extends Renderable implements IQuestState {
 		for(ItemStack item : p.getInventory().addItem(itemReward).values())
 			p.getWorld().dropItemNaturally(p.getLocation(), item);
 		
-		QuestingAPI.getSounds().QUEST_REWARD.playTo(p);
+		QuestWorld.getSounds().QUEST_REWARD.playTo(p);
 		
 		if (xp > 0) p.setLevel(p.getLevel() + xp);
-		if (money > 0 && QuestingAPI.getEconomy() != null) QuestingAPI.getEconomy().depositPlayer(p, money);
+		if (money > 0 && QuestWorld.getEconomy() != null) QuestWorld.getEconomy().depositPlayer(p, money);
 		
 		for (String command: commands) 
 			Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command.replaceAll("@p", p.getName()));

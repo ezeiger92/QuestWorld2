@@ -13,7 +13,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import com.google.common.collect.Lists;
 
-import me.mrCookieSlime.QuestWorld.QuestWorld;
+import me.mrCookieSlime.QuestWorld.QuestWorldPlugin;
 import me.mrCookieSlime.QuestWorld.api.QuestStatus;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IMissionState;
@@ -25,7 +25,7 @@ public class ProgressTracker {
 	private final YamlConfiguration config;
 	
 	public ProgressTracker(UUID uuid) {
-		configFile = new File(QuestWorld.getPath("data.player"), uuid.toString() + ".yml");
+		configFile = new File(QuestWorldPlugin.getPath("data.player"), uuid.toString() + ".yml");
 		config = YamlConfiguration.loadConfiguration(configFile);
 	}
 	
@@ -136,7 +136,7 @@ public class ProgressTracker {
 	}
 	
 	public static File dialogueFile(IMission mission) {
-		return new File(QuestWorld.getPath("data.dialogue"), mission.getQuest().getCategory().getID()
+		return new File(QuestWorldPlugin.getPath("data.dialogue"), mission.getQuest().getCategory().getID()
 				+ "+" + mission.getQuest().getID() + "+" + mission.getIndex() + ".txt");
 	}
 	

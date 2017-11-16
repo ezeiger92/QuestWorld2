@@ -8,8 +8,9 @@ import org.bukkit.Bukkit;
 
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.MissionViewer;
-import me.mrCookieSlime.QuestWorld.api.QuestingAPI;
+import me.mrCookieSlime.QuestWorld.api.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.Translator;
+import me.mrCookieSlime.QuestWorld.api.contract.QuestingAPI;
 import me.mrCookieSlime.QuestWorld.quest.RenderableFacade;
 import me.mrCookieSlime.QuestWorld.util.BukkitService;
 import me.mrCookieSlime.QuestWorld.util.Lang;
@@ -18,7 +19,7 @@ import me.mrCookieSlime.QuestWorld.util.ResourceLoader;
 import me.mrCookieSlime.QuestWorld.util.Sounds;
 import net.milkbowl.vault.economy.Economy;
 
-public class QuestingImpl extends QuestingAPI implements Reloadable {
+public class QuestingImpl implements QuestingAPI, Reloadable {
 	private Map<String, MissionType> types = new HashMap<>();
 	private Map<String, MissionType> immutableTypes = Collections.unmodifiableMap(types);
 	private MissionViewer viewer = new MissionViewer();
@@ -27,12 +28,13 @@ public class QuestingImpl extends QuestingAPI implements Reloadable {
 	private Sounds eventSounds;
 	private ResourceLoader resources;
 	private Lang language;
-	private QuestWorld questWorld;
+	private QuestWorldPlugin questWorld;
 	
-	public QuestingImpl(QuestWorld questWorld) {
+	public QuestingImpl(QuestWorldPlugin questWorld) {
 		this.questWorld = questWorld;
 		resources = new ResourceLoader(questWorld);
 		language = new Lang(resources);
+		QuestWorld.setAPI(this);
 	}
 	
 	@Override
@@ -84,7 +86,7 @@ public class QuestingImpl extends QuestingAPI implements Reloadable {
 	}
 	
 	@Override
-	public QuestWorld plugin() {
+	public QuestWorldPlugin plugin() {
 		return questWorld;
 	}
 
