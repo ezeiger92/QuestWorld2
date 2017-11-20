@@ -14,7 +14,7 @@ class CategoryState extends Category {
 	private Category origin;
 	
 	public CategoryState(Category copy) {
-		super(copy.serialize());
+		super(copy);
 		setUnique(copy.getUnique());
 		origin = copy;
 	}
@@ -48,6 +48,7 @@ class CategoryState extends Category {
 	public boolean apply() {
 		if(sendEvent()) {
 			copyTo(origin);
+			origin.updateLastModified();
 			changeBits = 0;
 			return true;
 		}
@@ -74,15 +75,16 @@ class CategoryState extends Category {
 		return CancellableEvent.send(new CategoryChangeEvent(this));
 	}
 
-	// TODO this doesn't support CategoryChange
 	@Override
-	public void addQuest(IQuest quest) {
-		origin.addQuest(quest);
+	public void addQuest(String name, int id) {
+		super.addQuest(name, id);
+		changeBits |= BitFlag.getBits(Member.QUESTS);
 	}
-	
+
 	@Override
 	public void removeQuest(IQuest quest) {
-		origin.removeQuest(quest);
+		super.removeQuest(quest);
+		changeBits |= BitFlag.getBits(Member.QUESTS);
 	}
 	
 	// Modify "setX" methods

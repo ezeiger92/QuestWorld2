@@ -54,7 +54,7 @@ public class QBDialogue {
 					if (q instanceof ICategory) {
 						ICategory category = (ICategory)q;
 						if(CancellableEvent.send(new CategoryDeleteEvent(category))) {
-							QuestWorld.getFacade().unregisterCategory(category);
+							QuestWorld.getFacade().deleteCategory(category);
 							p2.closeInventory();
 							QuestBook.openEditor(p2);
 							PlayerTools.sendTranslation(p2, true, Translation.CATEGORY_DELETED, category.getName());
@@ -67,7 +67,8 @@ public class QBDialogue {
 							
 							ICategoryState changes = quest.getCategory().getState();
 							changes.removeQuest(quest);
-							//changes.apply(); 
+							if(changes.apply())
+								QuestWorld.getFacade().deleteQuest(quest);
 
 							p2.closeInventory();
 							QuestBook.openCategoryQuestEditor(p2, quest.getCategory());

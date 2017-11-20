@@ -17,10 +17,9 @@ class MissionState extends Mission {
 	private long changeBits = 0;
 	private Mission origin;
 	
-	public MissionState(Mission copy) {
-		super(copy.serialize());
-		setUnique(copy.getUnique());
-		origin = copy;
+	public MissionState(Mission source) {
+		super(source);
+		origin = source;
 	}
 	
 	public boolean hasChange(Member field) {
@@ -35,6 +34,7 @@ class MissionState extends Mission {
 	public boolean apply() {
 		if(sendEvent()) {
 			copyTo(origin);
+			origin.updateLastModified();
 			ProgressTracker.saveDialogue(origin);
 			changeBits = 0;
 			return true;

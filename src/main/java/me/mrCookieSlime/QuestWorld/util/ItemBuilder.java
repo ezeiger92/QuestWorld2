@@ -1,5 +1,6 @@
 package me.mrCookieSlime.QuestWorld.util;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -349,6 +350,48 @@ public class ItemBuilder implements Cloneable {
 		ItemMeta stackMeta = resultStack.getItemMeta();
 		stackMeta.setLore(lore);
 		resultStack.setItemMeta(stackMeta);
+		return this;
+	}
+	
+	// TODO Put together without testing in 10 minutes at 2am. 100% chance of dramatic failure
+	public @Mutable ItemBuilder wrapText(String... lines) {
+		ArrayList<String> newStrings = new ArrayList<>();
+		final int max_length = 16;
+		String lastFormat = "";
+		String currentFormat = "";
+		
+		for(String line : lines) {
+			line = Text.colorize(line);
+			int start = 0;
+			int end = 0;
+			int length = line.length();
+			char[] chars = line.toCharArray();
+			for(int i = 0; i < length; ++i) {
+				if(chars[i] == Text.colorChar) {
+					char c = chars[++i];
+					if("0123456789aAbBcCdDeEfFrR".indexOf(c) != -1) {
+						currentFormat = String.valueOf(Text.colorChar) + c;
+					}
+					else if("iIoOlLmMnNkK".indexOf(c) != -1) {
+						currentFormat = lastFormat + String.valueOf(Text.colorChar) + c;
+					}
+					continue;
+				}
+				
+				if((++end - start) >= max_length) {
+					newStrings.add(lastFormat + line.substring(start, end));
+					start = end;
+					lastFormat = currentFormat;
+				}
+			}
+		}
+		
+		ItemMeta stackMeta = resultStack.getItemMeta();
+		stackMeta.setDisplayName(newStrings.get(0));
+		newStrings.remove(0);
+		stackMeta.setLore(newStrings);
+		resultStack.setItemMeta(stackMeta);
+		
 		return this;
 	}
 	

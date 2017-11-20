@@ -67,13 +67,13 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener, QuestLoade
 	
 	@Override
 	public void onEnable() {
+		api.onEnable();
 		hookInstaller = new ExtensionInstaller(this);
 		new Builtin();
 		hookInstaller.addAll(preEnableHooks);
 		preEnableHooks.clear();
 		preEnableHooks = null;
 		
-		api.initEconomy();
 		if(api.getEconomy() == null)
 			Log.info("No economy (vault) found, money rewards disabled");
 			
@@ -88,7 +88,7 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener, QuestLoade
 			Log.fine("Successfully loaded " + quests + " Quests");
 		}, 0L);
 		
-		loadConfigs();
+		reloadQWConfig();
 		
 		getCommand("quests").setExecutor(new QuestsCommand());
 		getCommand("questeditor").setExecutor(new EditorCommand(this));
@@ -103,8 +103,6 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener, QuestLoade
 	
 	public void loadConfigs() {
 		reloadConfig();
-		
-		api.onConfig();
 		
 		if(questCheckHandle != -1)
 			getServer().getScheduler().cancelTask(questCheckHandle);

@@ -1031,7 +1031,7 @@ public class QuestBook {
 				menu.put(45 + i,
 						new ItemBuilder(Material.PAPER).display("&7&o> New Task").get(),
 						event -> {
-							changes.addMission(QuestWorld.getFacade().createMission(event.getSlot() + 9, quest));
+							changes.addMission(event.getSlot() + 9);
 
 							changes.apply();
 							openQuestEditor((Player) event.getWhoClicked(), quest);

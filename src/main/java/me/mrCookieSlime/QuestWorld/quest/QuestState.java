@@ -50,6 +50,7 @@ class QuestState extends Quest {
 	public boolean apply() {
 		if(sendEvent()) {
 			copyTo(origin);
+			origin.updateLastModified();
 			changeBits = 0;
 			return true;
 		}
@@ -102,8 +103,8 @@ class QuestState extends Quest {
 	}
 	
 	@Override
-	public void addMission(IMission mission) {
-		super.addMission(mission);
+	public void addMission(int index) {
+		super.addMission(index);
 		changeBits |= BitFlag.getBits(Member.TASKS);
 	}
 	

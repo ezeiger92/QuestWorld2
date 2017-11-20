@@ -20,24 +20,23 @@ import org.bukkit.inventory.ItemStack;
 
 class Mission extends Renderable implements IMissionState {
 
-	private boolean spawnersAllowed;
-	private int amount;
-	private int customInt;
-	private String customString;
-	private String description;
-	private ArrayList<String> dialogue = new ArrayList<>();
-	private String displayName;
-	private EntityType entity;
-	private int index;
-	private Location location;
-	private ItemStack item;
 	private WeakReference<Quest> quest;
-	private int timeframe;
-	private MissionType type;
-	private boolean deathReset;
+	private boolean     spawnersAllowed = true;
+	private int         amount = 1;
+	private int         customInt = 0;
+	private String      customString = "";
+	private String      description = "Hey there! Do this Quest.";
+	private String      displayName = "";
+	private EntityType  entity = EntityType.PLAYER;
+	private int         index = -1;
+	private Location    location = Bukkit.getWorlds().get(0).getSpawnLocation();
+	private ItemStack   item = new ItemStack(Material.STONE);
+	private int         timeframe = 0;
+	private MissionType type = QuestWorld.getMissionType("SUBMIT");
+	private boolean     deathReset = false;
+	private ArrayList<String> dialogue = new ArrayList<>();
 
 	public Mission(int menuIndex, Quest quest) {
-		loadDefaults();
 		this.index = menuIndex;
 		this.quest = new WeakReference<>(quest);
 	}
@@ -45,6 +44,10 @@ class Mission extends Renderable implements IMissionState {
 	public Mission(Map<String, Object> data) {
 		loadMap(data);
 		ProgressTracker.loadDialogue(this);
+	}
+	
+	protected Mission(Mission source) {
+		copy(source);
 	}
 	
 	public void sanitize() {
@@ -172,31 +175,26 @@ class Mission extends Renderable implements IMissionState {
 
 	@Override
 	public void setAmount(int amount) {
-		updateLastModified();
 		this.amount = amount;
 	}
 
 	@Override
 	public void setCustomInt(int val) {
-		updateLastModified();
 		customInt = val;
 	}
 	
 	@Override
 	public void setCustomString(String customString) {
-		updateLastModified();
 		this.customString = customString;
 	}
 	
 	@Override
 	public void setDeathReset(boolean deathReset) {
-		updateLastModified();
 		this.deathReset = deathReset;
 	}
 	
 	@Override
 	public void setDescription(String description) {
-		updateLastModified();
 		this.description = description;
 	}
 	
@@ -208,13 +206,11 @@ class Mission extends Renderable implements IMissionState {
 
 	@Override
 	public void setDisplayName(String name) {
-		updateLastModified();
 		displayName = name;
 	}
 	
 	@Override
 	public void setEntity(EntityType entity) {
-		updateLastModified();
 		this.entity = entity;
 	}
 	
@@ -226,19 +222,16 @@ class Mission extends Renderable implements IMissionState {
 	
 	@Override
 	public void setLocation(Location loc) {
-		updateLastModified();
 		this.location = loc.clone();
 	}
 
 	@Override
 	public void setSpawnerSupport(boolean acceptsSpawners) {
-		updateLastModified();
 		spawnersAllowed = acceptsSpawners;
 	}
 
 	@Override
 	public void setType(MissionType type) {
-		updateLastModified();
 		this.type = type;
 		// TODO: Something like this
 		// type.attemptUpgrade(this);
@@ -246,7 +239,6 @@ class Mission extends Renderable implements IMissionState {
 	
 	@Override
 	public void setTimeframe(int timeframe) {
-		updateLastModified();
 		this.timeframe = timeframe;
 	}
 
@@ -272,18 +264,26 @@ class Mission extends Renderable implements IMissionState {
 	
 	@Override
 	protected void updateLastModified() {
-		// TODO Really take a look at this whole system again
+		// TODO Remove if/when quests get their own files
 		getQuest().updateLastModified();
 	}
 	
 	protected void copy(Mission source) {
-		loadMap(source.serialize());
+		setUnique(source.getUnique());
 		quest = source.quest;
-
-		dialogue = new ArrayList<>();
-		dialogue.addAll(source.dialogue);
-		
-		updateLastModified();
+		spawnersAllowed = source.spawnersAllowed;
+		amount = source.amount;
+		customString = source.customString;
+		description = source.description;
+		displayName = source.displayName;
+		entity = source.entity;
+		index = source.index;
+		location = source.location;
+		item = source.item;
+		timeframe = source.timeframe;
+		type = source.type;
+		deathReset = source.deathReset;
+		dialogue = source.getDialogue();
 	}
 	
 	protected void copyTo(Mission dest) {
@@ -299,25 +299,24 @@ class Mission extends Renderable implements IMissionState {
 		setUnique((Integer)data.getOrDefault("unique", (int)getUnique()));
 		
 		quest    = new WeakReference<>((Quest)data.get("quest"));
-		type     = QuestWorld.getMissionType((String)data.getOrDefault("type", "SUBMIT"));
-		item     = (ItemStack)data.getOrDefault("item", new ItemStack(Material.STONE));
-		amount   = (Integer)data.getOrDefault("amount", 1);
-		entity   = EntityType.PLAYER;
+		type     = QuestWorld.getMissionType((String)data.getOrDefault("type", type));
+		item     = (ItemStack)data.getOrDefault("item", item);
+		amount   = (Integer)data.getOrDefault("amount", amount);
 		try { entity = EntityType.valueOf((String)data.get("entity")); }
 		catch(Exception e) {}
 		location = locationHelper((Map<String, Object>)data.get("location"));
-		index    = (Integer)data.getOrDefault("index", -1);
+		index    = (Integer)data.getOrDefault("index", index);
 		// Chain to handle old name
-		customString = (String)data.getOrDefault("name", "");
+		customString = (String)data.getOrDefault("name", customString);
 		customString = Text.colorize((String)data.getOrDefault("custom_string", customString));
-		displayName  = Text.colorize((String)data.getOrDefault("display-name", ""));
-		timeframe    = (Integer)data.getOrDefault("timeframe", 0);
-		deathReset   = (Boolean)data.getOrDefault("reset-on-death", false);
-		description  = Text.colorize((String)data.getOrDefault("lore", "Hey there! Do this Quest."));
+		displayName  = Text.colorize((String)data.getOrDefault("display-name", displayName));
+		timeframe    = (Integer)data.getOrDefault("timeframe", timeframe);
+		deathReset   = (Boolean)data.getOrDefault("reset-on-death", deathReset);
+		description  = Text.colorize((String)data.getOrDefault("lore", description));
 		// Chain to handle old name
-		customInt    = (Integer)data.getOrDefault("citizen", 0);
+		customInt    = (Integer)data.getOrDefault("citizen", customInt);
 		customInt    = (Integer)data.getOrDefault("custom_int", customInt);
-		spawnersAllowed = !(Boolean)data.getOrDefault("exclude-spawners", false);
+		spawnersAllowed = !(Boolean)data.getOrDefault("exclude-spawners", !spawnersAllowed);
 	}
 	
 	private static Location locationHelper(Map<String, Object> data) {

@@ -9,6 +9,7 @@ import me.mrCookieSlime.QuestWorld.api.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.SinglePrompt;
 import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
+import me.mrCookieSlime.QuestWorld.api.contract.ICategoryState;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
 import me.mrCookieSlime.QuestWorld.manager.PlayerManager;
 import me.mrCookieSlime.QuestWorld.util.PlayerTools;
@@ -71,8 +72,12 @@ public class Buttons {
 			PlayerTools.promptInput(p, new SinglePrompt(
 					PlayerTools.makeTranslation(true, Translation.QUEST_NAME_EDIT, defaultQuestName),
 					(c,s) -> {
-						QuestWorld.getFacade().createQuest(s, id, category);
-						PlayerTools.sendTranslation(p, true, Translation.QUEST_CREATED, s);
+						ICategoryState state = category.getState();
+						state.addQuest(s, id);
+						if(state.apply()) {
+							PlayerTools.sendTranslation(p, true, Translation.QUEST_CREATED, s);
+						}
+						
 						QuestBook.openCategoryQuestEditor(p, category);
 
 						return true;

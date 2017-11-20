@@ -57,13 +57,9 @@ public class QuestingImpl implements QuestingAPI, Reloadable {
 		return viewer;
 	}
 	
-	public void initEconomy() {
+	public void onEnable() {
 		if(Bukkit.getPluginManager().getPlugin("Vault") != null)
 			econ = BukkitService.get(Economy.class);
-	}
-
-	public void onConfig() {
-		eventSounds = new Sounds(resources.loadConfigNoexpect("sounds.yml", true));
 	}
 	
 	@Override
@@ -98,6 +94,7 @@ public class QuestingImpl implements QuestingAPI, Reloadable {
 
 	@Override
 	public void reload() {
+		eventSounds = new Sounds(resources.loadConfigNoexpect("sounds.yml", true));
 		language.reload();
 	}
 }

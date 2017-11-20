@@ -10,39 +10,46 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import me.mrCookieSlime.QuestWorld.QuestWorldPlugin;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
 import me.mrCookieSlime.QuestWorld.api.contract.IFacade;
+import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
 import me.mrCookieSlime.QuestWorld.container.WeakValueMap;
 import me.mrCookieSlime.QuestWorld.manager.PlayerManager;
 
 public class RenderableFacade implements IFacade {
 	private long lastSave;
-	private HashMap<Integer, Category> categories = new HashMap<>();
-	private WeakValueMap<Integer, Quest> quests = new WeakValueMap<>();
-	private WeakValueMap<Integer, Mission> missions = new WeakValueMap<>();
+	private HashMap<Integer, Category> categoryMap = new HashMap<>();
+	private WeakValueMap<Long, Quest> questMap = new WeakValueMap<>();
+	private WeakValueMap<Long, Mission> missionMap = new WeakValueMap<>();
 	
 	@Deprecated
-	public Quest getQuest(int id) {
-		return quests.getOrNull(id);
+	public Quest getQuest(long unique) {
+		return questMap.getOrNull(unique);
 	}
 	
 	@Deprecated
-	public Mission getMission(int id) {
-		return missions.getOrNull(id);
+	public Mission getMission(int unique) {
+		return missionMap.getOrNull(unique);
 	}
 	
 	@Override
 	public Category createCategory(String name, int id) {
-		return new Category(name, id);
+		Category c = new Category(name, id, this);
+		categoryMap.put(id, c);
+		return c;
 	}
 	
-	@Override
+	
 	public Quest createQuest(String name, int id, ICategory category) {
-		return new Quest(name, id, (Category)category);
+		Quest q = new Quest(name, id, (Category)category);
+		questMap.putWeak(q.getUnique(), q);
+		return q;
 	}
 	
-	@Override
+	
 	public Mission createMission(int id, IQuest quest) {
-		return new Mission(id, (Quest)quest);
+		Mission m = new Mission(id, (Quest)quest);
+		missionMap.putWeak(m.getUnique(), m);
+		return m;
 	}
 	
 	static int[] splitQuestString(String in) {
@@ -88,40 +95,45 @@ public class RenderableFacade implements IFacade {
 				categoryData.add(new ParseData(Integer.parseInt(fileName.substring(0, fileName.length() - 9)), file));
 		}
 		
-		ArrayList<ICategory> categories = new ArrayList<>(categoryData.size());
+		ArrayList<Category> categories = new ArrayList<>(categoryData.size());
 		
 		for (ParseData cData: categoryData) {
-			Category category = new Category(cData.id, cData.file);
+			Category category = new Category(cData.id, cData.file, this);
 			categories.add(category);
 			
-			for (ParseData qData: questData.get(cData.id))
-				new Quest(qData.id, qData.file, category);
+			for (ParseData qData: questData.get(cData.id)) {
+				Quest q = new Quest(qData.id, qData.file, category);
+				category.directAddQuest(q);
+				questMap.putWeak(q.getUnique(), q);
+			}
 		}
 		
-		for (ICategory category: categories) {
-			// Administrative process - bypass events and directly modify data
-			// 99% of the time you should use .getState() and .apply()
-			((Category)category).refreshParent();
+		for (Category category: categories) {
+			category.refreshParent();
 			
-			for (IQuest quest: category.getQuests())
-				((Quest)quest).refreshParent();
+			for (Quest quest: category.getQuests())
+				quest.refreshParent();
+			
+			categoryMap.put(category.getID(), category);
 		}
 	}
 	
 	public void unload() {
-		categories.clear();
+		categoryMap.clear();
+		questMap.clear();
+		missionMap.clear();
 	}
 	
-	public void deleteQuestFile(IQuest quest) {
+	private void deleteQuestFile(IQuest quest) {
 		((Quest)quest).getFile().delete();
 	}
 	
-	public void deleteCategoryFile(ICategory category) {
+	private void deleteCategoryFile(ICategory category) {
 		((Category)category).getFile().delete();
 	}
 	
 	public void save(boolean force) {
-		for(Category c : categories.values()) {
+		for(Category c : categoryMap.values()) {
 			c.save(force);
 		}
 		lastSave = System.currentTimeMillis();
@@ -134,26 +146,35 @@ public class RenderableFacade implements IFacade {
 	
 	@Override
 	public Collection<Category> getCategories() {
-		return categories.values();
+		return categoryMap.values();
 	}
 	
 	@Override
 	public Category getCategory(int id) {
-		return categories.get(id);
+		return categoryMap.get(id);
 	}
 
 	@Override
-	public void registerCategory(ICategory category) {
-		categories.put(category.getID(), (Category)category);
-	}
-
-	@Override
-	public void unregisterCategory(ICategory category) {
-		for (IQuest quest: category.getQuests()) {
-			PlayerManager.clearAllQuestData(quest);
-			deleteQuestFile(quest);
-		}
-		categories.remove(category.getID());
+	public void deleteCategory(ICategory category) {
+		for (IQuest quest: category.getQuests())
+			deleteQuest(quest);
+		
+		categoryMap.remove(category.getID());
 		deleteCategoryFile(category);
+	}
+	
+	@Override
+	public void deleteQuest(IQuest quest) {
+		for(IMission mission : quest.getMissions())
+			deleteMission(mission);
+		
+		PlayerManager.clearAllQuestData(quest);
+		questMap.remove(((Quest)quest).getUnique());
+		deleteQuestFile(quest);
+	}
+	
+	@Override
+	public void deleteMission(IMission mission) {
+		missionMap.remove(((Mission)mission).getUnique());
 	}
 }

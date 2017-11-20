@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 
 import me.mrCookieSlime.QuestWorld.QuestWorldPlugin;
-import me.mrCookieSlime.QuestWorld.api.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategoryState;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
@@ -23,6 +22,7 @@ import org.bukkit.inventory.ItemStack;
 
 class Category extends Renderable implements ICategoryState {
 	private int id;
+	private RenderableFacade facade;
 	private boolean hidden;
 	private String name;
 	private String permission;
@@ -34,33 +34,36 @@ class Category extends Renderable implements ICategoryState {
 	private YamlConfiguration config;
 
 	// External
-	public Category(String name, int id) {
+	public Category(String name, int id, RenderableFacade facade) {
 		this.id = id;
 		this.name = Text.colorize(name);
+		this.facade = facade;
 		config = YamlConfiguration.loadConfiguration(getFile());
 		item = new ItemBuilder(Material.BOOK_AND_QUILL).display(name).get();
 		world_blacklist = new ArrayList<String>();
 		permission = "";
 		hidden = false;
-		
-		QuestWorld.getFacade().registerCategory(this);
 	}
 	
+	protected Category(Category copy) {
+		copy(copy);
+	}
+	
+	@Deprecated
 	public Category(Map<String, Object> data) {
 		loadMap(data);
 	}
 	
 	// Package
-	Category(int id, YamlConfiguration config) {
+	Category(int id, YamlConfiguration config, RenderableFacade facade) {
 		this.id = id;
 		this.config = config;
+		this.facade = facade;
 		name = Text.colorize(config.getString("name"));
 		item = new ItemBuilder(config.getItemStack("item")).display(name).get();
 		hidden = config.getBoolean("hidden");
 		permission = config.getString("permission", "");
 		world_blacklist = config.getStringList("world-blacklist");
-		
-		QuestWorld.getFacade().registerCategory(this);
 	}
 	
 	//// ICategory Impl
@@ -118,25 +121,21 @@ class Category extends Renderable implements ICategoryState {
 
 	//// ICategoryState Impl
 	public void setName(String name) {
-		updateLastModified();
 		this.name = Text.colorize(name);
 		ItemBuilder.edit(this.item).display(name);
 	}
 
 	@Override
 	public void setParent(IQuest quest) {
-		updateLastModified();
 		this.parent = new WeakReference<>((Quest)quest);
 	}
 
 	@Override
 	public void setPermission(String permission) {
-		updateLastModified();
 		this.permission = permission;
 	}
 	
 	public void setHidden(boolean hidden) {
-		updateLastModified();
 		this.hidden = hidden;
 	}
 	
@@ -147,7 +146,7 @@ class Category extends Renderable implements ICategoryState {
 		if (parentId != null) {
 			int[] parts = RenderableFacade.splitQuestString(parentId);
 			
-			Category c = (Category)QuestWorld.getFacade().getCategory(parts[1]);
+			Category c = facade.getCategory(parts[1]);
 			if (c != null)
 				parent = new WeakReference<>(c.getQuest(parts[0]));
 		}
@@ -157,20 +156,25 @@ class Category extends Renderable implements ICategoryState {
 		return new File(QuestWorldPlugin.getPath("data.questing"), id + ".category");
 	}
 	
-	public void addQuest(IQuest quest) {
-		if(quest instanceof QuestState)
-			quests.put(quest.getID(), ((QuestState)quest).getSource());
-		else
-			quests.put(quest.getID(), (Quest)quest);
+	@Override
+	public void addQuest(String name, int id) {
+		quests.put(id, facade.createQuest(name, id, this));
+	}
+	
+	public RenderableFacade getFacade() {
+		return facade;
+	}
+	
+	public void directAddQuest(Quest quest) {
+		quests.put(quest.getID(), quest);
 	}
 	
 	public void removeQuest(IQuest quest) {
 		quests.remove(quest.getID());
-		((Quest)quest).getFile().delete();
 	}
 	
 	public void save(boolean force) {
-		long lastSave = QuestWorld.getFacade().getLastSave();
+		long lastSave = facade.getLastSave();
 		for (Quest quest: quests.values()) {
 			// Forcing save or quest appears changed
 			if(force || lastSave < quest.getLastModified())
@@ -201,7 +205,6 @@ class Category extends Renderable implements ICategoryState {
 	}
 
 	public void setItem(ItemStack item) {
-		updateLastModified();
 		if(name != null)
 			this.item = new ItemBuilder(item).display(name).get();
 		else
@@ -209,7 +212,6 @@ class Category extends Renderable implements ICategoryState {
 	}
 
 	public void toggleWorld(String world) {
-		updateLastModified();
 		if (world_blacklist.contains(world)) world_blacklist.remove(world);
 		else world_blacklist.add(world);
 	}
@@ -224,6 +226,7 @@ class Category extends Renderable implements ICategoryState {
 		return true;
 	}
 	
+	@Deprecated
 	public Map<String, Object> serialize() {
 		HashMap<String, Object> result = new HashMap<>();
 		
@@ -256,6 +259,7 @@ class Category extends Renderable implements ICategoryState {
 		dest.copy(this);
 	}
 	
+	@Deprecated
 	WeakReference<Quest> fancyParentResolveFunction(Integer id) {
 		if(id == null)
 			return null;
@@ -263,6 +267,7 @@ class Category extends Renderable implements ICategoryState {
 		return null;
 	}
 	
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	private void loadMap(Map<String, Object> data) {
 		setUnique((Integer)data.getOrDefault("unique", (int)getUnique()));

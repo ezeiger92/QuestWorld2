@@ -37,6 +37,9 @@ public class PlayerTools {
 	}
 	
 	public static int getMaxCraftAmount(CraftingInventory inv) {
+		if(inv.getResult() == null)
+			return 0;
+		
 		int resultCount = inv.getResult().getAmount();
 		int materialCount = Integer.MAX_VALUE;
 		

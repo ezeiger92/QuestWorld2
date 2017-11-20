@@ -12,7 +12,7 @@ public interface IQuestState extends IQuest {
 	void setItem(ItemStack item);
 	void toggleWorld(String world);
 	void setName(String name);
-	void addMission(IMission mission);
+	void addMission(int id);
 	void removeMission(IMission mission);
 	void setPartySize(int size);
 	void setRawCooldown(long cooldown);

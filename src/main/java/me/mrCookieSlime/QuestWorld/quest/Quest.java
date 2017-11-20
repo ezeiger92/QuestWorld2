@@ -73,8 +73,6 @@ class Quest extends Renderable implements IQuestState {
 		autoclaim      = source.autoclaim;
 		parent         = source.parent;
 		permission     = source.permission;
-
-		updateLastModified();
 	}
 	
 	protected void copyTo(Quest dest) {
@@ -105,8 +103,6 @@ class Quest extends Renderable implements IQuestState {
 		
 		partysize  = config.getInt("min-party-size", 1);
 		permission = config.getString("permission", "");
-		
-		category.addQuest(this);
 	}
 
 	// External
@@ -127,8 +123,6 @@ class Quest extends Renderable implements IQuestState {
 		ordered = false;
 		autoclaim = false;
 		partysize = 1;
-		
-		category.addQuest(this);
 	}
 	
 	public void refreshParent() {
@@ -153,7 +147,7 @@ class Quest extends Renderable implements IQuestState {
 
 		for (String key: missions.getKeys(false)) {
 			// TODO mess
-			QuestState changes = new QuestState(this);
+			//QuestState changes = new QuestState(this);
 			Map<String, Object> data = missions.getConfigurationSection(key).getValues(false);
 			// getValues wont recurse through sections, so we have to manually map to... map
 			data.put("location", ((ConfigurationSection)data.get("location")).getValues(false));
@@ -163,8 +157,9 @@ class Quest extends Renderable implements IQuestState {
 				
 			Mission m = new Mission(data);
 			m.sanitize();
-			changes.addMission(m);
-			changes.apply();
+			directAddMission(m);
+			//changes.directAddMission(m);
+			//changes.apply();
 		}
 	}
 	
@@ -243,7 +238,6 @@ class Quest extends Renderable implements IQuestState {
 	}
 	
 	public void setItemRewards(Player p) {
-		updateLastModified();
 		rewards.clear();
 		for (int i = 0; i < 9; i++) {
 			ItemStack item = p.getInventory().getItem(i);
@@ -252,12 +246,10 @@ class Quest extends Renderable implements IQuestState {
 	}
 
 	public void setItem(ItemStack item) {
-		updateLastModified();
 		this.item = new ItemBuilder(item).display(name).get();
 	}
 
 	public void toggleWorld(String world) {
-		updateLastModified();
 		if (world_blacklist.contains(world)) world_blacklist.remove(world);
 		else world_blacklist.add(world);
 	}
@@ -268,7 +260,6 @@ class Quest extends Renderable implements IQuestState {
 	}
 
 	public void setName(String name) {
-		updateLastModified();
 		this.name = Text.colorize(name);
 		ItemBuilder.edit(this.item).display(name);
 	}
@@ -281,16 +272,15 @@ class Quest extends Renderable implements IQuestState {
 		return tasks.size() > i ? tasks.get(i): null;
 	}
 	
-	public void addMission(IMission mission) {
-		updateLastModified();
-		if(mission instanceof MissionState)
-			tasks.add(((MissionState)mission).getSource());
-		else
-			tasks.add((Mission)mission);
+	public void addMission(int index) {
+		tasks.add(getCategory().getFacade().createMission(index, this));
+	}
+	
+	public void directAddMission(Mission m) {
+		tasks.add(m);
 	}
 	
 	public void removeMission(IMission mission) {
-		updateLastModified();
 		if(mission instanceof MissionState)
 			tasks.remove(((MissionState)mission).getSource());
 		else
@@ -298,7 +288,6 @@ class Quest extends Renderable implements IQuestState {
 	}
 	
 	public void setPartySize(int size) {
-		updateLastModified();
 		partysize = size;
 	}
 
@@ -307,7 +296,6 @@ class Quest extends Renderable implements IQuestState {
 	}
 	
 	public void setRawCooldown(long cooldown) {
-		updateLastModified();
 		this.cooldown = cooldown;
 	}
 	
@@ -316,7 +304,6 @@ class Quest extends Renderable implements IQuestState {
 	}
 
 	public void setCooldown(long cooldown) {
-		updateLastModified();
 		this.cooldown = cooldown * 60 * 1000;
 	}
 	
@@ -333,12 +320,10 @@ class Quest extends Renderable implements IQuestState {
 	}
 	
 	public void setMoney(int money) {
-		updateLastModified();
 		this.money = money;
 	}
 	
 	public void setXP(int xp) {
-		updateLastModified();
 		this.xp = xp;
 	}
 	
@@ -375,7 +360,6 @@ class Quest extends Renderable implements IQuestState {
 
 	@Override
 	public void setParent(IQuest quest) {
-		updateLastModified();
 		Quest parent;
 		if(quest instanceof QuestState)
 			parent = ((QuestState)quest).getSource();
@@ -390,12 +374,10 @@ class Quest extends Renderable implements IQuestState {
 	}
 
 	public void removeCommand(int i) {
-		updateLastModified();
 		commands.remove(i);
 	}
 
 	public void addCommand(String command) {
-		updateLastModified();
 		commands.add(command);
 	}
 
@@ -406,7 +388,6 @@ class Quest extends Renderable implements IQuestState {
 
 	@Override
 	public void setPermission(String permission) {
-		updateLastModified();
 		this.permission = permission;
 	}
 
@@ -415,7 +396,6 @@ class Quest extends Renderable implements IQuestState {
 	}
 
 	public void setPartySupport(boolean partySupport) {
-		updateLastModified();
 		this.partySupport = partySupport;
 	}
 
@@ -424,7 +404,6 @@ class Quest extends Renderable implements IQuestState {
 	}
 
 	public void setOrdered(boolean ordered) {
-		updateLastModified();
 		this.ordered = ordered;
 	}
 
@@ -433,7 +412,6 @@ class Quest extends Renderable implements IQuestState {
 	}
 
 	public void setAutoClaim(boolean autoclaim) {
-		updateLastModified();
 		this.autoclaim = autoclaim;
 	}
 
@@ -466,14 +444,17 @@ class Quest extends Renderable implements IQuestState {
 		return true;
 	}
 	
+	@Deprecated
 	Quest(Map<String, Object> data) {
 		loadMap(data);
 	}
 	
+	@Deprecated
 	public Map<String, Object> serialize() {
 		return null;
 	}
 	
+	@Deprecated
 	private void loadMap(Map<String, Object> data) {
 		
 	}

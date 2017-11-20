@@ -14,6 +14,7 @@ import java.util.UUID;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.PlayerDeathEvent;
@@ -51,7 +52,7 @@ public class PlayerListener implements Listener {
 		}
 	}
 	
-	@EventHandler
+	@EventHandler(priority=EventPriority.LOWEST)
 	public void onJoin(PlayerJoinEvent e) {
 		final UUID uuid = e.getPlayer().getUniqueId();
 		e.getPlayer().setMetadata("questworld.playermanager", new LazyMetadataValue(QuestWorld.getPlugin(), () ->
