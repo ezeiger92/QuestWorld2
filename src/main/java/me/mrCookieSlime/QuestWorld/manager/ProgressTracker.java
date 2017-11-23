@@ -156,15 +156,12 @@ public class ProgressTracker {
 	public static void loadDialogue(IMissionState mission) {
 		File file = dialogueFile(mission);
 		if (file.exists()) {
-			//IMissionState state = mission.getState();
 			try {
 				mission.setDialogue(Files.readAllLines(file.toPath(), StandardCharsets.UTF_8));
 			} catch (IOException e) {
 				e.printStackTrace();
 				return;
 			}
-			
-			//state.apply();
 		}
 	}
 	

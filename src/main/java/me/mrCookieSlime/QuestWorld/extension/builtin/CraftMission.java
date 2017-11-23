@@ -25,7 +25,7 @@ public class CraftMission extends MissionType implements Listener, Decaying {
 	
 	@Override
 	public ItemStack userDisplayItem(IMission instance) {
-		return instance.getMissionItem();
+		return instance.getItem();
 	}
 	
 	@Override
@@ -84,7 +84,7 @@ public class CraftMission extends MissionType implements Listener, Decaying {
 		Player player = (Player)e.getWhoClicked();
 		
 		for(MissionSet.Result r : MissionSet.of(this, player))
-			if(ItemBuilder.compareItems(test, r.getMission().getMissionItem()))
+			if(ItemBuilder.compareItems(test, r.getMission().getItem()))
 				r.addProgress(test.getAmount());
 	}
 	

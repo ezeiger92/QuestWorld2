@@ -42,7 +42,7 @@ public class PlayerListener implements Listener {
 		for(IMission task : QuestWorld.getViewer().getDecayingMissions()) {
 			IQuest quest = task.getQuest();
 			if (!manager.getStatus(quest).equals(QuestStatus.AVAILABLE)
-					|| !quest.isWorldEnabled(worldName)
+					|| !quest.getWorldEnabled(worldName)
 					|| !quest.getCategory().isWorldEnabled(worldName))
 				continue;
 			

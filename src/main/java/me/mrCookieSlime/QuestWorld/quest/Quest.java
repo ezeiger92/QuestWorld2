@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -215,7 +216,7 @@ class Quest extends Renderable implements IQuestState {
 	}
 
 	public List<Mission> getMissions() {
-		return tasks;
+		return Collections.unmodifiableList(tasks);
 	}
 	
 	private List<ItemStack> loadRewards() {
@@ -399,7 +400,7 @@ class Quest extends Renderable implements IQuestState {
 		this.partySupport = partySupport;
 	}
 
-	public boolean isOrdered() {
+	public boolean getOrdered() {
 		return ordered;
 	}
 
@@ -407,7 +408,7 @@ class Quest extends Renderable implements IQuestState {
 		this.ordered = ordered;
 	}
 
-	public boolean isAutoClaiming() {
+	public boolean getAutoClaimed() {
 		return autoclaim;
 	}
 
@@ -415,7 +416,7 @@ class Quest extends Renderable implements IQuestState {
 		this.autoclaim = autoclaim;
 	}
 
-	public boolean isWorldEnabled(String world) {
+	public boolean getWorldEnabled(String world) {
 		return !world_blacklist.contains(world);
 	}
 	

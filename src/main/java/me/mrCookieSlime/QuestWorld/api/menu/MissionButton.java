@@ -23,7 +23,7 @@ import me.mrCookieSlime.QuestWorld.util.Text;
 public class MissionButton {
 	public static MenuData item(IMissionState changes) {
 		return simpleButton(changes,
-				new ItemBuilder(changes.getMissionItem()).lore(
+				new ItemBuilder(changes.getItem()).lore(
 						"",
 						"&e> Click to change the Item to",
 						"&ethe Item you are currently holding").get(),
@@ -162,12 +162,12 @@ public class MissionButton {
 	public static MenuData deathReset(IMissionState changes) {
 		return simpleButton(changes,
 				new ItemBuilder(Material.SKULL_ITEM)
-				.display("&7Resets on Death: " + (changes.resetsonDeath() ? "&2&l\u2714": "&4&l\u2718")).lore(
+				.display("&7Resets on Death: " + (changes.getDeathReset() ? "&2&l\u2714": "&4&l\u2718")).lore(
 						"",
 						"&e> Click to change whether this Mission's Progress",
 						"&eresets when a Player dies").get(),
 				event -> {
-					changes.setDeathReset(!changes.resetsonDeath());
+					changes.setDeathReset(!changes.getDeathReset());
 				}
 		);
 	}
@@ -175,12 +175,12 @@ public class MissionButton {
 	public static MenuData spawnersAllowed(IMissionState changes) {
 		return simpleButton(changes,
 				new ItemBuilder(Material.MOB_SPAWNER)
-				.display("&7Allow Mobs from Spawners: " + (changes.acceptsSpawners() ? "&2&l\u2714": "&4&l\u2718")).lore(
+				.display("&7Allow Mobs from Spawners: " + (changes.getSpawnerSupport() ? "&2&l\u2714": "&4&l\u2718")).lore(
 						"",
 						"&e> Click to change whether this Mission will",
 						"&ealso count Mobs which were spawned by a Mob Spawner").get(),
 				event -> {
-					changes.setSpawnerSupport(!changes.acceptsSpawners());
+					changes.setSpawnerSupport(!changes.getSpawnerSupport());
 				}
 		);
 	}

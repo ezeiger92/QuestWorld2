@@ -1,7 +1,5 @@
 package me.mrCookieSlime.QuestWorld.quest;
 
-import java.util.List;
-
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -20,61 +18,10 @@ class QuestState extends Quest {
 		setUnique(copy.getUnique());
 		origin = copy;
 	}
-	
-	public boolean hasChange(Member field) {
-		return (changeBits & BitFlag.getBits(field)) != 0;
-	}
-
-	/**
-	 * Get a list representing the members changed in this Quest
-	 * 
-	 * @return Member enum list
-	 */
-	public List<Member> getChanges() {
-		return BitFlag.getFlags(Member.values(), changeBits);
-	}
-	
-	/**
-	 * Get the quest these changes apply to
-	 * 
-	 * @return Origin quest
-	 */
-	public Quest getSource() {
-		return origin;
-	}
-	
-	/**
-	 * Applies all changes held by this object to the original quest
-	 */
-	@Override
-	public boolean apply() {
-		if(sendEvent()) {
-			copyTo(origin);
-			origin.updateLastModified();
-			changeBits = 0;
-			return true;
-		}
-		return false;
-	}
 
 	@Override
-	public boolean discard() {
-		if(changeBits != 0) {
-			copy(origin);
-			changeBits = 0;
-			return true;
-		}
-		return false;
-	}
-	
-	/**
-	 * Fires a QuestChangeEvent
-	 * 
-	 * @see QuestChangeEvent
-	 * @return false if the event is cancelled, otherwise true
-	 */
-	public boolean sendEvent() {
-		return CancellableEvent.send(new QuestChangeEvent(this));
+	public QuestState getState() {
+		return this;
 	}
 	
 	// Modify "setX" methods
@@ -185,9 +132,53 @@ class QuestState extends Quest {
 		super.setAutoClaim(autoclaim);
 		changeBits |= BitFlag.getBits(Member.AUTOCLAIM);
 	}
+	
+	/**
+	 * Applies all changes held by this object to the original quest
+	 */
+	@Override
+	public boolean apply() {
+		if(sendEvent()) {
+			copyTo(origin);
+			origin.updateLastModified();
+			changeBits = 0;
+			return true;
+		}
+		return false;
+	}
 
 	@Override
-	public QuestState getState() {
-		return this;
+	public boolean discard() {
+		if(changeBits != 0) {
+			copy(origin);
+			changeBits = 0;
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * Get the quest these changes apply to
+	 * 
+	 * @return Origin quest
+	 */
+	@Override
+	public Quest getSource() {
+		return origin;
+	}
+	
+	@Override
+	public boolean hasChange(Member field) {
+		return (changeBits & BitFlag.getBits(field)) != 0;
+	}
+	
+	/**
+	 * Fires a QuestChangeEvent
+	 * 
+	 * @see QuestChangeEvent
+	 * @return false if the event is cancelled, otherwise true
+	 */
+	public boolean sendEvent() {
+		return changeBits != 0 && CancellableEvent.send(new QuestChangeEvent(this));
 	}
 }

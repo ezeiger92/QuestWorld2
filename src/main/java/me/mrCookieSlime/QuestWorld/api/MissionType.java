@@ -44,7 +44,7 @@ public abstract class MissionType {
 	}
 	
 	private String formatDeathReset(IMission instance) {
-		if(!instance.resetsonDeath() || !supportsDeathReset())
+		if(!instance.getDeathReset() || !supportsDeathReset())
 			return "";
 		
 		return " &7without dying";

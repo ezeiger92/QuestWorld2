@@ -20,7 +20,7 @@ public class DetectMission extends MissionType implements Ticking {
 	
 	@Override
 	public ItemStack userDisplayItem(IMission instance) {
-		return instance.getMissionItem();
+		return instance.getItem();
 	}
 	
 	@Override
@@ -34,7 +34,7 @@ public class DetectMission extends MissionType implements Ticking {
 		int amount = 0;
 		for (int i = 0; i < 36; i++) {
 			ItemStack current = p.getInventory().getItem(i);
-			if (ItemBuilder.compareItems(current, mission.getMissionItem()))
+			if (ItemBuilder.compareItems(current, mission.getItem()))
 				amount = amount + current.getAmount();
 		}
 		

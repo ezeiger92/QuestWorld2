@@ -26,7 +26,7 @@ public class MineMission extends MissionType implements Listener, Decaying {
 	
 	@Override
 	public ItemStack userDisplayItem(IMission instance) {
-		return instance.getMissionItem();
+		return instance.getItem();
 	}
 	
 	@Override
@@ -37,7 +37,7 @@ public class MineMission extends MissionType implements Listener, Decaying {
 	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
 	public void onMine(BlockBreakEvent e) {
 		for(MissionSet.Result r : MissionSet.of(this, e.getPlayer()))
-			if(PlayerTools.getStackOf(e.getBlock()).isSimilar(r.getMission().getMissionItem()))
+			if(PlayerTools.getStackOf(e.getBlock()).isSimilar(r.getMission().getItem()))
 				r.addProgress(1);
 	}
 	

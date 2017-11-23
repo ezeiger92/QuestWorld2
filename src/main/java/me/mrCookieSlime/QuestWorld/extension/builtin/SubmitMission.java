@@ -20,7 +20,7 @@ public class SubmitMission extends MissionType implements Manual {
 	
 	@Override
 	public ItemStack userDisplayItem(IMission instance) {
-		return instance.getMissionItem();
+		return instance.getItem();
 	}
 	
 	@Override
@@ -33,7 +33,7 @@ public class SubmitMission extends MissionType implements Manual {
 		IMission mission = result.getMission();
 		int found = result.getRemaining();
 		
-		ItemStack search = mission.getMissionItem();
+		ItemStack search = mission.getItem();
 		search.setAmount(found);
 		
 		ItemStack missing = p.getInventory().removeItem(search).get(0);

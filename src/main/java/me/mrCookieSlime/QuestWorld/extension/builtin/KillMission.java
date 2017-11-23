@@ -31,7 +31,7 @@ public class KillMission extends MissionType implements Listener, Decaying {
 	@Override
 	protected String userInstanceDescription(IMission instance) {
 		String type = Text.niceName(instance.getEntity().toString());
-		return "&7Kill " + instance.getAmount() + "x " + (!instance.acceptsSpawners() ? "naturally spawned " : "") + type;
+		return "&7Kill " + instance.getAmount() + "x " + (!instance.getSpawnerSupport() ? "naturally spawned " : "") + type;
 	}
 	
 	@EventHandler
@@ -43,7 +43,7 @@ public class KillMission extends MissionType implements Listener, Decaying {
 		for(MissionSet.Result r : MissionSet.of(this, killer)) {
 			IMission mission = r.getMission();
 			if(mission.getEntity() == e.getEntityType()
-				&& (mission.acceptsSpawners() || !EntityTools.isFromSpawner(e.getEntity())))
+				&& (mission.getSpawnerSupport() || !EntityTools.isFromSpawner(e.getEntity())))
 				r.addProgress(1);
 		}
 	}

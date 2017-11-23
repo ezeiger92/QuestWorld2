@@ -22,12 +22,93 @@ class MissionState extends Mission {
 		origin = source;
 	}
 	
-	public boolean hasChange(Member field) {
-		return (changeBits & BitFlag.getBits(field)) != 0;
+	@Override
+	public MissionState getState() {
+		return this;
 	}
 	
-	public Mission getSource() {
-		return origin;
+	//// IMissionWrite
+	@Override
+	public void setAmount(int amount) {
+		super.setAmount(amount);
+		changeBits |= BitFlag.getBits(Member.AMOUNT);
+	}
+
+	@Override
+	public void setCustomInt(int val) {
+		super.setCustomInt(val);
+		changeBits |= BitFlag.getBits(Member.CUSTOM_INT);
+	}
+
+	@Override
+	public void setCustomString(String customString) {
+		super.setCustomString(customString);
+		changeBits |= BitFlag.getBits(Member.CUSTOM_STRING);
+	}
+
+	@Override
+	public void setDeathReset(boolean deathReset) {
+		super.setDeathReset(deathReset);
+		changeBits |= BitFlag.getBits(Member.DEATH_RESET);
+	}
+
+	@Override
+	public void setDescription(String description) {
+		super.setDescription(description);
+		changeBits |= BitFlag.getBits(Member.DESCRIPTION);
+	}
+	
+	@Override
+	public void setDialogue(List<String> dialogue) {
+		super.setDialogue(dialogue);
+		changeBits |= BitFlag.getBits(Member.DIALOGUE);
+	}
+	
+	@Override
+	public void setDisplayName(String name) {
+		super.setDisplayName(name);
+		changeBits |= BitFlag.getBits(Member.CUSTOM_STRING);
+	}
+
+	@Override
+	public void setEntity(EntityType entity) {
+		super.setEntity(entity);
+		changeBits |= BitFlag.getBits(Member.ENTITY);
+	}
+	
+	@Override
+	public void setItem(ItemStack item) {
+		super.setItem(item);
+		changeBits |= BitFlag.getBits(Member.ITEM);
+	}
+	
+	@Override
+	public void setLocation(Location loc) {
+		super.setLocation(loc);
+		changeBits |= BitFlag.getBits(Member.LOCATION);
+	}
+
+	@Override
+	public void setSpawnerSupport(boolean acceptsSpawners) {
+		super.setSpawnerSupport(acceptsSpawners);
+		changeBits |= BitFlag.getBits(Member.SPAWNER_SUPPORT);
+	}
+
+	@Override
+	public void setTimeframe(int timeframe) {
+		super.setTimeframe(timeframe);
+		changeBits |= BitFlag.getBits(Member.TIMEFRAME);
+	}
+
+	@Override
+	public void setType(MissionType type) {
+		// TODO RIP migrateFrom
+		if(true) {
+			loadDefaults();
+			changeBits |= BitString.ALL;
+		}
+		super.setType(type);
+		changeBits |= BitFlag.getBits(Member.TYPE);
 	}
 	
 	@Override
@@ -52,99 +133,17 @@ class MissionState extends Mission {
 		return false;
 	}
 	
+	@Override
+	public Mission getSource() {
+		return origin;
+	}
+	
+	@Override
+	public boolean hasChange(Member field) {
+		return (changeBits & BitFlag.getBits(field)) != 0;
+	}
+	
 	private boolean sendEvent() {
-		if(changeBits == 0)
-			return false;
-		
-		return CancellableEvent.send(new MissionChangeEvent(this));
-	}
-	
-	// Modify "setX" methods
-	@Override
-	public void setItem(ItemStack item) {
-		super.setItem(item);
-		changeBits |= BitFlag.getBits(Member.ITEM);
-	}
-
-	@Override
-	public void setEntity(EntityType entity) {
-		super.setEntity(entity);
-		changeBits |= BitFlag.getBits(Member.ENTITY);
-	}
-
-	@Override
-	public void setCustomString(String customString) {
-		super.setCustomString(customString);
-		changeBits |= BitFlag.getBits(Member.NAME);
-	}
-
-	@Override
-	public void setType(MissionType type) {
-		// TODO RIP migrateFrom
-		if(true) {
-			loadDefaults();
-			changeBits |= BitString.ALL;
-		}
-		super.setType(type);
-		changeBits |= BitFlag.getBits(Member.TYPE);
-	}
-
-	@Override
-	public void setAmount(int amount) {
-		super.setAmount(amount);
-		changeBits |= BitFlag.getBits(Member.AMOUNT);
-	}
-	
-	@Override
-	public void setLocation(Location loc) {
-		super.setLocation(loc);
-		changeBits |= BitFlag.getBits(Member.LOCATION);
-	}
-	
-	@Override
-	public void setDisplayName(String name) {
-		super.setDisplayName(name);
-		changeBits |= BitFlag.getBits(Member.NAME);
-	}
-
-	@Override
-	public void setTimeframe(int timeframe) {
-		super.setTimeframe(timeframe);
-		changeBits |= BitFlag.getBits(Member.TIMEFRAME);
-	}
-
-	@Override
-	public void setDeathReset(boolean deathReset) {
-		super.setDeathReset(deathReset);
-		changeBits |= BitFlag.getBits(Member.DEATH_RESET);
-	}
-
-	@Override
-	public void setDescription(String description) {
-		super.setDescription(description);
-		changeBits |= BitFlag.getBits(Member.LORE);
-	}
-
-	@Override
-	public void setCustomInt(int val) {
-		super.setCustomInt(val);
-		changeBits |= BitFlag.getBits(Member.CUSTOM_INT);
-	}
-
-	@Override
-	public void setSpawnerSupport(boolean acceptsSpawners) {
-		super.setSpawnerSupport(acceptsSpawners);
-		changeBits |= BitFlag.getBits(Member.SPAWNERS_ALLOWED);
-	}
-	
-	@Override
-	public void setDialogue(List<String> dialgoue) {
-		
-		changeBits |= BitFlag.getBits(Member.DIALOGUE);
-	}
-	
-	@Override
-	public MissionState getState() {
-		return this;
+		return changeBits != 0 && CancellableEvent.send(new MissionChangeEvent(this));
 	}
 }

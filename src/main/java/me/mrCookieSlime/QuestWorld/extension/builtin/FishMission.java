@@ -23,7 +23,7 @@ public class FishMission extends MissionType implements Listener, Decaying {
 	
 	@Override
 	public ItemStack userDisplayItem(IMission instance) {
-		return instance.getMissionItem();
+		return instance.getItem();
 	}
 	
 	@Override
@@ -38,7 +38,7 @@ public class FishMission extends MissionType implements Listener, Decaying {
 		ItemStack caught = ((Item)e.getCaught()).getItemStack();
 
 		for(MissionSet.Result r : MissionSet.of(this, e.getPlayer()))
-			if(ItemBuilder.compareItems(caught, r.getMission().getMissionItem()))
+			if(ItemBuilder.compareItems(caught, r.getMission().getItem()))
 				r.addProgress(caught.getAmount());
 	}
 	

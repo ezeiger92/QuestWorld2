@@ -290,7 +290,7 @@ public class QuestBook {
 		
 		for (final IQuest quest: category.getQuests()) {
 			glassPane.display(quest.getName());
-			if (manager.getStatus(quest).equals(QuestStatus.LOCKED) || !quest.isWorldEnabled(p.getWorld().getName())) {
+			if (manager.getStatus(quest).equals(QuestStatus.LOCKED) || !quest.getWorldEnabled(p.getWorld().getName())) {
 				view.addButton(quest.getID(), glassPane.lore("", QuestWorld.translate(Translation.quests_locked)).getNew(),
 						null, false);
 			}
@@ -359,7 +359,7 @@ public class QuestBook {
 					PlayerManager manager2 = PlayerManager.of(p2);
 					for(IMission mission : quest.getMissions()) {
 						if (!manager2.hasUnlockedTask(mission)) continue;
-						if (manager2.getStatus(quest).equals(QuestStatus.AVAILABLE) && quest.isWorldEnabled(p2.getWorld().getName())) {
+						if (manager2.getStatus(quest).equals(QuestStatus.AVAILABLE) && quest.getWorldEnabled(p2.getWorld().getName())) {
 							if (manager2.hasCompletedTask(mission)) continue;
 							
 							if(mission.getType() instanceof Manual) {
@@ -435,7 +435,7 @@ public class QuestBook {
 				PlayerManager manager2 = PlayerManager.of(p2);
 				
 				if (!manager2.hasUnlockedTask(mission)) return;
-				if (manager2.getStatus(quest).equals(QuestStatus.AVAILABLE) && quest.isWorldEnabled(p2.getWorld().getName())) {
+				if (manager2.getStatus(quest).equals(QuestStatus.AVAILABLE) && quest.getWorldEnabled(p2.getWorld().getName())) {
 					if (manager2.hasCompletedTask(mission)) return;
 					
 					if(mission.getType() instanceof Manual) {
@@ -947,12 +947,12 @@ public class QuestBook {
 		
 		menu.put(19,
 				new ItemBuilder(Material.COMMAND)
-				.display("&rOrdered Completion Mode: " + (quest.isOrdered() ? "&2&l\u2714": "&4&l\u2718")).lore(
+				.display("&rOrdered Completion Mode: " + (quest.getOrdered() ? "&2&l\u2714": "&4&l\u2718")).lore(
 						"",
 						"&e> Click to change whether this Quest's Tasks",
 						"&ehave to be done in the Order they are arranged").get(),
 				event -> {
-					changes.setOrdered(!quest.isOrdered());
+					changes.setOrdered(!quest.getOrdered());
 					changes.apply();
 					openQuestEditor((Player) event.getWhoClicked(), quest);
 				}
@@ -960,13 +960,13 @@ public class QuestBook {
 		
 		menu.put(20,
 				new ItemBuilder(Material.CHEST)
-				.display("&rAuto-Claim Rewards: " + (quest.isAutoClaiming() ? "&2&l\u2714": "&4&l\u2718")).lore(
+				.display("&rAuto-Claim Rewards: " + (quest.getAutoClaimed() ? "&2&l\u2714": "&4&l\u2718")).lore(
 						"",
 						"&e> Click to change whether this Quest's Rewards",
 						"&ewill be automatically given or have to be",
 						"&eclaimed manually").get(),
 				event -> {
-					changes.setAutoClaim(!changes.isAutoClaiming());
+					changes.setAutoClaim(!changes.getAutoClaimed());
 					changes.apply();
 					openQuestEditor((Player) event.getWhoClicked(), quest);
 				}
@@ -1069,7 +1069,7 @@ public class QuestBook {
 		for (final World world: Bukkit.getWorlds()) {
 			menu.put(index,
 					new ItemBuilder(Material.GRASS)
-					.display("&r" + world.getName() + ": " + (quest.isWorldEnabled(world.getName()) ? "&2&l\u2714": "&4&l\u2718")).get(),
+					.display("&r" + world.getName() + ": " + (quest.getWorldEnabled(world.getName()) ? "&2&l\u2714": "&4&l\u2718")).get(),
 					event -> {
 						IQuestState changes = quest.getState();
 						changes.toggleWorld(world.getName());

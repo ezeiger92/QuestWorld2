@@ -20,18 +20,18 @@ public interface IQuest extends IStateful {
 	int getMoney();
 	int getPartySize();
 	int getXP();
-	IQuest getParent();
 	List<String> getCommands();
 	boolean supportsParties();
-	boolean isOrdered();
-	boolean isAutoClaiming();
-	boolean isWorldEnabled(String world);
+	boolean getOrdered();
+	boolean getAutoClaimed();
+	boolean getWorldEnabled(String world);
 	String getFormattedCooldown();
 	String getPermission();
-	
+
+	IQuest getParent();
 	String getName();
 	
 	void handoutReward(Player p);
-	
+	@Override
 	IQuestState getState();
 }

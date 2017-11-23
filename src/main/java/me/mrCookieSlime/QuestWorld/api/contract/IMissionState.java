@@ -23,29 +23,29 @@ public interface IMissionState extends IMission {
 	void setItem(ItemStack item);
 	void setLocation(Location loc);
 	void setSpawnerSupport(boolean acceptsSpawners);
-	void setType(MissionType type);
 	void setTimeframe(int timeframe);
+	void setType(MissionType type);
 
 	boolean  apply();
 	boolean  discard();
-	IMission getSource();
 	boolean  hasChange(Member field);
+	IMission getSource();
 	
 	public enum Member implements BitString {
 		QUEST,
-		TYPE,
-		ITEM,
 		AMOUNT,
-		ID,
-		ENTITY,
-		LOCATION,
-		NAME,
-		DISPLAY_NAME,
-		TIMEFRAME,
-		DEATH_RESET,
-		LORE,
+		CUSTOM_STRING,
 		CUSTOM_INT,
-		SPAWNERS_ALLOWED,
+		DEATH_RESET,
+		DESCRIPTION,
 		DIALOGUE,
+		DISPLAY_NAME,
+		ENTITY,
+		ITEM,
+		INDEX,
+		LOCATION,
+		SPAWNER_SUPPORT,
+		TYPE,
+		TIMEFRAME,
 	}
 }

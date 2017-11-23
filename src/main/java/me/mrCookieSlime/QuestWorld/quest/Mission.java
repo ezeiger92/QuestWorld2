@@ -19,22 +19,21 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
 
 class Mission extends Renderable implements IMissionState {
-
 	private WeakReference<Quest> quest;
-	private boolean     spawnersAllowed = true;
 	private int         amount = 1;
 	private int         customInt = 0;
 	private String      customString = "";
+	private boolean     deathReset = false;
 	private String      description = "Hey there! Do this Quest.";
+	private ArrayList<String> dialogue = new ArrayList<>();
 	private String      displayName = "";
 	private EntityType  entity = EntityType.PLAYER;
+	private ItemStack   item = new ItemStack(Material.STONE);
 	private int         index = -1;
 	private Location    location = Bukkit.getWorlds().get(0).getSpawnLocation();
-	private ItemStack   item = new ItemStack(Material.STONE);
+	private boolean     spawnerSupport = true;
 	private int         timeframe = 0;
 	private MissionType type = QuestWorld.getMissionType("SUBMIT");
-	private boolean     deathReset = false;
-	private ArrayList<String> dialogue = new ArrayList<>();
 
 	public Mission(int menuIndex, Quest quest) {
 		this.index = menuIndex;
@@ -57,11 +56,7 @@ class Mission extends Renderable implements IMissionState {
 		changes.apply();
 	}
 
-	@Override
-	public boolean acceptsSpawners() {
-		return spawnersAllowed;
-	}
-
+	//// IMission
 	@Override
 	public int getAmount() {
 		return amount;
@@ -109,13 +104,18 @@ class Mission extends Renderable implements IMissionState {
 	}
 	
 	@Override
-	public ItemStack getMissionItem() {
+	public ItemStack getItem() {
 		return item.clone();
 	}
 	
 	@Override
 	public Quest getQuest() {
 		return quest.get();
+	}
+	
+	@Override
+	public boolean getSpawnerSupport() {
+		return spawnerSupport;
 	}
 	
 	@Override
@@ -129,7 +129,7 @@ class Mission extends Renderable implements IMissionState {
 	}
 
 	@Override
-	public boolean resetsonDeath() {
+	public boolean getDeathReset() {
 		return deathReset;
 	}
 
@@ -168,7 +168,7 @@ class Mission extends Renderable implements IMissionState {
 		result.put("reset-on-death", deathReset);
 		result.put("lore",           Text.escape(description));
 		result.put("custom_int",     customInt);
-		result.put("exclude-spawners", !spawnersAllowed);
+		result.put("exclude-spawners", !spawnerSupport);
 		
 		return result;
 	}
@@ -227,7 +227,7 @@ class Mission extends Renderable implements IMissionState {
 
 	@Override
 	public void setSpawnerSupport(boolean acceptsSpawners) {
-		spawnersAllowed = acceptsSpawners;
+		spawnerSupport = acceptsSpawners;
 	}
 
 	@Override
@@ -271,7 +271,7 @@ class Mission extends Renderable implements IMissionState {
 	protected void copy(Mission source) {
 		setUnique(source.getUnique());
 		quest = source.quest;
-		spawnersAllowed = source.spawnersAllowed;
+		spawnerSupport = source.spawnerSupport;
 		amount = source.amount;
 		customString = source.customString;
 		description = source.description;
@@ -316,7 +316,7 @@ class Mission extends Renderable implements IMissionState {
 		// Chain to handle old name
 		customInt    = (Integer)data.getOrDefault("citizen", customInt);
 		customInt    = (Integer)data.getOrDefault("custom_int", customInt);
-		spawnersAllowed = !(Boolean)data.getOrDefault("exclude-spawners", !spawnersAllowed);
+		spawnerSupport = !(Boolean)data.getOrDefault("exclude-spawners", !spawnerSupport);
 	}
 	
 	private static Location locationHelper(Map<String, Object> data) {

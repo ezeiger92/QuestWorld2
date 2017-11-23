@@ -11,23 +11,24 @@ import me.mrCookieSlime.QuestWorld.api.annotation.NoImpl;
 
 @NoImpl
 public interface IMission extends IStateful {
-	boolean acceptsSpawners();
 	int          getAmount();
 	int          getCustomInt();
 	String       getCustomString();
+	boolean      getDeathReset();
 	String       getDescription();
 	List<String> getDialogue();
 	String       getDisplayName();
 	EntityType   getEntity();
-	int          getIndex();
+	ItemStack    getItem();
 	Location     getLocation();
-	ItemStack    getMissionItem();
-	IQuest       getQuest();
+	boolean      getSpawnerSupport();
 	int          getTimeframe();
 	MissionType  getType();
-	boolean      resetsonDeath();
 
+	int          getIndex();
+	IQuest       getQuest();
 	ItemStack     getDisplayItem();
+	
 	@Override
 	IMissionState getState();
 	String        getText();

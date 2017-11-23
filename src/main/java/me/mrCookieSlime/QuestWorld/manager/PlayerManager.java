@@ -99,7 +99,7 @@ public class PlayerManager {
 		for(IMission task : QuestWorld.getViewer().getMissionsOf(type)) {
 			IQuest quest = task.getQuest();	
 			
-			if (quest.getCategory().isWorldEnabled(worldName) && quest.isWorldEnabled(worldName)
+			if (quest.getCategory().isWorldEnabled(worldName) && quest.getWorldEnabled(worldName)
 				&& !hasCompletedTask(task) && hasUnlockedTask(task)
 				&& getStatus(quest).equals(QuestStatus.AVAILABLE))
 				result.add(task);
@@ -172,7 +172,7 @@ public class PlayerManager {
 					if (finished) {
 						tracker.setQuestFinished(quest, true);
 						
-						if (!quest.isAutoClaiming() || p == null)
+						if (!quest.getAutoClaimed() || p == null)
 							tracker.setQuestStatus(quest, QuestStatus.REWARD_CLAIMABLE);
 						else {
 							// TODO manually handout and complete... reconsider
@@ -207,7 +207,7 @@ public class PlayerManager {
 	}
 
 	public boolean hasUnlockedTask(IMission task) {
-		if (!task.getQuest().isOrdered()) return true;
+		if (!task.getQuest().getOrdered()) return true;
 		
 		List<? extends IMission> tasks = task.getQuest().getMissions();
 		int index = tasks.indexOf(task) - 1;

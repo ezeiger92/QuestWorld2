@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -101,7 +102,7 @@ class Category extends Renderable implements ICategoryState {
 	
 	@Override
 	public Collection<Quest> getQuests() {
-		return quests.values();
+		return Collections.unmodifiableCollection(quests.values());
 	}
 
 	@Override
