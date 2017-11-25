@@ -61,7 +61,8 @@ public class QuestBook {
 						int finishedCount = manager.getProgress(category);
 						view.addButton(category.getID(),
 								// TODO: wrapText
-								new ItemBuilder(category.getItem()).lore(
+								new ItemBuilder(category.getItem()).wrapText(
+										category.getName() + "\n" + 
 										QuestWorld.translate(Translation.CATEGORY_DESC,
 												String.valueOf(questCount),
 												String.valueOf(finishedCount),
@@ -72,7 +73,7 @@ public class QuestBook {
 										).split("\n")).get(),
 								event -> {
 									Player p2 = (Player) event.getWhoClicked();
-									PlayerManager.of(p2).putPage(0);
+									PagedMapping.putPage(p2, 0);
 									openCategory(p2, category, true);
 								}, true
 						);
@@ -650,7 +651,7 @@ public class QuestBook {
 		
 		menu.put(9,
 				new ItemBuilder(category.getItem()).wrapText(
-						null,
+						category.getName(),
 						"",
 						"&e> Click to set the Item to the one in your hand").get(),
 				event -> {
@@ -707,7 +708,7 @@ public class QuestBook {
 						openCategoryEditor(p2, category);
 					}
 					else {
-						PlayerManager.of(p2).putPage(0);
+						PagedMapping.putPage(p2, 0);
 						QBDialogue.openQuestRequirementChooser(p2, category);
 					}
 				}
@@ -790,7 +791,7 @@ public class QuestBook {
 		
 		menu.put(9,
 				new ItemBuilder(quest.getItem()).wrapText(
-						null,
+						quest.getName(),
 						"",
 						"&e> Click to set the Item to the one in your hand").get(),
 				event -> {
@@ -931,7 +932,7 @@ public class QuestBook {
 						openQuestEditor(p2, quest);
 					}
 					else {
-						PlayerManager.of(p2).putPage(0);
+						PagedMapping.putPage(p2, 0);
 						QBDialogue.openQuestRequirementChooser(p2, quest);
 					}
 				}

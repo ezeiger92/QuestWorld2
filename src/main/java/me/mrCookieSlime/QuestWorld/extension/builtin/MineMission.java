@@ -45,7 +45,7 @@ public class MineMission extends MissionType implements Listener, Decaying {
 	protected void layoutMenu(IMissionState changes) {
 		super.layoutMenu(changes);
 		putButton(10, new MenuData(
-				new ItemBuilder(changes.getDisplayItem()).lore(
+				new ItemBuilder(changes.getDisplayItem()).wrapLore(
 						"",
 						"&e> Click to change the Block to",
 						"&ethe Item you are currently holding").get(),

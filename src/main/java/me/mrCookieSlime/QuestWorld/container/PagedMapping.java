@@ -2,17 +2,19 @@ package me.mrCookieSlime.QuestWorld.container;
 
 import java.util.ArrayList;
 import java.util.ListIterator;
+import java.util.Stack;
 import java.util.function.Consumer;
 
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.metadata.Metadatable;
 
 import me.mrCookieSlime.QuestWorld.api.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.api.menu.Menu;
-import me.mrCookieSlime.QuestWorld.manager.PlayerManager;
 import me.mrCookieSlime.QuestWorld.util.ItemBuilder;
 
 public class PagedMapping {
@@ -24,6 +26,35 @@ public class PagedMapping {
 	private int currentPage = 0;
 	private int activeSize;
 	private Consumer<InventoryClickEvent> backButton = null;
+	
+	@SuppressWarnings("unchecked")
+	private static Stack<Integer> stackFor(Metadatable player) {
+		Stack<Integer> result;
+		try {
+			result = (Stack<Integer>)player.getMetadata("questworld.pages").get(0).value();
+		}
+		catch(IndexOutOfBoundsException e) {
+			result = new Stack<Integer>();
+			player.setMetadata("questworld.pages", new FixedMetadataValue(QuestWorld.getPlugin(), result));
+		}
+		return result;
+	}
+	
+	public static void putPage(Metadatable player, int page) {
+		stackFor(player).push(page);
+	}
+	
+	public static int popPage(Metadatable player) {
+		Stack<Integer> stack = stackFor(player);
+		if(stack.isEmpty())
+			return 0;
+		
+		return stack.pop();
+	}
+	
+	public static void clearPages(Metadatable player) {
+		stackFor(player).clear();
+	}
 	
 	public PagedMapping(int cellsPerPanel, int minDisplay) {
 		pageSize = cellsPerPanel;
@@ -67,20 +98,20 @@ public class PagedMapping {
 	
 	public void addButton(int index, ItemStack item, Consumer<InventoryClickEvent> button, boolean isNavButton) {
 		findPanel(index).addButton(index % pageSize, item, isNavButton ? event -> {
-			PlayerManager.of(event.getWhoClicked()).putPage(currentPage);
+			putPage(event.getWhoClicked(), currentPage);
 			button.accept(event);
 		} : button);
 	}
 
 	public void addFrameButton(int index, ItemStack item, Consumer<InventoryClickEvent> button, boolean isNavButton) {
 		frame.addButton(index, item, isNavButton ? event -> {
-			PlayerManager.of(event.getWhoClicked()).putPage(currentPage);
+			putPage(event.getWhoClicked(), currentPage);
 			button.accept(event);
 		} : button);
 	}
 	
 	public void build(Menu menu, Player p) {
-		int page = PlayerManager.of(p).popPage();
+		int page = popPage(p);
 		if(page >= panels.size()) {
 			page = 0;
 		}

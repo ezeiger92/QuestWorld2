@@ -66,8 +66,6 @@ public class QBDialogue {
 					else if (q instanceof IQuest) {
 						IQuest quest = (IQuest)q;
 						if(CancellableEvent.send(new QuestDeleteEvent(quest))) {
-							PlayerManager.clearAllQuestData(quest);
-							
 							ICategoryState changes = quest.getCategory().getState();
 							changes.removeQuest(quest);
 							if(changes.apply())
@@ -231,12 +229,12 @@ public class QBDialogue {
 		PagedMapping pager = new PagedMapping(45, 9);
 		for(ICategory category : QuestWorld.getFacade().getCategories()) {
 			pager.addButton(category.getID(), new ItemBuilder(category.getItem()).wrapText(
-					null,
+					category.getName(),
 					"",
 					"&7&oLeft Click to open").get(),
 					event -> {
 						Player p2 = (Player)event.getWhoClicked();
-						PlayerManager.of(p2).putPage(0);
+						PagedMapping.putPage(p2, 0);
 						openQuestRequirementChooser2(p2, quest, category);
 					}, true
 			);
@@ -259,14 +257,15 @@ public class QBDialogue {
 		PagedMapping pager = new PagedMapping(45, 9);
 		for(IQuest quest : category.getQuests()) {
 			pager.addButton(quest.getID(),
-					new ItemBuilder(quest.getItem()).lore(
+					new ItemBuilder(quest.getItem()).wrapText(
+							quest.getName(),
 							"",
 							"&7&oClick to select it as a Requirement",
 							"&7&ofor the Quest:",
 							"&r" + quest.getName()).get(),
 					event -> {
 						Player p2 = (Player) event.getWhoClicked();
-						PlayerManager.of(p2).popPage();
+						PagedMapping.popPage(p2);
 
 						if (q instanceof IQuest) {
 							IQuest child = (IQuest)q;

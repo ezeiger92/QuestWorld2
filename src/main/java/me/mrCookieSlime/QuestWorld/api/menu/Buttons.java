@@ -11,7 +11,7 @@ import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategoryState;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
-import me.mrCookieSlime.QuestWorld.manager.PlayerManager;
+import me.mrCookieSlime.QuestWorld.container.PagedMapping;
 import me.mrCookieSlime.QuestWorld.util.PlayerTools;
 import me.mrCookieSlime.QuestWorld.util.Text;
 
@@ -24,7 +24,7 @@ public class Buttons {
 			else if(event.isShiftClick())
 				QuestBook.openCategoryEditor(p, category);
 			else {
-				PlayerManager.of(p).putPage(0);
+				PagedMapping.putPage(p, 0);
 				QuestBook.openCategoryQuestEditor(p, category);
 			}
 		};
@@ -96,7 +96,7 @@ public class Buttons {
 				
 				// TODO openPartyMenu has no way to go back to where it came from, so it always goes to the main menu
 				// As a result, we need to clear pages to avoid odd behavior. RIP.
-				PlayerManager.of(p).clearPages();
+				PagedMapping.clearPages(p);
 				QuestBook.openPartyMenu(p);
 			}
 		};

@@ -23,7 +23,11 @@ import me.mrCookieSlime.QuestWorld.api.annotation.Mutable;
 
 /**
  * This class provides a builder for ItemStacks. It is exactly what you expect,
- * nothing special.
+ * with a few special functions listed below and some static utilities.
+ * 
+ * @see ItemBuilder#selector
+ * @see ItemBuilder#wrapLore
+ * @see ItemBuilder#wrapText
  * 
  * @author ezeiger92
  */
@@ -33,6 +37,7 @@ public class ItemBuilder implements Cloneable {
 	 * @author erik
 	 *
 	 */
+	// TODO: Here's something that will probably need changing after 1.13
 	public static enum Proto {
 		RED_WOOL(new ItemBuilder(Material.WOOL).color(DyeColor.RED).get()),
 		LIME_WOOL(new ItemBuilder(Material.WOOL).color(DyeColor.LIME).get()),
@@ -361,118 +366,90 @@ public class ItemBuilder implements Cloneable {
 		return this;
 	}
 	
+	/**
+     * Sets item lore, applying colors in the process
+     *
+     * @param lore The text to set
+     * 
+     * @return this, for chaining
+     */
 	public @Mutable ItemBuilder lore(String... lore) {
-		return lore(Arrays.asList(Text.colorizeList(lore)));
+		return directLore(Arrays.asList(Text.colorizeList(lore)));
 	}
 	
-	public @Mutable ItemBuilder lore(List<String> lore) {
+	/**
+     * Sets item lore without colors, in case they were processed before
+     *
+     * @param lore The text to set
+     * 
+     * @return this, for chaining
+     */
+	public @Mutable ItemBuilder directLore(List<String> lore) {
 		ItemMeta stackMeta = resultStack.getItemMeta();
 		stackMeta.setLore(lore);
 		resultStack.setItemMeta(stackMeta);
 		return this;
 	}
 	
-	public @Mutable ItemBuilder wrapText(String... input) {
-		ArrayList<String> output = new ArrayList<>(input.length);
-
-		final int max_length = Math.max(QuestWorld.getPlugin().getConfig().getInt("options.text-wrap", 32), 8);
-		String format = "&f&o";
-		for(String s : input) {
-			if(s == null) {
-				continue;
-			}
-			
-			int begin = 0;
-			int end = -1;
-			int seq_begin = 0;
-			int seq_end = -1;
-			String prepared_format = format;
-			String committed_format = format;
-			for(int i = 0, n = 0; i < s.length(); ++i) {
-				char c1 = s.charAt(i);
-				if(c1 == Text.dummyChar) {
-					if(i + 1 != s.length()) {
-						char c = s.charAt(i + 1);
-						if("0123456789aAbBcCdDeEfFrR".indexOf(c) != -1)  {
-							prepared_format = String.valueOf(Text.dummyChar) + c;
-							n -= 2;
-							if(i > seq_end)
-								seq_begin = i;
-							seq_end = i+1;
-						}
-						else if("oOlLmMnNkK".indexOf(c) != -1) {
-							prepared_format += String.valueOf(Text.dummyChar) + c;
-							n -= 2;
-							if(i > seq_end)
-								seq_begin = i;
-							seq_end = i+1;
-						}
-					}
-				}
-				if(c1 == ' ' && i > 0) {
-					end = i;
-				}
-				
-				//Log.info("n: " + n + ", c: " + s.charAt(i) + ", i: " + i +  ", s: " + seq_begin + ", e: " + seq_end + ", p: " + prepared_format + ", co: " + committed_format);
-				
-				if(n == max_length) {
-					if(end == -1) {
-						if(i-2 == seq_end || i-1 == seq_end) {
-							end = seq_begin + i - seq_end - 2;
-						}
-						else
-							end = i - 1;
-
-						//Log.info("truncate: " + s.substring(begin, end) + '-');
-						output.add(Text.colorize(format + s.substring(begin, end) + '-'));
-					}
-					else {
-						//Log.info("full: " + s.substring(begin, end));
-						output.add(Text.colorize(format + s.substring(begin, end)));
-					}
-					begin = end;
-					n = i - end;
-					end = -1;
-					format = committed_format;
-				}
-				else
-					++n;
-				
-				if(i > seq_end) {
-					committed_format = prepared_format;
-				}
-			}
-			output.add(Text.colorize(format + s.substring(begin)));
-			format = prepared_format;
-		}
+	/**
+     * Creates a wrapping text field across the display name and lore
+     * Null elements will be ignored
+     *
+     * @param text The text to set
+     * 
+     * @return this, for chaining
+     */
+	public @Mutable ItemBuilder wrapText(String... text) {
+		int length = QuestWorld.getPlugin().getConfig().getInt("options.text-wrap", 32);
+		ArrayList<String> lines = Text.wrap(length, text);
 		
 		ItemMeta stackMeta = resultStack.getItemMeta();
-		
-		if(input[0] != null) {
-			stackMeta.setDisplayName(output.get(0));
-			output.remove(0);
+		if(lines.size() > 0) {
+			stackMeta.setDisplayName(lines.get(0));
+			lines.remove(0);
 		}
-		stackMeta.setLore(output);
+		stackMeta.setLore(lines);
 		resultStack.setItemMeta(stackMeta);
 		
 		return this;
 	}
 	
+	/**
+     * Creates a wrapping text field across lore only
+     * Null elements will be ignored
+     *
+     * @param lore The text to set
+     * 
+     * @return this, for chaining
+     */
+	public @Mutable ItemBuilder wrapLore(String... lore) {
+		int length = QuestWorld.getPlugin().getConfig().getInt("options.text-wrap", 32);
+		return directLore(Text.wrap(length, lore));
+	}
+	
+	/**
+	 * Creates a list selector within item lore. All options will be printed in order with default
+	 * formatting, and the selected index will be highlighted with special formatting.
+	 * 
+	 * @param index The index to highlight, defaults to 0 if outside a valid range
+	 * @param options Array of options to select, must have at least 1 element to function
+	 * @return this, for chaining
+	 */
 	public @Mutable ItemBuilder selector(int index, String... options) {
-		if(options == null || options.length == 0)
+		if(options.length == 0)
 			return this;
 		
 		if(index < 0 || index >= options.length)
 			index = 0;
 		
-		String[] result = new String[options.length + 1];
-		result[0] = "";
+		ArrayList<String> result = new ArrayList<>(options.length + 1);
+		result.add("");
 		
 		for(int i = 0; i < options.length; ++i)
-			result[i + 1] = " &7" + options[i];
+			result.add(Text.colorize(" &7" + options[i]));
 		
-		result[index + 1] = "&2>" + options[index];
-		lore(result);
+		result.add(Text.colorize("&2>" + options[index]));
+		directLore(result);
 		return this;
 	}
 	

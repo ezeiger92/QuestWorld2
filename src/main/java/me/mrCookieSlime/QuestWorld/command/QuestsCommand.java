@@ -6,6 +6,7 @@ import me.mrCookieSlime.QuestWorld.api.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
 import me.mrCookieSlime.QuestWorld.api.menu.QuestBook;
+import me.mrCookieSlime.QuestWorld.container.PagedMapping;
 import me.mrCookieSlime.QuestWorld.manager.PlayerManager;
 import me.mrCookieSlime.QuestWorld.party.Party;
 import me.mrCookieSlime.QuestWorld.util.PlayerTools;
@@ -48,7 +49,7 @@ public class QuestsCommand implements CommandExecutor {
 					
 					ICategory category = QuestWorld.getFacade().getCategory(c_id);
 					if (category != null)  {
-						PlayerManager.of(p).clearPages();
+						PagedMapping.clearPages(p);
 						if (args.length == 2)
 							QuestBook.openQuest(p, category.getQuest(q_id), false, false);
 						else

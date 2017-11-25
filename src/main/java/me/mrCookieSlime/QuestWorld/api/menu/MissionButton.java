@@ -24,8 +24,7 @@ import me.mrCookieSlime.QuestWorld.util.Text;
 public class MissionButton {
 	public static MenuData item(IMissionState changes) {
 		return simpleButton(changes,
-				new ItemBuilder(changes.getItem()).wrapText(
-						null,
+				new ItemBuilder(changes.getItem()).wrapLore(
 						"",
 						"&e> Click to set the Item to the one in your hand").get(),
 				event -> {

@@ -1,6 +1,8 @@
 package me.mrCookieSlime.QuestWorld.api.menu;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 import org.bukkit.Bukkit;
@@ -10,11 +12,19 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 
-import me.mrCookieSlime.QuestWorld.manager.MenuManager;
 import me.mrCookieSlime.QuestWorld.util.ItemBuilder;
 import me.mrCookieSlime.QuestWorld.util.Text;
 
 public class Menu implements Cloneable {
+	private static HashMap<UUID, Menu> openMenus = new HashMap<>();
+	public static Menu forUUID(UUID key) {
+		return openMenus.get(key);
+	}
+	
+	public static void clear(UUID key) {
+		openMenus.remove(key);
+	}
+	
 	private static final int ROW_WIDTH = 9;
 	private Inventory inv;
 	private Consumer<InventoryClickEvent>[] handlers;
@@ -86,7 +96,7 @@ public class Menu implements Cloneable {
 	public void openFor(HumanEntity... viewers) {
 		for(HumanEntity v : viewers) {
 			v.openInventory(inv);
-			MenuManager.get().playerOpenMenus.put(v.getUniqueId(), this);
+			openMenus.put(v.getUniqueId(), this);
 		}
 	}
 	

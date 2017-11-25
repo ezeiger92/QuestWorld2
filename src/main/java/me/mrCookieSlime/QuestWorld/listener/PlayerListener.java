@@ -22,7 +22,6 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.metadata.FixedMetadataValue;
 
 public class PlayerListener implements Listener {
 	
@@ -55,8 +54,6 @@ public class PlayerListener implements Listener {
 	@EventHandler(priority=EventPriority.LOWEST)
 	public void onJoin(PlayerJoinEvent e) {
 		Player p = e.getPlayer();
-		e.getPlayer().setMetadata("questworld.playermanager",
-				new FixedMetadataValue(QuestWorld.getPlugin(), new PlayerManager(p.getUniqueId())));
 		
 		if (QuestWorld.getPlugin().getConfig().getBoolean("book.on-first-join") &&
 				!PlayerManager.of(p).getTracker().exists())
@@ -68,6 +65,7 @@ public class PlayerListener implements Listener {
 		PlayerManager.of(e.getPlayer()).unload();
 	}
 	
+	// Since we can't randomly update recipes at runtime, replace result with latest lore
 	@EventHandler
 	public void preCraft(PrepareItemCraftEvent e) {
 		boolean hasTable = false;

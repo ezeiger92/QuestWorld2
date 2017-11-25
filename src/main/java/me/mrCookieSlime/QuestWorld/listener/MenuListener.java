@@ -13,20 +13,19 @@ import me.mrCookieSlime.QuestWorld.api.menu.Menu;
 import me.mrCookieSlime.QuestWorld.event.CategoryDeleteEvent;
 import me.mrCookieSlime.QuestWorld.event.MissionDeleteEvent;
 import me.mrCookieSlime.QuestWorld.event.QuestDeleteEvent;
-import me.mrCookieSlime.QuestWorld.manager.MenuManager;
 import me.mrCookieSlime.QuestWorld.manager.PlayerManager;
 
 public class MenuListener implements Listener {
 
 	@EventHandler(ignoreCancelled=true)
 	public void onInventoryClick(InventoryClickEvent event) {
-		Menu openMenu = MenuManager.get().playerOpenMenus.get(event.getWhoClicked().getUniqueId());
+		Menu openMenu = Menu.forUUID(event.getWhoClicked().getUniqueId());
 		if(openMenu != null) {
 			boolean val = true;
 			try {
 				val = openMenu.click(event);
 			}
-			catch(Exception e) {
+			catch(Throwable e) {
 				e.printStackTrace();
 				event.getWhoClicked().sendMessage(ChatColor.RED + "An internal error occurred, please contact an admin!");
 			}
@@ -36,12 +35,12 @@ public class MenuListener implements Listener {
 	
 	@EventHandler
 	public void onClose(InventoryCloseEvent event) {
-		MenuManager.get().playerOpenMenus.remove(event.getPlayer().getUniqueId());
+		Menu.clear(event.getPlayer().getUniqueId());
 	}
 	
 	@EventHandler
 	public void onDrag(InventoryDragEvent event) {
-		Menu openMenu = MenuManager.get().playerOpenMenus.get(event.getWhoClicked().getUniqueId());
+		Menu openMenu = Menu.forUUID(event.getWhoClicked().getUniqueId());
 		if(openMenu != null)
 			for(int key : event.getRawSlots())
 				if(openMenu.requestCancel(event.getInventory(), key)) {

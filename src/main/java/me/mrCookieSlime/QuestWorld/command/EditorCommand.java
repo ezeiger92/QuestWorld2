@@ -1,6 +1,5 @@
 package me.mrCookieSlime.QuestWorld.command;
 
-
 import me.mrCookieSlime.QuestWorld.QuestWorldPlugin;
 import me.mrCookieSlime.QuestWorld.api.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.SinglePrompt;
@@ -9,7 +8,7 @@ import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuestState;
 import me.mrCookieSlime.QuestWorld.api.menu.QBDialogue;
 import me.mrCookieSlime.QuestWorld.api.menu.QuestBook;
-import me.mrCookieSlime.QuestWorld.manager.PlayerManager;
+import me.mrCookieSlime.QuestWorld.container.PagedMapping;
 import me.mrCookieSlime.QuestWorld.util.Log;
 import me.mrCookieSlime.QuestWorld.util.PlayerTools;
 import me.mrCookieSlime.QuestWorld.util.Text;
@@ -67,9 +66,9 @@ public class EditorCommand implements CommandExecutor {
 				sender.sendMessage(Text.colorize("&cCould not save Preset &a", args[1]));
 		}
 		else if (param.equals("gui")) {
-			if (sender instanceof Player) {
-				PlayerManager.of((Player)sender).clearPages();
-				QuestBook.openEditor((Player) sender);
+			if (p != null) {
+				PagedMapping.clearPages(p);
+				QuestBook.openEditor(p);
 			}
 			else
 				sender.sendMessage(Text.colorize("&4You are not a Player"));

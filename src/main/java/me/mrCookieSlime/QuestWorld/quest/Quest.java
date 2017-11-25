@@ -13,7 +13,6 @@ import me.mrCookieSlime.QuestWorld.api.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuestState;
-import me.mrCookieSlime.QuestWorld.util.ItemBuilder;
 import me.mrCookieSlime.QuestWorld.util.Text;
 
 import org.bukkit.Bukkit;
@@ -29,7 +28,7 @@ class Quest extends Renderable implements IQuestState {
 	int id;
 	long cooldown;
 	String name;
-	ItemStack item;
+	ItemStack item = new ItemStack(Material.BOOK_AND_QUILL);
 	List<Mission> tasks = new ArrayList<>();
 	
 	List<String> commands = new ArrayList<>();
@@ -95,7 +94,7 @@ class Quest extends Renderable implements IQuestState {
 		ordered      = config.getBoolean("in-order");
 		autoclaim    = config.getBoolean("auto-claim");
 		name         = Text.colorize(config.getString("name"));
-		item         = new ItemBuilder(config.getItemStack("item")).display(name).get();
+		item         = config.getItemStack("item", item);
 		
 		rewards = loadRewards();
 		money   = config.getInt("rewards.money");
@@ -118,7 +117,6 @@ class Quest extends Renderable implements IQuestState {
 		
 		config = YamlConfiguration.loadConfiguration(getFile());
 		cooldown = -1;
-		item = new ItemBuilder(Material.BOOK_AND_QUILL).display(name).get();
 
 		money = 0;
 		xp = 0;
@@ -256,7 +254,7 @@ class Quest extends Renderable implements IQuestState {
 	}
 
 	public void setItem(ItemStack item) {
-		this.item = new ItemBuilder(item).display(name).get();
+		this.item = item.clone();
 	}
 
 	public void toggleWorld(String world) {
@@ -271,7 +269,6 @@ class Quest extends Renderable implements IQuestState {
 
 	public void setName(String name) {
 		this.name = name;
-		ItemBuilder.edit(this.item).display(name);
 	}
 
 	public List<ItemStack> getRewards() {

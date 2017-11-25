@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Stack;
 import java.util.UUID;
 
 import me.mrCookieSlime.QuestWorld.QuestWorldPlugin;
@@ -25,12 +24,20 @@ import me.mrCookieSlime.QuestWorld.util.Text;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.metadata.Metadatable;
+import org.bukkit.metadata.FixedMetadataValue;
 
 public class PlayerManager {
 	
-	public static PlayerManager of(Metadatable player) {
-		return (PlayerManager)player.getMetadata("questworld.playermanager").get(0).value();
+	public static PlayerManager of(Player player) {
+		PlayerManager result;
+		try {
+			result = (PlayerManager)player.getMetadata("questworld.playermanager").get(0).value();
+		}
+		catch(IndexOutOfBoundsException e) {
+			result = new PlayerManager(player.getUniqueId());
+			player.setMetadata("questworld.playermanager", new FixedMetadataValue(QuestWorld.getPlugin(), result));
+		}
+		return result;
 	}
 
 	public static PlayerManager of(UUID uuid) {
@@ -43,28 +50,11 @@ public class PlayerManager {
 	private UUID uuid;
 	private IStateful last;
 	
-	private Stack<Integer> pages = new Stack<>();
-	
 	private final ProgressTracker tracker;
 	
 	public PlayerManager(UUID uuid) {
 		this.uuid = uuid;
 		tracker = new ProgressTracker(uuid);
-	}
-	
-	public void putPage(int pageNum) {
-		pages.add(pageNum);
-	}
-	
-	public int popPage() {
-		if(pages.isEmpty())
-			return 0;
-		
-		return pages.pop();
-	}
-	
-	public void clearPages() {
-		pages.clear();
 	}
 	
 	public int countQuests(@Nullable ICategory root, @Nullable QuestStatus status) {
@@ -386,7 +376,7 @@ public class PlayerManager {
 
 			// Second: go back to the main thread and make sure all player managers know what happened
 			Bukkit.getScheduler().callSyncMethod(QuestWorld.getPlugin(), () -> {
-				for(Metadatable player : Bukkit.getOnlinePlayers())
+				for(Player player : Bukkit.getOnlinePlayers())
 					of(player).clearQuestData(quest);
 				
 				return false;

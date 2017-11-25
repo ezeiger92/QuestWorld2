@@ -1,5 +1,6 @@
 package me.mrCookieSlime.QuestWorld.util;
 
+import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -155,5 +156,81 @@ public class Text {
 			e.printStackTrace();
 			return niceName(stack.getType().toString());
 		}
+	}
+	
+	public static ArrayList<String> wrap(int max_length, String... input) {
+		ArrayList<String> output = new ArrayList<>(input.length);
+
+		String format = "&f&o";
+		for(String s : input) {
+			if(s == null) {
+				continue;
+			}
+			
+			int begin = 0;
+			int end = -1;
+			int seq_begin = 0;
+			int seq_end = -1;
+			String prepared_format = format;
+			String committed_format = format;
+			for(int i = 0, n = 0; i < s.length(); ++i) {
+				char c1 = s.charAt(i);
+				if(c1 == Text.dummyChar) {
+					if(i + 1 != s.length()) {
+						char c = s.charAt(i + 1);
+						if("0123456789aAbBcCdDeEfFrR".indexOf(c) != -1)  {
+							prepared_format = String.valueOf(Text.dummyChar) + c;
+							n -= 2;
+							if(i > seq_end)
+								seq_begin = i;
+							seq_end = i+1;
+						}
+						else if("oOlLmMnNkK".indexOf(c) != -1) {
+							prepared_format += String.valueOf(Text.dummyChar) + c;
+							n -= 2;
+							if(i > seq_end)
+								seq_begin = i;
+							seq_end = i+1;
+						}
+					}
+				}
+				if(c1 == ' ' && i > 0) {
+					end = i;
+				}
+				
+				//Log.info("n: " + n + ", c: " + s.charAt(i) + ", i: " + i +  ", s: " + seq_begin + ", e: " + seq_end + ", p: " + prepared_format + ", co: " + committed_format);
+				
+				if(n == max_length) {
+					if(end == -1) {
+						if(i-2 == seq_end || i-1 == seq_end) {
+							end = seq_begin + i - seq_end - 2;
+						}
+						else
+							end = i - 1;
+
+						//Log.info("truncate: " + s.substring(begin, end) + '-');
+						output.add(Text.colorize(format + s.substring(begin, end) + '-'));
+					}
+					else {
+						//Log.info("full: " + s.substring(begin, end));
+						output.add(Text.colorize(format + s.substring(begin, end)));
+					}
+					begin = end;
+					n = i - end;
+					end = -1;
+					format = committed_format;
+				}
+				else
+					++n;
+				
+				if(i > seq_end) {
+					committed_format = prepared_format;
+				}
+			}
+			output.add(Text.colorize(format + s.substring(begin)));
+			format = prepared_format;
+		}
+		
+		return output;
 	}
 }

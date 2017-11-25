@@ -14,7 +14,6 @@ import me.mrCookieSlime.QuestWorld.QuestWorldPlugin;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategoryState;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
-import me.mrCookieSlime.QuestWorld.util.ItemBuilder;
 import me.mrCookieSlime.QuestWorld.util.Text;
 
 import org.bukkit.Material;
@@ -40,7 +39,7 @@ class Category extends Renderable implements ICategoryState {
 		this.name = Text.colorize(name);
 		this.facade = facade;
 		config = YamlConfiguration.loadConfiguration(getFile());
-		item = new ItemBuilder(Material.BOOK_AND_QUILL).display(name).get();
+		item = new ItemStack(Material.BOOK_AND_QUILL);
 		world_blacklist = new ArrayList<String>();
 		permission = "";
 		hidden = false;
@@ -61,7 +60,7 @@ class Category extends Renderable implements ICategoryState {
 		this.config = config;
 		this.facade = facade;
 		name = Text.colorize(config.getString("name"));
-		item = new ItemBuilder(config.getItemStack("item")).display(name).get();
+		item = config.getItemStack("item", item);
 		hidden = config.getBoolean("hidden");
 		permission = config.getString("permission", "");
 		world_blacklist = config.getStringList("world-blacklist");
@@ -123,7 +122,6 @@ class Category extends Renderable implements ICategoryState {
 	//// ICategoryState Impl
 	public void setName(String name) {
 		this.name = Text.colorize(name);
-		ItemBuilder.edit(this.item).display(name);
 	}
 
 	@Override
@@ -206,10 +204,7 @@ class Category extends Renderable implements ICategoryState {
 	}
 
 	public void setItem(ItemStack item) {
-		if(name != null)
-			this.item = new ItemBuilder(item).display(name).get();
-		else
-			this.item = item.clone();
+		this.item = item.clone();
 	}
 
 	public void toggleWorld(String world) {
