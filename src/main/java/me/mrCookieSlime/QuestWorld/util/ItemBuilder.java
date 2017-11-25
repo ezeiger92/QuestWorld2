@@ -379,7 +379,6 @@ public class ItemBuilder implements Cloneable {
 		String format = "&f&o";
 		for(String s : input) {
 			if(s == null) {
-				output.add("");
 				continue;
 			}
 			
@@ -410,7 +409,7 @@ public class ItemBuilder implements Cloneable {
 						}
 					}
 				}
-				if(c1 == ' ') {
+				if(c1 == ' ' && i > 0) {
 					end = i;
 				}
 				
@@ -448,10 +447,11 @@ public class ItemBuilder implements Cloneable {
 		}
 		
 		ItemMeta stackMeta = resultStack.getItemMeta();
-		String name = output.get(0);
-		if(name != null)
-			stackMeta.setDisplayName(name);
-		output.remove(0);
+		
+		if(input[0] != null) {
+			stackMeta.setDisplayName(output.get(0));
+			output.remove(0);
+		}
 		stackMeta.setLore(output);
 		resultStack.setItemMeta(stackMeta);
 		

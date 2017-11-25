@@ -200,7 +200,6 @@ class Category extends Renderable implements ICategoryState {
 		try {
 			config.save(getFile());
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

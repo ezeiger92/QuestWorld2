@@ -233,8 +233,6 @@ class Mission extends Renderable implements IMissionState {
 	@Override
 	public void setType(MissionType type) {
 		this.type = type;
-		// TODO: Something like this
-		// type.attemptUpgrade(this);
 	}
 	
 	@Override

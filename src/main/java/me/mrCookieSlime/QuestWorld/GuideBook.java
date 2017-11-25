@@ -39,12 +39,8 @@ public class GuideBook {
 	}
 	
 	private GuideBook() {
-		String[] lines = QuestWorld.translate(Translation.GUIDE_BOOK).split("\n");
-		//String display = QuestWorld.translate(Translation.BOOK_DISPLAY);
-		//String[] lore = QuestWorld.translate(Translation.BOOK_LORE).split("\n");
-		
-		//new ItemBuilder(Material.ENCHANTED_BOOK).wrapText(display, lore);
-		guide = new ItemBuilder(Material.ENCHANTED_BOOK).wrapText(lines).get();
+		guide = new ItemBuilder(Material.ENCHANTED_BOOK).wrapText(
+				QuestWorld.translate(Translation.GUIDE_BOOK).split("\n")).get();
 		pastBooks.add(guide.hashCode());
 	}
 }

@@ -35,22 +35,32 @@ public class QuestsCommand implements CommandExecutor {
 					}
 				}
 				else {
-					// TODO: This is a pretty hefty try block. Bad.
+					int c_id = -1;
+					int q_id = -1;
 					try {
-						ICategory category = QuestWorld.getFacade().getCategory(Integer.parseInt(args[0]));
-						if (category != null)  {
-							PlayerManager.of((Player)sender).clearPages();
-							if (args.length == 2) QuestBook.openQuest((Player) sender, category.getQuest(Integer.parseInt(args[1])), false, false);
-							else QuestBook.openCategory((Player) sender, category, false);
-						}
-						else sender.sendMessage(Text.colorize("&4Unknown Category: &c", args[0]));
-					} catch(Exception x) {
-						 sender.sendMessage(Text.colorize("&4Unknown Category: &c", args[0]));
+						c_id = Integer.parseInt(args[0]);
+						q_id = Integer.parseInt(args[1]);
 					}
+					catch(NumberFormatException exception) {
+						sender.sendMessage(Text.colorize("&4Error: invalid number for category (", args[0], ") or quest (", args[1], ")"));
+						return true;
+					}
+					
+					ICategory category = QuestWorld.getFacade().getCategory(c_id);
+					if (category != null)  {
+						PlayerManager.of(p).clearPages();
+						if (args.length == 2)
+							QuestBook.openQuest(p, category.getQuest(q_id), false, false);
+						else
+							QuestBook.openCategory(p, category, false);
+					}
+					else
+						sender.sendMessage(Text.colorize("&4Unknown Category: &c", args[0]));
 				}
 			}
 		}
-		else sender.sendMessage(Text.colorize("&4You are not a Player"));
+		else
+			sender.sendMessage(Text.colorize("&4You are not a Player"));
 		return true;
 	}
 

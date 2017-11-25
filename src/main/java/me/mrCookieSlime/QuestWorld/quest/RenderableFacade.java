@@ -101,11 +101,13 @@ public class RenderableFacade implements IFacade {
 			Category category = new Category(cData.id, cData.file, this);
 			categories.add(category);
 			
-			for (ParseData qData: questData.get(cData.id)) {
-				Quest q = new Quest(qData.id, qData.file, category);
-				category.directAddQuest(q);
-				questMap.putWeak(q.getUnique(), q);
-			}
+			ArrayList<ParseData> elements = questData.get(cData.id);
+			if(elements != null)
+				for (ParseData qData: questData.get(cData.id)) {
+					Quest q = new Quest(qData.id, qData.file, category);
+					category.directAddQuest(q);
+					questMap.putWeak(q.getUnique(), q);
+				}
 		}
 		
 		for (Category category: categories) {

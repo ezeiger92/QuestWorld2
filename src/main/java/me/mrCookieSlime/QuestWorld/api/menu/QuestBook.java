@@ -1,8 +1,5 @@
 package me.mrCookieSlime.QuestWorld.api.menu;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import me.mrCookieSlime.QuestWorld.api.Manual;
 import me.mrCookieSlime.QuestWorld.api.MissionSet;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
@@ -307,45 +304,53 @@ public class QuestBook {
 		view.addFrameButton(4, partyMenuItem(p), Buttons.partyMenu(), true);
 		
 		for (final IQuest quest: category.getQuests()) {
-			// TODO: wrapText
-			glassPane.display(quest.getName());
 			if (manager.getStatus(quest).equals(QuestStatus.LOCKED) || !quest.getWorldEnabled(p.getWorld().getName())) {
-				view.addButton(quest.getID(), glassPane.lore("", QuestWorld.translate(Translation.quests_locked)).getNew(),
+				view.addButton(quest.getID(), 
+						glassPane.wrapText(
+								quest.getName(),
+								"",
+								QuestWorld.translate(Translation.quests_locked)).getNew(),
 						null, false);
 			}
 			else if (manager.getStatus(quest).equals(QuestStatus.LOCKED_NO_PARTY)) {
-				view.addButton(quest.getID(), glassPane.lore("", "&4You need to leave your current Party").getNew(),
+				view.addButton(quest.getID(),
+						glassPane.wrapText(
+								quest.getName(),
+								"",
+								"&4You need to leave your current Party").getNew(),
 						null, false);
 			}
 			else if (manager.getStatus(quest).equals(QuestStatus.LOCKED_PARTY_SIZE)) {
-				view.addButton(quest.getID(), glassPane.lore("", "&4You can only do this Quest in a Party", "&4with at least &c" + quest.getPartySize() + " &4Members").getNew(),
+				view.addButton(quest.getID(),
+						glassPane.wrapText(
+								quest.getName(),
+								"",
+								"&4You can only do this Quest in a Party",
+								"&4with at least &c" + quest.getPartySize() + " &4Members").getNew(),
 						null, false);
 			}
 			else {
-				// TODO Combine these translations and use placeholders
-				List<String> lore = new ArrayList<String>();
-				lore.add("");
-				lore.add(manager.progressString(quest));
-				lore.add("");
-				lore.add(Text.colorize("&7") + manager.getProgress(quest) + "/" + quest.getMissions().size() + QuestWorld.translate(Translation.quests_tasks_completed));
+				String extra = null;
+				
 				if (manager.getStatus(quest).equals(QuestStatus.REWARD_CLAIMABLE)) {
-					lore.add("");
-					lore.add(QuestWorld.translate(Translation.quests_state_reward_claimable));
+					extra = QuestWorld.translate(Translation.quests_state_reward_claimable);
 				}
 				else if (manager.getStatus(quest).equals(QuestStatus.ON_COOLDOWN)) {
-					lore.add("");
-					lore.add(QuestWorld.translate(Translation.quests_state_cooldown));
+					extra = QuestWorld.translate(Translation.quests_state_cooldown);
 				}
 				else if (manager.hasFinished(quest)) {
-					lore.add("");
-					lore.add(QuestWorld.translate(Translation.quests_state_completed));
+					extra = QuestWorld.translate(Translation.quests_state_completed);
 				}
-				for(int i = 0; i < lore.size(); ++i)
-					lore.set(i, Text.colorize(lore.get(i)));
 				
 				view.addButton(quest.getID(),
-						new ItemBuilder(quest.getItem()).lore(lore)
-						.get(),
+						new ItemBuilder(quest.getItem()).wrapText(
+								quest.getName(),
+								"",
+								manager.progressString(quest),
+								"",
+								"&7" + manager.getProgress(quest) + "/" + quest.getMissions().size() + QuestWorld.translate(Translation.quests_tasks_completed),
+								(extra == null) ? null : "",
+								extra).get(),
 						event -> {
 							openQuest((Player) event.getWhoClicked(), quest, back, true);
 						}, true
@@ -540,6 +545,7 @@ public class QuestBook {
 			ICategory category = QuestWorld.getFacade().getCategory(i);
 			if(category != null) {
 				String[] lore = {
+						category.getName(),
 						"",
 						"&c&oLeft Click to open",
 						"&c&oShift + Left Click to edit",
@@ -547,23 +553,26 @@ public class QuestBook {
 				};
 				int quests = category.getQuests().size();
 				if(quests > 0) {
-					int j = 0;
-					List<String> lines = new ArrayList<>();
+					String[] lines = new String[lore.length + Math.min(quests, 6)];
+					lines[0] = category.getName();
+					
+					int j = 1;
 					for(IQuest q : category.getQuests()) {
-						lines.add("&7- " + q.getName());
-						if(++j >= 5)
+						lines[j++] = "&7- " + q.getName();
+						if(j == 5) {
+							lines[j++] = "&7&oand " + (quests - j) + " more...";
 							break;
+						}	
 					}
-					if(j < quests)
-						lines.add("&7&oand "+(quests-j)+" more...");
-					String[] newLore = lines.toArray(new String[lines.size() + lore.length]);
-					for(j = 0; j < lore.length; ++j)
-						newLore[lines.size() + j] = lore[j];
-					lore = newLore;
+					
+					for(int k = 0; k < 4; ++k)
+						lines[k + j] = lore[k + 1];
+					
+					lore = lines;
 				}
 				
 				view.addButton(i,
-						new ItemBuilder(category.getItem()).lore(lore).get(),
+						new ItemBuilder(category.getItem()).wrapText(lore).get(),
 						Buttons.onCategory(category), true);
 
 				view.reserve(1);
@@ -593,31 +602,35 @@ public class QuestBook {
 		for (int i = 0; i < view.getCapacity(); ++i) {
 			IQuest quest = category.getQuest(i);
 			if (quest != null) {
-				int missions = quest.getMissions().size();
 				String[] lore = {
+					quest.getName(),
 					"",
 					"&c&oLeft Click to edit",
 					"&c&oRight Click to delete"
 				};
-				
+
+				int missions = quest.getMissions().size();
 				if(missions > 0) {
-					int j = 0;
-					List<String> lines = new ArrayList<>();
+					String[] lines = new String[lore.length + Math.min(missions, 6)];
+					lines[0] = quest.getName();
+					
+					int j = 1;
 					for(IMission m : quest.getMissions()) {
-						lines.add("&7- " + m.getText());
-						if(++j >= 5)
+						lines[j++] = "&7- " + m.getText();
+						if(j > 5) {
+							lines[j++] = "&7&oand " + (missions - j) + " more...";
 							break;
+						}
 					}
-					if(j < missions)
-						lines.add("&7&oand "+(missions-j)+" more...");
-					String[] newLore = lines.toArray(new String[lines.size() + lore.length]);
-					for(j = 0; j < lore.length; ++j)
-						newLore[lines.size() + j] = lore[j];
-					lore = newLore;
+					
+					for(int k = 0; k < 3; ++k)
+						lines[k + j] = lore[k + 1];
+
+					lore = lines;
 				}
 				
 				view.addButton(i,
-						new ItemBuilder(quest.getItem()).lore(lore).get(),
+						new ItemBuilder(quest.getItem()).wrapText(lore).get(),
 						Buttons.onQuest(quest), true);
 				
 				view.reserve(1);
