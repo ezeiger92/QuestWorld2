@@ -97,8 +97,6 @@ class Quest extends Renderable implements IQuestState {
 		name         = Text.colorize(config.getString("name"));
 		item         = new ItemBuilder(config.getItemStack("item")).display(name).get();
 		
-		loadMissions();
-		
 		rewards = loadRewards();
 		money   = config.getInt("rewards.money");
 		xp      = config.getInt("rewards.xp");
@@ -108,6 +106,8 @@ class Quest extends Renderable implements IQuestState {
 		
 		partysize  = config.getInt("min-party-size", 1);
 		permission = config.getString("permission", "");
+		
+		loadMissions();
 	}
 
 	// External
@@ -149,6 +149,8 @@ class Quest extends Renderable implements IQuestState {
 		ConfigurationSection missions = config.getConfigurationSection("missions");
 		if (missions == null)
 			return;
+		
+		ArrayList<Mission> arr = new ArrayList<>();
 
 		for (String key: missions.getKeys(false)) {
 			// TODO mess
@@ -159,13 +161,16 @@ class Quest extends Renderable implements IQuestState {
 			
 			data.put("menu_index", Integer.valueOf(key));
 			data.put("quest", this);
-				
+			
 			Mission m = new Mission(data);
 			m.sanitize();
-			directAddMission(m);
-			//changes.directAddMission(m);
-			//changes.apply();
+			arr.add(m);
 		}
+		
+		QuestState state = getState();
+		for(Mission m : arr)
+			state.directAddMission(m);
+		state.apply();
 	}
 	
 	public void save() {
@@ -278,7 +283,7 @@ class Quest extends Renderable implements IQuestState {
 	}
 	
 	public void addMission(int index) {
-		tasks.add(getCategory().getFacade().createMission(index, this));
+		tasks.add(getCategory().getFacade().createMission(index, getSource()));
 	}
 	
 	public void directAddMission(Mission m) {

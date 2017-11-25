@@ -15,7 +15,6 @@ import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IMissionState;
 import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
 import me.mrCookieSlime.QuestWorld.util.EntityTools;
-import me.mrCookieSlime.QuestWorld.util.Text;
 
 public class KillMission extends MissionType implements Listener, Decaying {
 	public KillMission() {
@@ -30,7 +29,7 @@ public class KillMission extends MissionType implements Listener, Decaying {
 	
 	@Override
 	protected String userInstanceDescription(IMission instance) {
-		String type = Text.niceName(instance.getEntity().toString());
+		String type = EntityTools.nameOf(instance.getEntity());
 		return "&7Kill " + instance.getAmount() + "x " + (!instance.getSpawnerSupport() ? "naturally spawned " : "") + type;
 	}
 	
@@ -39,10 +38,11 @@ public class KillMission extends MissionType implements Listener, Decaying {
 		Player killer = e.getEntity().getKiller();
 		if(killer == null)
 			return;
-
+		
 		for(MissionSet.Result r : MissionSet.of(this, killer)) {
 			IMission mission = r.getMission();
-			if(mission.getEntity() == e.getEntityType()
+			EntityType type = mission.getEntity();
+			if((type == e.getEntityType() || type == EntityType.COMPLEX_PART)
 				&& (mission.getSpawnerSupport() || !EntityTools.isFromSpawner(e.getEntity())))
 				r.addProgress(1);
 		}

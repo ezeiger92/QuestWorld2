@@ -150,15 +150,10 @@ public class PlayerManager {
 	public void update(boolean quest_check) {
 		Player p = Bukkit.getPlayer(uuid);
 		
-		if (p != null && quest_check) {
-			for (IMission task: QuestWorld.getViewer().getTickingMissions()) {
-				if (getStatus(task.getQuest()).equals(QuestStatus.AVAILABLE) && !hasCompletedTask(task) && hasUnlockedTask(task)) {
-					MissionSet.Result entry = new MissionSet.Result(task, getProgress(task));
-					((Ticking) task.getType()).onTick(p, entry);
-					setProgress(task, entry.getProgress());
-				}
-			}
-		}
+		if (p != null && quest_check)
+			for (IMission task: QuestWorld.getViewer().getTickingMissions())
+				if (getStatus(task.getQuest()).equals(QuestStatus.AVAILABLE) && !hasCompletedTask(task) && hasUnlockedTask(task))
+					((Ticking) task.getType()).onTick(p, new MissionSet.Result(task, this));
 		
 		for (ICategory category: QuestWorld.getFacade().getCategories()) {
 			for (IQuest quest: category.getQuests()) {

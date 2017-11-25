@@ -59,14 +59,9 @@ public class MissionButton {
 	
 	public static MenuData entity(IMissionState changes) {
 		EntityType entity = changes.getEntity();
-		String entityName = Text.niceName(entity.toString());
-		
-		if(entity == EntityType.COMPLEX_PART)
-			entityName = "Any Entity";
-		
 		return new MenuData(
 				EntityTools.getEntityDisplay(entity).wrapText(
-						"&7Entity Type: &r" + entityName,
+						"&7Entity Type: &r" + EntityTools.nameOf(entity),
 						"",
 						"&e> Click to change the Entity").get(),
 				event -> {
@@ -175,7 +170,7 @@ public class MissionButton {
 	}
 	
 	public static MenuData spawnersAllowed(IMissionState changes) {
-		String icon = changes.getDeathReset() ? "&2&l\u2714": "&4&l\u2718";
+		String icon = changes.getSpawnerSupport() ? "&2&l\u2714": "&4&l\u2718";
 		return simpleButton(changes,
 				new ItemBuilder(Material.MOB_SPAWNER).wrapText(
 						"&7Allow Mobs from Spawners: " + icon,

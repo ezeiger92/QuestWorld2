@@ -387,9 +387,7 @@ public class QuestBook {
 							if (manager2.hasCompletedTask(mission)) continue;
 							
 							if(mission.getType() instanceof Manual) {
-								MissionSet.Result entry = new MissionSet.Result(mission, manager2.getProgress(mission));
-								((Manual) mission.getType()).onManual(p2, entry);
-								manager2.setProgress(mission, entry.getProgress());
+								((Manual) mission.getType()).onManual(p2, new MissionSet.Result(mission, manager2));
 								openQuest(p2, quest, categoryBack, back);
 							}
 						}
@@ -475,9 +473,7 @@ public class QuestBook {
 					if (manager2.hasCompletedTask(mission)) return;
 					
 					if(mission.getType() instanceof Manual) {
-						MissionSet.Result entry = new MissionSet.Result(mission, manager2.getProgress(mission));
-						((Manual) mission.getType()).onManual(p2, entry);
-						manager2.setProgress(mission, entry.getProgress());
+						((Manual) mission.getType()).onManual(p2, new MissionSet.Result(mission, manager2));
 						openQuest(p2, quest, categoryBack, back);
 					}
 				}

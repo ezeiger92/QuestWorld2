@@ -159,7 +159,8 @@ class Category extends Renderable implements ICategoryState {
 	
 	@Override
 	public void addQuest(String name, int id) {
-		quests.put(id, facade.createQuest(name, id, this));
+		// Quests should never reference a CategoryState, getSource always returns the actual Category
+		quests.put(id, facade.createQuest(name, id, getSource()));
 	}
 	
 	public RenderableFacade getFacade() {
@@ -244,15 +245,21 @@ class Category extends Renderable implements ICategoryState {
 	
 	protected void copy(Category source) {
 		id         = source.id;
-		config     = YamlConfiguration.loadConfiguration(getFile());
+		facade     = source.facade;
+		hidden     = source.hidden;
 		name       = source.name;
+		permission = source.permission;
 		item       = source.item.clone();
 		parent     = new WeakReference<>(source.getParent());
-		permission = source.permission;
-		hidden     = source.hidden;
+		parent     = new WeakReference<>(source.getParent());
+		
+		quests.clear();
+		quests.putAll(source.quests);
 		
 		world_blacklist.clear();
 		world_blacklist.addAll(source.world_blacklist);
+		
+		config     = YamlConfiguration.loadConfiguration(getFile());
 	}
 	
 	protected void copyTo(Category dest) {

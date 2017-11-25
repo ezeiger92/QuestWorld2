@@ -132,7 +132,7 @@ public class QBDialogue {
 			EntityType entity = entities[i];
 			pager.addButton(i,
 					EntityTools.getEntityDisplay(entity).wrapText(
-							"&7Entity Type: &r" + Text.niceName(entity.name()),
+							"&7Entity Type: &r" + EntityTools.nameOf(entity),
 							"",
 							"&e> Click to select").get(),
 					event -> {

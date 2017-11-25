@@ -12,6 +12,7 @@ public class EntityTools {
 	static {
 		// Alive entities
 		ArrayList<EntityType> entities = new ArrayList<>();
+		entities.add(EntityType.COMPLEX_PART);
 		for(EntityType ent : EntityType.values())
 			if(ent.isAlive())
 				entities.add(ent);
@@ -46,6 +47,13 @@ public class EntityTools {
 		}
 		
 		return ib;
+	}
+	
+	public static String nameOf(EntityType entity) {
+		if(entity == EntityType.COMPLEX_PART)
+			return "Any Entity";
+		
+		return Text.niceName(entity.toString());
 	}
 	
 	public static boolean isFromSpawner(Metadatable entity) {

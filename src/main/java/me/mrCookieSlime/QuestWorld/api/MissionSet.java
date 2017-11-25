@@ -25,16 +25,16 @@ public class MissionSet implements Iterable<MissionSet.Result> {
 		List<IMission> active = manager.getActiveMissions(type);
 		results = new ArrayList<>(active.size());
 		for(IMission mission : active)
-			results.add(new Result(mission, manager.getProgress(mission)));
+			results.add(new Result(mission, manager));
 	}
 	
 	public static class Result {
 		private IMission mission;
-		private int progress;
+		private PlayerManager manager;
 		
-		public Result(IMission mission, int progress) {
+		public Result(IMission mission, PlayerManager manager) {
 			this.mission = mission;
-			this.progress = progress;
+			this.manager = manager;
 		}
 		
 		public IMission getMission() {
@@ -42,15 +42,15 @@ public class MissionSet implements Iterable<MissionSet.Result> {
 		}
 		
 		public int getProgress() {
-			return progress;
+			return manager.getProgress(mission);
 		}
 		
 		public void setProgress(int progress) {
-			this.progress = progress;
+			manager.setProgress(mission, progress);
 		}
 		
 		public void addProgress(int progress) {
-			this.progress += progress;
+			manager.addProgress(mission, progress);
 		}
 		
 		public int getRemaining() {

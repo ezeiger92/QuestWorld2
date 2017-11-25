@@ -133,6 +133,12 @@ class QuestState extends Quest {
 		changeBits |= BitFlag.getBits(Member.AUTOCLAIM);
 	}
 	
+	@Override
+	public void directAddMission(Mission m) {
+		super.directAddMission(m);
+		changeBits |= BitFlag.getBits(Member.TASKS);
+	}
+	
 	/**
 	 * Applies all changes held by this object to the original quest
 	 */

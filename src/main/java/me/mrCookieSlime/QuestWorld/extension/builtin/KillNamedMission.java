@@ -46,7 +46,8 @@ public class KillNamedMission extends KillMission {
 		
 		for(MissionSet.Result r : MissionSet.of(this, killer)) {
 			IMission mission = r.getMission();
-			if(mission.getEntity() == e.getEntityType()
+			EntityType type = mission.getEntity();
+			if((type == e.getEntityType() || type == EntityType.COMPLEX_PART)
 				&& (mission.getSpawnerSupport() || !EntityTools.isFromSpawner(e.getEntity()))
 				&& (mission.getCustomInt() == EXACT && mission.getCustomString().equals(name)
 					|| mission.getCustomInt() == CONTAINS && mission.getCustomString().contains(name)))

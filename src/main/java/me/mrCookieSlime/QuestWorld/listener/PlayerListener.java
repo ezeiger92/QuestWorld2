@@ -48,9 +48,7 @@ public class PlayerListener implements Listener {
 					|| !task.getDeathReset())
 				continue;
 
-			MissionSet.Result entry = new MissionSet.Result(task, manager.getProgress(task));
-			((Decaying) task).onDeath(event, entry);
-			manager.setProgress(task, entry.getProgress());
+			((Decaying) task).onDeath(event, new MissionSet.Result(task, manager));
 		}
 	}
 	

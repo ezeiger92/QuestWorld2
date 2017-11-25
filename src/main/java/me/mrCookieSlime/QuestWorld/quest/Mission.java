@@ -289,7 +289,7 @@ class Mission extends Renderable implements IMissionState {
 	}
 	
 	protected void loadDefaults() {
-		loadMap(new HashMap<>());
+		copy(new Mission(index, getQuest()));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -297,7 +297,7 @@ class Mission extends Renderable implements IMissionState {
 		setUnique((Integer)data.getOrDefault("unique", (int)getUnique()));
 		
 		quest    = new WeakReference<>((Quest)data.get("quest"));
-		type     = QuestWorld.getMissionType((String)data.getOrDefault("type", type));
+		type     = QuestWorld.getMissionType((String)data.getOrDefault("type", type.toString()));
 		item     = (ItemStack)data.getOrDefault("item", item);
 		amount   = (Integer)data.getOrDefault("amount", amount);
 		try { entity = EntityType.valueOf((String)data.get("entity")); }

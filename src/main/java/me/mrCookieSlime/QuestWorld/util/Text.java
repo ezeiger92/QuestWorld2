@@ -124,6 +124,12 @@ public class Text {
 	private static final String progress_bar = "::::::::::::::::::::";
 	
 	public static String progressBar(int current, int total, @Nullable("defaults to xy%") String append) {
+		if(total <= 0) {
+			total = 1;
+			current = 0;
+		}
+		current = Math.max(Math.min(current, total), 0);
+		
 		int length = (current * 20) / total;
 		if(append == null)
 			append = ((current * 100) / total) + "%";
