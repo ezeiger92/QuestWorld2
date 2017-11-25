@@ -138,6 +138,7 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener, QuestLoade
 	public void reloadQWConfig() {
 		loadConfigs();
 		api.reload();
+		GuideBook.reset();
 	}
 	
 	public void reloadQuests() {

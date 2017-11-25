@@ -6,10 +6,16 @@ public enum Translation implements Translator {
 	DEFAULT_MISSION ("defaults.mission.name"),
 	DEFAULT_PREFIX  ("defaults.prefix"),
 	
+	@Deprecated
 	BOOK_DISPLAY("book.display"),
+	@Deprecated
 	BOOK_LORE   ("book.lore"),
+	GUIDE_BOOK("guide-book"),
 	
+	NAV_ITEM("navigation.item", "page", "pages", "pre-next", "pre-last"),
+	@Deprecated
 	NAV_DISPLAY("navigation.display", "page",     "pages"),
+	@Deprecated
 	NAV_LORE(   "navigation.lore",    "pre-next", "pre-last"),
 	NAV_NEXT(   "navigation.prefix-next"),
 	NAV_PREV(   "navigation.prefix-last"),

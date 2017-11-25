@@ -61,9 +61,13 @@ class Quest extends Renderable implements IQuestState {
 		name     = source.name;
 		item     = source.item.clone();
 
+		tasks.clear();
 		tasks.addAll(source.tasks);
+		commands.clear();
 		commands.addAll(source.commands);
+		world_blacklist.clear();
 		world_blacklist.addAll(source.world_blacklist);
+		rewards.clear();
 		rewards.addAll(source.rewards);
 
 		money          = source.money;
@@ -110,7 +114,7 @@ class Quest extends Renderable implements IQuestState {
 	public Quest(String name, int id, Category category) {
 		this.id = id;
 		this.category = new WeakReference<>(category);
-		this.name = Text.colorize(name);
+		this.name = name;
 		
 		config = YamlConfiguration.loadConfiguration(getFile());
 		cooldown = -1;
@@ -261,7 +265,7 @@ class Quest extends Renderable implements IQuestState {
 	}
 
 	public void setName(String name) {
-		this.name = Text.colorize(name);
+		this.name = name;
 		ItemBuilder.edit(this.item).display(name);
 	}
 

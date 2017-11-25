@@ -13,6 +13,7 @@ import me.mrCookieSlime.QuestWorld.api.contract.ICategoryState;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
 import me.mrCookieSlime.QuestWorld.manager.PlayerManager;
 import me.mrCookieSlime.QuestWorld.util.PlayerTools;
+import me.mrCookieSlime.QuestWorld.util.Text;
 
 public class Buttons {
 	public static Consumer<InventoryClickEvent> onCategory(ICategory category) {
@@ -73,7 +74,7 @@ public class Buttons {
 					PlayerTools.makeTranslation(true, Translation.QUEST_NAME_EDIT, defaultQuestName),
 					(c,s) -> {
 						ICategoryState state = category.getState();
-						state.addQuest(s, id);
+						state.addQuest(Text.colorize(s), id);
 						if(state.apply()) {
 							PlayerTools.sendTranslation(p, true, Translation.QUEST_CREATED, s);
 						}

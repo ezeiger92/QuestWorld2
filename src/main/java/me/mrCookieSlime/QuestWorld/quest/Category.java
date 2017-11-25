@@ -252,7 +252,7 @@ class Category extends Renderable implements ICategoryState {
 		permission = source.permission;
 		hidden     = source.hidden;
 		
-		world_blacklist = new ArrayList<>();
+		world_blacklist.clear();
 		world_blacklist.addAll(source.world_blacklist);
 	}
 	
@@ -265,7 +265,11 @@ class Category extends Renderable implements ICategoryState {
 		if(id == null)
 			return null;
 		
-		return null;
+		Quest q = facade.getQuest(id.longValue());
+		if(q == null)
+			return null;
+		
+		return new WeakReference<>(q);
 	}
 	
 	@Deprecated

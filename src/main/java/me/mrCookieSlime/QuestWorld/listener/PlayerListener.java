@@ -10,18 +10,19 @@ import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
 import me.mrCookieSlime.QuestWorld.api.menu.QuestBook;
 import me.mrCookieSlime.QuestWorld.manager.PlayerManager;
 
-import java.util.UUID;
-
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.metadata.LazyMetadataValue;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.metadata.FixedMetadataValue;
 
 public class PlayerListener implements Listener {
 	
@@ -29,7 +30,7 @@ public class PlayerListener implements Listener {
 	public void onQuestBook2(PlayerInteractEvent event) {
 		Action a = event.getAction();
 		if(a == Action.RIGHT_CLICK_AIR || a == Action.RIGHT_CLICK_BLOCK)
-			if (GuideBook.get().isSimilar(event.getItem()))
+			if (GuideBook.isGuide(event.getItem()))
 				QuestBook.openLastMenu(event.getPlayer());
 	}
 	
@@ -43,9 +44,10 @@ public class PlayerListener implements Listener {
 			IQuest quest = task.getQuest();
 			if (!manager.getStatus(quest).equals(QuestStatus.AVAILABLE)
 					|| !quest.getWorldEnabled(worldName)
-					|| !quest.getCategory().isWorldEnabled(worldName))
+					|| !quest.getCategory().isWorldEnabled(worldName)
+					|| !task.getDeathReset())
 				continue;
-			
+
 			MissionSet.Result entry = new MissionSet.Result(task, manager.getProgress(task));
 			((Decaying) task).onDeath(event, entry);
 			manager.setProgress(task, entry.getProgress());
@@ -54,18 +56,32 @@ public class PlayerListener implements Listener {
 	
 	@EventHandler(priority=EventPriority.LOWEST)
 	public void onJoin(PlayerJoinEvent e) {
-		final UUID uuid = e.getPlayer().getUniqueId();
-		e.getPlayer().setMetadata("questworld.playermanager", new LazyMetadataValue(QuestWorld.getPlugin(), () ->
-			new PlayerManager(uuid)
-		));
+		Player p = e.getPlayer();
+		e.getPlayer().setMetadata("questworld.playermanager",
+				new FixedMetadataValue(QuestWorld.getPlugin(), new PlayerManager(p.getUniqueId())));
 		
 		if (QuestWorld.getPlugin().getConfig().getBoolean("book.on-first-join") &&
-				!PlayerManager.of(e.getPlayer()).getTracker().exists())
-			e.getPlayer().getInventory().addItem(GuideBook.get());
+				!PlayerManager.of(p).getTracker().exists())
+			p.getInventory().addItem(GuideBook.get());
 	}
 	
 	@EventHandler
 	public void onleave(PlayerQuitEvent e) {
 		PlayerManager.of(e.getPlayer()).unload();
+	}
+	
+	@EventHandler
+	public void preCraft(PrepareItemCraftEvent e) {
+		boolean hasTable = false;
+		for(ItemStack is : e.getInventory().getMatrix())
+			if(is != null) {
+				if(is.getType() == Material.WORKBENCH && !hasTable)
+					hasTable = true;
+				else
+					return;
+			}
+		
+		if(hasTable)
+			e.getInventory().setResult(GuideBook.get());
 	}
 }

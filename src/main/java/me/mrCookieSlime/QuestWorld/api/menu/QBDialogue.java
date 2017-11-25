@@ -38,15 +38,18 @@ public class QBDialogue {
 			else if (q instanceof IMission) QuestBook.openQuestEditor(p2, ((IMission) q).getQuest());
 		});
 		
-		String tag = Text.colorize("&r") ;
-		if (q instanceof IQuest) tag += "your Quest \"" + ((IQuest) q).getName() + "\"";
-		else if (q instanceof ICategory) tag += "your Category \"" + ((ICategory) q).getName() + "\"";
-		else if (q instanceof IMission) tag += "your Task";
+		String tag;
+		if (q instanceof IQuest) tag = "your Quest \"" + ((IQuest) q).getName() + "\"";
+		else if (q instanceof ICategory) tag = "your Category \"" + ((ICategory) q).getName() + "\"";
+		else if (q instanceof IMission) tag = "your Task";
+		else tag = "";
 		
 		menu.put(2,
-				ItemBuilder.Proto.LIME_WOOL.get()
-				.display("&aYes I am sure")
-				.lore("", "&rThis will delete", tag).get(),
+				ItemBuilder.Proto.LIME_WOOL.get().wrapText(
+						"&aYes I am sure",
+						"",
+						"&rThis will delete",
+						tag).get(),
 				event -> {
 					Player p2 = (Player) event.getWhoClicked();
 					QuestWorld.getSounds().DESTRUCTIVE_CLICK.playTo(p2);
@@ -101,9 +104,11 @@ public class QBDialogue {
 			QuestBook.openQuestEditor((Player) event.getWhoClicked(), q);
 		});
 		
-		menu.put(2, ItemBuilder.Proto.LIME_WOOL.get()
-				.display("&aYes I am sure")
-				.lore("", "&rThis will reset this Quest's Database").get(),
+		menu.put(2,
+				ItemBuilder.Proto.LIME_WOOL.get().wrapText(
+						"&aYes I am sure",
+						"",
+						"&rThis will reset this Quest's Database").get(),
 				event -> {
 					PlayerManager.clearAllQuestData(q);
 					QuestBook.openQuestEditor((Player) event.getWhoClicked(), q);
@@ -120,17 +125,16 @@ public class QBDialogue {
 		//String title = Text.colorize(mission.getQuest().getName() + " &7- &8(Page " + (page+1) + "/" + (lastPage+1) + ")");
 		final Menu menu = new Menu(6, "&3Entity Selector: " + mission.getQuest().getName());
 		
-		String[] lore = {"", "&e> Click to select"};
-		
 		PagedMapping pager = new PagedMapping(45);
 
 		EntityType[] entities = EntityTools.aliveEntityTypes();
 		for(int i = 0; i < entities.length; ++i) {
 			EntityType entity = entities[i];
 			pager.addButton(i,
-					EntityTools.getEntityDisplay(entity)
-					.lore(lore)
-					.display("&7Entity Type: &r" + Text.niceName(entity.name())).get(),
+					EntityTools.getEntityDisplay(entity).wrapText(
+							"&7Entity Type: &r" + Text.niceName(entity.name()),
+							"",
+							"&e> Click to select").get(),
 					event -> {
 						changes.setEntity(entity);
 						changes.apply();
@@ -226,7 +230,8 @@ public class QBDialogue {
 
 		PagedMapping pager = new PagedMapping(45, 9);
 		for(ICategory category : QuestWorld.getFacade().getCategories()) {
-			pager.addButton(category.getID(), new ItemBuilder(category.getItem()).lore(
+			pager.addButton(category.getID(), new ItemBuilder(category.getItem()).wrapText(
+					null,
 					"",
 					"&7&oLeft Click to open").get(),
 					event -> {

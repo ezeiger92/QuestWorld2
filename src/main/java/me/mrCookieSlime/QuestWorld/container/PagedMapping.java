@@ -92,15 +92,15 @@ public class PagedMapping {
 		currentPage = page;
 		
 		panels.get(page).build(menu, 9, activeSize);
-		
-		String display = QuestWorld.translate(Translation.NAV_DISPLAY, String.valueOf(page + 1), String.valueOf(panels.size()));
 
-		String nextPre = QuestWorld.translate(page < panels.size() - 1 ? Translation.NAV_NEXT : Translation.NAV_NEXTBAD);
-		String prevPre = QuestWorld.translate(page > 0 ? Translation.NAV_PREV : Translation.NAV_PREVBAD);
-		String[] lore = QuestWorld.translate(Translation.NAV_LORE, nextPre, prevPre).split("\n");
+		String[] lines = QuestWorld.translate(Translation.NAV_ITEM,
+				String.valueOf(page + 1),
+				String.valueOf(panels.size()),
+				QuestWorld.translate(page < panels.size() - 1 ? Translation.NAV_NEXT : Translation.NAV_NEXTBAD),
+				QuestWorld.translate(page > 0 ? Translation.NAV_PREV : Translation.NAV_PREVBAD)).split("\n");
 
 		frame.addButton(1,
-				new ItemBuilder(Material.PAPER).amount(page + 1).display(display).lore(lore).get(),
+				new ItemBuilder(Material.PAPER).amount(page + 1).wrapText(lines).get(),
 				event -> {
 					int delta = (event.isRightClick() ? -1 : 1) * (event.isShiftClick() ? panels.size() : 1);
 					int nextPage = Math.min(Math.max(0, page + delta), panels.size() - 1);

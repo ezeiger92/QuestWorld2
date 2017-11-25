@@ -319,7 +319,6 @@ public class ItemBuilder implements Cloneable {
 		}
 		return this;
 	}
-	
 
 	public @Mutable ItemBuilder flag(ItemFlag... flags) {
 		ItemMeta stackMeta = resultStack.getItemMeta();
@@ -333,6 +332,26 @@ public class ItemBuilder implements Cloneable {
 		stackMeta.removeItemFlags(flags);
 		resultStack.setItemMeta(stackMeta);
 		return this;
+	}
+	
+	public @Mutable ItemBuilder flagAll() {
+		return flag(
+				ItemFlag.HIDE_ATTRIBUTES,
+				ItemFlag.HIDE_DESTROYS,
+				ItemFlag.HIDE_ENCHANTS,
+				ItemFlag.HIDE_PLACED_ON,
+				ItemFlag.HIDE_POTION_EFFECTS,
+				ItemFlag.HIDE_UNBREAKABLE);
+	}
+	
+	public @Mutable ItemBuilder unflagAll() {
+		return unflag(
+				ItemFlag.HIDE_ATTRIBUTES,
+				ItemFlag.HIDE_DESTROYS,
+				ItemFlag.HIDE_ENCHANTS,
+				ItemFlag.HIDE_PLACED_ON,
+				ItemFlag.HIDE_POTION_EFFECTS,
+				ItemFlag.HIDE_UNBREAKABLE);
 	}
 	
 	public @Mutable ItemBuilder display(String displayName) {
@@ -353,43 +372,87 @@ public class ItemBuilder implements Cloneable {
 		return this;
 	}
 	
-	// TODO Put together without testing in 10 minutes at 2am. 100% chance of dramatic failure
-	public @Mutable ItemBuilder wrapText(String... lines) {
-		ArrayList<String> newStrings = new ArrayList<>();
-		final int max_length = 16;
-		String lastFormat = "";
-		String currentFormat = "";
-		
-		for(String line : lines) {
-			line = Text.colorize(line);
-			int start = 0;
-			int end = 0;
-			int length = line.length();
-			char[] chars = line.toCharArray();
-			for(int i = 0; i < length; ++i) {
-				if(chars[i] == Text.colorChar) {
-					char c = chars[++i];
-					if("0123456789aAbBcCdDeEfFrR".indexOf(c) != -1) {
-						currentFormat = String.valueOf(Text.colorChar) + c;
+	public @Mutable ItemBuilder wrapText(String... input) {
+		ArrayList<String> output = new ArrayList<>(input.length);
+
+		final int max_length = Math.max(QuestWorld.getPlugin().getConfig().getInt("options.text-wrap", 32), 8);
+		String format = "&f&o";
+		for(String s : input) {
+			if(s == null) {
+				output.add("");
+				continue;
+			}
+			
+			int begin = 0;
+			int end = -1;
+			int seq_begin = 0;
+			int seq_end = -1;
+			String prepared_format = format;
+			String committed_format = format;
+			for(int i = 0, n = 0; i < s.length(); ++i) {
+				char c1 = s.charAt(i);
+				if(c1 == Text.dummyChar) {
+					if(i + 1 != s.length()) {
+						char c = s.charAt(i + 1);
+						if("0123456789aAbBcCdDeEfFrR".indexOf(c) != -1)  {
+							prepared_format = String.valueOf(Text.dummyChar) + c;
+							n -= 2;
+							if(i > seq_end)
+								seq_begin = i;
+							seq_end = i+1;
+						}
+						else if("oOlLmMnNkK".indexOf(c) != -1) {
+							prepared_format += String.valueOf(Text.dummyChar) + c;
+							n -= 2;
+							if(i > seq_end)
+								seq_begin = i;
+							seq_end = i+1;
+						}
 					}
-					else if("iIoOlLmMnNkK".indexOf(c) != -1) {
-						currentFormat = lastFormat + String.valueOf(Text.colorChar) + c;
-					}
-					continue;
+				}
+				if(c1 == ' ') {
+					end = i;
 				}
 				
-				if((++end - start) >= max_length) {
-					newStrings.add(lastFormat + line.substring(start, end));
-					start = end;
-					lastFormat = currentFormat;
+				//Log.info("n: " + n + ", c: " + s.charAt(i) + ", i: " + i +  ", s: " + seq_begin + ", e: " + seq_end + ", p: " + prepared_format + ", co: " + committed_format);
+				
+				if(n == max_length) {
+					if(end == -1) {
+						if(i-2 == seq_end || i-1 == seq_end) {
+							end = seq_begin + i - seq_end - 2;
+						}
+						else
+							end = i - 1;
+
+						//Log.info("truncate: " + s.substring(begin, end) + '-');
+						output.add(Text.colorize(format + s.substring(begin, end) + '-'));
+					}
+					else {
+						//Log.info("full: " + s.substring(begin, end));
+						output.add(Text.colorize(format + s.substring(begin, end)));
+					}
+					begin = end;
+					n = i - end;
+					end = -1;
+					format = committed_format;
+				}
+				else
+					++n;
+				
+				if(i > seq_end) {
+					committed_format = prepared_format;
 				}
 			}
+			output.add(Text.colorize(format + s.substring(begin)));
+			format = prepared_format;
 		}
 		
 		ItemMeta stackMeta = resultStack.getItemMeta();
-		stackMeta.setDisplayName(newStrings.get(0));
-		newStrings.remove(0);
-		stackMeta.setLore(newStrings);
+		String name = output.get(0);
+		if(name != null)
+			stackMeta.setDisplayName(name);
+		output.remove(0);
+		stackMeta.setLore(output);
 		resultStack.setItemMeta(stackMeta);
 		
 		return this;

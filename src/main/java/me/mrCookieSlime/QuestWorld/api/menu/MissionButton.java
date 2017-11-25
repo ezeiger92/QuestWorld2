@@ -23,10 +23,10 @@ import me.mrCookieSlime.QuestWorld.util.Text;
 public class MissionButton {
 	public static MenuData item(IMissionState changes) {
 		return simpleButton(changes,
-				new ItemBuilder(changes.getItem()).lore(
+				new ItemBuilder(changes.getItem()).wrapText(
+						null,
 						"",
-						"&e> Click to change the Item to",
-						"&ethe Item you are currently holding").get(),
+						"&e> Click to set the Item to the one in your hand").get(),
 				event -> {
 					Player p = (Player)event.getWhoClicked();
 					ItemStack hand = p.getInventory().getItemInMainHand();
@@ -42,7 +42,8 @@ public class MissionButton {
 	
 	public static MenuData amount(IMissionState changes, int groupSize) {
 		return simpleButton(changes,
-				new ItemBuilder(Material.REDSTONE).display("&7Amount: &b" + changes.getAmount()).lore(
+				new ItemBuilder(Material.REDSTONE).wrapText(
+						"&7Amount: &b" + changes.getAmount(),
 						"",
 						"&rLeft Click: &e+1",
 						"&rRight Click: &e-1",
@@ -63,8 +64,8 @@ public class MissionButton {
 			entityName = "Any Entity";
 		
 		return new MenuData(
-				EntityTools.getEntityDisplay(entity)
-				.display("&7Entity Type: &r" + entityName).lore(
+				EntityTools.getEntityDisplay(entity).wrapText(
+						"&7Entity Type: &r" + entityName,
 						"",
 						"&e> Click to change the Entity").get(),
 				event -> {
@@ -76,10 +77,10 @@ public class MissionButton {
 	public static MenuData location(IMissionState changes) {
 		return simpleButton(changes,
 				// TODO: "Location: {print location}"
-				new ItemBuilder(changes.getDisplayItem()).lore(
+				new ItemBuilder(changes.getDisplayItem()).wrapText(
+						null,
 						"",
-						"&e> Click to change the Location",
-						"&eto your current Position").get(),
+						"&e> Click to change the Location to your current Position").get(),
 				event -> {
 					changes.setLocation(event.getWhoClicked().getLocation().getBlock().getLocation());
 				}
@@ -88,8 +89,8 @@ public class MissionButton {
 	
 	public static MenuData entityName(IMissionState changes) {
 		return new MenuData(
-				new ItemBuilder(Material.NAME_TAG)
-				.display("&r" + changes.getCustomString()).lore(
+				new ItemBuilder(Material.NAME_TAG).wrapText(
+						"&r" + changes.getCustomString(),
 						"",
 						"&e> Click to change the Name").get(),
 				event -> {
@@ -113,7 +114,7 @@ public class MissionButton {
 	
 	public static MenuData missionName(IMissionState changes) {
 		return new MenuData(
-				new ItemBuilder(Material.NAME_TAG).display("").lore(
+				new ItemBuilder(Material.NAME_TAG).wrapText(
 						changes.getText(),
 						"",
 						"&rLeft Click: Edit Mission Name",
@@ -145,8 +146,8 @@ public class MissionButton {
 
 	public static MenuData timeframe(IMissionState changes) {
 		return simpleButton(changes,
-				new ItemBuilder(Material.WATCH)
-				.display("&7Complete Mission within: &b" + Text.timeFromNum(changes.getTimeframe())).lore(
+				new ItemBuilder(Material.WATCH).wrapText(
+						"&7Complete Mission within: &b" + Text.timeFromNum(changes.getTimeframe()),
 						"",
 						"&rLeft Click: &e+1m",
 						"&rRight Click: &e-1m",
@@ -160,12 +161,12 @@ public class MissionButton {
 	}
 	
 	public static MenuData deathReset(IMissionState changes) {
+		String icon = changes.getDeathReset() ? "&2&l\u2714": "&4&l\u2718";
 		return simpleButton(changes,
-				new ItemBuilder(Material.SKULL_ITEM)
-				.display("&7Resets on Death: " + (changes.getDeathReset() ? "&2&l\u2714": "&4&l\u2718")).lore(
+				new ItemBuilder(Material.SKULL_ITEM).wrapText(
+						"&7Resets on Death: " + icon,
 						"",
-						"&e> Click to change whether this Mission's Progress",
-						"&eresets when a Player dies").get(),
+						"&e> Click to change whether this Mission's Progress resets when a Player dies").get(),
 				event -> {
 					changes.setDeathReset(!changes.getDeathReset());
 				}
@@ -173,12 +174,12 @@ public class MissionButton {
 	}
 	
 	public static MenuData spawnersAllowed(IMissionState changes) {
+		String icon = changes.getDeathReset() ? "&2&l\u2714": "&4&l\u2718";
 		return simpleButton(changes,
-				new ItemBuilder(Material.MOB_SPAWNER)
-				.display("&7Allow Mobs from Spawners: " + (changes.getSpawnerSupport() ? "&2&l\u2714": "&4&l\u2718")).lore(
+				new ItemBuilder(Material.MOB_SPAWNER).wrapText(
+						"&7Allow Mobs from Spawners: " + icon,
 						"",
-						"&e> Click to change whether this Mission will",
-						"&ealso count Mobs which were spawned by a Mob Spawner").get(),
+						"&e> Click to change whether this Mission will also count Mobs which were spawned by a Mob Spawner").get(),
 				event -> {
 					changes.setSpawnerSupport(!changes.getSpawnerSupport());
 				}
@@ -187,7 +188,8 @@ public class MissionButton {
 	
 	public static MenuData dialogue(IMissionState changes) {
 		return new MenuData(
-				new ItemBuilder(Material.PAPER).display("&rDialogue").lore(
+				new ItemBuilder(Material.PAPER).wrapText(
+						"&rDialogue",
 						"",
 						"&rLeft Click: Edit the Dialogue",
 						"&rRight Click: Dialogue Preview").get(),

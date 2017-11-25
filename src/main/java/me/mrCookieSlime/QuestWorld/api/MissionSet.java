@@ -58,6 +58,7 @@ public class MissionSet implements Iterable<MissionSet.Result> {
 		}
 	}
 
+	// TODO: Mission iterator, pulls results on request
 	@Override
 	public Iterator<Result> iterator() {
 		return results.iterator();

@@ -12,6 +12,11 @@ book:
     &rYour basic Guide for Quests
     &rIn case you lose it, simply place a
     &rWorkbench into your Crafting Grid
+guide-book: |
+  &eQuest Book &7(Right Click)
+  
+  &rYour basic Guide for Quests
+  If you lose it, simply craft a new one with a Workbench
 
 navigation:
   display: '&7Page %page%/%pages%'
@@ -23,6 +28,11 @@ navigation:
   prefix-last: '&c'
   prefix-next-inactive: '&7&o'
   prefix-last-inactive: '&7&o'
+  item: |
+    &7Page %page%/%pages%
+    %pre-next%Next page (left-click)
+    %pre-last%Prev page (right-click)
+    &6&oHold shift to jump to the end
 
 editor:
   category.created:     '&aSuccessfully created a category called &r%name%'

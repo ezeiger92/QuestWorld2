@@ -1,5 +1,7 @@
 package me.mrCookieSlime.QuestWorld;
 
+import java.util.HashSet;
+
 import org.bukkit.Material;
 //import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
@@ -10,15 +12,24 @@ import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.util.ItemBuilder;
 
 public class GuideBook {
+	private static HashSet<Integer> pastBooks = new HashSet<>();
 	private static GuideBook instance = null;
 	private ItemStack guide;
-	//private NamespacedKey key = new NamespacedKey(QuestWorld.getInstance(), "GuideBook");
+	//private NamespacedKey key = new NamespacedKey(QuestWorld.getPlugin(), "GuideBook");
 	
 	public static ItemStack get() {
 		if(instance == null)
 			instance = new GuideBook();
 		
 		return instance.guide.clone();
+	}
+	
+	public static void reset() {
+		instance = null;
+	}
+	
+	public static boolean isGuide(ItemStack item) {
+		return item != null && pastBooks.contains(item.hashCode());
 	}
 	
 	@SuppressWarnings("deprecation")
@@ -28,9 +39,12 @@ public class GuideBook {
 	}
 	
 	private GuideBook() {
-		String display = QuestWorld.translate(Translation.BOOK_DISPLAY);
-		String[] lore = QuestWorld.translate(Translation.BOOK_LORE).split("\n");
+		String[] lines = QuestWorld.translate(Translation.GUIDE_BOOK).split("\n");
+		//String display = QuestWorld.translate(Translation.BOOK_DISPLAY);
+		//String[] lore = QuestWorld.translate(Translation.BOOK_LORE).split("\n");
 		
-		guide = new ItemBuilder(Material.ENCHANTED_BOOK).display(display).lore(lore).get();
+		//new ItemBuilder(Material.ENCHANTED_BOOK).wrapText(display, lore);
+		guide = new ItemBuilder(Material.ENCHANTED_BOOK).wrapText(lines).get();
+		pastBooks.add(guide.hashCode());
 	}
 }

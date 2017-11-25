@@ -2,6 +2,7 @@ options:
   auto-update: true
   quest-check-delay: 60
   autosave-interval: 5
+  text-wrap: 32
 party:
   max-members: 4
   enabled: true

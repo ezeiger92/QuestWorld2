@@ -83,7 +83,8 @@ public class LocationMission extends MissionType implements Ticking {
 		super.layoutMenu(changes);
 		putButton(10, MissionButton.location(changes));
 		putButton(11, new MenuData(
-				new ItemBuilder(Material.NAME_TAG).display("&r" + changes.getCustomString()).lore(
+				new ItemBuilder(Material.NAME_TAG).wrapText(
+						"&r" + changes.getCustomString(),
 						 "",
 						 "&e> Give your Location a Name").get(),
 				event -> {
@@ -107,7 +108,8 @@ public class LocationMission extends MissionType implements Ticking {
 				}
 		));
 		putButton(17, new MenuData(
-				new ItemBuilder(Material.COMPASS).display("&7Radius: &a" + changes.getCustomInt()).lore(
+				new ItemBuilder(Material.COMPASS).wrapText(
+						"&7Radius: &a" + changes.getCustomInt(),
 						"",
 						"&rLeft Click: &e+1",
 						"&rRight Click: &e-1",
