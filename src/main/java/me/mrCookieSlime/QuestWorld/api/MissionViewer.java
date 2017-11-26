@@ -2,7 +2,6 @@ package me.mrCookieSlime.QuestWorld.api;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -47,9 +46,8 @@ public class MissionViewer implements Listener {
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onCreateMission(QuestChangeEvent event) {
 		if(event.hasChange(IQuestState.Member.TASKS)) {
-			List<? extends IMission> questMissions = event.getNextState().getMissions();
-			IMission m = questMissions.get(questMissions.size() - 1);
-			add(m, m.getType());
+			for(IMission m : event.getNextState().getMissions())
+				add(m, m.getType());
 		}
 	}
 	

@@ -15,8 +15,8 @@ public interface IQuest extends IStateful {
 	ICategory getCategory();
 	List<ItemStack> getRewards();
 	IMission getMission(int i);
-	long getRawCooldown();
-	long getCooldown();
+	int getRawCooldown();
+	int getCooldown();
 	int getMoney();
 	int getPartySize();
 	int getXP();

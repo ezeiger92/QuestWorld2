@@ -37,6 +37,10 @@ public class QuestingImpl implements QuestingAPI, Reloadable {
 		QuestWorld.setAPI(this);
 	}
 	
+	public ResourceLoader getResources() {
+		return resources;
+	}
+	
 	@Override
 	@SuppressWarnings("unchecked")
 	public <T extends MissionType> T getMissionType(String typeName) {

@@ -68,13 +68,13 @@ class QuestState extends Quest {
 	}
 	
 	@Override
-	public void setRawCooldown(long cooldown) {
+	public void setRawCooldown(int cooldown) {
 		super.setRawCooldown(cooldown);
 		changeBits |= BitFlag.getBits(Member.COOLDOWN);
 	}
 	
 	@Override
-	public void setCooldown(long cooldown) {
+	public void setCooldown(int cooldown) {
 		super.setCooldown(cooldown);
 		changeBits |= BitFlag.getBits(Member.COOLDOWN);
 	}

@@ -24,8 +24,16 @@ public class ProgressTracker {
 	private final File configFile;
 	private final YamlConfiguration config;
 	
+	private static File fileFor(UUID uuid) {
+		return new File(QuestWorldPlugin.getPath("data.player"), uuid.toString() + ".yml");
+	}
+	
+	public static boolean exists(UUID uuid) {
+		return fileFor(uuid).exists();
+	}
+	
 	public ProgressTracker(UUID uuid) {
-		configFile = new File(QuestWorldPlugin.getPath("data.player"), uuid.toString() + ".yml");
+		configFile = fileFor(uuid);
 		config = YamlConfiguration.loadConfiguration(configFile);
 	}
 	
@@ -35,10 +43,6 @@ public class ProgressTracker {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-	}
-	
-	public boolean exists() {
-		return configFile.exists();
 	}
 	
 	private static UUID tryUUID(String uuid) {
@@ -96,7 +100,7 @@ public class ProgressTracker {
 	}
 	
 	public void setQuestRefresh(IQuest quest, long until) {
-		config.set(path(quest), dateFormat.format(until));
+		config.set(path(quest) + ".cooldown", dateFormat.format(until));
 	}
 	
 	public QuestStatus getQuestStatus(IQuest quest) {

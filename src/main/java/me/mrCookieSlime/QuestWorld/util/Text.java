@@ -113,7 +113,7 @@ public class Text {
 	
 	public static String timeFromNum(long minutes) {
 		long hours = minutes / 60;
-		minutes = minutes - hours;
+		minutes = minutes - hours * 60;
 		
 		return hours + "h " + minutes + "m";
 	}

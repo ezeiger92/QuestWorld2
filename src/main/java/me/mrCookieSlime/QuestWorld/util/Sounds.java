@@ -1,5 +1,7 @@
 package me.mrCookieSlime.QuestWorld.util;
 
+import java.util.List;
+
 import org.bukkit.Sound;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
@@ -35,22 +37,36 @@ public class Sounds {
 	}
 
 	public class SoundList {
-		private Sound sound;
+		private Sound sound = null;
 		private float volume;
 		private float pitch;
 		
 		public SoundList(String path, float volume, float pitch) {
-			String soundStr = config.getString(path + ".sound").toUpperCase();
-			
-			try {
-				sound = Sound.valueOf(soundStr);
-			}
-			catch(Exception e) {
-				sound = null;
-			}
-
 			this.volume = volume;
 			this.pitch = pitch;
+			
+			String soundStr = config.getString(path + ".sound", null);
+			
+			if(soundStr == null) {
+				List<String> sounds = config.getStringList(path + ".list");
+				if(!sounds.isEmpty()) {
+					soundStr = sounds.get(0);
+					Log.warning("Sound path \"" + path + "\" uses an old format, using first sound in list ("+soundStr+")");
+					Log.warning("  Please change this from \"list: [sound[, sound, ...]]\" to \"sound: [sound]");
+				}
+				else {
+					Log.severe("No sound found for path \"" + path + "\" in sounds.yml");
+					return;
+				}
+			}
+			
+			try {
+				sound = Sound.valueOf(soundStr.toUpperCase());
+			}
+			catch(Exception e) {
+				Log.severe("The sound \"" + soundStr + "\" is not a valid sound (path = \""+path+"\")");
+				return;
+			}
 			
 			if(config.contains(path + ".volume"))
 				this.volume = (float) config.getDouble(path + ".volume");

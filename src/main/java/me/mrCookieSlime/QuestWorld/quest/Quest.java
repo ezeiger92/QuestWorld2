@@ -26,7 +26,7 @@ class Quest extends Renderable implements IQuestState {
 	
 	WeakReference<Category> category;
 	int id;
-	long cooldown;
+	int cooldown;
 	String name;
 	ItemStack item = new ItemStack(Material.BOOK_AND_QUILL);
 	List<Mission> tasks = new ArrayList<>();
@@ -83,13 +83,22 @@ class Quest extends Renderable implements IQuestState {
 		dest.copy(this);
 	}
 	
+	private int fromMaybeString(Object o) {
+		if(o instanceof Integer)
+			return ((Integer)o).intValue();
+		if(o instanceof String)
+			return Integer.valueOf((String)o);
+		
+		throw new IllegalArgumentException("Expected Integer or String, got " + o.getClass().getSimpleName());
+	}
+	
 	// Package
 	Quest(int id, YamlConfiguration file, Category category) {
 		this.category = new WeakReference<>(category);
 		this.id = id;
 		
 		config = file;
-		cooldown     = config.getLong("cooldown");
+		cooldown     = fromMaybeString(config.get("cooldown"));
 		partySupport = !config.getBoolean("disable-parties");
 		ordered      = config.getBoolean("in-order");
 		autoclaim    = config.getBoolean("auto-claim");
@@ -157,7 +166,7 @@ class Quest extends Renderable implements IQuestState {
 			// getValues wont recurse through sections, so we have to manually map to... map
 			data.put("location", ((ConfigurationSection)data.get("location")).getValues(false));
 			
-			data.put("menu_index", Integer.valueOf(key));
+			data.put("index", Integer.valueOf(key));
 			data.put("quest", this);
 			
 			Mission m = new Mission(data);
@@ -298,19 +307,19 @@ class Quest extends Renderable implements IQuestState {
 		partysize = size;
 	}
 
-	public long getRawCooldown() {
+	public int getRawCooldown() {
 		return cooldown;
 	}
 	
-	public void setRawCooldown(long cooldown) {
+	public void setRawCooldown(int cooldown) {
 		this.cooldown = cooldown;
 	}
 	
-	public long getCooldown() {
+	public int getCooldown() {
 		return cooldown / 60 / 1000;
 	}
 
-	public void setCooldown(long cooldown) {
+	public void setCooldown(int cooldown) {
 		this.cooldown = cooldown * 60 * 1000;
 	}
 	

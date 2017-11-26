@@ -554,11 +554,11 @@ public class QuestBook {
 					
 					int j = 1;
 					for(IQuest q : category.getQuests()) {
-						lines[j++] = "&7- " + q.getName();
-						if(j == 5) {
+						if(j > 5) {
 							lines[j++] = "&7&oand " + (quests - j) + " more...";
 							break;
-						}	
+						}
+						lines[j++] = "&7- " + q.getName();	
 					}
 					
 					for(int k = 0; k < 4; ++k)
@@ -612,11 +612,12 @@ public class QuestBook {
 					
 					int j = 1;
 					for(IMission m : quest.getMissions()) {
-						lines[j++] = "&7- " + m.getText();
 						if(j > 5) {
 							lines[j++] = "&7&oand " + (missions - j) + " more...";
 							break;
 						}
+						lines[j++] = "&7- " + m.getText();
+						
 					}
 					
 					for(int k = 0; k < 3; ++k)
@@ -852,8 +853,8 @@ public class QuestBook {
 						"&rShift + Left Click: &e+1h",
 						"&rShift + Right Click: &e-1h").get(),
 				event -> {
-					long cooldown = quest.getCooldown();
-					long delta = event.isShiftClick() ? 60: 1;
+					int cooldown = quest.getCooldown();
+					int delta = event.isShiftClick() ? 60: 1;
 					if (event.isRightClick()) delta = -delta;
 
 					// Force a step at 0, so you can't jump from 59 -> -1 or -1 -> 59

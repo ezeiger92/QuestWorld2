@@ -272,6 +272,20 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener, QuestLoade
 	}
 	
 	public static String resolvePath(String key) {
-		return instance.getConfig().getString(key,"");
+		String result = instance.getConfig().getString(key,null);
+		if(result == null) {
+			String fallback = instance.api.getResources().loadJarConfig("config.yml").getString(key, null);
+			if(fallback == null) {
+				Log.severe("No setting for \""+key+"\" found in config.yml, defaulting to \"\"");
+				result = "";
+			}
+			else {
+				Log.warning("Missing config.yml setting \""+key+"\", did you just update? Saving default \""+fallback+"\" from jar");
+				result = fallback;
+				instance.getConfig().set(key, fallback);
+				instance.saveConfig();
+			}
+		}
+		return result;
 	}
 }

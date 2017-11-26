@@ -3,6 +3,7 @@ package me.mrCookieSlime.QuestWorld.quest;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -10,6 +11,7 @@ import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.contract.IMissionState;
 import me.mrCookieSlime.QuestWorld.manager.ProgressTracker;
+import me.mrCookieSlime.QuestWorld.util.Log;
 import me.mrCookieSlime.QuestWorld.util.Text;
 
 import org.bukkit.Bukkit;
@@ -34,6 +36,10 @@ class Mission extends Renderable implements IMissionState {
 	private boolean     spawnerSupport = true;
 	private int         timeframe = 0;
 	private MissionType type = QuestWorld.getMissionType("SUBMIT");
+	
+	@Deprecated
+	private String missingWorldName = location.getWorld().getName();
+	private static HashSet<String> missingWorlds = new HashSet<>();
 
 	public Mission(int menuIndex, Quest quest) {
 		this.index = menuIndex;
@@ -282,6 +288,7 @@ class Mission extends Renderable implements IMissionState {
 		type = source.type;
 		deathReset = source.deathReset;
 		dialogue = source.getDialogue();
+		missingWorldName = source.missingWorldName;
 	}
 	
 	protected void copyTo(Mission dest) {
@@ -290,6 +297,15 @@ class Mission extends Renderable implements IMissionState {
 	
 	protected void loadDefaults() {
 		copy(new Mission(index, getQuest()));
+	}
+	
+	private int fromMaybeString(Object o) {
+		if(o instanceof Integer)
+			return ((Integer)o).intValue();
+		if(o instanceof String)
+			return Integer.valueOf((String)o);
+		
+		throw new IllegalArgumentException("Expected Integer or String, got " + o.getClass().getSimpleName());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -303,12 +319,18 @@ class Mission extends Renderable implements IMissionState {
 		try { entity = EntityType.valueOf((String)data.get("entity")); }
 		catch(Exception e) {}
 		location = locationHelper((Map<String, Object>)data.get("location"));
+		if(location.getWorld() == null && !missingWorlds.contains(missingWorldName)) {
+			Log.warning("Mission location exists in missing world \"" + missingWorldName + "\". Was it deleted?");
+			missingWorlds.add(missingWorldName);
+		}
 		index    = (Integer)data.getOrDefault("index", index);
 		// Chain to handle old name
 		customString = (String)data.getOrDefault("name", customString);
 		customString = Text.colorize((String)data.getOrDefault("custom_string", customString));
 		displayName  = Text.colorize((String)data.getOrDefault("display-name", displayName));
-		timeframe    = (Integer)data.getOrDefault("timeframe", timeframe);
+		
+		timeframe    = fromMaybeString(data.getOrDefault("timeframe", timeframe));
+		
 		deathReset   = (Boolean)data.getOrDefault("reset-on-death", deathReset);
 		description  = Text.colorize((String)data.getOrDefault("lore", description));
 		// Chain to handle old name
@@ -317,10 +339,10 @@ class Mission extends Renderable implements IMissionState {
 		spawnerSupport = !(Boolean)data.getOrDefault("exclude-spawners", !spawnerSupport);
 	}
 	
-	private static Location locationHelper(Map<String, Object> data) {
-		String defaultWorld = Bukkit.getWorlds().get(0).getName();
+	private Location locationHelper(Map<String, Object> data) {
+		missingWorldName = (String)data.getOrDefault("world", missingWorldName);
 		return new Location(
-				Bukkit.getWorld((String)data.getOrDefault("world", defaultWorld)),
+				Bukkit.getWorld(missingWorldName),
 				(Double)data.getOrDefault("x", 0.0),
 				(Double)data.getOrDefault("y", 64.0),
 				(Double)data.getOrDefault("z", 0.0),
@@ -328,10 +350,13 @@ class Mission extends Renderable implements IMissionState {
 				((Double)data.getOrDefault("pitch", 0.0)).floatValue());
 	}
 	
-	private static HashMap<String, Object> locationHelper(Location location) {
+	private HashMap<String, Object> locationHelper(Location location) {
 		HashMap<String, Object> result = new HashMap<>();
+		String worldName = missingWorldName;
+		if(location.getWorld() != null)
+			worldName = location.getWorld().getName();
 		
-		result.put("world", location.getWorld().getName());
+		result.put("world", worldName);
 		result.put("x", location.getX());
 		result.put("y", location.getY());
 		result.put("z", location.getZ());

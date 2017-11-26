@@ -9,11 +9,11 @@ import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
 import me.mrCookieSlime.QuestWorld.api.menu.QuestBook;
 import me.mrCookieSlime.QuestWorld.manager.PlayerManager;
+import me.mrCookieSlime.QuestWorld.manager.ProgressTracker;
 
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.PlayerDeathEvent;
@@ -51,12 +51,12 @@ public class PlayerListener implements Listener {
 		}
 	}
 	
-	@EventHandler(priority=EventPriority.LOWEST)
+	@EventHandler
 	public void onJoin(PlayerJoinEvent e) {
 		Player p = e.getPlayer();
 		
 		if (QuestWorld.getPlugin().getConfig().getBoolean("book.on-first-join") &&
-				!PlayerManager.of(p).getTracker().exists())
+				!ProgressTracker.exists(p.getUniqueId()))
 			p.getInventory().addItem(GuideBook.get());
 	}
 	
