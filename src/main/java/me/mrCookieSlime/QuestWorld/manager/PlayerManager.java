@@ -289,7 +289,8 @@ public class PlayerManager {
 		// Otherwise if there was no dialogue, use the completion placeholder
 		// If there are no lines, and there was dialogue, we're clearly done so return
 		// Refactor for ezeiger92/QuestWorld2#57
-		if(dialogue.hasNext())
+		boolean hasNext = dialogue.hasNext();
+		if(hasNext)
 			line = dialogue.next();
 		else if(task.getDialogue().isEmpty())
 			line = "*";
@@ -304,8 +305,9 @@ public class PlayerManager {
 		else
 			sendDialogueComponent(player, line);
 		
-		Bukkit.getScheduler().scheduleSyncDelayedTask(QuestWorld.getPlugin(),
-				() -> sendDialogue(player, task, dialogue), 70L);
+		if(hasNext)
+			Bukkit.getScheduler().scheduleSyncDelayedTask(QuestWorld.getPlugin(),
+					() -> sendDialogue(player, task, dialogue), 70L);
 	}
 
 	private static void sendDialogueComponent(Player player, String line) {
