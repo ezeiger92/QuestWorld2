@@ -93,7 +93,7 @@ class Quest extends Renderable implements IQuestState {
 		partySupport = !config.getBoolean("disable-parties");
 		ordered      = config.getBoolean("in-order");
 		autoclaim    = config.getBoolean("auto-claim");
-		name         = Text.colorize(config.getString("name"));
+		name         = config.getString("name");
 		item         = config.getItemStack("item", item);
 		
 		rewards = loadRewards();
@@ -175,7 +175,7 @@ class Quest extends Renderable implements IQuestState {
 		config.set("id", id);
 		config.set("category", getCategory().getID());
 		config.set("cooldown", String.valueOf(cooldown));
-		config.set("name", Text.escape(name));
+		config.set("name", name);
 		config.set("item", new ItemStack(item));
 		config.set("rewards.items", null);
 		config.set("rewards.money", money);

@@ -158,10 +158,21 @@ public class Text {
 		}
 	}
 	
+	/**
+	 * This function wraps words to align at a specific length, and works with
+	 * color *formatted* strings (rather than colorized strings). If you supply
+	 * strings from {@link Text.colorize}, they will fail to wrap colors across
+	 * multiple lines. The minimum length is 8 characters, and shorter lengths
+	 * will be set to 8.
+	 * 
+	 * @param max_length The maximum length of string
+	 * @param input An array of non-colorized strings
+	 * @return An array of strings, split by length and colorized
+	 */
 	public static ArrayList<String> wrap(int max_length, String... input) {
 		ArrayList<String> output = new ArrayList<>(input.length);
-
-		String format = "&f&o";
+		max_length = Math.max(max_length, 8);
+		String format = "";
 		for(String s : input) {
 			if(s == null) {
 				continue;
@@ -215,6 +226,7 @@ public class Text {
 						//Log.info("full: " + s.substring(begin, end));
 						output.add(Text.colorize(format + s.substring(begin, end)));
 					}
+					//Log.info("prepared: " + prepared_format + ", committed: " + committed_format + ", format: " + format);
 					begin = end;
 					n = i - end;
 					end = -1;
@@ -228,6 +240,7 @@ public class Text {
 				}
 			}
 			output.add(Text.colorize(format + s.substring(begin)));
+			//Log.info("prepared: " + prepared_format + ", committed: " + committed_format + ", format: " + format);
 			format = prepared_format;
 		}
 		

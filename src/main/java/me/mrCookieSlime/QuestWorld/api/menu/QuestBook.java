@@ -60,9 +60,8 @@ public class QuestBook {
 						int questCount = manager.countQuests(category, null);
 						int finishedCount = manager.getProgress(category);
 						view.addButton(category.getID(),
-								// TODO: wrapText
 								new ItemBuilder(category.getItem()).wrapText(
-										category.getName() + "\n" + 
+										(category.getName() + "\n" + 
 										QuestWorld.translate(Translation.CATEGORY_DESC,
 												String.valueOf(questCount),
 												String.valueOf(finishedCount),
@@ -70,7 +69,7 @@ public class QuestBook {
 												String.valueOf(manager.countQuests(category, QuestStatus.ON_COOLDOWN)),
 												String.valueOf(manager.countQuests(category, QuestStatus.REWARD_CLAIMABLE)),
 												Text.progressBar(finishedCount, questCount, null)
-										).split("\n")).get(),
+										)).split("\n")).get(),
 								event -> {
 									Player p2 = (Player) event.getWhoClicked();
 									PagedMapping.putPage(p2, 0);
@@ -817,7 +816,7 @@ public class QuestBook {
 							PlayerTools.makeTranslation(true, Translation.QUEST_NAME_EDIT, quest.getName()),
 							(c,s) -> {
 								String oldName = quest.getName();
-								changes.setName(Text.colorize(s));
+								changes.setName(s);
 								if(changes.apply()) 
 									PlayerTools.sendTranslation(p2, true, Translation.QUEST_NAME_SET, s, oldName);
 

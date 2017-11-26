@@ -14,7 +14,6 @@ import me.mrCookieSlime.QuestWorld.QuestWorldPlugin;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategoryState;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
-import me.mrCookieSlime.QuestWorld.util.Text;
 
 import org.bukkit.Material;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -36,7 +35,7 @@ class Category extends Renderable implements ICategoryState {
 	// External
 	public Category(String name, int id, RenderableFacade facade) {
 		this.id = id;
-		this.name = Text.colorize(name);
+		this.name = name;
 		this.facade = facade;
 		config = YamlConfiguration.loadConfiguration(getFile());
 		item = new ItemStack(Material.BOOK_AND_QUILL);
@@ -59,7 +58,7 @@ class Category extends Renderable implements ICategoryState {
 		this.id = id;
 		this.config = config;
 		this.facade = facade;
-		name = Text.colorize(config.getString("name"));
+		name = config.getString("name");
 		item = config.getItemStack("item", item);
 		hidden = config.getBoolean("hidden");
 		permission = config.getString("permission", "");
@@ -121,7 +120,7 @@ class Category extends Renderable implements ICategoryState {
 
 	//// ICategoryState Impl
 	public void setName(String name) {
-		this.name = Text.colorize(name);
+		this.name = name;
 	}
 
 	@Override
@@ -186,7 +185,7 @@ class Category extends Renderable implements ICategoryState {
 			return;
 		
 		config.set("id", id);
-		config.set("name", Text.escape(name));
+		config.set("name", name);
 		config.set("item", item);
 		config.set("permission", permission);
 		config.set("hidden", this.hidden);
@@ -229,7 +228,7 @@ class Category extends Renderable implements ICategoryState {
 		result.put("unique", (int)getUnique());
 		result.put("index", id);
 		result.put("hidden", hidden);
-		result.put("name", Text.escape(name));
+		result.put("name", name);
 		result.put("permission", permission);
 		result.put("item", item);
 		result.put("parent", getParent() == null ? null : (int)getParent().getUnique());
@@ -280,7 +279,7 @@ class Category extends Renderable implements ICategoryState {
 		
 		id = (Integer)data.getOrDefault("index", -1);
 		hidden = (Boolean)data.getOrDefault("hidden", false);
-		name = Text.colorize((String)data.getOrDefault("name", ""));
+		name = (String)data.getOrDefault("name", "");
 		permission = (String)data.getOrDefault("permission", "");
 		item = (ItemStack)data.getOrDefault("item", new ItemStack(Material.STONE));
 		parent = fancyParentResolveFunction((Integer)data.getOrDefault("parent", null));
