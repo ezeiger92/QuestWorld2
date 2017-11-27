@@ -33,9 +33,10 @@ import me.mrCookieSlime.QuestWorld.api.annotation.Mutable;
  */
 public class ItemBuilder implements Cloneable {
 	/**
+	 * A handy set of builder prototypes that were being created by hand too
+	 * often.
 	 * 
 	 * @author erik
-	 *
 	 */
 	// TODO: Here's something that will probably need changing after 1.13
 	public static enum Proto {
@@ -48,19 +49,45 @@ public class ItemBuilder implements Cloneable {
 			this.item = item;
 		}
 		
+		/**
+		 * Creates a new ItemBuilder from the prototype item.
+		 * 
+		 * @return A new ItemBuilder
+		 */
 		public ItemBuilder get() {
 			return new ItemBuilder(item);
 		}
 		
+		/**
+		 * Copies the prototype item.
+		 * 
+		 * @return A new ItemStack
+		 */
 		public ItemStack getItem() {
 			return item.clone();
 		}
 	}
 	
+	/**
+	 * Null pointer safe tool for cloning ItemStacks
+	 * 
+	 * @param source ItemStack to clone
+	 * @return Clone of source, or <tt>null</tt> if source is <tt>null</tt>
+	 */
 	public static ItemStack clone(ItemStack source) {
 		return (source != null) ? source.clone() : null;
 	}
 	
+	/**
+	 * Item comparison with (optional) wildcard matching for metadata. If either
+	 * stack has the lore consisting of a single asterisk ("*"), all metadata
+	 * will be discarded before a comparison is made. If either stack is null,
+	 * a null pointer safe comparison is made.
+	 * 
+	 * @param left One of the ItemStacks
+	 * @param right The other ItemStack
+	 * @return Whether or not the items are considered identical
+	 */
 	public static boolean compareItems(ItemStack left, ItemStack right) {
 		if(left == null || right == null)
 			return left == right;
@@ -92,6 +119,13 @@ public class ItemBuilder implements Cloneable {
 		return left.isSimilar(right);
 	}
 	
+	/**
+	 * Constructs an ItemBuilder by consuming an exiting ItemStack. Any
+	 * modifications to the builder directly affect the ItemStack.
+	 * 
+	 * @param stack The ItemStack to edit
+	 * @return A new ItemBuilder that modifies <tt>stack</tt>
+	 */
 	public static @Mutable ItemBuilder edit(@Mutable("Stored and modified by other functions") ItemStack stack) {
 		
 		ItemBuilder res = new ItemBuilder();
@@ -155,10 +189,24 @@ public class ItemBuilder implements Cloneable {
 		durability(durability);
 	}
 	
+	/**
+     * Constructs an ItemBuilder. Takes an int for durability to "play nice"
+     * with integral types, but will truncate to a short internally.
+     *
+     * @param type Material of item
+     * @param amount Amount of material
+     * @param durability Stack durability as an int
+     */
 	public ItemBuilder(Material type, int amount, int durability) {
 		this(type, amount, (short)durability);
 	}
 	
+	/**
+	 * Constructs an ItemBuilder of a skull. The resulting builder will have the
+	 * material <tt>SKULL_ITEM</tt> and use the desired skull type.
+	 * 
+	 * @param type Type of skull to create
+	 */
 	public ItemBuilder(SkullType type) {
 		this(Material.SKULL_ITEM);
 		skull(type);
@@ -278,6 +326,12 @@ public class ItemBuilder implements Cloneable {
 		return this;
 	}
 	
+	/**
+	 * Sets skull type, given that the current material accepts skull types.
+	 * 
+	 * @param type Desired type of skull
+	 * @return this, for chaining
+	 */
 	public @Mutable ItemBuilder skull(SkullType type) {
 		if(resultStack.getType() == Material.SKULL_ITEM)
 			durability(type.ordinal());
@@ -285,6 +339,15 @@ public class ItemBuilder implements Cloneable {
 		return this;
 	}
 	
+	/**
+	 * Sets the skull type to a players head, given that the current material
+	 * accepts skull types. <tt>playerName</tt> must not be null. If you want a
+	 * plain player skull, use
+	 * {@link ItemBuilder#skull(SkullType) skull(SkullType.PLAYER)}.
+	 * 
+	 * @param playerName The player whose face will be displayed on the head
+	 * @return this, for chaining
+	 */
 	@SuppressWarnings("deprecation")
 	public @Mutable ItemBuilder skull(String playerName) {
 		skull(SkullType.PLAYER);
@@ -299,10 +362,16 @@ public class ItemBuilder implements Cloneable {
 		return this;
 	}
 	
-	public @Mutable ItemBuilder mob(EntityType mob) {
+	/**
+	 * Sets the mob type, given the current material supports mob types.
+	 * 
+	 * @param entity The type of entity
+	 * @return this, for chaining
+	 */
+	public @Mutable ItemBuilder mob(EntityType entity) {
 		if(resultStack.getItemMeta() instanceof SpawnEggMeta) {
 			SpawnEggMeta meta = (SpawnEggMeta) resultStack.getItemMeta();
-			meta.setSpawnedType(mob);
+			meta.setSpawnedType(entity);
 			resultStack.setItemMeta(meta);
 		}
 		
@@ -325,6 +394,13 @@ public class ItemBuilder implements Cloneable {
 		return this;
 	}
 
+	/**
+	 * Sets a series of flags on the ItemStack, affecting the information it
+	 * displays.
+	 * 
+	 * @param flags A series of ItemFlags
+	 * @return this, for chaining
+	 */
 	public @Mutable ItemBuilder flag(ItemFlag... flags) {
 		ItemMeta stackMeta = resultStack.getItemMeta();
 		stackMeta.addItemFlags(flags);
@@ -332,6 +408,13 @@ public class ItemBuilder implements Cloneable {
 		return this;
 	}
 	
+	/**
+	 * Removes a series of flags from the ItemStack, affecting the information it
+	 * displays.
+	 * 
+	 * @param flags A series of ItemFlags
+	 * @return this, for chaining
+	 */
 	public @Mutable ItemBuilder unflag(ItemFlag... flags) {
 		ItemMeta stackMeta = resultStack.getItemMeta();
 		stackMeta.removeItemFlags(flags);
@@ -339,6 +422,13 @@ public class ItemBuilder implements Cloneable {
 		return this;
 	}
 	
+	/**
+	 * Sets all existing flags on the ItemStack.
+	 * 
+	 * @see ItemBuilder#flag
+	 * 
+	 * @return this, for chaining
+	 */
 	public @Mutable ItemBuilder flagAll() {
 		return flag(
 				ItemFlag.HIDE_ATTRIBUTES,
@@ -349,6 +439,13 @@ public class ItemBuilder implements Cloneable {
 				ItemFlag.HIDE_UNBREAKABLE);
 	}
 	
+	/**
+	 * Removes all flags from the ItemStack.
+	 * 
+	 * @see ItemBuilder#unflag
+	 * 
+	 * @return this, for chaining
+	 */
 	public @Mutable ItemBuilder unflagAll() {
 		return unflag(
 				ItemFlag.HIDE_ATTRIBUTES,
@@ -359,6 +456,12 @@ public class ItemBuilder implements Cloneable {
 				ItemFlag.HIDE_UNBREAKABLE);
 	}
 	
+	/**
+	 * Sets the display name for the ItemStack.
+	 * 
+	 * @param displayName The new name
+	 * @return this, for chaining
+	 */
 	public @Mutable ItemBuilder display(String displayName) {
 		ItemMeta stackMeta = resultStack.getItemMeta();
 		stackMeta.setDisplayName(Text.colorize(displayName));
@@ -454,7 +557,13 @@ public class ItemBuilder implements Cloneable {
 		directLore(result);
 		return this;
 	}
-	
+
+	/**
+	 * Clones the current ItemBuilder, copying the current state of its
+	 * ItemStack. Neither builder can access the others ItemStack.
+	 * 
+	 * @return A new ItemBuilder
+	 */
 	@Override
 	public ItemBuilder clone() {
 		return new ItemBuilder(resultStack);
