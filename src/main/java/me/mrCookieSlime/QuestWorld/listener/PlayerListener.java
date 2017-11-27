@@ -10,7 +10,12 @@ import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
 import me.mrCookieSlime.QuestWorld.api.menu.QuestBook;
 import me.mrCookieSlime.QuestWorld.manager.PlayerManager;
 import me.mrCookieSlime.QuestWorld.manager.ProgressTracker;
+import me.mrCookieSlime.QuestWorld.party.Party;
 
+import java.util.HashMap;
+import java.util.UUID;
+
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -22,6 +27,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitRunnable;
 
 public class PlayerListener implements Listener {
 	
@@ -51,9 +57,17 @@ public class PlayerListener implements Listener {
 		}
 	}
 	
+	HashMap<UUID, Integer> partyKick = new HashMap<>();
+	
 	@EventHandler
 	public void onJoin(PlayerJoinEvent e) {
 		Player p = e.getPlayer();
+		
+		int task_id = partyKick.getOrDefault(p.getUniqueId(), -1);
+		if(task_id > -1) {
+			Bukkit.getScheduler().cancelTask(task_id);
+			partyKick.remove(task_id);
+		}
 		
 		if (QuestWorld.getPlugin().getConfig().getBoolean("book.on-first-join") &&
 				!ProgressTracker.exists(p.getUniqueId()))
@@ -62,7 +76,33 @@ public class PlayerListener implements Listener {
 	
 	@EventHandler
 	public void onleave(PlayerQuitEvent e) {
-		PlayerManager.of(e.getPlayer()).unload();
+		Player player = e.getPlayer();
+		
+		int autokick = QuestWorld.getPlugin().getConfig().getInt("party.autokick", 2);
+		if(autokick == 0) {
+			Party party = PlayerManager.of(player).getParty();
+			if(party.isLeader(player))
+				party.abandon();
+			else
+				party.kickPlayer(player);
+		}
+		else if(autokick > 0) {
+			Party party = PlayerManager.of(player).getParty();
+			int task_id = new BukkitRunnable(){
+				@Override
+				public void run() {
+					if(party.isLeader(player))
+						party.abandon();
+					else
+						party.kickPlayer(player);
+					partyKick.remove(getTaskId());
+				}
+			}.runTaskLater(QuestWorld.getPlugin(), autokick).getTaskId();
+			
+			partyKick.put(player.getUniqueId(), task_id);
+		}
+
+		PlayerManager.of(player).unload();
 	}
 	
 	// Since we can't randomly update recipes at runtime, replace result with latest lore

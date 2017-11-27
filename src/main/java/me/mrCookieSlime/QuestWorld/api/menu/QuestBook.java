@@ -160,7 +160,7 @@ public class QuestBook {
 									(party.isLeader(player) ? "": "&7&oClick here to kick this Member")).get(),
 							event -> {
 								if (!party.isLeader(player)) {
-									party.kickPlayer(player.getName());
+									party.kickPlayer(player);
 									openPartyMembers((Player) event.getWhoClicked());
 								}
 							}
@@ -266,7 +266,7 @@ public class QuestBook {
 								"&rBe careful with this Option!").getNew(), 
 						event -> {
 							Player p2 = (Player) event.getWhoClicked();
-							party.kickPlayer(p2.getName());
+							party.kickPlayer(p2);
 							openPartyMenu(p2);
 						}
 				);

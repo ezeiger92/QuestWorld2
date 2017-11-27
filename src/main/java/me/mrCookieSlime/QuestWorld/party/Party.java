@@ -68,8 +68,9 @@ public class Party {
 		save();
 	}
 	
-	public void kickPlayer(String name) {
-		OfflinePlayer target = null;
+	public void kickPlayer(OfflinePlayer target) {
+		//OfflinePlayer target = null;
+		boolean valid = false;
 		List<Player> existingParty = new ArrayList<Player>();
 		
 		for (UUID member: getPlayers()) {
@@ -77,13 +78,13 @@ public class Party {
 			if (p.isOnline())
 				existingParty.add((Player)p);
 			
-			if(p.getName().equalsIgnoreCase(name))
-				target = p;
+			if(p.getUniqueId().equals(target.getUniqueId()))
+				valid = true;
 		}
 		
-		if(target != null) {
+		if(valid) {
 			for(Player p : existingParty) {
-				PlayerTools.sendTranslation(p, true, Translation.PARTY_PLAYER_KICK, name);
+				PlayerTools.sendTranslation(p, true, Translation.PARTY_PLAYER_KICK, target.getName());
 			}
 			
 			members.remove(target.getUniqueId());
