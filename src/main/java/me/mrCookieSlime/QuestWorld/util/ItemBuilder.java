@@ -450,7 +450,7 @@ public class ItemBuilder implements Cloneable {
 		for(int i = 0; i < options.length; ++i)
 			result.add(Text.colorize(" &7" + options[i]));
 		
-		result.add(Text.colorize("&2>" + options[index]));
+		result.set(index + 1, Text.colorize("&2>" + options[index]));
 		directLore(result);
 		return this;
 	}

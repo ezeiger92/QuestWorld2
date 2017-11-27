@@ -228,7 +228,7 @@ public class MissionButton {
 	
 	public static void apply(InventoryClickEvent event, IMissionState changes) {
 		if(changes.apply()) {
-			QuestBook.openQuestMissionEditor((Player) event.getWhoClicked(), changes);
+			QuestBook.openQuestMissionEditor((Player) event.getWhoClicked(), changes.getSource());
 		}
 	}
 

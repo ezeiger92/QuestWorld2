@@ -49,8 +49,8 @@ public class KillNamedMission extends KillMission {
 			EntityType type = mission.getEntity();
 			if((type == e.getEntityType() || type == EntityType.COMPLEX_PART)
 				&& (mission.getSpawnerSupport() || !EntityTools.isFromSpawner(e.getEntity()))
-				&& (mission.getCustomInt() == EXACT && mission.getCustomString().equals(name)
-					|| mission.getCustomInt() == CONTAINS && mission.getCustomString().contains(name)))
+				&& (mission.getCustomInt() == EXACT && name.equals(mission.getCustomString())
+					|| mission.getCustomInt() == CONTAINS && name.contains(mission.getCustomString())))
 				r.addProgress(1);
 		}
 	}
@@ -61,13 +61,10 @@ public class KillNamedMission extends KillMission {
 		putButton(12, MissionButton.entityName(changes));
 		putButton(16, MissionButton.simpleButton(
 				changes,
-				new ItemBuilder(Material.BEDROCK).display("&7Match Type")	
-				.selector(changes.getSource().getCustomInt(), "Exact", "Contains").get(),
+				new ItemBuilder(Material.GOLDEN_APPLE).display("&7Match Type")	
+				.selector(changes.getCustomInt(), "Exact", "Contains").get(),
 				event -> {
 					changes.setCustomInt(1 - changes.getCustomInt());
-					if(changes.apply()) {
-						
-					}
 				}
 		));
 	}

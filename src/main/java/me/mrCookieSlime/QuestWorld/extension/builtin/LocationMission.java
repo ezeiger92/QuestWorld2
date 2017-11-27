@@ -107,7 +107,8 @@ public class LocationMission extends MissionType implements Ticking {
 					PlayerTools.closeInventoryWithEvent(p);
 				}
 		));
-		putButton(17, new MenuData(
+		putButton(17, MissionButton.simpleButton(
+				changes,
 				new ItemBuilder(Material.COMPASS).wrapText(
 						"&7Radius: &a" + changes.getCustomInt(),
 						"",
@@ -118,7 +119,6 @@ public class LocationMission extends MissionType implements Ticking {
 				event -> {
 					int amount = MissionButton.clickNumber(changes.getCustomInt(), 16, event);
 					changes.setCustomInt(Math.max(amount, 1));
-					MissionButton.apply(event, changes);
 				}
 		));
 	}

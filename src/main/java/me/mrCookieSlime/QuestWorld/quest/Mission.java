@@ -229,6 +229,7 @@ class Mission extends Renderable implements IMissionState {
 	@Override
 	public void setLocation(Location loc) {
 		this.location = loc.clone();
+		this.missingWorldName = loc.getWorld().getName();
 	}
 
 	@Override
@@ -275,19 +276,20 @@ class Mission extends Renderable implements IMissionState {
 	protected void copy(Mission source) {
 		setUnique(source.getUnique());
 		quest = source.quest;
-		spawnerSupport = source.spawnerSupport;
 		amount = source.amount;
+		customInt = source.customInt;
 		customString = source.customString;
+		deathReset = source.deathReset;
 		description = source.description;
+		dialogue = source.getDialogue();
 		displayName = source.displayName;
 		entity = source.entity;
+		item = source.item.clone();
 		index = source.index;
 		location = source.location;
-		item = source.item;
+		spawnerSupport = source.spawnerSupport;
 		timeframe = source.timeframe;
 		type = source.type;
-		deathReset = source.deathReset;
-		dialogue = source.getDialogue();
 		missingWorldName = source.missingWorldName;
 	}
 	
