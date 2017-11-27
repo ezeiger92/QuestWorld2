@@ -555,7 +555,7 @@ public class QuestBook {
 					int j = 1;
 					for(IQuest q : category.getQuests()) {
 						if(j > 5) {
-							lines[j++] = "&7&oand " + (quests - j) + " more...";
+							lines[j++] = "&7&oand " + (quests - 5) + " more...";
 							break;
 						}
 						lines[j++] = "&7- " + q.getName();	
@@ -613,7 +613,7 @@ public class QuestBook {
 					int j = 1;
 					for(IMission m : quest.getMissions()) {
 						if(j > 5) {
-							lines[j++] = "&7&oand " + (missions - j) + " more...";
+							lines[j++] = "&7&oand " + (missions - 5) + " more...";
 							break;
 						}
 						lines[j++] = "&7- " + m.getText();

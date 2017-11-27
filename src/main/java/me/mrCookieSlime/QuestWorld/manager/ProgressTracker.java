@@ -62,7 +62,7 @@ public class ProgressTracker {
 	}
 	
 	public void setPartyLeader(UUID uuid) {
-		config.set("party.associated", uuid);
+		config.set("party.associated", uuid.toString());
 	}
 	
 	public List<UUID> getPartyMembers() {

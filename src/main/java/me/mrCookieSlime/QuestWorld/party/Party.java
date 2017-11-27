@@ -132,16 +132,7 @@ public class Party {
 	}
 	
 	public void save() {
-		List<String> list = new ArrayList<String>();
-		for (UUID member: members) {
-			list.add(member.toString());
-		}
 		manager.getTracker().setPartyMembers(members);
-		
-		List<String> invitations = new ArrayList<String>();
-		for (UUID p: pending) {
-			invitations.add(p.toString());
-		}
 		manager.getTracker().setPartyPending(pending);
 	}
 
