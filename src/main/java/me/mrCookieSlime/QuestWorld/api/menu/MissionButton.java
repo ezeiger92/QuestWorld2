@@ -14,7 +14,7 @@ import me.mrCookieSlime.QuestWorld.api.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.SinglePrompt;
 import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.api.contract.IMissionState;
-import me.mrCookieSlime.QuestWorld.manager.PlayerManager;
+import me.mrCookieSlime.QuestWorld.manager.PlayerStatus;
 import me.mrCookieSlime.QuestWorld.manager.ProgressTracker;
 import me.mrCookieSlime.QuestWorld.util.EntityTools;
 import me.mrCookieSlime.QuestWorld.util.ItemBuilder;
@@ -195,7 +195,7 @@ public class MissionButton {
 						if (changes.getDialogue().isEmpty())
 							p.sendMessage(Text.colorize("&4No Dialogue found!"));
 						else
-							PlayerManager.sendDialogue(p, changes, changes.getDialogue().iterator());
+							PlayerStatus.sendDialogue(p, changes, changes.getDialogue().iterator());
 						return;
 					}
 					

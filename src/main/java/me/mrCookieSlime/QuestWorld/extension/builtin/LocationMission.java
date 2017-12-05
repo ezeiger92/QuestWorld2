@@ -5,13 +5,13 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import me.mrCookieSlime.QuestWorld.api.MissionSet;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.SinglePrompt;
 import me.mrCookieSlime.QuestWorld.api.Ticking;
 import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IMissionState;
+import me.mrCookieSlime.QuestWorld.api.contract.MissionEntry;
 import me.mrCookieSlime.QuestWorld.api.menu.MenuData;
 import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
 import me.mrCookieSlime.QuestWorld.api.menu.QuestBook;
@@ -67,7 +67,7 @@ public class LocationMission extends MissionType implements Ticking {
 	}
 	
 	@Override
-	public void onManual(Player p, MissionSet.Result result) {
+	public void onManual(Player p, MissionEntry result) {
 		IMission mission = result.getMission();
 		if(withinRadius(mission.getLocation(), p.getLocation(), mission.getCustomInt()))
 			result.addProgress(1);

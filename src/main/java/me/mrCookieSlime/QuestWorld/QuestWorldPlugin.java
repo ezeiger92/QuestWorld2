@@ -13,13 +13,13 @@ import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.QuestExtension;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
 import me.mrCookieSlime.QuestWorld.api.contract.QuestLoader;
+import me.mrCookieSlime.QuestWorld.api.contract.QuestingAPI;
 import me.mrCookieSlime.QuestWorld.command.EditorCommand;
 import me.mrCookieSlime.QuestWorld.command.QuestsCommand;
 import me.mrCookieSlime.QuestWorld.extension.builtin.Builtin;
 import me.mrCookieSlime.QuestWorld.listener.ExtensionInstaller;
 import me.mrCookieSlime.QuestWorld.listener.MenuListener;
 import me.mrCookieSlime.QuestWorld.listener.PlayerListener;
-import me.mrCookieSlime.QuestWorld.manager.PlayerManager;
 import me.mrCookieSlime.QuestWorld.util.Log;
 
 import org.bukkit.entity.Player;
@@ -50,6 +50,7 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener, QuestLoade
 		
 		extLoader = new ExtensionLoader(getClassLoader(), getPath("data.extensions"));
 		getServer().getServicesManager().register(QuestLoader.class, this, this, ServicePriority.Normal);
+		getServer().getServicesManager().register(QuestingAPI.class, api, this, ServicePriority.Normal);
 	}
 	
 	private ArrayList<QuestExtension> preEnableHooks = new ArrayList<>();
@@ -110,7 +111,7 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener, QuestLoade
 		questCheckHandle = getServer().getScheduler().scheduleSyncRepeatingTask(this,
 				() -> {
 					for (Player p: getServer().getOnlinePlayers())
-						PlayerManager.of(p).update(true);
+						api.getPlayerStatus(p).update(true);
 				},
 				0L,
 				getConfig().getInt("options.quest-check-delay")
@@ -165,7 +166,7 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener, QuestLoade
 		api.getFacade().save(force);
 
 		for(Player p : getServer().getOnlinePlayers())
-			PlayerManager.of(p).getTracker().save();
+			api.getPlayerStatus(p).getTracker().save();
 		
 		lastSave = System.currentTimeMillis();
 	}
@@ -175,7 +176,7 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener, QuestLoade
 		api.getFacade().unload();
 		
 		for(Player p : getServer().getOnlinePlayers())
-			PlayerManager.of(p).getTracker().save();
+			api.getPlayerStatus(p).getTracker().save();
 	}
 	
 	public boolean importPreset(String fileName) {
@@ -287,5 +288,9 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener, QuestLoade
 			}
 		}
 		return result;
+	}
+	
+	public static QuestingImpl getImpl() {
+		return instance.api;
 	}
 }

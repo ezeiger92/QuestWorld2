@@ -14,11 +14,11 @@ import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IMissionState;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuestState;
-import me.mrCookieSlime.QuestWorld.event.CategoryDeleteEvent;
-import me.mrCookieSlime.QuestWorld.event.MissionChangeEvent;
-import me.mrCookieSlime.QuestWorld.event.MissionDeleteEvent;
-import me.mrCookieSlime.QuestWorld.event.QuestChangeEvent;
-import me.mrCookieSlime.QuestWorld.event.QuestDeleteEvent;
+import me.mrCookieSlime.QuestWorld.api.event.CategoryDeleteEvent;
+import me.mrCookieSlime.QuestWorld.api.event.MissionChangeEvent;
+import me.mrCookieSlime.QuestWorld.api.event.MissionDeleteEvent;
+import me.mrCookieSlime.QuestWorld.api.event.QuestChangeEvent;
+import me.mrCookieSlime.QuestWorld.api.event.QuestDeleteEvent;
 
 public class MissionViewer implements Listener {
 	private Map<MissionType, Set<IMission>> missions = new HashMap<>();

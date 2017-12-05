@@ -11,7 +11,6 @@ import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategoryState;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
-import me.mrCookieSlime.QuestWorld.container.PagedMapping;
 import me.mrCookieSlime.QuestWorld.util.PlayerTools;
 
 public class Buttons {

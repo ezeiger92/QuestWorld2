@@ -2,6 +2,7 @@ package me.mrCookieSlime.QuestWorld.api;
 
 import org.bukkit.plugin.Plugin;
 
+import me.mrCookieSlime.QuestWorld.api.annotation.Control;
 import me.mrCookieSlime.QuestWorld.api.contract.QuestLoader;
 import me.mrCookieSlime.QuestWorld.util.BukkitService;
 import me.mrCookieSlime.QuestWorld.util.Log;
@@ -25,6 +26,7 @@ public abstract class QuestExtension {
 		loader.attach(this);
 	}
 	
+	@Control
 	public String getName() {
 		return getClass().getSimpleName();
 	}

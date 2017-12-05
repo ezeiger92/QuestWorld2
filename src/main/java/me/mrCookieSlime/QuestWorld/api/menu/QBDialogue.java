@@ -9,12 +9,11 @@ import me.mrCookieSlime.QuestWorld.api.contract.IMissionState;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuestState;
 import me.mrCookieSlime.QuestWorld.api.contract.IStateful;
-import me.mrCookieSlime.QuestWorld.container.PagedMapping;
-import me.mrCookieSlime.QuestWorld.event.CancellableEvent;
-import me.mrCookieSlime.QuestWorld.event.CategoryDeleteEvent;
-import me.mrCookieSlime.QuestWorld.event.MissionDeleteEvent;
-import me.mrCookieSlime.QuestWorld.event.QuestDeleteEvent;
-import me.mrCookieSlime.QuestWorld.manager.PlayerManager;
+import me.mrCookieSlime.QuestWorld.api.event.CancellableEvent;
+import me.mrCookieSlime.QuestWorld.api.event.CategoryDeleteEvent;
+import me.mrCookieSlime.QuestWorld.api.event.MissionDeleteEvent;
+import me.mrCookieSlime.QuestWorld.api.event.QuestDeleteEvent;
+import me.mrCookieSlime.QuestWorld.manager.PlayerStatus;
 import me.mrCookieSlime.QuestWorld.util.EntityTools;
 import me.mrCookieSlime.QuestWorld.util.ItemBuilder;
 import me.mrCookieSlime.QuestWorld.util.PlayerTools;
@@ -108,7 +107,7 @@ public class QBDialogue {
 						"",
 						"&rThis will reset this Quest's Database").get(),
 				event -> {
-					PlayerManager.clearAllQuestData(q);
+					PlayerStatus.clearAllQuestData(q);
 					QuestBook.openQuestEditor((Player) event.getWhoClicked(), q);
 				}
 		);

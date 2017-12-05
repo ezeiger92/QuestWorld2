@@ -5,12 +5,18 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.MissionViewer;
 import me.mrCookieSlime.QuestWorld.api.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.Translator;
+import me.mrCookieSlime.QuestWorld.api.contract.IMission;
+import me.mrCookieSlime.QuestWorld.api.contract.MissionEntry;
 import me.mrCookieSlime.QuestWorld.api.contract.QuestingAPI;
+import me.mrCookieSlime.QuestWorld.manager.MissionSet;
+import me.mrCookieSlime.QuestWorld.manager.PlayerStatus;
+import me.mrCookieSlime.QuestWorld.manager.StatusManager;
 import me.mrCookieSlime.QuestWorld.quest.RenderableFacade;
 import me.mrCookieSlime.QuestWorld.util.BukkitService;
 import me.mrCookieSlime.QuestWorld.util.Lang;
@@ -29,6 +35,7 @@ public class QuestingImpl implements QuestingAPI, Reloadable {
 	private ResourceLoader resources;
 	private Lang language;
 	private QuestWorldPlugin questWorld;
+	private StatusManager statusManager = new StatusManager();
 	
 	public QuestingImpl(QuestWorldPlugin questWorld) {
 		this.questWorld = questWorld;
@@ -87,8 +94,23 @@ public class QuestingImpl implements QuestingAPI, Reloadable {
 	}
 	
 	@Override
+	public Iterable<MissionEntry> getMissionEntries(MissionType type, OfflinePlayer player) {
+		return new MissionSet(statusManager.get(player), type);
+	}
+	
+	@Override
+	public MissionEntry getMissionEntry(IMission mission, OfflinePlayer player) {
+		return new MissionSet.Result(mission, statusManager.get(player));
+	}
+	
+	@Override
 	public QuestWorldPlugin getPlugin() {
 		return questWorld;
+	}
+	
+	@Override
+	public PlayerStatus getPlayerStatus(OfflinePlayer player) {
+		return statusManager.get(player);
 	}
 
 	@Override
@@ -100,5 +122,9 @@ public class QuestingImpl implements QuestingAPI, Reloadable {
 	public void reload() {
 		eventSounds = new Sounds(resources.loadConfigNoexpect("sounds.yml", true));
 		language.reload();
+	}
+	
+	public void playerLeave(OfflinePlayer player) {
+		statusManager.unload(player);
 	}
 }

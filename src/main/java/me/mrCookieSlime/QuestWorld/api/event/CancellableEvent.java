@@ -1,4 +1,4 @@
-package me.mrCookieSlime.QuestWorld.event;
+package me.mrCookieSlime.QuestWorld.api.event;
 
 import org.bukkit.Bukkit;
 import org.bukkit.event.Cancellable;

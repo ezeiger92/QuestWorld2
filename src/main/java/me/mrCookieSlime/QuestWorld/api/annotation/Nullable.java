@@ -1,8 +1,9 @@
 package me.mrCookieSlime.QuestWorld.api.annotation;
 
+import static java.lang.annotation.RetentionPolicy.SOURCE;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
@@ -19,7 +20,7 @@ import java.lang.annotation.Target;
  * <p> This will not be included during compilation, it is purely for
  * documentation.
  */
-@Retention(RetentionPolicy.SOURCE)
+@Retention(SOURCE)
 @Target({ElementType.METHOD, ElementType.PARAMETER})
 public @interface Nullable {
 	// Reason for nullability, if it helps documentation

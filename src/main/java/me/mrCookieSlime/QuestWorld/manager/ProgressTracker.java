@@ -8,10 +8,11 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
+import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.YamlConfiguration;
-
-import com.google.common.collect.Lists;
 
 import me.mrCookieSlime.QuestWorld.QuestWorldPlugin;
 import me.mrCookieSlime.QuestWorld.api.QuestStatus;
@@ -45,10 +46,10 @@ public class ProgressTracker {
 		}
 	}
 	
-	private static UUID tryUUID(String uuid) {
+	private static OfflinePlayer tryOfflinePlayer(String uuid) {
 		if(uuid != null)
 			try {
-				return UUID.fromString(uuid);
+				return Bukkit.getOfflinePlayer(UUID.fromString(uuid));
 			}
 			catch(IllegalArgumentException e) {
 			}
@@ -57,28 +58,38 @@ public class ProgressTracker {
 	}
 	
 	//// PARTY
-	public UUID getPartyLeader() {
-		return tryUUID(config.getString("party.associated", null));
+	public OfflinePlayer getPartyLeader() {
+		return tryOfflinePlayer(config.getString("party.associated", null));
 	}
 	
-	public void setPartyLeader(UUID uuid) {
-		config.set("party.associated", uuid.toString());
+	public void setPartyLeader(OfflinePlayer player) {
+		config.set("party.associated", player.getUniqueId().toString());
 	}
 	
-	public List<UUID> getPartyMembers() {
-		return Lists.transform(config.getStringList("party.members"), s -> tryUUID(s));
+	public List<OfflinePlayer> getPartyMembers() {
+		return config.getStringList("party.members").stream()
+				.map(string -> tryOfflinePlayer(string))
+				.filter(player -> player != null)
+				.collect(Collectors.toList());
 	}
 	
-	public void setPartyMembers(List<UUID> members) {
-		config.set("party.members", Lists.transform(members, uuid -> uuid.toString()));
+	public void setPartyMembers(List<OfflinePlayer> members) {
+		config.set("party.members", members.stream()
+				.map(player -> player.getUniqueId())
+				.collect(Collectors.toList()));
 	}
 	
-	public List<UUID> getPartyPending() {
-		return Lists.transform(config.getStringList("party.pending-requests"), s -> tryUUID(s));
+	public List<OfflinePlayer> getPartyPending() {
+		return config.getStringList("party.pending-requests").stream()
+				.map(string -> tryOfflinePlayer(string))
+				.filter(player -> player != null)
+				.collect(Collectors.toList());
 	}
 	
-	public void setPartyPending(List<UUID> pending) {
-		config.set("party.pending-requests", Lists.transform(pending, uuid -> uuid.toString()));
+	public void setPartyPending(List<OfflinePlayer> pending) {
+		config.set("party.pending-requests", pending.stream()
+				.map(player -> player.getUniqueId().toString())
+				.collect(Collectors.toList()));
 	}
 	
 	//// QUEST

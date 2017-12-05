@@ -13,6 +13,8 @@ import me.mrCookieSlime.QuestWorld.api.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuestState;
+import me.mrCookieSlime.QuestWorld.api.event.CancellableEvent;
+import me.mrCookieSlime.QuestWorld.api.event.QuestCompleteEvent;
 import me.mrCookieSlime.QuestWorld.util.Text;
 
 import org.bukkit.Bukkit;
@@ -343,7 +345,18 @@ class Quest extends Renderable implements IQuestState {
 		this.xp = xp;
 	}
 	
-	public void handoutReward(Player p) {
+	@Override
+	public boolean completeFor(Player p) {
+		if(CancellableEvent.send(new QuestCompleteEvent(getSource(), p))) {
+			handoutReward(p);
+			QuestWorldPlugin.getImpl().getPlayerStatus(p).completeQuest(this);
+			return true;
+		}
+		
+		return false;
+	}
+	
+	private void handoutReward(Player p) {
 		ItemStack[] itemReward = rewards.toArray(new ItemStack[rewards.size()]);
 		for(ItemStack item : p.getInventory().addItem(itemReward).values())
 			p.getWorld().dropItemNaturally(p.getLocation(), item);

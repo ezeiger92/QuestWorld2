@@ -12,8 +12,8 @@ import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
 import me.mrCookieSlime.QuestWorld.api.contract.IFacade;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
-import me.mrCookieSlime.QuestWorld.container.WeakValueMap;
-import me.mrCookieSlime.QuestWorld.manager.PlayerManager;
+import me.mrCookieSlime.QuestWorld.manager.PlayerStatus;
+import me.mrCookieSlime.QuestWorld.util.WeakValueMap;
 
 public class RenderableFacade implements IFacade {
 	private long lastSave;
@@ -170,7 +170,7 @@ public class RenderableFacade implements IFacade {
 		for(IMission mission : quest.getMissions())
 			deleteMission(mission);
 		
-		PlayerManager.clearAllQuestData(quest);
+		PlayerStatus.clearAllQuestData(quest);
 		questMap.remove(((Quest)quest).getUnique());
 		deleteQuestFile(quest);
 	}

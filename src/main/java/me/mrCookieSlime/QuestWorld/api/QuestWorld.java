@@ -2,10 +2,14 @@ package me.mrCookieSlime.QuestWorld.api;
 
 import java.util.Map;
 
+import org.bukkit.OfflinePlayer;
 import org.bukkit.plugin.Plugin;
 
 import me.mrCookieSlime.QuestWorld.api.contract.QuestingAPI;
 import me.mrCookieSlime.QuestWorld.api.contract.IFacade;
+import me.mrCookieSlime.QuestWorld.api.contract.IMission;
+import me.mrCookieSlime.QuestWorld.api.contract.IPlayerStatus;
+import me.mrCookieSlime.QuestWorld.api.contract.MissionEntry;
 import me.mrCookieSlime.QuestWorld.util.Sounds;
 import net.milkbowl.vault.economy.Economy;
 
@@ -53,8 +57,20 @@ public final class QuestWorld {
 		return api.translate(key, replacements);
 	}
 	
+	public static Iterable<MissionEntry> getMissionEntries(MissionType type, OfflinePlayer player) {
+		return api.getMissionEntries(type, player);
+	}
+	
+	public static MissionEntry getMissionEntry(IMission mission, OfflinePlayer player) {
+		return api.getMissionEntry(mission, player);
+	}
+	
 	public static Plugin getPlugin() {
 		return api.getPlugin();
+	}
+	
+	public static IPlayerStatus getPlayerStatus(OfflinePlayer player) {
+		return api.getPlayerStatus(player);
 	}
 	
 	public static QuestingAPI getAPI() {

@@ -10,7 +10,7 @@ import org.bukkit.plugin.RegisteredServiceProvider;
  * 
  * @author erik
  */
-public class BukkitService {
+public final class BukkitService {
 	/**
 	 * Retrieves a service provider from Bukkit given the interface it
 	 * implements. If no provider exists, <tt>null</tt> is returned.
@@ -18,7 +18,7 @@ public class BukkitService {
 	 * @param clazz The service class that is desired
 	 * @return The service provider, if found. Otherwise <tt>null</tt>
 	 */
-	public static final <T> T get(Class<T> clazz) {
+	public static <T> T get(Class<T> clazz) {
 		RegisteredServiceProvider<T> service = Bukkit.getServer().getServicesManager().getRegistration(clazz);
 		if(service != null)
 			return service.getProvider();

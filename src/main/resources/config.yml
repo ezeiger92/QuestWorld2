@@ -6,7 +6,7 @@ options:
 party:
   max-members: 4
   enabled: true
-  autokick: 2
+  auto-kick: 5
 book:
   on-first-join: true
 dialogue:

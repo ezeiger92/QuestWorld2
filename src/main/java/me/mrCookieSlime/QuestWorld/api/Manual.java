@@ -2,10 +2,10 @@ package me.mrCookieSlime.QuestWorld.api;
 
 import org.bukkit.entity.Player;
 
+import me.mrCookieSlime.QuestWorld.api.contract.MissionEntry;
+
 public interface Manual {
-	//public static int FAIL = -1;
-	
-	void onManual(Player player, MissionSet.Result mission);
+	void onManual(Player player, MissionEntry mission);
 	
 	default String getLabel() {
 		return "Check";
