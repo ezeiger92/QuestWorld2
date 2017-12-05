@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * Utility class for easy bit flagging via enum types.
  * 
- * @author erik
+ * @author Erik Zeiger
  */
 public final class BitFlag {
 	

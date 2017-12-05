@@ -44,7 +44,7 @@ public class DetectMission extends MissionType implements Ticking {
 
 	@Override
 	public String getLabel() {
-		return "Detect";
+		return "&r> Click to check for items";
 	}
 	
 	@Override

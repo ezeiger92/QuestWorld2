@@ -10,7 +10,7 @@ import org.bukkit.metadata.Metadatable;
 /**
  * A shared home for tools related to entities and entity manipulation.
  * 
- * @author erik
+ * @author Erik Zeiger
  */
 public class EntityTools {
 	private static final EntityType[] alive;

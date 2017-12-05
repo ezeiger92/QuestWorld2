@@ -52,7 +52,7 @@ public class SubmitMission extends MissionType implements Manual {
 	
 	@Override
 	public String getLabel() {
-		return "Submit";
+		return "&r> Click to submit items";
 	}
 	
 	@Override

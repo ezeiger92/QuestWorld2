@@ -1,5 +1,6 @@
 package me.mrCookieSlime.QuestWorld.api;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -20,11 +21,24 @@ import me.mrCookieSlime.QuestWorld.api.event.MissionDeleteEvent;
 import me.mrCookieSlime.QuestWorld.api.event.QuestChangeEvent;
 import me.mrCookieSlime.QuestWorld.api.event.QuestDeleteEvent;
 
+/**
+ * Provides access to missions based on type, {@link Decaying} status, and
+ * {@link Ticking} status.
+ * 
+ * @author Erik Zeiger
+ */
 public class MissionViewer implements Listener {
 	private Map<MissionType, Set<IMission>> missions = new HashMap<>();
 	private Set<IMission> ticking_missions = new HashSet<>();
 	private Set<IMission> decaying_missions = new HashSet<>();
 	
+	/**
+	 * Provides all missions of a desired type. The returned Set is immutable,
+	 * do not attempt to modify it.
+	 * 
+	 * @param type The target mission type
+	 * @return A set containing all missions of type <tt>type</tt>
+	 */
 	public Set<IMission> getMissionsOf(MissionType type) {
 		Set<IMission> result = missions.get(type);
 		if(result == null) {
@@ -32,17 +46,36 @@ public class MissionViewer implements Listener {
 			missions.put(type, result);
 		}
 		
-		return result;
+		return Collections.unmodifiableSet(result);
 	}
 	
+	/**
+	 * Provides all Ticking missions. The returned Set is immutable, do not
+	 * attempt to modify it.
+	 * 
+	 * @return A set containing all Ticking missions
+	 */
 	public Set<IMission> getTickingMissions() {
 		return ticking_missions;
 	}
 	
+	/**
+	 * Provides all Decaying missions. The returned Set is immutable, do not
+	 * attempt to modify it.
+	 * 
+	 * @return A set containing all Decaying missions
+	 */
 	public Set<IMission> getDecayingMissions() {
 		return decaying_missions;
 	}
 	
+	/**
+	 * Updates mission sets based on event data. This is an event method and
+	 * should not be called directly.
+	 * 
+	 * @param event The event
+	 */
+	@Deprecated
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onCreateMission(QuestChangeEvent event) {
 		if(event.hasChange(IQuestState.Member.TASKS)) {
@@ -51,28 +84,62 @@ public class MissionViewer implements Listener {
 		}
 	}
 	
+	/**
+	 * Updates mission sets based on event data. This is an event method and
+	 * should not be called directly.
+	 * 
+	 * @param event The event
+	 */
+	@Deprecated
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onUpdateMission(MissionChangeEvent event) {
 		if(event.hasChange(IMissionState.Member.TYPE))
 			remove(event.getMission());
 			add(event.getMission(), event.getNextState().getType());
 	}
-	
+
+	/**
+	 * Updates mission sets based on event data. This is an event method and
+	 * should not be called directly.
+	 * 
+	 * @param event The event
+	 */
+	@Deprecated
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onDeleteCategory(CategoryDeleteEvent event) {
 		removeAll(event.getCategory());
 	}
-	
+
+	/**
+	 * Updates mission sets based on event data. This is an event method and
+	 * should not be called directly.
+	 * 
+	 * @param event The event
+	 */
+	@Deprecated
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onDeleteQuest(QuestDeleteEvent event) {
 		removeAll(event.getQuest());
 	}
-	
+
+	/**
+	 * Updates mission sets based on event data. This is an event method and
+	 * should not be called directly.
+	 * 
+	 * @param event The event
+	 */
+	@Deprecated
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onDeleteMission(MissionDeleteEvent event) {
 		remove(event.getMission());
 	}
 	
+	/**
+	 * Adds a mission to relevant Sets based on its type.
+	 * 
+	 * @param mission The mission
+	 * @param type The type
+	 */
 	private void add(IMission mission, MissionType type) {
 		getMissionsOf(type).add(mission);
 		
@@ -83,16 +150,31 @@ public class MissionViewer implements Listener {
 			decaying_missions.add(mission);
 	}
 	
+	/**
+	 * Removes all missions in a category from their Sets.
+	 * 
+	 * @param category The category
+	 */
 	private void removeAll(ICategory category) {
 		for(IQuest q : category.getQuests())
 			removeAll(q);
 	}
 	
+	/**
+	 * Removes all missions in a quest from their Sets.
+	 * 
+	 * @param quest The quest
+	 */
 	private void removeAll(IQuest quest) {
 		for(IMission m : quest.getMissions())
 			remove(m);
 	}
 	
+	/**
+	 * Removes a mission from all Sets.
+	 * 
+	 * @param mission The mission
+	 */
 	private void remove(IMission mission) {
 		getMissionsOf(mission.getType()).remove(mission);
 		

@@ -454,13 +454,12 @@ public class QuestBook {
 				String progress = Text.progressBar(current, total, mission.getType().progressString(current, total));
 				
 				if(mission.getType() instanceof Manual) {
-					String label = ((Manual) mission.getType()).getLabel();
 					entryItem.wrapText(
 							mission.getText(),
 							"",
 							progress,
 							"",
-							"&r> Click for Manual " + label);
+							((Manual) mission.getType()).getLabel());
 				}
 				else
 					entryItem.wrapText(

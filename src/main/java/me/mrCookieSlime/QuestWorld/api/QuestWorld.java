@@ -13,12 +13,30 @@ import me.mrCookieSlime.QuestWorld.api.contract.MissionEntry;
 import me.mrCookieSlime.QuestWorld.util.Sounds;
 import net.milkbowl.vault.economy.Economy;
 
+/**
+ * Singleton backed static interface of QuestingAPI.
+ * 
+ * @author Erik Zeiger
+ */
 public final class QuestWorld {
+	private static QuestingAPI api = null;
+	
+	/**
+	 * This class is entirely static and cannot be constructed.
+	 */
 	private QuestWorld() {	
 	}
 	
-	private static QuestingAPI api = null;
-	
+	/**
+	 * Set the implementing API. This is an internal function and should not be
+	 * called directly.
+	 * 
+	 * @param api The implementation of QuestingAPI
+	 * 
+	 * @throws NullPointerException The supplied implementation was null
+	 * @throws UnsupportedOperationException An implementation was already set
+	 * and the singleton cannot be redefined
+	 */
 	public static void setAPI(QuestingAPI api) {
 		if(QuestWorld.api != null)
 			throw new UnsupportedOperationException("Cannot redefine API singleton");

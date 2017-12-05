@@ -36,7 +36,7 @@ public class ItemBuilder implements Cloneable {
 	 * A handy set of builder prototypes that were being created by hand too
 	 * often.
 	 * 
-	 * @author erik
+	 * @author Erik Zeiger
 	 */
 	// TODO: Here's something that will probably need changing after 1.13
 	public static enum Proto {

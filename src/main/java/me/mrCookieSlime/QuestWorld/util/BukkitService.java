@@ -8,7 +8,7 @@ import org.bukkit.plugin.RegisteredServiceProvider;
  * 
  * @see BukkitService#get
  * 
- * @author erik
+ * @author Erik Zeiger
  */
 public final class BukkitService {
 	/**
