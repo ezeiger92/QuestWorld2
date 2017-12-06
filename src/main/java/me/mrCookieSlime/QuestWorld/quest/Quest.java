@@ -24,7 +24,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-class Quest extends Renderable implements IQuestState {
+class Quest extends UniqueObject implements IQuestState {
 	
 	WeakReference<Category> category;
 	int id;
@@ -142,7 +142,7 @@ class Quest extends Renderable implements IQuestState {
 	public void refreshParent() {
 		String parentId = config.getString("parent", null);
 		if (parentId != null) {
-			int[] parts = RenderableFacade.splitQuestString(parentId);
+			int[] parts = Facade.splitQuestString(parentId);
 			
 			Category c = (Category)QuestWorld.getFacade().getCategory(parts[1]);
 			if (c != null)
@@ -343,6 +343,11 @@ class Quest extends Renderable implements IQuestState {
 	
 	public void setXP(int xp) {
 		this.xp = xp;
+	}
+	
+	@Override
+	public void clearAllUserData() {
+		getCategory().getFacade().clearAllUserData(getSource());
 	}
 	
 	@Override

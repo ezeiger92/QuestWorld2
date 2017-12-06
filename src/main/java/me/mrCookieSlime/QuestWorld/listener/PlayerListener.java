@@ -31,7 +31,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 public class PlayerListener implements Listener {
 	
 	@EventHandler
-	public void onQuestBook2(PlayerInteractEvent event) {
+	public void onQuestBook(PlayerInteractEvent event) {
 		Action a = event.getAction();
 		if(a == Action.RIGHT_CLICK_AIR || a == Action.RIGHT_CLICK_BLOCK)
 			if (GuideBook.isGuide(event.getItem()))

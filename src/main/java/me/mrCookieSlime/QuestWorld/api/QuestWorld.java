@@ -16,6 +16,8 @@ import net.milkbowl.vault.economy.Economy;
 /**
  * Singleton backed static interface of QuestingAPI.
  * 
+ * @see me.mrCookieSlime.QuestWorld.api.contract.QuestingAPI QuestingAPI
+ * 
  * @author Erik Zeiger
  */
 public final class QuestWorld {
@@ -31,7 +33,8 @@ public final class QuestWorld {
 	 * Set the implementing API. This is an internal function and should not be
 	 * called directly.
 	 * 
-	 * @param api The implementation of QuestingAPI
+	 * @param api The implementation of
+	 * {@link me.mrCookieSlime.QuestWorld.api.contract.QuestingAPI QuestingAPI}
 	 * 
 	 * @throws NullPointerException The supplied implementation was null
 	 * @throws UnsupportedOperationException An implementation was already set

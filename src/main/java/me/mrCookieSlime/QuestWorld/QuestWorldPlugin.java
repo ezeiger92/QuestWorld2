@@ -20,6 +20,7 @@ import me.mrCookieSlime.QuestWorld.extension.builtin.Builtin;
 import me.mrCookieSlime.QuestWorld.listener.ExtensionInstaller;
 import me.mrCookieSlime.QuestWorld.listener.MenuListener;
 import me.mrCookieSlime.QuestWorld.listener.PlayerListener;
+import me.mrCookieSlime.QuestWorld.listener.SpawnerListener;
 import me.mrCookieSlime.QuestWorld.util.Log;
 
 import org.bukkit.entity.Player;
@@ -98,6 +99,7 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener, QuestLoade
 		pm.registerEvents(new PlayerListener(), this);
 		pm.registerEvents(api.getViewer(), this);
 		pm.registerEvents(new MenuListener(), this);
+		pm.registerEvents(new SpawnerListener(), this);
 
 		getServer().addRecipe(GuideBook.recipe());
 	}
@@ -288,6 +290,11 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener, QuestLoade
 			}
 		}
 		return result;
+	}
+	
+	@Override
+	public QuestingImpl getAPI() {
+		return api;
 	}
 	
 	public static QuestingImpl getImpl() {

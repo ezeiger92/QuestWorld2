@@ -31,6 +31,7 @@ public interface IQuest extends IStateful {
 	IQuest getParent();
 	String getName();
 	
+	void clearAllUserData();
 	boolean completeFor(Player p);
 	
 	@Override

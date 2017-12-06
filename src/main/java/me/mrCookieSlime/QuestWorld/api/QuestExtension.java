@@ -4,6 +4,7 @@ import org.bukkit.plugin.Plugin;
 
 import me.mrCookieSlime.QuestWorld.api.annotation.Control;
 import me.mrCookieSlime.QuestWorld.api.contract.QuestLoader;
+import me.mrCookieSlime.QuestWorld.api.contract.QuestingAPI;
 import me.mrCookieSlime.QuestWorld.util.BukkitService;
 
 public abstract class QuestExtension {
@@ -13,6 +14,11 @@ public abstract class QuestExtension {
 	private final QuestLoader loader;
 	private boolean initialized = false;
 	
+	/**
+	 * Performs setup for this extension. In particular, this calls user methods
+	 * {@link QuestExtension#setup setup} and
+	 * {@link QuestExtension#getDepends getDepends}, in that order.
+	 */
 	public QuestExtension() {
 		setup();
 		loader = BukkitService.get(QuestLoader.class);
@@ -24,6 +30,20 @@ public abstract class QuestExtension {
 		found = new Plugin[remaining];
 		
 		loader.attach(this);
+	}
+	
+	/**
+	 * Supplies access to the QuestWorld API. The static form
+	 * <tt>QuestWorld.<i>method</i></tt> may also be used, depending on your
+	 * preference.
+	 * 
+	 * @see QuestingAPI
+	 * @see QuestWorld
+	 * 
+	 * @return The API
+	 */
+	public final QuestingAPI getAPI() {
+		return loader.getAPI();
 	}
 	
 	/**

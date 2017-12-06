@@ -15,7 +15,6 @@ import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuestState;
 import me.mrCookieSlime.QuestWorld.api.contract.IStateful;
 import me.mrCookieSlime.QuestWorld.manager.Party;
-import me.mrCookieSlime.QuestWorld.manager.PlayerStatus;
 import me.mrCookieSlime.QuestWorld.manager.Party.LeaveReason;
 import me.mrCookieSlime.QuestWorld.util.ItemBuilder;
 import me.mrCookieSlime.QuestWorld.util.PlayerTools;
@@ -774,9 +773,7 @@ public class QuestBook {
 						"&rThis is going to delete the Database of all Quests inside this Category"
 						+" and will clear all Player's Progress associated with those Quests.").get(),
 				event -> {
-					for (IQuest quest: category.getQuests()) {
-						PlayerStatus.clearAllQuestData(quest);
-					}
+					category.clearAllUserData();
 					QuestWorld.getSounds().DESTRUCTIVE_CLICK.playTo((Player) event.getWhoClicked());
 				}
 		);
@@ -1057,7 +1054,7 @@ public class QuestBook {
 						"&rThis is going to delete this Quest's Database and will"
 						+" clear all Player's Progress associated with this Quest.").get(),
 				event -> {
-					PlayerStatus.clearAllQuestData(quest);
+					quest.clearAllUserData();
 					QuestWorld.getSounds().DESTRUCTIVE_CLICK.playTo((Player) event.getWhoClicked());
 				}
 		);

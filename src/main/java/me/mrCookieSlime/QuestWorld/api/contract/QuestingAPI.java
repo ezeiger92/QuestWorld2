@@ -9,12 +9,25 @@ import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.MissionViewer;
 import me.mrCookieSlime.QuestWorld.api.Translator;
 import me.mrCookieSlime.QuestWorld.api.annotation.NoImpl;
+import me.mrCookieSlime.QuestWorld.api.annotation.Nullable;
 import me.mrCookieSlime.QuestWorld.util.Sounds;
 import net.milkbowl.vault.economy.Economy;
 
 @NoImpl
 public interface QuestingAPI {
-	<T extends MissionType> T getMissionType(String typeName);
+	/**
+	 * Gets the MissionType instance represented by this String. The owning
+	 * extension must already be loaded, otherwise <tt>null</tt> will be
+	 * returned.
+	 * <p> If this method is called in a non-static context, the Builtin
+	 * extension and all of its MissionTypes are guaranteed to exist.
+	 * 
+	 * @param typeName Name of the desired MissionType
+	 * @return The found type, or <tt>null</tt>
+	 */
+	@Nullable <T extends MissionType> T getMissionType(String typeName);
+	
+	
 	Map<String, MissionType> getMissionTypes();
 	MissionViewer getViewer();
 	Economy getEconomy();

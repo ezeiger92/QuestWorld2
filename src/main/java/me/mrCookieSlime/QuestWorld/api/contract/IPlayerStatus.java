@@ -7,15 +7,16 @@ import me.mrCookieSlime.QuestWorld.manager.Party;
 public interface IPlayerStatus {
 	boolean hasDeathEvent(IMission mission);
 	Party getParty();
-	int countQuests(@Nullable ICategory root, @Nullable QuestStatus status);
+	int countQuests(@Nullable ICategory category, @Nullable QuestStatus status);
 	boolean hasFinished(IQuest quest);
-	int getProgress(IMission task);
+	int getProgress(IMission mission);
 	int getProgress(IQuest quest);
 	int getProgress(ICategory category);
 	QuestStatus getStatus(IQuest quest);
 	long getCooldownEnd(IQuest quest);
-	boolean hasCompletedTask(IMission task);
-	boolean hasUnlockedTask(IMission task);
+	boolean isMissionActive(IMission mission);
+	boolean hasCompletedTask(IMission mission);
+	boolean hasUnlockedTask(IMission mission);
 	
 	String progressString(IQuest quest);
 	String progressString();

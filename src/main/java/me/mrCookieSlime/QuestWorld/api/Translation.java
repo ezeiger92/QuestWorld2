@@ -1,5 +1,13 @@
 package me.mrCookieSlime.QuestWorld.api;
 
+/**
+ * The default translation mapping from <tt>lang/**_**.yml</tt>
+ * 
+ * @see me.mrCookieSlime.QuestWorld.util.Lang Lang
+ * @see Translator
+ * 
+ * @author Erik Zeiger
+ */
 public enum Translation implements Translator {
 	DEFAULT_CATEGORY("defaults.category.name"),
 	DEFAULT_QUEST   ("defaults.quest.name"),
@@ -41,16 +49,6 @@ public enum Translation implements Translator {
 	KILLMISSION_NAME_SET ("editor.renamed-kill-type"),
 	LOCMISSION_NAME_EDIT ("editor.rename-location"),
 	LOCMISSION_NAME_SET  ("editor.renamed-location"),
-
-	//PARTY_ERROR_FULL  ("party.full",       "max"),
-	//PARTY_ERROR_ABSENT("party.not-online", "name"),
-	//PARTY_ERROR_MEMBER("party.already",    "name"),
-	//PARTY_PLAYER_PICK ("party.invite"),
-	//PARTY_PLAYER_ADD  ("party.invited",    "name"),
-	//PARTY_PLAYER_JOIN ("party.join",       "name"),
-	//PARTY_PLAYER_KICK ("party.kicked",     "name"),
-	//PARTY_GROUP_INVITE("party.invitation", "name"),
-	//PARTY_GROUP_JOIN  ("party.joined",     "name"),
 	
 	// New party translations
 	PARTY_ERROR_FULL   ("party.error.full",    "max"),

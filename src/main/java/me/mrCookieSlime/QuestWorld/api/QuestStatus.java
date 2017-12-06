@@ -23,7 +23,8 @@ public enum QuestStatus {
 	LOCKED_PARTY_SIZE,
 	
 	/**
-	 * The quest is active.
+	 * The quest is able to be completed. It may have been previously completed,
+	 * in which case either the cooldown expired or it had no cooldown.
 	 */
 	AVAILABLE,
 	

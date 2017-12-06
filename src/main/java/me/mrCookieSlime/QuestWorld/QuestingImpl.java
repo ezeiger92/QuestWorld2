@@ -17,7 +17,7 @@ import me.mrCookieSlime.QuestWorld.api.contract.QuestingAPI;
 import me.mrCookieSlime.QuestWorld.manager.MissionSet;
 import me.mrCookieSlime.QuestWorld.manager.PlayerStatus;
 import me.mrCookieSlime.QuestWorld.manager.StatusManager;
-import me.mrCookieSlime.QuestWorld.quest.RenderableFacade;
+import me.mrCookieSlime.QuestWorld.quest.Facade;
 import me.mrCookieSlime.QuestWorld.util.BukkitService;
 import me.mrCookieSlime.QuestWorld.util.Lang;
 import me.mrCookieSlime.QuestWorld.util.Reloadable;
@@ -30,7 +30,7 @@ public class QuestingImpl implements QuestingAPI, Reloadable {
 	private Map<String, MissionType> immutableTypes = Collections.unmodifiableMap(types);
 	private MissionViewer viewer = new MissionViewer();
 	private Economy econ = null;
-	private RenderableFacade facade = new RenderableFacade();
+	private Facade facade = new Facade();
 	private Sounds eventSounds;
 	private ResourceLoader resources;
 	private Lang language;
@@ -79,7 +79,7 @@ public class QuestingImpl implements QuestingAPI, Reloadable {
 	}
 	
 	@Override
-	public RenderableFacade getFacade() {
+	public Facade getFacade() {
 		return facade;
 	}
 	

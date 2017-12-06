@@ -122,13 +122,20 @@ public class PlayerStatus implements IPlayerStatus {
 		return true;
 	}
 	
+	@Override
+	public boolean isMissionActive(IMission mission) {
+		return getStatus(mission.getQuest()).equals(QuestStatus.AVAILABLE)
+				&& !hasCompletedTask(mission)
+				&& hasUnlockedTask(mission);
+	}
+	
 	public void update(boolean quest_check) {
 		Player p = asOnline(player);
 		
 		if (p != null && quest_check)
-			for (IMission task: QuestWorld.getViewer().getTickingMissions())
-				if (getStatus(task.getQuest()).equals(QuestStatus.AVAILABLE) && !hasCompletedTask(task) && hasUnlockedTask(task))
-					((Ticking) task.getType()).onTick(p, new MissionSet.Result(task, this));
+			for (IMission mission: QuestWorld.getViewer().getTickingMissions())
+				if (isMissionActive(mission))
+					((Ticking) mission.getType()).onTick(p, new MissionSet.Result(mission, this));
 		
 		for (ICategory category: QuestWorld.getFacade().getCategories()) {
 			for (IQuest quest: category.getQuests()) {

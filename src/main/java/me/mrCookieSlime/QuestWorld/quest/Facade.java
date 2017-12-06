@@ -15,7 +15,7 @@ import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
 import me.mrCookieSlime.QuestWorld.manager.PlayerStatus;
 import me.mrCookieSlime.QuestWorld.util.WeakValueMap;
 
-public class RenderableFacade implements IFacade {
+public class Facade implements IFacade {
 	private long lastSave;
 	private HashMap<Integer, Category> categoryMap = new HashMap<>();
 	private WeakValueMap<Long, Quest> questMap = new WeakValueMap<>();
@@ -178,5 +178,14 @@ public class RenderableFacade implements IFacade {
 	@Override
 	public void deleteMission(IMission mission) {
 		missionMap.remove(((Mission)mission).getUnique());
+	}
+	
+	public void clearAllUserData(Category category) {
+		for(Quest quest : category.getQuests())
+			clearAllUserData(quest);
+	}
+	
+	public void clearAllUserData(Quest quest) {
+		PlayerStatus.clearAllQuestData(quest);
 	}
 }
