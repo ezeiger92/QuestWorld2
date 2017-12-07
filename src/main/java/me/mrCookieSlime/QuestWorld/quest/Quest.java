@@ -28,7 +28,7 @@ class Quest extends UniqueObject implements IQuestState {
 	
 	WeakReference<Category> category;
 	int id;
-	int cooldown;
+	long cooldown;
 	String name;
 	ItemStack item = new ItemStack(Material.BOOK_AND_QUILL);
 	List<Mission> tasks = new ArrayList<>();
@@ -85,13 +85,13 @@ class Quest extends UniqueObject implements IQuestState {
 		dest.copy(this);
 	}
 	
-	private int fromMaybeString(Object o) {
-		if(o instanceof Integer)
-			return ((Integer)o).intValue();
+	private long fromMaybeString(Object o) {
+		if(o instanceof Long || o instanceof Integer)
+			return ((Number)o).longValue();
 		if(o instanceof String)
-			return Integer.valueOf((String)o);
+			return Long.valueOf((String)o);
 		
-		throw new IllegalArgumentException("Expected Integer or String, got " + o.getClass().getSimpleName());
+		throw new IllegalArgumentException("Expected (Long) Integer or String, got " + o.getClass().getSimpleName());
 	}
 	
 	// Package
@@ -185,7 +185,7 @@ class Quest extends UniqueObject implements IQuestState {
 	public void save() {
 		config.set("id", id);
 		config.set("category", getCategory().getID());
-		config.set("cooldown", String.valueOf(cooldown));
+		config.set("cooldown", cooldown);
 		config.set("name", name);
 		config.set("item", new ItemStack(item));
 		config.set("rewards.items", null);
@@ -309,19 +309,19 @@ class Quest extends UniqueObject implements IQuestState {
 		partysize = size;
 	}
 
-	public int getRawCooldown() {
+	public long getRawCooldown() {
 		return cooldown;
 	}
 	
-	public void setRawCooldown(int cooldown) {
+	public void setRawCooldown(long cooldown) {
 		this.cooldown = cooldown;
 	}
 	
-	public int getCooldown() {
+	public long getCooldown() {
 		return cooldown / 60 / 1000;
 	}
 
-	public void setCooldown(int cooldown) {
+	public void setCooldown(long cooldown) {
 		this.cooldown = cooldown * 60 * 1000;
 	}
 	

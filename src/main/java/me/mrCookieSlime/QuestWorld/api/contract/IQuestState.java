@@ -15,8 +15,8 @@ public interface IQuestState extends IQuest {
 	void addMission(int id);
 	void removeMission(IMission mission);
 	void setPartySize(int size);
-	void setRawCooldown(int cooldown);
-	void setCooldown(int cooldown);
+	void setRawCooldown(long cooldown);
+	void setCooldown(long cooldown);
 	void setMoney(int money);
 	void setXP(int xp);
 	void setParent(IQuest object);
