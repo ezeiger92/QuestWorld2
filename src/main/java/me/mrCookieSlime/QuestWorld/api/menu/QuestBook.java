@@ -853,7 +853,7 @@ public class QuestBook {
 						"&rShift + Left Click: &e+1h",
 						"&rShift + Right Click: &e-1h").get(),
 				event -> {
-					int cooldown = quest.getCooldown();
+					long cooldown = quest.getCooldown();
 					int delta = event.isShiftClick() ? 60: 1;
 					if (event.isRightClick()) delta = -delta;
 
