@@ -84,12 +84,12 @@ class Quest extends Renderable implements IQuestState {
 	}
 	
 	private long fromMaybeString(Object o) {
-		if(o instanceof Long)
-			return ((Long)o).longValue();
+		if(o instanceof Long || o instanceof Integer)
+			return ((Number)o).longValue();
 		if(o instanceof String)
 			return Long.valueOf((String)o);
 		
-		throw new IllegalArgumentException("Expected Integer or String, got " + o.getClass().getSimpleName());
+		throw new IllegalArgumentException("Expected (Long) Integer or String, got " + o.getClass().getSimpleName());
 	}
 	
 	// Package
@@ -183,7 +183,7 @@ class Quest extends Renderable implements IQuestState {
 	public void save() {
 		config.set("id", id);
 		config.set("category", getCategory().getID());
-		config.set("cooldown", String.valueOf(cooldown));
+		config.set("cooldown", cooldown);
 		config.set("name", name);
 		config.set("item", new ItemStack(item));
 		config.set("rewards.items", null);
