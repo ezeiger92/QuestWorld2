@@ -5,13 +5,13 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import me.mrCookieSlime.QuestWorld.api.MissionSet;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.SinglePrompt;
 import me.mrCookieSlime.QuestWorld.api.Ticking;
 import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IMissionState;
+import me.mrCookieSlime.QuestWorld.api.contract.MissionEntry;
 import me.mrCookieSlime.QuestWorld.api.menu.MenuData;
 import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
 import me.mrCookieSlime.QuestWorld.api.menu.QuestBook;
@@ -24,16 +24,9 @@ public class LocationMission extends MissionType implements Ticking {
 		super("REACH_LOCATION", false, new ItemStack(Material.LEATHER_BOOTS));
 	}
 	
-	public static String coordinateString(Location location) {
-		int x = location.getBlockX();
-		int y = location.getBlockY();
-		int z = location.getBlockZ();
-		return "X: "+ x +", Y: "+ y +", Z: "+ z;
-	}
-	
 	@Override
 	public ItemStack userDisplayItem(IMission instance) {
-		return new ItemBuilder(getSelectorItem()).display(coordinateString(instance.getLocation())).get();
+		return new ItemBuilder(getSelectorItem()).display(Text.stringOf(instance.getLocation())).get();
 	}
 	
 	@Override
@@ -41,7 +34,7 @@ public class LocationMission extends MissionType implements Ticking {
 		Location location = instance.getLocation();
 		String locationName = instance.getCustomString();
 		if(locationName.isEmpty())
-			locationName = coordinateString(location);
+			locationName = Text.stringOf(location);
 			
 		return "&7Travel to " + locationName;
 	}
@@ -67,7 +60,7 @@ public class LocationMission extends MissionType implements Ticking {
 	}
 	
 	@Override
-	public void onManual(Player p, MissionSet.Result result) {
+	public void onManual(Player p, MissionEntry result) {
 		IMission mission = result.getMission();
 		if(withinRadius(mission.getLocation(), p.getLocation(), mission.getCustomInt()))
 			result.addProgress(1);
@@ -75,7 +68,7 @@ public class LocationMission extends MissionType implements Ticking {
 	
 	@Override
 	public String getLabel() {
-		return "Detect";
+		return "&r> Click to check your position";
 	}
 	
 	@Override

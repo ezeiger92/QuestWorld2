@@ -1,16 +1,20 @@
 package me.mrCookieSlime.QuestWorld.listener;
 
 import me.mrCookieSlime.QuestWorld.GuideBook;
+import me.mrCookieSlime.QuestWorld.QuestingImpl;
 import me.mrCookieSlime.QuestWorld.api.Decaying;
-import me.mrCookieSlime.QuestWorld.api.MissionSet;
-import me.mrCookieSlime.QuestWorld.api.QuestStatus;
 import me.mrCookieSlime.QuestWorld.api.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
-import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
+import me.mrCookieSlime.QuestWorld.api.contract.IPlayerStatus;
 import me.mrCookieSlime.QuestWorld.api.menu.QuestBook;
-import me.mrCookieSlime.QuestWorld.manager.PlayerManager;
+import me.mrCookieSlime.QuestWorld.manager.Party;
 import me.mrCookieSlime.QuestWorld.manager.ProgressTracker;
+import me.mrCookieSlime.QuestWorld.manager.Party.LeaveReason;
 
+import java.util.HashMap;
+import java.util.UUID;
+
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -22,11 +26,12 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitRunnable;
 
 public class PlayerListener implements Listener {
 	
 	@EventHandler
-	public void onQuestBook2(PlayerInteractEvent event) {
+	public void onQuestBook(PlayerInteractEvent event) {
 		Action a = event.getAction();
 		if(a == Action.RIGHT_CLICK_AIR || a == Action.RIGHT_CLICK_BLOCK)
 			if (GuideBook.isGuide(event.getItem()))
@@ -36,24 +41,24 @@ public class PlayerListener implements Listener {
 	@EventHandler
 	public void onDie(PlayerDeathEvent event) {
 		Player p = event.getEntity();
-		PlayerManager manager = PlayerManager.of(p);
-		String worldName = p.getWorld().getName();
+		IPlayerStatus playerStatus = QuestWorld.getPlayerStatus(p);
 		
-		for(IMission task : QuestWorld.getViewer().getDecayingMissions()) {
-			IQuest quest = task.getQuest();
-			if (!manager.getStatus(quest).equals(QuestStatus.AVAILABLE)
-					|| !quest.getWorldEnabled(worldName)
-					|| !quest.getCategory().isWorldEnabled(worldName)
-					|| !task.getDeathReset())
-				continue;
-
-			((Decaying) task).onDeath(event, new MissionSet.Result(task, manager));
-		}
+		for(IMission mission : QuestWorld.getViewer().getDecayingMissions())
+			if(playerStatus.hasDeathEvent(mission))
+				((Decaying) mission).onDeath(event, QuestWorld.getMissionEntry(mission, p));
 	}
+	
+	HashMap<UUID, Integer> partyKick = new HashMap<>();
 	
 	@EventHandler
 	public void onJoin(PlayerJoinEvent e) {
 		Player p = e.getPlayer();
+		
+		int task_id = partyKick.getOrDefault(p.getUniqueId(), -1);
+		if(task_id > -1) {
+			Bukkit.getScheduler().cancelTask(task_id);
+			partyKick.remove(task_id);
+		}
 		
 		if (QuestWorld.getPlugin().getConfig().getBoolean("book.on-first-join") &&
 				!ProgressTracker.exists(p.getUniqueId()))
@@ -62,7 +67,33 @@ public class PlayerListener implements Listener {
 	
 	@EventHandler
 	public void onleave(PlayerQuitEvent e) {
-		PlayerManager.of(e.getPlayer()).unload();
+		Player player = e.getPlayer();
+		
+		int autokick = QuestWorld.getPlugin().getConfig().getInt("party.auto-kick", -1);
+		if(autokick == 0) {
+			Party party = QuestWorld.getPlayerStatus(player).getParty();
+			if(party.isLeader(player))
+				party.disband();
+			else
+				party.playerLeave(player, LeaveReason.DISCONNECT);
+		}
+		else if(autokick > 0) {
+			Party party = QuestWorld.getPlayerStatus(player).getParty();
+			int task_id = new BukkitRunnable(){
+				@Override
+				public void run() {
+					if(party.isLeader(player))
+						party.disband();
+					else
+						party.playerLeave(player, LeaveReason.DISCONNECT);
+					partyKick.remove(getTaskId());
+				}
+			}.runTaskLater(QuestWorld.getPlugin(), autokick).getTaskId();
+			
+			partyKick.put(player.getUniqueId(), task_id);
+		}
+		
+		((QuestingImpl)QuestWorld.getAPI()).playerLeave(player);
 	}
 	
 	// Since we can't randomly update recipes at runtime, replace result with latest lore

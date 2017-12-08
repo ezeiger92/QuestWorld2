@@ -25,9 +25,10 @@ public interface IMission extends IStateful {
 	int          getTimeframe();
 	MissionType  getType();
 
+	ItemStack    getDisplayItem();
 	int          getIndex();
 	IQuest       getQuest();
-	ItemStack     getDisplayItem();
+	
 	
 	@Override
 	IMissionState getState();

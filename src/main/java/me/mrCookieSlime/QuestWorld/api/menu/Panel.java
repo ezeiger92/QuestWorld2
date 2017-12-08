@@ -1,11 +1,10 @@
-package me.mrCookieSlime.QuestWorld.container;
+package me.mrCookieSlime.QuestWorld.api.menu;
 
 import java.util.function.Consumer;
 
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
-import me.mrCookieSlime.QuestWorld.api.menu.Menu;
 import me.mrCookieSlime.QuestWorld.util.ItemBuilder;
 
 public class Panel {

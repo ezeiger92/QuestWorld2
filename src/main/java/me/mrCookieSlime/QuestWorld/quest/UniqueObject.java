@@ -1,6 +1,6 @@
 package me.mrCookieSlime.QuestWorld.quest;
 
-class Renderable {
+class UniqueObject {
 	private static long s_uniqueId = 0;
 	
 	private final long uniqueId = s_uniqueId++;

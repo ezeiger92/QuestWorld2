@@ -1,9 +1,9 @@
 package me.mrCookieSlime.QuestWorld.api.annotation;
 
-import java.lang.annotation.ElementType;
+import static java.lang.annotation.RetentionPolicy.SOURCE;
 
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
@@ -14,13 +14,13 @@ import java.lang.annotation.Target;
  * data into that parameter.
  * 
  * <p> When used on a function, it indicates modification of the returned
- * value may cause side-effects. If implementing a @Mutable function, a copy
- * may be returned, although a reference is recommended.
+ * value may cause side-effects. If implementing a <tt>@Mutable</tt> function,
+ * you may return a copy, although a reference is recommended.
  * 
  * <p> This will not be included during compilation, it is purely for
  * documentation.
  */
-@Retention(RetentionPolicy.SOURCE)
+@Retention(SOURCE)
 @Target({ElementType.METHOD, ElementType.PARAMETER})
 public @interface Mutable {
 	// Reason for mutability, if it helps documentation

@@ -20,6 +20,8 @@ public interface ICategory extends IStateful {
 
 	IQuest getQuest(int i);
 	boolean isWorldEnabled(String world);
+	
+	void clearAllUserData();
 
 	@Override
 	ICategoryState getState();

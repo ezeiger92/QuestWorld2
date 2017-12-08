@@ -2,14 +2,16 @@ package me.mrCookieSlime.QuestWorld.extension.builtin;
 
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerLevelChangeEvent;
 import org.bukkit.inventory.ItemStack;
 
-import me.mrCookieSlime.QuestWorld.api.MissionSet;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
+import me.mrCookieSlime.QuestWorld.api.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IMissionState;
+import me.mrCookieSlime.QuestWorld.api.contract.MissionEntry;
 import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
 
 public class LevelMission extends MissionType implements Listener {
@@ -27,10 +29,10 @@ public class LevelMission extends MissionType implements Listener {
 		return "&7Reach Level " + instance.getAmount();
 	}
 	
-	@EventHandler
+	@EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
 	public void onXPChange(final PlayerLevelChangeEvent e) {
-		for(MissionSet.Result r : MissionSet.of(this, e.getPlayer()))
-			r.addProgress(1);
+		for(MissionEntry r : QuestWorld.getMissionEntries(this, e.getPlayer()))
+			r.setProgress(e.getNewLevel());
 	}
 	
 	@Override

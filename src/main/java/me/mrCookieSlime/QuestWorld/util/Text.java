@@ -5,6 +5,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
 
 import me.mrCookieSlime.QuestWorld.api.annotation.Nullable;
@@ -93,6 +94,13 @@ public class Text {
 			output[i] = escape(inputs[i]);
 		
 		return output;
+	}
+	
+	public static String stringOf(Location location) {
+		return "X: " + location.getBlockX() +
+				", Y: "+ location.getBlockY() +
+				", Z: "+ location.getBlockZ() +
+				", World: " + location.getWorld().getName();
 	}
 	
 	static Pattern firstLetter = Pattern.compile("\\b\\S");

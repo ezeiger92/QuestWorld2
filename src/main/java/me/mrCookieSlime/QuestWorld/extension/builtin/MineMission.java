@@ -9,10 +9,11 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 
 import me.mrCookieSlime.QuestWorld.api.Decaying;
-import me.mrCookieSlime.QuestWorld.api.MissionSet;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
+import me.mrCookieSlime.QuestWorld.api.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IMissionState;
+import me.mrCookieSlime.QuestWorld.api.contract.MissionEntry;
 import me.mrCookieSlime.QuestWorld.api.menu.MenuData;
 import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
 import me.mrCookieSlime.QuestWorld.util.ItemBuilder;
@@ -36,9 +37,10 @@ public class MineMission extends MissionType implements Listener, Decaying {
 	
 	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
 	public void onMine(BlockBreakEvent e) {
-		for(MissionSet.Result r : MissionSet.of(this, e.getPlayer()))
+		for(MissionEntry r : QuestWorld.getMissionEntries(this, e.getPlayer())) {
 			if(PlayerTools.getStackOf(e.getBlock()).isSimilar(r.getMission().getItem()))
 				r.addProgress(1);
+		}
 	}
 	
 	@Override

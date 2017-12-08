@@ -5,11 +5,11 @@ import org.bukkit.inventory.ItemStack;
 
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
-import me.mrCookieSlime.QuestWorld.event.CancellableEvent;
-import me.mrCookieSlime.QuestWorld.event.QuestChangeEvent;
+import me.mrCookieSlime.QuestWorld.api.event.CancellableEvent;
+import me.mrCookieSlime.QuestWorld.api.event.QuestChangeEvent;
 import me.mrCookieSlime.QuestWorld.util.BitFlag;
 
-class QuestState extends Quest {	
+class QuestState extends Quest {
 	private long changeBits = 0;
 	private Quest origin;
 	
@@ -144,12 +144,13 @@ class QuestState extends Quest {
 	 */
 	@Override
 	public boolean apply() {
-		if(sendEvent()) {
+		if(changeBits != 0 && CancellableEvent.send(new QuestChangeEvent(this))) {
 			copyTo(origin);
 			origin.updateLastModified();
 			changeBits = 0;
 			return true;
 		}
+		
 		return false;
 	}
 
@@ -176,15 +177,5 @@ class QuestState extends Quest {
 	@Override
 	public boolean hasChange(Member field) {
 		return (changeBits & BitFlag.getBits(field)) != 0;
-	}
-	
-	/**
-	 * Fires a QuestChangeEvent
-	 * 
-	 * @see QuestChangeEvent
-	 * @return false if the event is cancelled, otherwise true
-	 */
-	public boolean sendEvent() {
-		return changeBits != 0 && CancellableEvent.send(new QuestChangeEvent(this));
 	}
 }

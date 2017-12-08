@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategoryState;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
 
@@ -17,9 +16,9 @@ import org.bukkit.Material;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 
-class Category extends Renderable implements ICategoryState {
+class Category extends UniqueObject implements ICategoryState {
 	private int id;
-	private RenderableFacade facade;
+	private Facade facade;
 	private boolean hidden;
 	private String name;
 	private String permission;
@@ -31,7 +30,7 @@ class Category extends Renderable implements ICategoryState {
 	private YamlConfiguration config;
 
 	// External
-	public Category(String name, int id, RenderableFacade facade) {
+	public Category(String name, int id, Facade facade) {
 		this.id = id;
 		this.name = name;
 		this.facade = facade;
@@ -52,7 +51,7 @@ class Category extends Renderable implements ICategoryState {
 	}
 	
 	// Package
-	Category(int id, YamlConfiguration config, RenderableFacade facade) {
+	Category(int id, YamlConfiguration config, Facade facade) {
 		this.id = id;
 		this.config = config;
 		this.facade = facade;
@@ -110,6 +109,11 @@ class Category extends Renderable implements ICategoryState {
 	}
 	
 	@Override
+	public void clearAllUserData() {
+		facade.clearAllUserData(getSource());
+	}
+	
+	@Override
 	public CategoryState getState() {
 		return new CategoryState(this);
 	}
@@ -146,7 +150,7 @@ class Category extends Renderable implements ICategoryState {
 		quests.put(id, facade.createQuest(name, id, getSource()));
 	}
 	
-	public RenderableFacade getFacade() {
+	public Facade getFacade() {
 		return facade;
 	}
 	
@@ -196,7 +200,7 @@ class Category extends Renderable implements ICategoryState {
 	}
 
 	@Override
-	public ICategory getSource() {
+	public Category getSource() {
 		return this;
 	}
 
