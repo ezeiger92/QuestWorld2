@@ -1,6 +1,5 @@
 package me.mrCookieSlime.QuestWorld.quest;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -8,7 +7,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import me.mrCookieSlime.QuestWorld.QuestWorldPlugin;
 import me.mrCookieSlime.QuestWorld.api.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
@@ -44,7 +42,7 @@ class Quest extends UniqueObject implements IQuestState {
 	boolean ordered;
 	boolean autoclaim;
 	
-	WeakReference<Quest> parent;
+	WeakReference<Quest> parent = new WeakReference<>(null);
 	String permission;
 	
 	YamlConfiguration config;
@@ -57,7 +55,7 @@ class Quest extends UniqueObject implements IQuestState {
 	protected void copy(Quest source) {
 		category = source.category;
 		id       = source.id;
-		config   = YamlConfiguration.loadConfiguration(getFile());
+		config   = YamlConfiguration.loadConfiguration(RenderableFacade.fileFor(this));
 		cooldown = source.cooldown;
 		name     = source.name;
 		item     = source.item.clone();
@@ -126,12 +124,11 @@ class Quest extends UniqueObject implements IQuestState {
 		this.category = new WeakReference<>(category);
 		this.name = name;
 		
-		config = YamlConfiguration.loadConfiguration(getFile());
+		config = YamlConfiguration.loadConfiguration(RenderableFacade.fileFor(this));
 		cooldown = -1;
 
 		money = 0;
 		xp = 0;
-		parent = null;
 		partySupport = true;
 		permission = "";
 		ordered = false;
@@ -140,18 +137,8 @@ class Quest extends UniqueObject implements IQuestState {
 	}
 	
 	public void refreshParent() {
-		String parentId = config.getString("parent", null);
-		if (parentId != null) {
-			int[] parts = Facade.splitQuestString(parentId);
-			
-			Category c = (Category)QuestWorld.getFacade().getCategory(parts[1]);
-			if (c != null)
-				parent = new WeakReference<>(c.getQuest(parts[0]));
-		}
-	}
-	
-	File getFile() {
-		return new File(QuestWorldPlugin.getPath("data.questing"), id + "-C" + getCategory().getID() + ".quest");
+		parent = new WeakReference<>(
+				RenderableFacade.questOfString(config.getString("parent", null)));
 	}
 	
 	private void loadMissions() {
@@ -210,13 +197,11 @@ class Quest extends UniqueObject implements IQuestState {
 			config.set("missions." + mission.getIndex(), data);
 			//mission.save(config.createSection("missions." + mission.getID()));
 		}
-		Quest parent = getParent();
-		
-		if (parent != null) config.set("parent", String.valueOf(parent.getCategory().getID() + "-C" + parent.getID()));
-		else config.set("parent", null);
+
+		config.set("parent", RenderableFacade.stringOfQuest(getParent()));
 		
 		try {
-			config.save(getFile());
+			config.save(RenderableFacade.fileFor(this));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -385,14 +370,12 @@ class Quest extends UniqueObject implements IQuestState {
 	}
 	
 	public Quest getParent() {
-		if(parent == null)
-			return null;
 		return parent.get();
 	}
 
 	@Override
 	public void setParent(IQuest quest) {
-		this.parent = new WeakReference<>(((Quest)quest).getSource());
+		parent = new WeakReference<>(quest != null ? ((Quest)quest).getSource() : null);
 	}
 
 	public List<String> getCommands() {
