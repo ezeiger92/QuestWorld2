@@ -20,7 +20,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
 
-class Mission extends Renderable implements IMissionState {
+class Mission extends UniqueObject implements IMissionState {
 	private WeakReference<Quest> quest;
 	private int         amount = 1;
 	private int         customInt = 0;

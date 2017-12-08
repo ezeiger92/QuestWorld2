@@ -7,4 +7,5 @@ import me.mrCookieSlime.QuestWorld.api.annotation.NoImpl;
 public interface QuestLoader {
 	void attach(QuestExtension hook);
 	void enable(QuestExtension hook);
+	QuestingAPI getAPI();
 }

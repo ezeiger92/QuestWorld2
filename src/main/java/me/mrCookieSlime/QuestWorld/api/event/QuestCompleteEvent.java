@@ -1,20 +1,27 @@
-package me.mrCookieSlime.QuestWorld.event;
+package me.mrCookieSlime.QuestWorld.api.event;
 
+import org.bukkit.OfflinePlayer;
 import org.bukkit.event.HandlerList;
 
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
 
-public class QuestDeleteEvent extends CancellableEvent {
-	private IQuest quest;
+public class QuestCompleteEvent extends CancellableEvent {
+	private final IQuest quest;
+	private final OfflinePlayer player;
 	
-	public QuestDeleteEvent(IQuest quest) {
+	public QuestCompleteEvent(IQuest quest, OfflinePlayer player) {
 		this.quest = quest;
+		this.player = player;
 	}
 	
 	public IQuest getQuest() {
 		return quest;
 	}
-
+	
+	public OfflinePlayer getPlayer() {
+		return player;
+	}
+	
 	// Boilerplate copy/paste from CancellableEvent
 	@Override
 	public HandlerList getHandlers() { return handlers;	}

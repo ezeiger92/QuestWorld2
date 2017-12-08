@@ -61,7 +61,7 @@ editor:
     &7Example: Awesomeville
   renamed-location: '&aSuccessfully given this Location a Name'
   
-  # TODO These are part of the citizens extension... Why are they here?
+  # TODO: These are part of the citizens extension... Why are they here?
   link-citizen:          '&7Please right click the NPC you want to link with this Quest'
   link-citizen-finished: '&aSuccessfully linked this NPC'
   
@@ -75,6 +75,25 @@ party:
   kicked:     '&e%name% &7has been kicked from the Party'
   invitation: '&e%name% &7has invited you to join their Party'
   joined:     '&7You are now a member of &e%name%''s &7Party!'
+
+party:
+  error:
+    full:    '&4You cannot have more than &c%max% &4Party Members!'
+    member:  '&4%name% &cis already a Member of a Party'
+    offline: '&cPlayer &4%name% &cis not online'
+  group:
+    abandon: '&e%name% has left the Party'
+    disband: '&cThe party has been disbanded!'
+    join:    '&e%name% has joined the Party'
+    kick:    '&e%name% &7has been kicked from the Party'
+  leader:
+    invite-sent: '&7Successfully invited &e%name% &7to your Party'
+    pick-player: '&7Please type in the Name of the Player you want to invite'
+  player:
+    abandon: '&7You have left &e%leader%''s &7Party'
+    invited: '&e%leader% &7has invited you to join their Party'
+    joined:  '&7You are now a member of &e%leader%''s &7Party!'
+    kicked:  '&cYou have been kicked from &e%leader%''s &cParty'
 
 notifications:
   task-completed: |

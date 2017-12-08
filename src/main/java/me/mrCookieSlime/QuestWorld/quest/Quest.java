@@ -13,6 +13,8 @@ import me.mrCookieSlime.QuestWorld.api.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuestState;
+import me.mrCookieSlime.QuestWorld.api.event.CancellableEvent;
+import me.mrCookieSlime.QuestWorld.api.event.QuestCompleteEvent;
 import me.mrCookieSlime.QuestWorld.util.Text;
 
 import org.bukkit.Bukkit;
@@ -22,7 +24,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-class Quest extends Renderable implements IQuestState {
+class Quest extends UniqueObject implements IQuestState {
 	
 	WeakReference<Category> category;
 	int id;
@@ -140,7 +142,7 @@ class Quest extends Renderable implements IQuestState {
 	public void refreshParent() {
 		String parentId = config.getString("parent", null);
 		if (parentId != null) {
-			int[] parts = RenderableFacade.splitQuestString(parentId);
+			int[] parts = Facade.splitQuestString(parentId);
 			
 			Category c = (Category)QuestWorld.getFacade().getCategory(parts[1]);
 			if (c != null)
@@ -341,7 +343,23 @@ class Quest extends Renderable implements IQuestState {
 		this.xp = xp;
 	}
 	
-	public void handoutReward(Player p) {
+	@Override
+	public void clearAllUserData() {
+		getCategory().getFacade().clearAllUserData(getSource());
+	}
+	
+	@Override
+	public boolean completeFor(Player p) {
+		if(CancellableEvent.send(new QuestCompleteEvent(getSource(), p))) {
+			handoutReward(p);
+			QuestWorldPlugin.getImpl().getPlayerStatus(p).completeQuest(this);
+			return true;
+		}
+		
+		return false;
+	}
+	
+	private void handoutReward(Player p) {
 		ItemStack[] itemReward = rewards.toArray(new ItemStack[rewards.size()]);
 		for(ItemStack item : p.getInventory().addItem(itemReward).values())
 			p.getWorld().dropItemNaturally(p.getLocation(), item);

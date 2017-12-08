@@ -1,4 +1,4 @@
-package me.mrCookieSlime.QuestWorld.container;
+package me.mrCookieSlime.QuestWorld.api.menu;
 
 import java.util.ArrayList;
 import java.util.ListIterator;
@@ -14,7 +14,6 @@ import org.bukkit.metadata.Metadatable;
 
 import me.mrCookieSlime.QuestWorld.api.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.Translation;
-import me.mrCookieSlime.QuestWorld.api.menu.Menu;
 import me.mrCookieSlime.QuestWorld.util.ItemBuilder;
 
 public class PagedMapping {

@@ -2,16 +2,23 @@ package me.mrCookieSlime.QuestWorld.api;
 
 import org.bukkit.plugin.Plugin;
 
+import me.mrCookieSlime.QuestWorld.api.annotation.Control;
 import me.mrCookieSlime.QuestWorld.api.contract.QuestLoader;
+import me.mrCookieSlime.QuestWorld.api.contract.QuestingAPI;
 import me.mrCookieSlime.QuestWorld.util.BukkitService;
-import me.mrCookieSlime.QuestWorld.util.Log;
 
 public abstract class QuestExtension {
 	private String[] requirements;
 	private int remaining;
 	private Plugin[] found;
-	private QuestLoader loader = null;
+	private final QuestLoader loader;
+	private boolean initialized = false;
 	
+	/**
+	 * Performs setup for this extension. In particular, this calls user methods
+	 * {@link QuestExtension#setup setup} and
+	 * {@link QuestExtension#getDepends getDepends}, in that order.
+	 */
 	public QuestExtension() {
 		setup();
 		loader = BukkitService.get(QuestLoader.class);
@@ -25,6 +32,27 @@ public abstract class QuestExtension {
 		loader.attach(this);
 	}
 	
+	/**
+	 * Supplies access to the QuestWorld API. The static form
+	 * <tt>QuestWorld.<i>method</i></tt> may also be used, depending on your
+	 * preference.
+	 * 
+	 * @see QuestingAPI
+	 * @see QuestWorld
+	 * 
+	 * @return The API
+	 */
+	public final QuestingAPI getAPI() {
+		return loader.getAPI();
+	}
+	
+	/**
+	 * Supplies the extension name, primarily used for printing status info.
+	 * <p> The default value is the simple name of the class.
+	 * 
+	 * @return The extension name
+	 */
+	@Control
 	public String getName() {
 		return getClass().getSimpleName();
 	}
@@ -33,6 +61,7 @@ public abstract class QuestExtension {
 	 * Called before anything else, use this for things not dependent on other
 	 * plugins.
 	 */
+	@Control
 	public void setup() {
 	}
 	
@@ -58,19 +87,22 @@ public abstract class QuestExtension {
 	 */
 	protected abstract void initialize(Plugin parent);
 	
-	private boolean initialized = false;
-	public final void init(Plugin parent) {
-		if(initialized)
+	/**
+	 * Initializes the extension after all dependencies have been located. This
+	 * is an internal function and should not be called directly.
+	 * 
+	 * @param parent The plugin loading extensions (QuestWorld)
+	 * 
+	 * @throws Throwable Any (likely unchecked) exception raised by
+	 * {@link QuestExtension#initialize initialize} will be passed up the stack
+	 */
+	public final void init(Plugin parent) throws Throwable {
+		if(initialized || !isReady())
 			return;
 		
-		try {
-			initialize(parent);
-		}
-		catch(RuntimeException e) {
-			Log.warning("Failed to initialize hook " + getName());
-			e.printStackTrace();
-			return;
-		}
+		// Never trust user code, this may throw anything
+		initialize(parent);
+
 		loader.enable(this);
 		initialized = true;
 	}

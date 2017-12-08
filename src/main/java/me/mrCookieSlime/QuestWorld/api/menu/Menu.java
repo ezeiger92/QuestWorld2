@@ -1,30 +1,20 @@
 package me.mrCookieSlime.QuestWorld.api.menu;
 
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.UUID;
 import java.util.function.Consumer;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 
 import me.mrCookieSlime.QuestWorld.util.ItemBuilder;
 import me.mrCookieSlime.QuestWorld.util.Text;
 
-public class Menu implements Cloneable {
-	private static HashMap<UUID, Menu> openMenus = new HashMap<>();
-	public static Menu forUUID(UUID key) {
-		return openMenus.get(key);
-	}
-	
-	public static void clear(UUID key) {
-		openMenus.remove(key);
-	}
-	
+public class Menu implements Cloneable, InventoryHolder {
 	private static final int ROW_WIDTH = 9;
 	private Inventory inv;
 	private Consumer<InventoryClickEvent>[] handlers;
@@ -44,9 +34,9 @@ public class Menu implements Cloneable {
 	
 	private Inventory makeInv(int cells, String title) {
 		if(title != null)
-			return Bukkit.createInventory(null, cells, Text.colorize(title));
+			return Bukkit.createInventory(this, cells, Text.colorize(title));
 		
-		return Bukkit.createInventory(null, cells);
+		return Bukkit.createInventory(this, cells);
 	}
 	
 	public void resize(int rows) {
@@ -94,10 +84,8 @@ public class Menu implements Cloneable {
 	}
 
 	public void openFor(HumanEntity... viewers) {
-		for(HumanEntity v : viewers) {
+		for(HumanEntity v : viewers)
 			v.openInventory(inv);
-			openMenus.put(v.getUniqueId(), this);
-		}
 	}
 	
 	public boolean requestCancel(Inventory inv, int slot) {
@@ -122,5 +110,10 @@ public class Menu implements Cloneable {
 	@Override
 	public Menu clone() {
 		return new Menu(this);
+	}
+
+	@Override
+	public Inventory getInventory() {
+		return inv;
 	}
 }
