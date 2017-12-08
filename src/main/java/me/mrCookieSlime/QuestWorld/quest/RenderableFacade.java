@@ -108,6 +108,8 @@ public class RenderableFacade implements IFacade {
 					category.directAddQuest(q);
 					questMap.putWeak(q.getUnique(), q);
 				}
+			
+			categoryMap.put(category.getID(), category);
 		}
 		
 		for (Category category: categories) {
@@ -115,8 +117,6 @@ public class RenderableFacade implements IFacade {
 			
 			for (Quest quest: category.getQuests())
 				quest.refreshParent();
-			
-			categoryMap.put(category.getID(), category);
 		}
 	}
 	

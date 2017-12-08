@@ -209,6 +209,7 @@ class Quest extends Renderable implements IQuestState {
 			//mission.save(config.createSection("missions." + mission.getID()));
 		}
 		Quest parent = getParent();
+		
 		if (parent != null) config.set("parent", String.valueOf(parent.getCategory().getID() + "-C" + parent.getID()));
 		else config.set("parent", null);
 		
@@ -297,10 +298,7 @@ class Quest extends Renderable implements IQuestState {
 	}
 	
 	public void removeMission(IMission mission) {
-		if(mission instanceof MissionState)
-			tasks.remove(((MissionState)mission).getSource());
-		else
-			tasks.remove((Mission)mission);
+		tasks.remove(((Mission)mission).getSource());
 	}
 	
 	public void setPartySize(int size) {
@@ -376,13 +374,7 @@ class Quest extends Renderable implements IQuestState {
 
 	@Override
 	public void setParent(IQuest quest) {
-		Quest parent;
-		if(quest instanceof QuestState)
-			parent = ((QuestState)quest).getSource();
-		else
-			parent = (Quest)quest;
-		
-		this.parent = new WeakReference<>(parent);
+		this.parent = new WeakReference<>(((Quest)quest).getSource());
 	}
 
 	public List<String> getCommands() {
