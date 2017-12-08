@@ -1,6 +1,5 @@
 package me.mrCookieSlime.QuestWorld.quest;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -10,7 +9,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import me.mrCookieSlime.QuestWorld.QuestWorldPlugin;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategoryState;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
@@ -26,7 +24,7 @@ class Category extends Renderable implements ICategoryState {
 	private String name;
 	private String permission;
 	private ItemStack item;
-	private WeakReference<Quest> parent;
+	private WeakReference<Quest> parent = new WeakReference<>(null);
 	private Map<Integer, Quest> quests = new HashMap<>();
 	private List<String> world_blacklist = new ArrayList<String>();
 	
@@ -37,7 +35,7 @@ class Category extends Renderable implements ICategoryState {
 		this.id = id;
 		this.name = name;
 		this.facade = facade;
-		config = YamlConfiguration.loadConfiguration(getFile());
+		config = YamlConfiguration.loadConfiguration(RenderableFacade.fileFor(this));
 		item = new ItemStack(Material.BOOK_AND_QUILL);
 		world_blacklist = new ArrayList<String>();
 		permission = "";
@@ -93,8 +91,6 @@ class Category extends Renderable implements ICategoryState {
 	
 	@Override
 	public Quest getParent() {
-		if(parent == null)
-			return null;
 		return parent.get();
 	}
 	
@@ -125,7 +121,7 @@ class Category extends Renderable implements ICategoryState {
 
 	@Override
 	public void setParent(IQuest quest) {
-		this.parent = new WeakReference<>((Quest)quest);
+		parent = new WeakReference<>(quest != null ? ((Quest)quest).getSource() : null);
 	}
 
 	@Override
@@ -140,18 +136,8 @@ class Category extends Renderable implements ICategoryState {
 	//// DONE
 	
 	public void refreshParent() {
-		String parentId = config.getString("parent", null);
-		if (parentId != null) {
-			int[] parts = RenderableFacade.splitQuestString(parentId);
-			
-			Category c = facade.getCategory(parts[1]);
-			if (c != null)
-				parent = new WeakReference<>(c.getQuest(parts[0]));
-		}
-	}
-	
-	File getFile() {
-		return new File(QuestWorldPlugin.getPath("data.questing"), id + ".category");
+		parent = new WeakReference<>(
+				RenderableFacade.questOfString(config.getString("parent", null)));
 	}
 	
 	@Override
@@ -191,12 +177,10 @@ class Category extends Renderable implements ICategoryState {
 		config.set("hidden", this.hidden);
 		config.set("world-blacklist", world_blacklist);
 		
-		Quest parent = getParent();
-		if (parent != null) config.set("parent", String.valueOf(parent.getCategory().getID() + "-C" + parent.getID()));
-		else config.set("parent", null);
+		config.set("parent", RenderableFacade.stringOfQuest(getParent()));
 		
 		try {
-			config.save(getFile());
+			config.save(RenderableFacade.fileFor(this));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -253,7 +237,7 @@ class Category extends Renderable implements ICategoryState {
 		world_blacklist.clear();
 		world_blacklist.addAll(source.world_blacklist);
 		
-		config     = YamlConfiguration.loadConfiguration(getFile());
+		config     = YamlConfiguration.loadConfiguration(RenderableFacade.fileFor(this));
 	}
 	
 	protected void copyTo(Category dest) {

@@ -8,6 +8,7 @@ import java.util.HashMap;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import me.mrCookieSlime.QuestWorld.QuestWorldPlugin;
+import me.mrCookieSlime.QuestWorld.api.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
 import me.mrCookieSlime.QuestWorld.api.contract.IFacade;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
@@ -52,7 +53,15 @@ public class RenderableFacade implements IFacade {
 		return m;
 	}
 	
-	static int[] splitQuestString(String in) {
+	static File fileFor(ICategory category) {
+		return new File(QuestWorldPlugin.getPath("data.questing"), category.getID() + ".category");
+	}
+	
+	static File fileFor(IQuest quest) {
+		return new File(QuestWorldPlugin.getPath("data.questing"), stringOfQuest(quest));
+	}
+	
+	private static int[] splitQuestString(String in) {
 		int result[] = {0, 0};
 		
 		int len = in.length();
@@ -62,6 +71,25 @@ public class RenderableFacade implements IFacade {
 		result[1] = Integer.parseInt(in.substring(mid + 1, len));
 		
 		return result;
+	}
+	
+	static Quest questOfString(String in) {
+		if(in == null)
+			return null;
+		
+		int[] parts = splitQuestString(in);
+		ICategory c = QuestWorld.getFacade().getCategory(parts[1]);
+		if (c != null)
+			return (Quest)c.getQuest(parts[0]);
+		
+		return null;
+	}
+	
+	static String stringOfQuest(IQuest quest) {
+		if(quest == null)
+			return null;
+		
+		return quest.getID() + "-C" + quest.getCategory().getID();
 	}
 	
 	private class ParseData {
@@ -127,11 +155,11 @@ public class RenderableFacade implements IFacade {
 	}
 	
 	private void deleteQuestFile(IQuest quest) {
-		((Quest)quest).getFile().delete();
+		fileFor(quest).delete();
 	}
 	
 	private void deleteCategoryFile(ICategory category) {
-		((Category)category).getFile().delete();
+		fileFor(category).delete();
 	}
 	
 	public void save(boolean force) {
