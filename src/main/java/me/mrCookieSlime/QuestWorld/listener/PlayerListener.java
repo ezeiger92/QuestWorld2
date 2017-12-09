@@ -6,6 +6,8 @@ import me.mrCookieSlime.QuestWorld.api.Decaying;
 import me.mrCookieSlime.QuestWorld.api.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IPlayerStatus;
+import me.mrCookieSlime.QuestWorld.api.event.CancellableEvent;
+import me.mrCookieSlime.QuestWorld.api.event.GenericPlayerLeaveEvent;
 import me.mrCookieSlime.QuestWorld.api.menu.QuestBook;
 import me.mrCookieSlime.QuestWorld.manager.Party;
 import me.mrCookieSlime.QuestWorld.manager.ProgressTracker;
@@ -18,12 +20,14 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -65,9 +69,19 @@ public class PlayerListener implements Listener {
 			p.getInventory().addItem(GuideBook.get());
 	}
 	
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void onKick(PlayerKickEvent event) {
+		CancellableEvent.send(new GenericPlayerLeaveEvent(event.getPlayer()));
+	}
+	
 	@EventHandler
-	public void onleave(PlayerQuitEvent e) {
-		Player player = e.getPlayer();
+	public void onQuit(PlayerQuitEvent event) {
+		CancellableEvent.send(new GenericPlayerLeaveEvent(event.getPlayer()));
+	}
+	
+	@EventHandler
+	public void onleave(GenericPlayerLeaveEvent event) {
+		Player player = event.getPlayer();
 		
 		int autokick = QuestWorld.getPlugin().getConfig().getInt("party.auto-kick", -1);
 		if(autokick == 0) {

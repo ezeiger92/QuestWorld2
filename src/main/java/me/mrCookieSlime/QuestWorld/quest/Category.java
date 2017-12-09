@@ -34,7 +34,7 @@ class Category extends UniqueObject implements ICategoryState {
 		this.id = id;
 		this.name = name;
 		this.facade = facade;
-		config = YamlConfiguration.loadConfiguration(RenderableFacade.fileFor(this));
+		config = YamlConfiguration.loadConfiguration(Facade.fileFor(this));
 		item = new ItemStack(Material.BOOK_AND_QUILL);
 		world_blacklist = new ArrayList<String>();
 		permission = "";
@@ -141,7 +141,7 @@ class Category extends UniqueObject implements ICategoryState {
 	
 	public void refreshParent() {
 		parent = new WeakReference<>(
-				RenderableFacade.questOfString(config.getString("parent", null)));
+				Facade.questOfString(config.getString("parent", null)));
 	}
 	
 	@Override
@@ -181,10 +181,10 @@ class Category extends UniqueObject implements ICategoryState {
 		config.set("hidden", this.hidden);
 		config.set("world-blacklist", world_blacklist);
 		
-		config.set("parent", RenderableFacade.stringOfQuest(getParent()));
+		config.set("parent", Facade.stringOfQuest(getParent()));
 		
 		try {
-			config.save(RenderableFacade.fileFor(this));
+			config.save(Facade.fileFor(this));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -241,7 +241,7 @@ class Category extends UniqueObject implements ICategoryState {
 		world_blacklist.clear();
 		world_blacklist.addAll(source.world_blacklist);
 		
-		config     = YamlConfiguration.loadConfiguration(RenderableFacade.fileFor(this));
+		config     = YamlConfiguration.loadConfiguration(Facade.fileFor(this));
 	}
 	
 	protected void copyTo(Category dest) {

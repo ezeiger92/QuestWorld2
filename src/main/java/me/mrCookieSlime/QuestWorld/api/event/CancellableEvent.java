@@ -20,10 +20,13 @@ public abstract class CancellableEvent extends Event implements Cancellable {
 		cancelled = cancel;
 	}
 	
-	public static boolean send(CancellableEvent event) {
+	public static boolean send(Event event) {
 		Bukkit.getPluginManager().callEvent(event);
 		
-		return !event.isCancelled();
+		if(event instanceof Cancellable)
+			return !((Cancellable)event).isCancelled();
+		
+		return true;
 	}
 	
 /*

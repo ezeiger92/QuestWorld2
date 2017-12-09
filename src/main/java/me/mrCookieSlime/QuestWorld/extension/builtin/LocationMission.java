@@ -1,17 +1,25 @@
 package me.mrCookieSlime.QuestWorld.extension.builtin;
 
+import java.util.HashMap;
+
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
 
 import me.mrCookieSlime.QuestWorld.api.MissionType;
+import me.mrCookieSlime.QuestWorld.api.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.SinglePrompt;
 import me.mrCookieSlime.QuestWorld.api.Ticking;
 import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IMissionState;
 import me.mrCookieSlime.QuestWorld.api.contract.MissionEntry;
+import me.mrCookieSlime.QuestWorld.api.event.GenericPlayerLeaveEvent;
 import me.mrCookieSlime.QuestWorld.api.menu.MenuData;
 import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
 import me.mrCookieSlime.QuestWorld.api.menu.QuestBook;
@@ -19,7 +27,7 @@ import me.mrCookieSlime.QuestWorld.util.ItemBuilder;
 import me.mrCookieSlime.QuestWorld.util.PlayerTools;
 import me.mrCookieSlime.QuestWorld.util.Text;
 
-public class LocationMission extends MissionType implements Ticking {
+public class LocationMission extends MissionType implements Listener, Ticking {
 	public LocationMission() {
 		super("REACH_LOCATION", false, new ItemStack(Material.LEATHER_BOOTS));
 	}
@@ -60,10 +68,46 @@ public class LocationMission extends MissionType implements Ticking {
 	}
 	
 	@Override
-	public void onManual(Player p, MissionEntry result) {
-		IMission mission = result.getMission();
+	public void onManual(Player p, MissionEntry entry) {
+		IMission mission = entry.getMission();
 		if(withinRadius(mission.getLocation(), p.getLocation(), mission.getCustomInt()))
-			result.addProgress(1);
+			entry.addProgress(1);
+	}
+	
+	private HashMap<Player, Integer> distanceMap = new HashMap<>();
+	
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void onPlayerMove(PlayerMoveEvent event) {
+		Player player = event.getPlayer();
+		int distance = distanceMap.getOrDefault(player, 0);
+		
+		if(distance > 0) {
+			distanceMap.put(player, (distance << 1) / 3);
+			return;
+		}
+		
+		double fdist = Integer.MAX_VALUE >> 1;
+		
+		for(MissionEntry entry : QuestWorld.getMissionEntries(this, player)) {
+			Location missionLoc = entry.getMission().getLocation();
+			if(missionLoc.getWorld() != player.getWorld())
+				continue;
+			
+			int radSquared = entry.getMission().getCustomInt() * entry.getMission().getCustomInt();
+			
+			double difference = missionLoc.distanceSquared(player.getLocation());
+			if(radSquared < difference)
+				fdist = Math.min(fdist, difference);
+			else
+				entry.addProgress(1);
+		}
+		
+		distanceMap.put(player, (int)fdist);
+	}
+	
+	@EventHandler
+	public void onPlayerLeave(GenericPlayerLeaveEvent event) {
+		distanceMap.remove(event.getPlayer());
 	}
 	
 	@Override

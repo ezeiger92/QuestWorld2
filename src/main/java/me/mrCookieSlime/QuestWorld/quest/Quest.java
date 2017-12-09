@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import me.mrCookieSlime.QuestWorld.QuestWorldPlugin;
 import me.mrCookieSlime.QuestWorld.api.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
@@ -55,7 +56,7 @@ class Quest extends UniqueObject implements IQuestState {
 	protected void copy(Quest source) {
 		category = source.category;
 		id       = source.id;
-		config   = YamlConfiguration.loadConfiguration(RenderableFacade.fileFor(this));
+		config   = YamlConfiguration.loadConfiguration(Facade.fileFor(this));
 		cooldown = source.cooldown;
 		name     = source.name;
 		item     = source.item.clone();
@@ -124,7 +125,7 @@ class Quest extends UniqueObject implements IQuestState {
 		this.category = new WeakReference<>(category);
 		this.name = name;
 		
-		config = YamlConfiguration.loadConfiguration(RenderableFacade.fileFor(this));
+		config = YamlConfiguration.loadConfiguration(Facade.fileFor(this));
 		cooldown = -1;
 
 		money = 0;
@@ -138,7 +139,7 @@ class Quest extends UniqueObject implements IQuestState {
 	
 	public void refreshParent() {
 		parent = new WeakReference<>(
-				RenderableFacade.questOfString(config.getString("parent", null)));
+				Facade.questOfString(config.getString("parent", null)));
 	}
 	
 	private void loadMissions() {
@@ -198,10 +199,10 @@ class Quest extends UniqueObject implements IQuestState {
 			//mission.save(config.createSection("missions." + mission.getID()));
 		}
 
-		config.set("parent", RenderableFacade.stringOfQuest(getParent()));
+		config.set("parent", Facade.stringOfQuest(getParent()));
 		
 		try {
-			config.save(RenderableFacade.fileFor(this));
+			config.save(Facade.fileFor(this));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
