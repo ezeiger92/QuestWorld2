@@ -9,6 +9,8 @@ import me.mrCookieSlime.QuestWorld.api.annotation.NoImpl;
 
 @NoImpl
 public interface IQuest extends IStateful {
+	public static final long COOLDOWN_SCALE = 60 * 1000;
+	
 	int getID();
 	List<? extends IMission> getMissions();
 	ItemStack getItem();

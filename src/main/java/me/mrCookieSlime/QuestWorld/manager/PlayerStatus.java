@@ -318,11 +318,11 @@ public class PlayerStatus implements IPlayerStatus {
 	}
 
 	public void completeQuest(IQuest quest) {
-		if (quest.getCooldown() == -1)
+		if (quest.getRawCooldown() < 0)
 			tracker.setQuestStatus(quest, QuestStatus.FINISHED);
 		
 		else {
-			if (quest.getCooldown() == 0)
+			if (quest.getRawCooldown() == 0)
 				tracker.setQuestStatus(quest, QuestStatus.AVAILABLE);
 			
 			else {

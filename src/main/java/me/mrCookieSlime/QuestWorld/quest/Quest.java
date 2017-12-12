@@ -151,7 +151,6 @@ class Quest extends UniqueObject implements IQuestState {
 
 		for (String key: missions.getKeys(false)) {
 			// TODO mess
-			//QuestState changes = new QuestState(this);
 			Map<String, Object> data = missions.getConfigurationSection(key).getValues(false);
 			// getValues wont recurse through sections, so we have to manually map to... map
 			data.put("location", ((ConfigurationSection)data.get("location")).getValues(false));
@@ -302,11 +301,11 @@ class Quest extends UniqueObject implements IQuestState {
 	}
 	
 	public long getCooldown() {
-		return cooldown / 60 / 1000;
+		return cooldown / COOLDOWN_SCALE;
 	}
 
 	public void setCooldown(long cooldown) {
-		this.cooldown = cooldown * 60 * 1000;
+		this.cooldown = cooldown * COOLDOWN_SCALE;
 	}
 	
 	public int getMoney() {
@@ -361,7 +360,7 @@ class Quest extends UniqueObject implements IQuestState {
 
 	public String getFormattedCooldown() {
 		long cooldown = getCooldown();
-		if(cooldown == -1)
+		if(cooldown < 0)
 			return "Single Use";
 		
 		if(cooldown == 0)

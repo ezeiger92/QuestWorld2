@@ -107,7 +107,7 @@ public class EditorCommand implements CommandExecutor {
 							// Administrative process - bypass events and directly modify quest
 							// 99% of the time you should use .getState() and .apply()
 							IQuestState q = (IQuestState)quest;
-							q.setCooldown(-1);
+							q.setRawCooldown(-1);
 							++changeCount;
 							String questFile = quest.getID() + "-C" + category.getID();
 							Log.info("[Quest World 2] Upgrading "+category.getName()+"."+quest.getName()+" ("+questFile+".quest): Cooldown changed from 0 to -1");
