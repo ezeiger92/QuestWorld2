@@ -855,9 +855,13 @@ public class QuestBook {
 						"&rShift + Left Click: &e+1h",
 						"&rShift + Right Click: &e-1h").get(),
 				event -> {
-					long cooldown = quest.getCooldown();
-					int delta = event.isShiftClick() ? 60: 1;
-					if (event.isRightClick()) delta = -delta;
+					// Work with raw cooldowns so -1 is actually -1
+					long cooldown = quest.getRawCooldown();
+					long delta = IQuest.COOLDOWN_SCALE;
+					if(event.isShiftClick())
+						delta *= 60;
+					if (event.isRightClick())
+						delta = -delta;
 
 					// Force a step at 0, so you can't jump from 59 -> -1 or -1 -> 59
 					if(cooldown + delta < 0) {
@@ -871,7 +875,8 @@ public class QuestBook {
 					else
 						cooldown += delta;
 					
-					changes.setCooldown(cooldown);
+					changes.setRawCooldown(cooldown);
+					
 					changes.apply();
 					
 					openQuestEditor((Player) event.getWhoClicked(), quest);
