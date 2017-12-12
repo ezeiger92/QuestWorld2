@@ -44,7 +44,11 @@ public class QuestingImpl implements QuestingAPI, Reloadable {
 	@Override
 	@SuppressWarnings("unchecked")
 	public <T extends MissionType> T getMissionType(String typeName) {
-		return (T)types.get(typeName);
+		T result = (T)types.get(typeName);
+		if(result == null)
+			result = (T)UnknownMission.get(typeName);
+		
+		return result;
 	}
 
 	@Override

@@ -58,7 +58,7 @@ public class RenderableFacade implements IFacade {
 	}
 	
 	static File fileFor(IQuest quest) {
-		return new File(QuestWorldPlugin.getPath("data.questing"), stringOfQuest(quest));
+		return new File(QuestWorldPlugin.getPath("data.questing"), stringOfQuest(quest) + ".quest");
 	}
 	
 	private static int[] splitQuestString(String in) {
@@ -69,6 +69,12 @@ public class RenderableFacade implements IFacade {
 		
 		result[0] = Integer.parseInt(in.substring(0, mid - 1));
 		result[1] = Integer.parseInt(in.substring(mid + 1, len));
+		
+		if(swap) {
+			int temp = result[0];
+			result[0] = result[1];
+			result[1] = temp;
+		}
 		
 		return result;
 	}
@@ -101,13 +107,15 @@ public class RenderableFacade implements IFacade {
 		public final int id;
 		public final YamlConfiguration file;
 	}
-	
+	static boolean swap = false;
 	public void load() {
+		
 		ArrayList<ParseData> categoryData = new ArrayList<>();
 		HashMap<Integer, ArrayList<ParseData>> questData = new HashMap<>();
 		
 		for (File file: QuestWorldPlugin.getPath("data.questing").listFiles()) {
 			String fileName = file.getName();
+			
 			if (fileName.endsWith(".quest")) {
 				int[] parts = splitQuestString(fileName.substring(0, fileName.length() - 6));
 				
@@ -130,6 +138,7 @@ public class RenderableFacade implements IFacade {
 			categories.add(category);
 			
 			ArrayList<ParseData> elements = questData.get(cData.id);
+			
 			if(elements != null)
 				for (ParseData qData: questData.get(cData.id)) {
 					Quest q = new Quest(qData.id, qData.file, category);
@@ -140,12 +149,16 @@ public class RenderableFacade implements IFacade {
 			categoryMap.put(category.getID(), category);
 		}
 		
+		swap = QuestWorld.getPlugin().getConfig().getBoolean("danger.swap-parent", false);
+		
 		for (Category category: categories) {
 			category.refreshParent();
 			
 			for (Quest quest: category.getQuests())
 				quest.refreshParent();
 		}
+		
+		swap = false;
 	}
 	
 	public void unload() {

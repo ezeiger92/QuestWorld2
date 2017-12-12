@@ -43,6 +43,12 @@ public class MissionViewer implements Listener {
 		return decaying_missions;
 	}
 	
+	public void clear() {
+		missions.clear();
+		ticking_missions.clear();
+		decaying_missions.clear();
+	}
+	
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onCreateMission(QuestChangeEvent event) {
 		if(event.hasChange(IQuestState.Member.TASKS)) {
