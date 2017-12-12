@@ -17,9 +17,9 @@ public class UnknownMission extends MissionType {
 		if(result == null) {
 			result = new UnknownMission(name);
 			cache.put(name, result);
+			Log.warning("Tried to fetch unknown mission type: " + name + ". Did an extension fail to load?");
+			Log.warning("Supplying dummy mission for " + name);
 		}
-		Log.warning("Tried to fetch unknown mission type: " + name + ". Did an extension fail to load?");
-		Log.warning("Supplying dummy mission for " + name);
 		return result;
 	}
 

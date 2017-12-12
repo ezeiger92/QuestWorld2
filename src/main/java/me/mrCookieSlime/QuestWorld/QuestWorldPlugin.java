@@ -176,6 +176,7 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener, QuestLoade
 	public void unload() {
 		api.getFacade().save(true);
 		api.getFacade().unload();
+		api.getViewer().clear();
 		
 		for(Player p : getServer().getOnlinePlayers())
 			api.getPlayerStatus(p).getTracker().save();

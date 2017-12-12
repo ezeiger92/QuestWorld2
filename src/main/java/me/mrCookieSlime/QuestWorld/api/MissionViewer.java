@@ -69,6 +69,12 @@ public class MissionViewer implements Listener {
 		return decaying_missions;
 	}
 	
+	public void clear() {
+		missions.clear();
+		ticking_missions.clear();
+		decaying_missions.clear();
+	}
+	
 	/**
 	 * Updates mission sets based on event data. This is an event method and
 	 * should not be called directly.
