@@ -11,6 +11,7 @@ import java.util.Map;
 
 import me.mrCookieSlime.QuestWorld.api.contract.ICategoryState;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
+import me.mrCookieSlime.QuestWorld.util.Text;
 
 import org.bukkit.Material;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -55,7 +56,7 @@ class Category extends UniqueObject implements ICategoryState {
 		this.id = id;
 		this.config = config;
 		this.facade = facade;
-		name = config.getString("name");
+		name = Text.deserializeColor(config.getString("name"));
 		item = config.getItemStack("item", item);
 		hidden = config.getBoolean("hidden");
 		permission = config.getString("permission", "");
@@ -175,7 +176,7 @@ class Category extends UniqueObject implements ICategoryState {
 			return;
 		
 		config.set("id", id);
-		config.set("name", name);
+		config.set("name", Text.serializeColor(name));
 		config.set("item", item);
 		config.set("permission", permission);
 		config.set("hidden", this.hidden);

@@ -71,29 +71,19 @@ public class Text {
 		return output;
 	}
 	
-	public static String escape(@Nullable("Returns null") String input) {
+	public static String serializeColor(@Nullable("Returns null") String input) {
 		if(input == null)
 			return null;
 		
-		return input.replace(colorChar, dummyChar);
+		return input.replace("\\", "\\\\").replace("&", "\\&").replace(colorChar, dummyChar);
 	}
 	
-	public static String escape(String... inputs) {
-		StringBuilder sb = new StringBuilder(inputs.length);
+	public static String deserializeColor(@Nullable("Returns null") String input) {
+		if(input == null)
+			return null;
 		
-		for(String input : inputs)
-			sb.append(escape(input));
-		
-		return sb.toString();
-	}
-	
-	public static String[] escapeList(String... inputs) {
-		String[] output = new String[inputs.length];
-		
-		for(int i = 0; i < inputs.length; ++i)
-			output[i] = escape(inputs[i]);
-		
-		return output;
+		input = input.replaceAll("(?i)(?<!\\\\)((?:\\\\\\\\)*)&([0-9A-FK-OR])", "$1"+colorChar+"$2");
+		return input.replace("\\\\", "\\");
 	}
 	
 	public static String stringOf(Location location) {

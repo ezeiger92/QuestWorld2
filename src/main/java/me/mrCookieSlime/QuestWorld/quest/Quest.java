@@ -103,7 +103,7 @@ class Quest extends UniqueObject implements IQuestState {
 		partySupport = !config.getBoolean("disable-parties");
 		ordered      = config.getBoolean("in-order");
 		autoclaim    = config.getBoolean("auto-claim");
-		name         = config.getString("name");
+		name         = Text.deserializeColor(config.getString("name"));
 		item         = config.getItemStack("item", item);
 		
 		rewards = loadRewards();
@@ -173,7 +173,7 @@ class Quest extends UniqueObject implements IQuestState {
 		config.set("id", id);
 		config.set("category", getCategory().getID());
 		config.set("cooldown", cooldown);
-		config.set("name", name);
+		config.set("name", Text.serializeColor(name));
 		config.set("item", new ItemStack(item));
 		config.set("rewards.items", null);
 		config.set("rewards.money", money);

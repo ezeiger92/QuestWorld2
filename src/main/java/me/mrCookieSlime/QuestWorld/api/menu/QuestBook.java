@@ -777,10 +777,8 @@ public class QuestBook {
 		
 		menu.openFor(p);
 	}
-
-	public static void openQuestEditor(Player p, final IQuest quest) {
-		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
-		
+	
+	public static Menu getQuestEditor(IQuest quest) {
 		final Menu menu = new Menu(6, "&3Quest Editor");
 		IQuestState changes = quest.getState();
 		
@@ -1092,8 +1090,13 @@ public class QuestBook {
 				);
 			}
 		}
+		return menu;
+	}
+
+	public static void openQuestEditor(Player p, final IQuest quest) {
+		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
 		
-		menu.openFor(p);
+		getQuestEditor(quest).openFor(p);
 	}
 
 	public static void openWorldEditor(Player p, final IQuest quest) {

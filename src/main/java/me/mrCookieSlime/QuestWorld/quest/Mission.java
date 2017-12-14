@@ -168,11 +168,11 @@ class Mission extends UniqueObject implements IMissionState {
 		result.put("entity",   entity.toString());
 		result.put("location", locationHelper(location));
 		result.put("index",    index);
-		result.put("custom_string",  Text.escape(customString));
-		result.put("display-name",   Text.escape(displayName));
+		result.put("custom_string",  Text.serializeColor(customString));
+		result.put("display-name",   Text.serializeColor(displayName));
 		result.put("timeframe",      timeframe);
 		result.put("reset-on-death", deathReset);
-		result.put("lore",           Text.escape(description));
+		result.put("lore",           Text.serializeColor(description));
 		result.put("custom_int",     customInt);
 		result.put("exclude-spawners", !spawnerSupport);
 		
@@ -328,13 +328,13 @@ class Mission extends UniqueObject implements IMissionState {
 		index    = (Integer)data.getOrDefault("index", index);
 		// Chain to handle old name
 		customString = (String)data.getOrDefault("name", customString);
-		customString = Text.colorize((String)data.getOrDefault("custom_string", customString));
-		displayName  = Text.colorize((String)data.getOrDefault("display-name", displayName));
+		customString = Text.deserializeColor((String)data.getOrDefault("custom_string", customString));
+		displayName  = Text.deserializeColor((String)data.getOrDefault("display-name", displayName));
 		
 		timeframe    = fromMaybeString(data.getOrDefault("timeframe", timeframe));
 		
 		deathReset   = (Boolean)data.getOrDefault("reset-on-death", deathReset);
-		description  = Text.colorize((String)data.getOrDefault("lore", description));
+		description  = Text.deserializeColor((String)data.getOrDefault("lore", description));
 		// Chain to handle old name
 		customInt    = (Integer)data.getOrDefault("citizen", customInt);
 		customInt    = (Integer)data.getOrDefault("custom_int", customInt);

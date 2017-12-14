@@ -207,14 +207,13 @@ public class MissionButton {
 							PlayerTools.makeTranslation(true, Translation.MISSION_DIALOG_ADD),
 							null,
 							(c,s) -> {
-								Player p2 = (Player) c.getForWhom();
 								if (s.equalsIgnoreCase("exit()") || s.equalsIgnoreCase("/exit")) {
 									changes.setDialogue(dialogue);
 									if(changes.apply()) {
 										String filename = ProgressTracker.dialogueFile(changes.getSource()).getName();
-										PlayerTools.sendTranslation(p2, true, Translation.MISSION_DIALOG_SET, filename);
+										PlayerTools.sendTranslation(p, true, Translation.MISSION_DIALOG_SET, filename);
 									}
-									QuestBook.openQuestMissionEditor(p2, changes.getSource());
+									QuestBook.openQuestMissionEditor(p, changes.getSource());
 									return true;
 								}
 								dialogue.add(s);
@@ -223,7 +222,7 @@ public class MissionButton {
 										Translation.MISSION_COMMAND_ADDED : Translation.MISSION_DIALOG_ADDED;
 								
 								SinglePrompt.setNextDisplay(c, PlayerTools.makeTranslation(true, translator, s));
-								QuestWorld.getSounds().DIALOG_ADD.playTo(p2);
+								QuestWorld.getSounds().DIALOG_ADD.playTo(p);
 								
 								return false;
 							}
