@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
 
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.MissionViewer;
@@ -14,6 +15,7 @@ import me.mrCookieSlime.QuestWorld.api.Translator;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.MissionEntry;
 import me.mrCookieSlime.QuestWorld.api.contract.QuestingAPI;
+import me.mrCookieSlime.QuestWorld.api.menu.Menu;
 import me.mrCookieSlime.QuestWorld.manager.MissionSet;
 import me.mrCookieSlime.QuestWorld.manager.PlayerStatus;
 import me.mrCookieSlime.QuestWorld.manager.StatusManager;
@@ -120,6 +122,17 @@ public class QuestingImpl implements QuestingAPI, Reloadable {
 	@Override
 	public void save() {
 		
+	}
+	
+	public void unload() {
+		facade.unload();
+		viewer.clear();
+		statusManager.unloadAll();
+		
+		// TODO: Better place, message
+		for(Player p : Bukkit.getOnlinePlayers())
+			if(p.getOpenInventory().getTopInventory().getHolder() instanceof Menu)
+				p.closeInventory();
 	}
 
 	@Override

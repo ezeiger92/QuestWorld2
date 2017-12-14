@@ -27,4 +27,8 @@ public class StatusManager {
 			statuses.remove(player.getUniqueId());
 		}
 	}
+	
+	public void unloadAll() {
+		statuses.clear();
+	}
 }
