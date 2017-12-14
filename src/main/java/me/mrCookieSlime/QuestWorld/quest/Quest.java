@@ -359,14 +359,14 @@ class Quest extends UniqueObject implements IQuestState {
 	}
 
 	public String getFormattedCooldown() {
-		long cooldown = getCooldown();
+		long cooldown = getRawCooldown();
 		if(cooldown < 0)
 			return "Single Use";
 		
 		if(cooldown == 0)
 			return "Repeating";
 
-		return Text.timeFromNum(cooldown);
+		return Text.timeFromNum(cooldown / COOLDOWN_SCALE);
 	}
 	
 	public Quest getParent() {

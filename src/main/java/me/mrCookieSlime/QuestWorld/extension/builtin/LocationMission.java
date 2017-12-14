@@ -76,19 +76,26 @@ public class LocationMission extends MissionType implements Listener, Ticking {
 			entry.addProgress(1);
 	}
 	
-	private HashMap<Player, Integer> distanceMap = new HashMap<>();
+	private HashMap<Player, Double> distanceMap = new HashMap<>();
 	
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onPlayerMove(PlayerMoveEvent event) {
-		Player player = event.getPlayer();
-		int distance = distanceMap.getOrDefault(player, 0);
+		double moved = event.getFrom().distanceSquared(event.getTo());
 		
-		if(distance > 0) {
-			distanceMap.put(player, (distance << 1) / 3);
+		// Looking around
+		if(moved == 0)
+			return;
+		
+		Player player = event.getPlayer();
+		double distance = distanceMap.getOrDefault(player, 0.0);
+		
+		// Handle big moves (teleports)
+		if(distance > moved * 100) {
+			distanceMap.put(player, distance * 0.0000001);
 			return;
 		}
 		
-		double fdist = Integer.MAX_VALUE >> 1;
+		double fdist = 1000000000000.0;
 		
 		for(MissionEntry entry : QuestWorld.getMissionEntries(this, player)) {
 			Location missionLoc = entry.getMission().getLocation();
@@ -98,13 +105,15 @@ public class LocationMission extends MissionType implements Listener, Ticking {
 			int radSquared = entry.getMission().getCustomInt() * entry.getMission().getCustomInt();
 			
 			double difference = missionLoc.distanceSquared(player.getLocation());
-			if(radSquared < difference)
+			if(radSquared < difference) {
 				fdist = Math.min(fdist, difference);
+			}
 			else
 				entry.addProgress(1);
 		}
 		
-		distanceMap.put(player, (int)fdist);
+		fdist = Math.pow(fdist, 12);
+		distanceMap.put(player, fdist);
 	}
 	
 	@EventHandler

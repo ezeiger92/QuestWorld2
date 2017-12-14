@@ -77,7 +77,7 @@ public class PlayerStatus implements IPlayerStatus {
 		String worldName = player.getWorld().getName();
 		
 		for(IMission task : QuestWorld.getViewer().getMissionsOf(type)) {
-			IQuest quest = task.getQuest();	
+			IQuest quest = task.getQuest();
 			
 			if (quest.getCategory().isWorldEnabled(worldName) && quest.getWorldEnabled(worldName)
 				&& !hasCompletedTask(task) && hasUnlockedTask(task)
@@ -307,13 +307,18 @@ public class PlayerStatus implements IPlayerStatus {
 	}
 
 	private static void sendDialogueComponent(Player player, String line) {
+		line = line.replace("@p", player.getName());
+
+		// TODO: remove
+		line = line.replace("<player>", player.getName());
+		
 		if(line.startsWith("/"))
-			Bukkit.dispatchCommand(Bukkit.getConsoleSender(), line.substring(1).replace("<player>", player.getName()));
+			Bukkit.dispatchCommand(Bukkit.getConsoleSender(), line.substring(1));
 
 		else {
 			line = QuestWorld.getPlugin().getConfig().getString("dialogue.prefix") + line;
 			
-			player.sendMessage(Text.colorize(line.replace("<player>", player.getName())));
+			player.sendMessage(Text.colorize(line));
 		}
 	}
 

@@ -10,6 +10,7 @@ public abstract class QuestExtension {
 	private int remaining;
 	private Plugin[] found;
 	private boolean initialized = false;
+	private QuestingAPI api = QuestWorld.getAPI();
 	
 	/**
 	 * Performs setup for this extension. In particular, this calls user methods
@@ -37,7 +38,7 @@ public abstract class QuestExtension {
 	 * @return The API
 	 */
 	public final QuestingAPI getAPI() {
-		return QuestWorld.getAPI();
+		return api;
 	}
 	
 	/**
