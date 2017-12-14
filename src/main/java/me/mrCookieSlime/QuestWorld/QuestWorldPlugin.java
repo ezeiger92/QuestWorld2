@@ -144,6 +144,7 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener {
 	
 	public void reloadQuests() {
 		api.getFacade().unload();
+		api.getViewer().clear();
 		load();
 	}
 	

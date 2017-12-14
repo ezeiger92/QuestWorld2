@@ -232,6 +232,11 @@ public class QuestBook {
 								PlayerTools.promptInput(p2, new SinglePrompt(
 										PlayerTools.makeTranslation(true, Translation.PARTY_LEADER_PICKNAME),
 										(c,s) -> {
+											if(s.equals("cancel()")) {
+												// TODO Translation for cancel && add cancel to PICKNAME
+												openPartyMenu(p);
+												return true;
+											}
 											String name = Text.decolor(s).replace("@", "");
 
 											Player player = PlayerTools.getPlayer(name);
@@ -243,13 +248,15 @@ public class QuestBook {
 													} catch (Exception e1) {
 														e1.printStackTrace();
 													}
+													openPartyMenu(p);
+													return true;
 												}
 												else PlayerTools.sendTranslation(p2, true, Translation.PARTY_ERROR_MEMBER, name);
 											}
 											else {
 												PlayerTools.sendTranslation(p2, true, Translation.PARTY_ERROR_OFFLINE, name);
 											}
-											return true;
+											return false;
 										}
 								));
 							}
@@ -946,6 +953,7 @@ public class QuestBook {
 						"&rLeft Click: &eOpen Command Editor").get(),
 				event -> {
 					Player p2 = (Player) event.getWhoClicked();
+					// TODO: Reopen menu
 					p2.closeInventory();
 					QBDialogue.openCommandEditor(p2, quest);
 				}
