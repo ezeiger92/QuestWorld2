@@ -228,6 +228,7 @@ public class QuestBook {
 							if (party.getSize() >= QuestWorld.getPlugin().getConfig().getInt("party.max-members"))
 								PlayerTools.sendTranslation(p2, true, Translation.PARTY_ERROR_FULL);
 							else {
+								p2.closeInventory();
 								PlayerTools.promptInput(p2, new SinglePrompt(
 										PlayerTools.makeTranslation(true, Translation.PARTY_LEADER_PICKNAME),
 										(c,s) -> {
@@ -251,8 +252,6 @@ public class QuestBook {
 											return true;
 										}
 								));
-
-								PlayerTools.closeInventoryWithEvent(p2);
 							}
 						}
 				);
@@ -677,6 +676,7 @@ public class QuestBook {
 						"&e> Click to change the Name").get(),
 				event -> {
 					Player p2 = (Player) event.getWhoClicked();
+					p2.closeInventory();
 					PlayerTools.promptInput(p2, new SinglePrompt(
 							PlayerTools.makeTranslation(true, Translation.CATEGORY_NAME_EDIT, category.getName()),
 							(c,s) -> {
@@ -689,8 +689,6 @@ public class QuestBook {
 								return true;
 							}
 					));
-
-					PlayerTools.closeInventoryWithEvent(p2);
 				}
 		);
 		
@@ -725,6 +723,7 @@ public class QuestBook {
 						"&e> Click to change the rquired Permission Node").get(),
 				event -> {
 					Player p2 = (Player) event.getWhoClicked();
+					p2.closeInventory();
 					PlayerTools.promptInput(p2, new SinglePrompt(
 							PlayerTools.makeTranslation(true, Translation.CATEGORY_PERM_EDIT, category.getName(), category.getPermission()),
 							(c,s) -> {
@@ -738,8 +737,6 @@ public class QuestBook {
 								return true;
 							}
 					));
-					
-					PlayerTools.closeInventoryWithEvent(p2);
 				}
 		);
 		
@@ -815,6 +812,7 @@ public class QuestBook {
 						"&e> Click to change the Name").get(),
 				event -> {
 					Player p2 = (Player) event.getWhoClicked();
+					p2.closeInventory();
 					PlayerTools.promptInput(p2, new SinglePrompt(
 							PlayerTools.makeTranslation(true, Translation.QUEST_NAME_EDIT, quest.getName()),
 							(c,s) -> {
@@ -827,8 +825,6 @@ public class QuestBook {
 								return true;
 							}
 					));
-
-					PlayerTools.closeInventoryWithEvent(p2);
 				}
 		);
 		
@@ -952,7 +948,7 @@ public class QuestBook {
 						"&rLeft Click: &eOpen Command Editor").get(),
 				event -> {
 					Player p2 = (Player) event.getWhoClicked();
-					PlayerTools.closeInventoryWithEvent(p2);
+					p2.closeInventory();
 					QBDialogue.openCommandEditor(p2, quest);
 				}
 		);
@@ -964,6 +960,7 @@ public class QuestBook {
 						"&e> Click to change the required Permission Node").get(),
 				event -> {
 					Player p2 = (Player) event.getWhoClicked();
+					p2.closeInventory();
 					PlayerTools.promptInput(p2, new SinglePrompt(
 							PlayerTools.makeTranslation(true, Translation.QUEST_PERM_EDIT, quest.getName(), quest.getPermission()),
 							(c,s) -> {
@@ -977,8 +974,6 @@ public class QuestBook {
 								return true;
 							}
 					));
-
-					PlayerTools.closeInventoryWithEvent(p2);
 				}
 		);
 		

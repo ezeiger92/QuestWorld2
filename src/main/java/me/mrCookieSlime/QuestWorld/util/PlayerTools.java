@@ -4,15 +4,15 @@ import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.conversations.Conversation;
+import org.bukkit.conversations.ConversationAbandonedEvent;
+import org.bukkit.conversations.ConversationAbandonedListener;
 import org.bukkit.conversations.ConversationFactory;
 import org.bukkit.conversations.Prompt;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.CraftingInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -20,6 +20,7 @@ import org.bukkit.inventory.ItemStack;
 import me.mrCookieSlime.QuestWorld.api.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.api.Translator;
+import me.mrCookieSlime.QuestWorld.api.event.GenericPlayerLeaveEvent;
 
 public class PlayerTools {
 	public static ItemStack getActiveHandItem(Player p) {
@@ -95,36 +96,59 @@ public class PlayerTools {
 		return factory;
 	}
 	public static void promptInput(Player p, Prompt prompt) {
-		getConversationFactory()
-		.withLocalEcho(false).withModality(false)
-		.withFirstPrompt(prompt).buildConversation(p).begin();
+		prepareConversation(p, prompt).begin();
 	}
 	
 	public static void promptCommand(Player p, Prompt prompt) {
-		Conversation con = getConversationFactory()
-				.withLocalEcho(false).withModality(false)
-				.withFirstPrompt(prompt).buildConversation(p);
+		Conversation con = prepareConversation(p, prompt);
 		p.sendMessage(prompt.getPromptText(con.getContext()));
 		
-		Bukkit.getPluginManager().registerEvents(new Listener() {
+		Bukkit.getPluginManager().registerEvents(commandListener(con, prompt), QuestWorld.getPlugin());
+	}
+	
+	public static void promptInputOrCommand(Player p, Prompt prompt) {
+		Conversation con = prepareConversation(p, prompt);
+		
+		Bukkit.getPluginManager().registerEvents(commandListener(con, prompt), QuestWorld.getPlugin());
+		con.begin();
+	}
+	
+	private static Listener commandListener(Conversation con, Prompt prompt) {
+		Listener listener = new Listener() {
 			@EventHandler
 			public void onCommand(PlayerCommandPreprocessEvent event) {
-				if(!event.getPlayer().getUniqueId().equals(p.getUniqueId()))
+				if(event.getPlayer() != con.getForWhom())
 					return;
 
 				event.setCancelled(true);
 				if(prompt.acceptInput(con.getContext(), event.getMessage()) != Prompt.END_OF_CONVERSATION) {
-					p.sendMessage(prompt.getPromptText(con.getContext()));
+					con.getForWhom().sendRawMessage(prompt.getPromptText(con.getContext()));
 				}
-				else
+				else {
+					con.abandon();
 					HandlerList.unregisterAll(this);
+				}
 			}
 			
 			@EventHandler
-			public void onLeave(PlayerQuitEvent event) {
+			public void onLeave(GenericPlayerLeaveEvent event) {
 				HandlerList.unregisterAll(this);
 			}
-		}, QuestWorld.getPlugin());
+		};
+		con.addConversationAbandonedListener(new ConversationAbandonedListener() {
+			@Override
+			public void conversationAbandoned(ConversationAbandonedEvent abandonedEvent) {
+				HandlerList.unregisterAll(listener);
+			}
+		});
+		
+		return listener;
+	}
+	
+	private static Conversation prepareConversation(Player p, Prompt prompt) {
+		return getConversationFactory()
+				.withLocalEcho(false).withModality(false)
+				.withFirstPrompt(prompt).buildConversation(p);
 	}
 	
 	public static boolean checkPermission(Player p, String permission) {
@@ -140,11 +164,6 @@ public class PlayerTools {
 	@SuppressWarnings("deprecation")
 	public static Player getPlayer(String name) {
 		return Bukkit.getPlayerExact(name);
-	}
-	
-	public static void closeInventoryWithEvent(Player p) {
-		Bukkit.getPluginManager().callEvent(new InventoryCloseEvent(p.getOpenInventory()));
-		p.closeInventory();
 	}
 
 	private static boolean noexceptPick = true;

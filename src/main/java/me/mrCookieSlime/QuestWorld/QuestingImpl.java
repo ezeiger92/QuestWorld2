@@ -128,7 +128,7 @@ public class QuestingImpl implements QuestingAPI, Reloadable {
 		language.reload();
 	}
 	
-	public void playerLeave(OfflinePlayer player) {
+	public void unloadPlayerStatus(OfflinePlayer player) {
 		statusManager.unload(player);
 	}
 }

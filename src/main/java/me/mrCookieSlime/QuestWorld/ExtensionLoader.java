@@ -72,12 +72,16 @@ public class ExtensionLoader {
 		
 		for(Class<?> extensionClass : extensionClasses) {
 			Log.fine("Loader - Constructing: " + extensionClass.getName());
-			try { extensionClass.getConstructor().newInstance(); }
+			QuestExtension extension;
+			try { extension = (QuestExtension)extensionClass.getConstructor().newInstance(); }
 			catch (Throwable e) {
 				Log.severe("Exception while constructing extension class \""+extensionClass+"\"!");
 				Log.severe("Is it missing a default constructor?");
 				e.printStackTrace();
+				continue;
 			}
+			
+			QuestWorldPlugin.getImpl().getPlugin().attach(extension);
 		}
 		
 		try { jar.close(); }

@@ -107,7 +107,7 @@ public class PlayerListener implements Listener {
 			partyKick.put(player.getUniqueId(), task_id);
 		}
 		
-		((QuestingImpl)QuestWorld.getAPI()).playerLeave(player);
+		((QuestingImpl)QuestWorld.getAPI()).unloadPlayerStatus(player);
 	}
 	
 	// Since we can't randomly update recipes at runtime, replace result with latest lore

@@ -47,11 +47,12 @@ editor:
   
   misssion-description: '&7Please type in a Description for your Quest'
   mission.desc-set:     '&aSuccessfully set description for &r%name%'
-  add-dialogue:     '&7Please type in the Message you want to add to the Dialogue! You can do this multiple times, simply type &eexit() &7when you are done! You can also add Commands! Just type in your command &e(ex. /say hello) &7and it will be executed within the Dialogue, use &e<player> &7for the Player''s Username'
+  add-dialogue:         '&7Please type in the Message you want to add to the Dialogue! You can do this multiple times, simply type &eexit() &7when you are done! You can also add Commands! Just type in your command &e(ex. /say hello) &7and it will be executed within the Dialogue, use &e<player> &7for the Player''s Username'
+  added-dialogue-text:    '&7Added dialogue: %line%'
+  added-dialogue-command: '&7Added command: %command%'
   set-dialogue: |
     &7Successfully set a Dialogue!
-    &7If you want to change something you can edit the Dialogue at any time at:
-    &e%path%
+    &7If you want to change something you can edit the Dialogue at any time at: &e%path%
   edit-mission-name:   '&aSuccessfully edited the Mission''s Display Name'
   await-mission-name:  '&7Please type in a Custom Name for this Mission'
   rename-kill-mission: '&7Please type in the Name of the Mob/Player you want to be killed &8(Color Code supported)'

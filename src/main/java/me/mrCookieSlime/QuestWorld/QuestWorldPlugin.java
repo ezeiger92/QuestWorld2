@@ -12,7 +12,6 @@ import java.util.zip.ZipOutputStream;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.QuestExtension;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
-import me.mrCookieSlime.QuestWorld.api.contract.QuestLoader;
 import me.mrCookieSlime.QuestWorld.api.contract.QuestingAPI;
 import me.mrCookieSlime.QuestWorld.command.EditorCommand;
 import me.mrCookieSlime.QuestWorld.command.QuestsCommand;
@@ -29,7 +28,7 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class QuestWorldPlugin extends JavaPlugin implements Listener, QuestLoader {
+public class QuestWorldPlugin extends JavaPlugin implements Listener {
 	private static QuestWorldPlugin instance = null;
 	private long lastSave = 0;
 
@@ -50,7 +49,6 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener, QuestLoade
 		getPath("data.presets");
 		
 		extLoader = new ExtensionLoader(getClassLoader(), getPath("data.extensions"));
-		getServer().getServicesManager().register(QuestLoader.class, this, this, ServicePriority.Normal);
 		getServer().getServicesManager().register(QuestingAPI.class, api, this, ServicePriority.Normal);
 	}
 	
@@ -71,7 +69,7 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener, QuestLoade
 	public void onEnable() {
 		api.onEnable();
 		hookInstaller = new ExtensionInstaller(this);
-		new Builtin();
+		hookInstaller.add(new Builtin());
 		hookInstaller.addAll(preEnableHooks);
 		preEnableHooks.clear();
 		preEnableHooks = null;
@@ -254,7 +252,6 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener, QuestLoade
 		return true;
 	}
 	
-	@Override
 	public void enable(QuestExtension hook) {
 		for(MissionType type : hook.getMissions()) {
 			Log.fine("Registrar - Storing mission: " + type.getName());
@@ -291,11 +288,6 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener, QuestLoade
 			}
 		}
 		return result;
-	}
-	
-	@Override
-	public QuestingImpl getAPI() {
-		return api;
 	}
 	
 	public static QuestingImpl getImpl() {

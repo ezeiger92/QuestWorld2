@@ -127,6 +127,7 @@ public class LocationMission extends MissionType implements Listener, Ticking {
 				event -> {
 					Player p = (Player)event.getWhoClicked();
 					
+					p.closeInventory();
 					PlayerTools.promptInput(p, new SinglePrompt(
 							PlayerTools.makeTranslation(true, Translation.LOCMISSION_NAME_EDIT),
 							(c,s) -> {
@@ -140,8 +141,6 @@ public class LocationMission extends MissionType implements Listener, Ticking {
 								return true;
 							}
 					));
-
-					PlayerTools.closeInventoryWithEvent(p);
 				}
 		));
 		putButton(17, MissionButton.simpleButton(

@@ -3,15 +3,12 @@ package me.mrCookieSlime.QuestWorld.api;
 import org.bukkit.plugin.Plugin;
 
 import me.mrCookieSlime.QuestWorld.api.annotation.Control;
-import me.mrCookieSlime.QuestWorld.api.contract.QuestLoader;
 import me.mrCookieSlime.QuestWorld.api.contract.QuestingAPI;
-import me.mrCookieSlime.QuestWorld.util.BukkitService;
 
 public abstract class QuestExtension {
 	private String[] requirements;
 	private int remaining;
 	private Plugin[] found;
-	private final QuestLoader loader;
 	private boolean initialized = false;
 	
 	/**
@@ -21,15 +18,12 @@ public abstract class QuestExtension {
 	 */
 	public QuestExtension() {
 		setup();
-		loader = BukkitService.get(QuestLoader.class);
 		
 		requirements = getDepends();
 		if(requirements == null)
 			requirements = new String[0];
 		remaining = requirements.length;
 		found = new Plugin[remaining];
-		
-		loader.attach(this);
 	}
 	
 	/**
@@ -43,7 +37,7 @@ public abstract class QuestExtension {
 	 * @return The API
 	 */
 	public final QuestingAPI getAPI() {
-		return loader.getAPI();
+		return QuestWorld.getAPI();
 	}
 	
 	/**
@@ -103,7 +97,6 @@ public abstract class QuestExtension {
 		// Never trust user code, this may throw anything
 		initialize(parent);
 
-		loader.enable(this);
 		initialized = true;
 	}
 	
@@ -156,6 +149,10 @@ public abstract class QuestExtension {
 	 */
 	public final boolean isReady() {
 		return remaining <= 0;
+	}
+	
+	public final boolean isInitialized() {
+		return initialized;
 	}
 	
 	/**

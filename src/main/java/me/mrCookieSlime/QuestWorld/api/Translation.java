@@ -41,6 +41,8 @@ public enum Translation implements Translator {
 	MISSION_DESC_EDIT ("editor.misssion-description"),
 	MISSION_DESC_SET  ("editor.mission.desc-set", "name", "desc"),
 	MISSION_DIALOG_ADD("editor.add-dialogue"),
+	MISSION_DIALOG_ADDED("editor.added-dialogue-text", "line"),
+	MISSION_COMMAND_ADDED("editor.added-dialogue-command", "command"),
 	MISSION_DIALOG_SET("editor.set-dialogue",     "path"),
 	MISSION_NAME_EDIT ("editor.await-mission-name"),
 	MISSION_NAME_SET  ("editor.edit-mission-name"),

@@ -11,6 +11,7 @@ import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 
+import me.mrCookieSlime.QuestWorld.QuestWorldPlugin;
 import me.mrCookieSlime.QuestWorld.api.QuestExtension;
 import me.mrCookieSlime.QuestWorld.util.Log;
 
@@ -55,6 +56,11 @@ public class ExtensionInstaller implements Listener {
 	}
 	
 	private void initialize(QuestExtension hook, String name) {
+		if(hook.isInitialized()) {
+			Log.warning("Error initializing hook: " + name + ": Double initializationS!");
+			return;
+		}
+		
 		Log.fine("Installer - Initializing hook: " + name);
 		
 		try {
@@ -63,7 +69,10 @@ public class ExtensionInstaller implements Listener {
 		catch(Throwable e) {
 			Log.warning("Error initializing hook: " + name);
 			e.printStackTrace();
+			return;
 		}
+
+		QuestWorldPlugin.getImpl().getPlugin().enable(hook);
 	}
 	
 	private String hookName(QuestExtension hook) {

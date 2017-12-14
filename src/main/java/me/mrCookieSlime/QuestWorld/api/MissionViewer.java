@@ -40,13 +40,7 @@ public class MissionViewer implements Listener {
 	 * @return A set containing all missions of type <tt>type</tt>
 	 */
 	public Set<IMission> getMissionsOf(MissionType type) {
-		Set<IMission> result = missions.get(type);
-		if(result == null) {
-			result = new HashSet<>();
-			missions.put(type, result);
-		}
-		
-		return Collections.unmodifiableSet(result);
+		return Collections.unmodifiableSet(rawGetMissionsOf(type));
 	}
 	
 	/**
@@ -147,7 +141,7 @@ public class MissionViewer implements Listener {
 	 * @param type The type
 	 */
 	private void add(IMission mission, MissionType type) {
-		getMissionsOf(type).add(mission);
+		rawGetMissionsOf(type).add(mission);
 		
 		if(type instanceof Ticking)
 			ticking_missions.add(mission);
@@ -182,12 +176,22 @@ public class MissionViewer implements Listener {
 	 * @param mission The mission
 	 */
 	private void remove(IMission mission) {
-		getMissionsOf(mission.getType()).remove(mission);
+		rawGetMissionsOf(mission.getType()).remove(mission);
 		
 		if(mission.getType() instanceof Ticking)
 			ticking_missions.remove(mission);
 		
 		if(mission.getType() instanceof Decaying)
 			decaying_missions.remove(mission);
+	}
+	
+	private Set<IMission> rawGetMissionsOf(MissionType type) {
+		Set<IMission> result = missions.get(type);
+		if(result == null) {
+			result = new HashSet<>();
+			missions.put(type, result);
+		}
+		
+		return result;
 	}
 }

@@ -91,7 +91,7 @@ public class MissionButton {
 				event -> {
 					Player p = (Player)event.getWhoClicked();
 
-					PlayerTools.closeInventoryWithEvent(p);
+					p.closeInventory();
 					PlayerTools.promptInput(p, new SinglePrompt(
 							PlayerTools.makeTranslation(true, Translation.KILLMISSION_NAME_EDIT),
 							(c,s) -> {
@@ -122,7 +122,7 @@ public class MissionButton {
 						apply(event, changes);
 					}
 					else {
-						PlayerTools.closeInventoryWithEvent(p);
+						p.closeInventory();
 						PlayerTools.promptInput(p, new SinglePrompt(
 								PlayerTools.makeTranslation(true, Translation.MISSION_NAME_EDIT),
 								(c,s) -> {
@@ -202,12 +202,13 @@ public class MissionButton {
 					List<String> dialogue = changes.getDialogue();
 					dialogue.clear();
 					
-					PlayerTools.closeInventoryWithEvent(p);
-					PlayerTools.promptInput(p, new SinglePrompt(
+					p.closeInventory();
+					PlayerTools.promptInputOrCommand(p, new SinglePrompt(
 							PlayerTools.makeTranslation(true, Translation.MISSION_DIALOG_ADD),
+							null,
 							(c,s) -> {
 								Player p2 = (Player) c.getForWhom();
-								if (s.equalsIgnoreCase("exit()")) {
+								if (s.equalsIgnoreCase("exit()") || s.equalsIgnoreCase("/exit")) {
 									changes.setDialogue(dialogue);
 									if(changes.apply()) {
 										String filename = ProgressTracker.dialogueFile(changes.getSource()).getName();
@@ -216,9 +217,14 @@ public class MissionButton {
 									QuestBook.openQuestMissionEditor(p2, changes.getSource());
 									return true;
 								}
-								
 								dialogue.add(s);
+								
+								Translation translator = s.startsWith("/") ?
+										Translation.MISSION_COMMAND_ADDED : Translation.MISSION_DIALOG_ADDED;
+								
+								SinglePrompt.setNextDisplay(c, PlayerTools.makeTranslation(true, translator, s));
 								QuestWorld.getSounds().DIALOG_ADD.playTo(p2);
+								
 								return false;
 							}
 					));
