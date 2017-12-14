@@ -54,12 +54,10 @@ class Mission extends UniqueObject implements IMissionState {
 	protected Mission(Mission source) {
 		copy(source);
 	}
-	
-	public void sanitize() {
-		// Repair any quests that would have been broken by updates, namely location quests
-		MissionState changes = new MissionState(this);
-		type.attemptUpgrade(changes);
-		changes.apply();
+
+	// Repair any quests that would have been broken by updates, namely location quests
+	public void validate() {
+		type.validate(new MissionState(this));
 	}
 
 	//// IMission

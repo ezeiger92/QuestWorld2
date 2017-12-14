@@ -44,7 +44,6 @@ public class PlayMission extends MissionType implements Ticking {
 	
 	@Override
 	protected void layoutMenu(IMissionState changes) {
-		super.layoutMenu(changes);
 		putButton(17, new MenuData(
 				new ItemBuilder(Material.WATCH).wrapText(
 						"&7Time: &b" + Text.timeFromNum(changes.getAmount()),

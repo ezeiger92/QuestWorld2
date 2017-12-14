@@ -78,8 +78,7 @@ public abstract class MissionType {
 	}
 	
 	@Control
-	public boolean attemptUpgrade(IMissionState instance) {
-		return false;
+	public void validate(IMissionState instance) {
 	}
 	
 	protected final void setSelectorItem(ItemStack material) {
@@ -109,6 +108,7 @@ public abstract class MissionType {
 		putButton(7, MissionButton.missionName(changes));
 		putButton(8, MissionButton.dialogue(changes));
 		
+		validate(changes);
 		layoutMenu(changes);
 		
 		for(Map.Entry<Integer, MenuData> entry : menuData.entrySet())

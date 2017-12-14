@@ -93,6 +93,10 @@ public class Text {
 				", World: " + location.getWorld().getName();
 	}
 	
+	public static String stringOf(Location location, int radius) {
+		return stringOf(location) + ", Range: " + radius;
+	}
+	
 	static Pattern firstLetter = Pattern.compile("\\b\\S");
 	
 	public static String niceName(String input) {

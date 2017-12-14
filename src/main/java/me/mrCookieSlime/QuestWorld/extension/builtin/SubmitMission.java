@@ -57,7 +57,6 @@ public class SubmitMission extends MissionType implements Manual {
 	
 	@Override
 	protected void layoutMenu(IMissionState changes) {
-		super.layoutMenu(changes);
 		putButton(10, MissionButton.item(changes));
 		putButton(17, MissionButton.amount(changes));
 	}

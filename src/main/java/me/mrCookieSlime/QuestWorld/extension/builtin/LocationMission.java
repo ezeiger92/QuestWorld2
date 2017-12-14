@@ -48,19 +48,21 @@ public class LocationMission extends MissionType implements Listener, Ticking {
 	}
 	
 	@Override
-	public boolean attemptUpgrade(IMissionState instance) {
-		int oldStyleRadius = instance.getAmount();
-		if(oldStyleRadius > 1) {
-			instance.setAmount(1);
-			instance.setCustomInt(oldStyleRadius);
-			return true;
+	public void validate(IMissionState missionState) {
+		int oldStyleRadius = missionState.getAmount();
+		int radius = missionState.getCustomInt();
+		
+		if(oldStyleRadius != 1) {
+			missionState.setAmount(1);
+			if(radius == 0)
+				missionState.setCustomInt(oldStyleRadius);
 		}
 		
 		// Minimum radius is 1, fixes ezeiger92/QuestWorld2#35	
-		if(instance.getCustomInt() <= 0)
-			instance.setCustomInt(3);
+		if(radius <= 0)
+			missionState.setCustomInt(3);
 		
-		return false;
+		missionState.apply();
 	}
 	
 	protected boolean withinRadius(Location left, Location right, int radius) {
@@ -117,7 +119,6 @@ public class LocationMission extends MissionType implements Listener, Ticking {
 	
 	@Override
 	protected void layoutMenu(IMissionState changes) {
-		super.layoutMenu(changes);
 		putButton(10, MissionButton.location(changes));
 		putButton(11, new MenuData(
 				new ItemBuilder(Material.NAME_TAG).wrapText(

@@ -37,7 +37,6 @@ public class LevelMission extends MissionType implements Listener {
 	
 	@Override
 	protected void layoutMenu(IMissionState changes) {
-		super.layoutMenu(changes);
 		putButton(17, MissionButton.amount(changes));
 	}
 }

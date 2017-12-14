@@ -159,7 +159,7 @@ class Quest extends UniqueObject implements IQuestState {
 			data.put("quest", this);
 			
 			Mission m = new Mission(data);
-			m.sanitize();
+			m.validate();
 			arr.add(m);
 		}
 		

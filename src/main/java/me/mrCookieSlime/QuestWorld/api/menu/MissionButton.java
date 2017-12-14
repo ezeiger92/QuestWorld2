@@ -3,7 +3,6 @@ package me.mrCookieSlime.QuestWorld.api.menu;
 import java.util.List;
 import java.util.function.Consumer;
 
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -70,10 +69,9 @@ public class MissionButton {
 	}
 	
 	public static MenuData location(IMissionState changes) {
-		Location l = changes.getLocation();
 		return simpleButton(changes,
 				new ItemBuilder(changes.getDisplayItem()).wrapText(
-						"&rX: " + l.getBlockX() + ", Y: " + l.getBlockY() + ", Z: " + l.getBlockZ(),
+						Text.stringOf(changes.getLocation(), changes.getCustomInt()),
 						"",
 						"&e> Click to change the Location to your current Position").get(),
 				event -> {

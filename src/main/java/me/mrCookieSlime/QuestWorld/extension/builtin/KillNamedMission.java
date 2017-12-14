@@ -58,7 +58,6 @@ public class KillNamedMission extends KillMission {
 	
 	@Override
 	protected void layoutMenu(IMissionState changes) {
-		super.layoutMenu(changes);
 		putButton(12, MissionButton.entityName(changes));
 		putButton(16, MissionButton.simpleButton(
 				changes,
