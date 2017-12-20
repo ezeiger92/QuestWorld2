@@ -193,7 +193,7 @@ public class MissionButton {
 						if (changes.getDialogue().isEmpty())
 							p.sendMessage(Text.colorize("&4No Dialogue found!"));
 						else
-							PlayerStatus.sendDialogue(p, changes, changes.getDialogue().iterator());
+							PlayerStatus.sendDialogue(p.getUniqueId(), changes, changes.getDialogue().iterator());
 						return;
 					}
 					

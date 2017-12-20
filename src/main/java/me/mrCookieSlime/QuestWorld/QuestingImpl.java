@@ -3,6 +3,7 @@ package me.mrCookieSlime.QuestWorld;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -27,11 +28,11 @@ import me.mrCookieSlime.QuestWorld.util.ResourceLoader;
 import me.mrCookieSlime.QuestWorld.util.Sounds;
 import net.milkbowl.vault.economy.Economy;
 
-public class QuestingImpl implements QuestingAPI, Reloadable {
+public final class QuestingImpl implements QuestingAPI, Reloadable {
 	private Map<String, MissionType> types = new HashMap<>();
-	private Map<String, MissionType> immutableTypes = Collections.unmodifiableMap(types);
+	//private Map<String, MissionType> immutableTypes = 
 	private MissionViewer viewer = new MissionViewer();
-	private Economy econ = null;
+	private Optional<Economy> econ = Optional.ofNullable(null);
 	private Facade facade = new Facade();
 	private Sounds eventSounds;
 	private ResourceLoader resources;
@@ -54,15 +55,17 @@ public class QuestingImpl implements QuestingAPI, Reloadable {
 	@SuppressWarnings("unchecked")
 	public <T extends MissionType> T getMissionType(String typeName) {
 		T result = (T)types.get(typeName);
-		if(result == null)
+		if(result == null) {
 			result = (T)UnknownMission.get(typeName);
+			registerType(result);
+		}
 		
 		return result;
 	}
 
 	@Override
 	public Map<String, MissionType> getMissionTypes() {
-		return immutableTypes;
+		return Collections.unmodifiableMap(types);
 	}
 	
 	public void registerType(MissionType type) {
@@ -76,11 +79,11 @@ public class QuestingImpl implements QuestingAPI, Reloadable {
 	
 	public void onEnable() {
 		if(Bukkit.getPluginManager().getPlugin("Vault") != null)
-			econ = BukkitService.get(Economy.class);
+			econ = Optional.ofNullable(BukkitService.get(Economy.class));
 	}
 	
 	@Override
-	public Economy getEconomy() {
+	public Optional<Economy> getEconomy() {
 		return econ;
 	}
 	
@@ -101,12 +104,12 @@ public class QuestingImpl implements QuestingAPI, Reloadable {
 	
 	@Override
 	public Iterable<MissionEntry> getMissionEntries(MissionType type, OfflinePlayer player) {
-		return new MissionSet(statusManager.get(player), type);
+		return new MissionSet(statusManager.get(player.getUniqueId()), type);
 	}
 	
 	@Override
 	public MissionEntry getMissionEntry(IMission mission, OfflinePlayer player) {
-		return new MissionSet.Result(mission, statusManager.get(player));
+		return new MissionSet.Result(mission, statusManager.get(player.getUniqueId()));
 	}
 	
 	@Override
@@ -116,7 +119,7 @@ public class QuestingImpl implements QuestingAPI, Reloadable {
 	
 	@Override
 	public PlayerStatus getPlayerStatus(OfflinePlayer player) {
-		return statusManager.get(player);
+		return statusManager.get(player.getUniqueId());
 	}
 
 	@Override
@@ -142,6 +145,6 @@ public class QuestingImpl implements QuestingAPI, Reloadable {
 	}
 	
 	public void unloadPlayerStatus(OfflinePlayer player) {
-		statusManager.unload(player);
+		statusManager.unload(player.getUniqueId());
 	}
 }

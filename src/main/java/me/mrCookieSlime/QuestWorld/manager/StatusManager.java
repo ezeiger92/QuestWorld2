@@ -3,28 +3,26 @@ package me.mrCookieSlime.QuestWorld.manager;
 import java.util.HashMap;
 import java.util.UUID;
 
-import org.bukkit.OfflinePlayer;
-
 public class StatusManager {
 	private HashMap<UUID, PlayerStatus> statuses = new HashMap<>();
 	
-	public PlayerStatus get(OfflinePlayer player) {
-		PlayerStatus result = statuses.get(player.getUniqueId());
+	public PlayerStatus get(UUID uuid) {
+		PlayerStatus result = statuses.get(uuid);
 		
 		if(result == null) {
-			result = new PlayerStatus(player);
-			statuses.put(player.getUniqueId(), result);
+			result = new PlayerStatus(uuid);
+			statuses.put(uuid, result);
 		}
 		
 		return result;
 	}
 	
-	public void unload(OfflinePlayer player) {
-		PlayerStatus status = statuses.get(player.getUniqueId());
+	public void unload(UUID uuid) {
+		PlayerStatus status = statuses.get(uuid);
 		
 		if(status != null) {
 			status.unload();
-			statuses.remove(player.getUniqueId());
+			statuses.remove(uuid);
 		}
 	}
 	

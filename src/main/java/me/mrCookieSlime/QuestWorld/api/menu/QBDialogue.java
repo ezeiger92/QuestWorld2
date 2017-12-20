@@ -32,7 +32,7 @@ public class QBDialogue {
 		menu.put(6, ItemBuilder.Proto.RED_WOOL.get().display("&cNo").get(), event -> {
 			Player p2 = (Player) event.getWhoClicked();
 			if (q instanceof IQuest) QuestBook.openCategoryEditor(p2, ((IQuest) q).getCategory());
-			else if (q instanceof ICategory) QuestBook.openEditor(p2);
+			else if (q instanceof ICategory) QuestBook.openCategoryList(p2);
 			else if (q instanceof IMission) QuestBook.openQuestEditor(p2, ((IMission) q).getQuest());
 		});
 		
@@ -57,7 +57,7 @@ public class QBDialogue {
 						if(CancellableEvent.send(new CategoryDeleteEvent(category))) {
 							QuestWorld.getFacade().deleteCategory(category);
 							p2.closeInventory();
-							QuestBook.openEditor(p2);
+							QuestBook.openCategoryList(p2);
 							PlayerTools.sendTranslation(p2, true, Translation.CATEGORY_DELETED, category.getName());
 						}
 					}
@@ -70,7 +70,7 @@ public class QBDialogue {
 								QuestWorld.getFacade().deleteQuest(quest);
 
 							p2.closeInventory();
-							QuestBook.openCategoryQuestEditor(p2, quest.getCategory());
+							QuestBook.openQuestList(p2, quest.getCategory());
 							PlayerTools.sendTranslation(p2, true, Translation.QUEST_DELETED, quest.getName());
 						}
 					}

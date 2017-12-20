@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import me.mrCookieSlime.QuestWorld.QuestWorldPlugin;
@@ -31,12 +32,12 @@ public class PlayerStatus implements IPlayerStatus {
 		return (PlayerStatus)QuestWorld.getAPI().getPlayerStatus(player);
 	}
 	
-	private final OfflinePlayer player;
+	private final UUID playerUUID;
 	private final ProgressTracker tracker;
 	
-	public PlayerStatus(OfflinePlayer player) {
-		this.player = player;
-		tracker = new ProgressTracker(player.getUniqueId());
+	public PlayerStatus(UUID uuid) {
+		this.playerUUID = uuid;
+		tracker = new ProgressTracker(uuid);
 	}
 	
 	@Override
@@ -63,17 +64,22 @@ public class PlayerStatus implements IPlayerStatus {
 		return result;
 	}
 	
-	private static Player asOnline(OfflinePlayer player) {
+	private static Player asOnline(UUID playerUUID) {
+		OfflinePlayer player = Bukkit.getOfflinePlayer(playerUUID);
 		if(player.isOnline())
 			return (Player)player;
 		
 		throw new IllegalArgumentException("Player " + player.getName() + " ("+player.getUniqueId()+") is offline");
 	}
 	
+	private static Optional<Player> ifOnline(UUID playerUUID) {
+		return Optional.ofNullable(Bukkit.getPlayer(playerUUID));
+	}
+	
 	public List<IMission> getActiveMissions(MissionType type) {
 		List<IMission> result = new ArrayList<>();
 		
-		Player player = asOnline(this.player);
+		Player player = asOnline(playerUUID);
 		String worldName = player.getWorld().getName();
 		
 		for(IMission task : QuestWorld.getViewer().getMissionsOf(type)) {
@@ -109,15 +115,17 @@ public class PlayerStatus implements IPlayerStatus {
 		if (isWithinTimeframe(task)) {
 			tracker.setMissionCompleted(task, null);
 			tracker.setMissionProgress(task, 0);
-			if (player.isOnline()) {
-				PlayerTools.sendTranslation((Player)player, false, Translation.NOTIFY_TIME_FAIL, task.getQuest().getName());
-			}
+			ifOnline(playerUUID).ifPresent(player ->
+				PlayerTools.sendTranslation(player, false, Translation.NOTIFY_TIME_FAIL, task.getQuest().getName())
+			);
 			return false;
 		}
 		else if (getProgress(task) == 0 && amount > 0) {
 			tracker.setMissionCompleted(task, System.currentTimeMillis() + task.getTimeframe() * 60 * 1000);
-			if (player.isOnline()) 
-				PlayerTools.sendTranslation((Player)player, false, Translation.NOTIFY_TIME_START, task.getText(), Text.timeFromNum(task.getTimeframe()));
+			
+			ifOnline(playerUUID).ifPresent(player ->
+				PlayerTools.sendTranslation(player, false, Translation.NOTIFY_TIME_START, task.getText(), Text.timeFromNum(task.getTimeframe()))
+			);
 		}
 		return true;
 	}
@@ -130,7 +138,7 @@ public class PlayerStatus implements IPlayerStatus {
 	}
 	
 	public void update(boolean quest_check) {
-		Player p = asOnline(player);
+		Player p = asOnline(playerUUID);
 		
 		if (p != null && quest_check)
 			for (IMission mission: QuestWorld.getViewer().getTickingMissions())
@@ -164,7 +172,7 @@ public class PlayerStatus implements IPlayerStatus {
 
 	@Override
 	public QuestStatus getStatus(IQuest quest) {
-		Player p = asOnline(player);
+		Player p = asOnline(playerUUID);
 		if (quest.getParent() != null && !hasFinished(quest.getParent())) return QuestStatus.LOCKED;
 		if (p != null && !PlayerTools.checkPermission(p, quest.getPermission())) return QuestStatus.LOCKED;
 		if (quest.getPartySize() == 0 && getParty() != null) return QuestStatus.LOCKED_NO_PARTY;
@@ -271,39 +279,38 @@ public class PlayerStatus implements IPlayerStatus {
 		
 		if(amount == task.getAmount()) {
 			Bukkit.getPluginManager().callEvent(new MissionCompletedEvent(task));
-			sendDialogue((Player)player, task, task.getDialogue().iterator());
+			sendDialogue(playerUUID, task, task.getDialogue().iterator());
 		}
 	}
 	
-	public static void sendDialogue(Player player, IMission task, Iterator<String> dialogue) {
-		if(!player.isOnline())
-			return;
-		
-		String line;
-		
-		// Grab a line if we can
-		// Otherwise if there was no dialogue, use the completion placeholder
-		// If there are no lines, and there was dialogue, we're clearly done so return
-		// Refactor for ezeiger92/QuestWorld2#57
-		boolean hasNext = dialogue.hasNext();
-		if(hasNext)
-			line = dialogue.next();
-		else if(task.getDialogue().isEmpty())
-			line = "*";
-		else
-			return;
-		
-		if(line.equals("*"))
-			// Change for ezeiger92/QuestWorld2#43 - Remove default complete message if dialog is present
-			// Previously "check !task.getType().getID().equals("ACCEPT_QUEST_FROM_NPC") && "
-			// This was done to keep quests quiet when interacting with citizens
-			PlayerTools.sendTranslation(player, false, Translation.NOTIFY_COMPLETED, task.getQuest().getName());
-		else
-			sendDialogueComponent(player, line);
-		
-		if(hasNext)
-			Bukkit.getScheduler().scheduleSyncDelayedTask(QuestWorld.getPlugin(),
-					() -> sendDialogue(player, task, dialogue), 70L);
+	public static void sendDialogue(UUID uuid, IMission task, Iterator<String> dialogue) {
+		ifOnline(uuid).ifPresent(player -> {
+			String line;
+			
+			// Grab a line if we can
+			// Otherwise if there was no dialogue, use the completion placeholder
+			// If there are no lines, and there was dialogue, we're clearly done so return
+			// Refactor for ezeiger92/QuestWorld2#57
+			boolean hasNext = dialogue.hasNext();
+			if(hasNext)
+				line = dialogue.next();
+			else if(task.getDialogue().isEmpty())
+				line = "*";
+			else
+				return;
+			
+			if(line.equals("*"))
+				// Change for ezeiger92/QuestWorld2#43 - Remove default complete message if dialog is present
+				// Previously "check !task.getType().getID().equals("ACCEPT_QUEST_FROM_NPC") && "
+				// This was done to keep quests quiet when interacting with citizens
+				PlayerTools.sendTranslation(player, false, Translation.NOTIFY_COMPLETED, task.getQuest().getName());
+			else
+				sendDialogueComponent(player, line);
+			
+			if(hasNext)
+				Bukkit.getScheduler().scheduleSyncDelayedTask(QuestWorld.getPlugin(),
+						() -> sendDialogue(uuid, task, dialogue), 70L);
+		});
 	}
 
 	private static void sendDialogueComponent(Player player, String line) {
@@ -383,14 +390,15 @@ public class PlayerStatus implements IPlayerStatus {
 
 	@Override
 	public boolean hasDeathEvent(IMission mission) {
-		if(!player.isOnline())
-			return false;
-		Player p = (Player)player;
-		IQuest quest = mission.getQuest();
-		
-		return getStatus(quest).equals(QuestStatus.AVAILABLE)
-				&& mission.getDeathReset()
-				&& quest.getWorldEnabled(p.getWorld().getName())
-				&& quest.getCategory().isWorldEnabled(p.getWorld().getName());
+		return ifOnline(playerUUID).map(player -> {
+			IQuest quest = mission.getQuest();
+			String playerWorld = player.getWorld().getName();
+			
+			return getStatus(quest).equals(QuestStatus.AVAILABLE)
+					&& mission.getDeathReset()
+					&& quest.getWorldEnabled(playerWorld)
+					&& quest.getCategory().isWorldEnabled(playerWorld);
+		})
+		.orElse(false);
 	}
 }

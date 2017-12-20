@@ -117,24 +117,21 @@ public class PlayerTools {
 		Listener listener = new Listener() {
 			@EventHandler
 			public void onCommand(PlayerCommandPreprocessEvent event) {
-				if(event.getPlayer() != con.getForWhom())
-					return;
-
-				event.setCancelled(true);
-				if(prompt.acceptInput(con.getContext(), event.getMessage()) != Prompt.END_OF_CONVERSATION) {
-					con.getForWhom().sendRawMessage(prompt.getPromptText(con.getContext()));
-				}
-				else {
-					con.abandon();
-					HandlerList.unregisterAll(this);
+				if(event.getPlayer() == con.getForWhom()) {
+					event.setCancelled(true);
+					if(prompt.acceptInput(con.getContext(), event.getMessage()) != Prompt.END_OF_CONVERSATION)
+						con.getForWhom().sendRawMessage(prompt.getPromptText(con.getContext()));
+					else
+						con.abandon();
 				}
 			}
 			
 			@EventHandler
 			public void onLeave(GenericPlayerLeaveEvent event) {
-				HandlerList.unregisterAll(this);
+				con.abandon();
 			}
 		};
+		
 		con.addConversationAbandonedListener(new ConversationAbandonedListener() {
 			@Override
 			public void conversationAbandoned(ConversationAbandonedEvent abandonedEvent) {

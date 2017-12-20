@@ -68,7 +68,7 @@ public class EditorCommand implements CommandExecutor {
 		else if (param.equals("gui")) {
 			if (p != null) {
 				PagedMapping.clearPages(p);
-				QuestBook.openEditor(p);
+				QuestBook.openCategoryList(p);
 			}
 			else
 				sender.sendMessage(Text.colorize("&4You are not a Player"));

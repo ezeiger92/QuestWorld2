@@ -110,7 +110,7 @@ public class PlayerListener implements Listener {
 		((QuestingImpl)QuestWorld.getAPI()).unloadPlayerStatus(player);
 	}
 	
-	// Since we can't randomly update recipes at runtime, replace result with latest lore
+	// Since we can't (yet) randomly update recipes at runtime, replace result with latest lore
 	@EventHandler
 	public void preCraft(PrepareItemCraftEvent e) {
 		boolean hasTable = false;

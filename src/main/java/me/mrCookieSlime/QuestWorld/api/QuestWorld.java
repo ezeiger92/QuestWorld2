@@ -1,6 +1,7 @@
 package me.mrCookieSlime.QuestWorld.api;
 
 import java.util.Map;
+import java.util.Optional;
 
 import org.bukkit.OfflinePlayer;
 import org.bukkit.plugin.Plugin;
@@ -62,7 +63,7 @@ public final class QuestWorld {
 		return api.getViewer();
 	}
 	
-	public static final Economy getEconomy() {
+	public static final Optional<Economy> getEconomy() {
 		return api.getEconomy();
 	}
 	

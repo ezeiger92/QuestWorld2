@@ -74,7 +74,7 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener {
 		preEnableHooks.clear();
 		preEnableHooks = null;
 		
-		if(api.getEconomy() == null)
+		if(!api.getEconomy().isPresent())
 			Log.info("No economy (vault) found, money rewards disabled");
 			
 		getServer().getScheduler().scheduleSyncDelayedTask(this, () -> {

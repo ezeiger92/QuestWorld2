@@ -23,7 +23,7 @@ public class Buttons {
 				QuestBook.openCategoryEditor(p, category);
 			else {
 				PagedMapping.putPage(p, 0);
-				QuestBook.openCategoryQuestEditor(p, category);
+				QuestBook.openQuestList(p, category);
 			}
 		};
 	}
@@ -39,7 +39,7 @@ public class Buttons {
 					(c,s) -> {
 						QuestWorld.getFacade().createCategory(s, id);
 						PlayerTools.sendTranslation(p, true, Translation.CATEGORY_CREATED, s);
-						QuestBook.openEditor(p);
+						QuestBook.openCategoryList(p);
 
 						return true;
 					}
@@ -77,7 +77,7 @@ public class Buttons {
 							PlayerTools.sendTranslation(p, true, Translation.QUEST_CREATED, s);
 						}
 						
-						QuestBook.openCategoryQuestEditor(p, category);
+						QuestBook.openQuestList(p, category);
 
 						return true;
 					}

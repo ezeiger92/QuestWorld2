@@ -352,7 +352,8 @@ class Quest extends UniqueObject implements IQuestState {
 		QuestWorld.getSounds().QUEST_REWARD.playTo(p);
 		
 		if (xp > 0) p.setLevel(p.getLevel() + xp);
-		if (money > 0 && QuestWorld.getEconomy() != null) QuestWorld.getEconomy().depositPlayer(p, money);
+		if(money > 0)
+			QuestWorld.getEconomy().ifPresent(economy -> economy.depositPlayer(p, money));
 		
 		for (String command: commands) 
 			Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command.replaceAll("@p", p.getName()));

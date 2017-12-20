@@ -427,7 +427,7 @@ public class QuestBook {
 		}
 		
 		int rewardIndex = 2;
-		if (quest.getMoney() > 0 && QuestWorld.getEconomy() != null) {
+		if (quest.getMoney() > 0 && QuestWorld.getEconomy().isPresent()) {
 			menu.put(rewardIndex, new ItemBuilder(Material.GOLD_INGOT).wrapText(
 					QuestWorld.translate(Translation.quests_display_monetary),
 					"",
@@ -536,10 +536,10 @@ public class QuestBook {
 	 * 			Quest Editor
 	 * 
 	 */
-	public static void openEditor(Player p) {
+	public static void openCategoryList(Player p) {
 		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
 		
-		final Menu menu = new Menu(6, "&3Quest Editor");
+		final Menu menu = new Menu(6, "&3Categories");
 		
 		ItemBuilder defaultItem = new ItemBuilder(Material.STAINED_GLASS_PANE)
 				.color(DyeColor.RED).display("&7&o> New Category");
@@ -591,7 +591,7 @@ public class QuestBook {
 		menu.openFor(p);
 	}
 
-	public static void openCategoryQuestEditor(Player p, final ICategory category) {
+	public static void openQuestList(Player p, final ICategory category) {
 		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
 		
 		final Menu menu = new Menu(6, "&3Quest Editor");
@@ -602,8 +602,12 @@ public class QuestBook {
 		PagedMapping view = new PagedMapping(45);
 		view.reserve(1);
 		view.setBackButton(event -> {
-			openEditor((Player) event.getWhoClicked());
+			openCategoryList((Player) event.getWhoClicked());
 		});
+		
+		view.addFrameButton(4, new ItemBuilder(Material.BARRIER).get(), event -> {
+			openCategoryEditor(p, category);
+		}, true);
 
 		for (int i = 0; i < view.getCapacity(); ++i) {
 			IQuest quest = category.getQuest(i);
@@ -656,7 +660,7 @@ public class QuestBook {
 		ICategoryState changes = category.getState();
 		
 		menu.put(0,  Proto.MAP_BACK.getItem(), event -> {
-			openEditor((Player) event.getWhoClicked());
+			openCategoryList((Player) event.getWhoClicked());
 		});
 		
 		menu.put(9,
@@ -790,7 +794,7 @@ public class QuestBook {
 		IQuestState changes = quest.getState();
 		
 		menu.put(0, ItemBuilder.Proto.MAP_BACK.getItem(), event -> {
-			openCategoryQuestEditor((Player) event.getWhoClicked(), quest.getCategory());
+			openQuestList((Player) event.getWhoClicked(), quest.getCategory());
 		});
 		
 		menu.put(9,
@@ -884,7 +888,7 @@ public class QuestBook {
 				}
 		);
 		
-		if (QuestWorld.getEconomy() != null) {
+		if(QuestWorld.getEconomy().isPresent())
 			menu.put(13,
 					new ItemBuilder(Material.GOLD_INGOT).wrapText(
 							"&7Monetary Reward: &6$" + quest.getMoney(),
@@ -903,7 +907,6 @@ public class QuestBook {
 						openQuestEditor((Player) event.getWhoClicked(), quest);
 					}
 			);
-		}
 		
 		menu.put(14,
 				new ItemBuilder(Material.EXP_BOTTLE).wrapText(

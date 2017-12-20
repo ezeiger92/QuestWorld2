@@ -1,6 +1,7 @@
 package me.mrCookieSlime.QuestWorld.api.contract;
 
 import java.util.Map;
+import java.util.Optional;
 
 import org.bukkit.OfflinePlayer;
 import org.bukkit.plugin.Plugin;
@@ -30,7 +31,7 @@ public interface QuestingAPI {
 	
 	Map<String, MissionType> getMissionTypes();
 	MissionViewer getViewer();
-	Economy getEconomy();
+	Optional<Economy> getEconomy();
 	IFacade getFacade();
 	Sounds getSounds();
 	String translate(Translator key, String... replacements);
