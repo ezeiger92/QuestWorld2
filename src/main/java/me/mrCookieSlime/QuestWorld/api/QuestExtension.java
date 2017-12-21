@@ -6,23 +6,21 @@ import me.mrCookieSlime.QuestWorld.api.annotation.Control;
 import me.mrCookieSlime.QuestWorld.api.contract.QuestingAPI;
 
 public abstract class QuestExtension {
-	private String[] requirements;
-	private int remaining;
-	private Plugin[] found;
 	private boolean initialized = false;
 	private QuestingAPI api = QuestWorld.getAPI();
+	private int remaining;
+	private String[] requirements;
+	private Plugin[] found;
+	private MissionType[] types = {};
 	
+	//TODO: Doc fix
 	/**
 	 * Performs setup for this extension. In particular, this calls user methods
 	 * {@link QuestExtension#setup setup} and
 	 * {@link QuestExtension#getDepends getDepends}, in that order.
 	 */
-	public QuestExtension() {
-		setup();
-		
-		requirements = getDepends();
-		if(requirements == null)
-			requirements = new String[0];
+	public QuestExtension(String... requirements) {
+		this.requirements = requirements.clone();
 		remaining = requirements.length;
 		found = new Plugin[remaining];
 	}
@@ -52,14 +50,7 @@ public abstract class QuestExtension {
 		return getClass().getSimpleName();
 	}
 	
-	/**
-	 * Called before anything else, use this for things not dependent on other
-	 * plugins.
-	 */
-	@Control
-	public void setup() {
-	}
-	
+	//TODO Doc fix
 	/**
 	 * This must return a list of all plugins that the hook depends on. It is
 	 * called after {@link #setup}, so override that method if you need to
@@ -67,7 +58,9 @@ public abstract class QuestExtension {
 	 * 
 	 * @return A list of all names of plugin dependencies
 	 */
-	public abstract String[] getDepends();
+	public final String[] getDepends() {
+		return requirements;
+	}
 	
 	/**
 	 * When all dependencies are found, initialize is called. A handle to
@@ -80,7 +73,9 @@ public abstract class QuestExtension {
 	 * 
 	 * @param parent The handle to QuestWorld
 	 */
-	protected abstract void initialize(Plugin parent);
+	@Control
+	protected void initialize(Plugin parent) {
+	}
 	
 	/**
 	 * Initializes the extension after all dependencies have been located. This
@@ -101,6 +96,11 @@ public abstract class QuestExtension {
 		initialized = true;
 	}
 	
+	public void setMissionTypes(MissionType... types) {
+		this.types = types.clone();
+	}
+	
+	// TODO fix doc
 	/**
 	 * This must return all custom MissionTypes so QuestWorld can prepare them.
 	 * <p>
@@ -110,7 +110,9 @@ public abstract class QuestExtension {
 	 * 
 	 * @return A list of all custom MissionTypes in this hook
 	 */
-	public abstract MissionType[] getMissions();
+	public final MissionType[] getMissionTypes() {
+		return types;
+	}
 	
 	/**
 	 * Only use this if you know what you are doing! Assigns a plugin to a

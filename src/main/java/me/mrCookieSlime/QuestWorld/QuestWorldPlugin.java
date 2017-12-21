@@ -253,7 +253,7 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener {
 	}
 	
 	public void enable(QuestExtension hook) {
-		for(MissionType type : hook.getMissions()) {
+		for(MissionType type : hook.getMissionTypes()) {
 			Log.fine("Registrar - Storing mission: " + type.getName());
 			api.registerType(type);
 			
