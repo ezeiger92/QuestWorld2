@@ -605,9 +605,9 @@ public class QuestBook {
 			openCategoryList((Player) event.getWhoClicked());
 		});
 		
-		view.addFrameButton(4, new ItemBuilder(Material.BARRIER).get(), event -> {
+		/*view.addFrameButton(4, new ItemBuilder(Material.BARRIER).get(), event -> {
 			openCategoryEditor(p, category);
-		}, true);
+		}, true);*/
 
 		for (int i = 0; i < view.getCapacity(); ++i) {
 			IQuest quest = category.getQuest(i);
