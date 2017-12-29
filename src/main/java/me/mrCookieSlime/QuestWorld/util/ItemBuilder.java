@@ -3,10 +3,13 @@ package me.mrCookieSlime.QuestWorld.util;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.SkullType;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
@@ -348,14 +351,16 @@ public class ItemBuilder implements Cloneable {
 	 * @param playerName The player whose face will be displayed on the head
 	 * @return this, for chaining
 	 */
-	@SuppressWarnings("deprecation")
-	public @Mutable ItemBuilder skull(String playerName) {
+	public @Mutable ItemBuilder skull(UUID playerUUID) {
+		return skull(Bukkit.getOfflinePlayer(playerUUID));
+	}
+	
+	public @Mutable ItemBuilder skull(OfflinePlayer player) {
 		skull(SkullType.PLAYER);
 		
 		if(resultStack.getItemMeta() instanceof SkullMeta) {
 			SkullMeta smHolder = (SkullMeta)resultStack.getItemMeta();
-			//smHolder.setOwningPlayer(PlayerTools.getPlayer(playerName)); // in 1.12+
-			smHolder.setOwner(playerName);
+			smHolder.setOwningPlayer(player);
 			resultStack.setItemMeta(smHolder);
 		}
 		

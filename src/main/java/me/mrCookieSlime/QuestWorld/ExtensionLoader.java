@@ -58,9 +58,10 @@ public class ExtensionLoader {
 			Log.finer("Loader - Loading class: " + className);
 			Class<?> clazz;
 			try { clazz = newLoader.loadClass(className); }
-			catch (ClassNotFoundException e) {
-				Log.severe("Could not load class \""+className+"\"!");
-				e.printStackTrace();
+			catch (Throwable e) {
+				// Hide these exceptions because extension may not be enabled
+				Log.fine("Could not load class \""+className+"\"");
+				//e.printStackTrace();
 				continue;
 			}
 

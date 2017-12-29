@@ -155,7 +155,7 @@ public class QuestBook {
 				final OfflinePlayer player = party.getPlayers().get(i);
 				if (!party.isLeader(p)) {
 					menu.put(i + 9,
-							skull.skull(player.getName()).wrapText(
+							skull.skull(player).wrapText(
 									"&e" + player.getName(),
 									"",
 									(party.isLeader(player) ? "&4Party Leader": "&eParty Member")).get(),
@@ -164,7 +164,7 @@ public class QuestBook {
 				}
 				else {
 					menu.put(i + 9,
-							skull.skull(player.getName()).wrapText(
+							skull.skull(player).wrapText(
 									"&e" + player.getName(),
 									"",
 									(party.isLeader(player) ? "&5&lParty Leader": "&e&lParty Member"),

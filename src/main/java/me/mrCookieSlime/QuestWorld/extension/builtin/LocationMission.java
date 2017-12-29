@@ -6,13 +6,9 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
 
 import me.mrCookieSlime.QuestWorld.api.MissionType;
-import me.mrCookieSlime.QuestWorld.api.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.SinglePrompt;
 import me.mrCookieSlime.QuestWorld.api.Ticking;
 import me.mrCookieSlime.QuestWorld.api.Translation;
@@ -27,7 +23,7 @@ import me.mrCookieSlime.QuestWorld.util.ItemBuilder;
 import me.mrCookieSlime.QuestWorld.util.PlayerTools;
 import me.mrCookieSlime.QuestWorld.util.Text;
 
-public class LocationMission extends MissionType implements Listener, Ticking {
+public class LocationMission extends MissionType implements Ticking {
 	public LocationMission() {
 		super("REACH_LOCATION", false, new ItemStack(Material.LEATHER_BOOTS));
 	}
@@ -78,7 +74,7 @@ public class LocationMission extends MissionType implements Listener, Ticking {
 	
 	private HashMap<Player, Double> distanceMap = new HashMap<>();
 	
-	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	/*@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onPlayerMove(PlayerMoveEvent event) {
 		double moved = event.getFrom().distanceSquared(event.getTo());
 		
@@ -114,7 +110,7 @@ public class LocationMission extends MissionType implements Listener, Ticking {
 		
 		fdist = Math.pow(fdist, 12);
 		distanceMap.put(player, fdist);
-	}
+	}*/
 	
 	@EventHandler
 	public void onPlayerLeave(GenericPlayerLeaveEvent event) {
