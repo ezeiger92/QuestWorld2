@@ -21,6 +21,9 @@ import me.mrCookieSlime.QuestWorld.util.PlayerTools;
 import me.mrCookieSlime.QuestWorld.util.Text;
 import me.mrCookieSlime.QuestWorld.util.ItemBuilder.Proto;
 
+import java.util.ArrayList;
+import java.util.Collections;
+
 import org.bukkit.Bukkit;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
@@ -1202,8 +1205,14 @@ public class QuestBook {
 		view.setBackButton(event -> {
 			openQuestMissionEditor((Player) event.getWhoClicked(), mission);
 		});
+		
+		ArrayList<MissionType> types = new ArrayList<>(QuestWorld.getMissionTypes().values());
+		Collections.sort(types, (m1, m2) ->
+			m1.toString().compareToIgnoreCase(m2.toString())
+		);
+		
 		int i = 0;
-		for(MissionType type : QuestWorld.getMissionTypes().values()) {
+		for(MissionType type : types) {
 			String name = Text.niceName(type.getName());
 			view.addButton(i,
 					new ItemBuilder(type.getSelectorItem()).display("&f" + name).get(),

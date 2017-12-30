@@ -27,7 +27,14 @@ public class EditorCommand implements CommandExecutor {
 	}
 	
 	private void help(String label, CommandSender sender) {
-		sender.sendMessage(Text.colorize("&4Usage: &c/", label, " <gui/save/upgrade/import <File>/export <File>/reload <config/quests/all>"));
+		sender.sendMessage(Text.colorize("&3== &b/", label, " help &3== "));
+		sender.sendMessage(Text.colorize("  &bgui &7- Open the editor gui"));
+		sender.sendMessage(Text.colorize("  &breload &7- Reloads config files from disk"));
+		sender.sendMessage(Text.colorize("  &bsave &7- Save all in-game config and quest changes to disk"));
+		sender.sendMessage(Text.colorize("  &bexmport <file> &7- Save all quests to a preset"));
+		sender.sendMessage(Text.colorize("  &bimport <file> &4&l*&7 - Overwrite all quests with a preset"));
+		sender.sendMessage(Text.colorize("  &bdiscard &4&l*&7 - Reloads quest data from disk, losing changes"));
+		sender.sendMessage(Text.colorize("  &bupgrade &4&l*&7 - Replaces all cooldowns of 0 with -1"));
 	}
 
 	@Override
@@ -73,29 +80,30 @@ public class EditorCommand implements CommandExecutor {
 			else
 				sender.sendMessage(Text.colorize("&4You are not a Player"));
 		}
+		else if(param.equals("discard")) {
+			plugin.onDiscard();
+			sender.sendMessage(Text.colorize("&7Reloaded all quests from disk"));
+		}
 		else if(param.equals("save")) {
 			// Command, force save, this is probably desired over an incremental save
 			plugin.onSave(true);
 			sender.sendMessage(Text.colorize("&7Saved all quests to disk"));
 		}
 		else if(param.equals("reload")) {
-			if(args.length > 1 && args[1].equalsIgnoreCase("config")) {
-				plugin.onReload();
-				sender.sendMessage(Text.colorize("&7Reloaded config from disk"));
-			}
-			else if(args.length > 1 && args[1].equalsIgnoreCase("quests")) {
+			if(args.length > 1 && args[1].equalsIgnoreCase("quests")) {
+				sender.sendMessage(Text.colorize("&cThis usage is deprecated! Use /qe discard instead"));
 				plugin.onDiscard();
 				sender.sendMessage(Text.colorize("&7Reloaded all quests from disk"));
 			}
 			else if(args.length > 1 && args[1].equalsIgnoreCase("all")) {
+				sender.sendMessage(Text.colorize("&cThis usage is deprecated! Use /qe reload and /qe discard instead"));
 				plugin.onReload();
 				plugin.onDiscard();
 				sender.sendMessage(Text.colorize("&7Reloaded config and all quests from disk"));
 			}
 			else {
-				sender.sendMessage(Text.colorize("&7/", label, " reload config - &fReload config files"));
-				sender.sendMessage(Text.colorize("&7/", label, " reload quests - &fReload quest files"));
-				sender.sendMessage(Text.colorize("&7/", label, " reload all - &fReload config and quest files"));
+				plugin.onReload();
+				sender.sendMessage(Text.colorize("&7Reloaded config from disk"));
 			}
 		}
 		else if(param.equals("upgrade")) {
