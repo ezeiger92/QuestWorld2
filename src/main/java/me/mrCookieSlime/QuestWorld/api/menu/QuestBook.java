@@ -317,10 +317,15 @@ public class QuestBook {
 		ItemBuilder glassPane = new ItemBuilder(Material.STAINED_GLASS_PANE).color(DyeColor.RED);
 		PagedMapping view = new PagedMapping(45, 9);
 		
-		if(back)
-			view.setBackButton(event -> {
-				openMainMenu((Player) event.getWhoClicked());
-			});
+		if(!back) {
+			PagedMapping.clearPages(p);
+			PagedMapping.putPage(p, category.getID() / 45);
+			PagedMapping.putPage(p, 0);
+		}
+		
+		view.setBackButton(event -> {
+			openMainMenu((Player) event.getWhoClicked());
+		});
 		
 		view.addFrameButton(4, partyMenuItem(p), Buttons.partyMenu(), true);
 		
@@ -390,11 +395,14 @@ public class QuestBook {
 		
 		Menu menu = new Menu(3, QuestWorld.translate(Translation.gui_title));
 		
-		if (back) {
-			menu.put(0, ItemBuilder.Proto.MAP_BACK.getItem(), event -> {
-				openCategory((Player) event.getWhoClicked(), quest.getCategory(), categoryBack);
-			});
+		if(!back) {
+			PagedMapping.clearPages(p);
+			PagedMapping.putPage(p, quest.getID() / 45);
 		}
+		
+		menu.put(0, ItemBuilder.Proto.MAP_BACK.getItem(), event -> {
+			openCategory((Player) event.getWhoClicked(), quest.getCategory(), categoryBack);
+		});
 		
 		// Detect all
 		menu.put(1,
