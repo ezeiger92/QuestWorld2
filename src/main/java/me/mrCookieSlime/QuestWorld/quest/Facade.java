@@ -151,7 +151,12 @@ public class Facade implements IFacade {
 		}
 	}
 	
-	public void unload() {
+	public void onDiscard() {
+		for(Category c: categoryMap.values())
+			for(Quest q : c.getQuests())
+				for(Mission m : q.getMissions())
+					ProgressTracker.loadDialogue(m);
+		
 		categoryMap.clear();
 		questMap.clear();
 		missionMap.clear();
@@ -176,10 +181,6 @@ public class Facade implements IFacade {
 	}
 	
 	public void onReload() {
-		for(Category c: categoryMap.values())
-			for(Quest q : c.getQuests())
-				for(Mission m : q.getMissions())
-					ProgressTracker.loadDialogue(m);
 	}
 	
 	@Override

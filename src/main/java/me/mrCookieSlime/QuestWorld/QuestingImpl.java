@@ -137,7 +137,7 @@ public final class QuestingImpl implements QuestingAPI, Reloadable {
 	
 	@Override
 	public void onDiscard() {
-		facade.unload();
+		facade.onDiscard();
 		viewer.clear();
 		statusManager.unloadAll();
 		
