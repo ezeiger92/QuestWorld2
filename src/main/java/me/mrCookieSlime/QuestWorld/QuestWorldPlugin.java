@@ -42,7 +42,6 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener {
 	
 	public QuestWorldPlugin() {
 		instance = this;
-		Log.setLogger(getLogger());
 
 		saveDefaultConfig();
 		getPath("data.extensions");
@@ -88,7 +87,7 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener {
 			Log.fine("Successfully loaded " + quests + " Quests");
 		}, 0L);
 		
-		reloadQWConfig();
+		onReload();
 		
 		getCommand("quests").setExecutor(new QuestsCommand());
 		getCommand("questeditor").setExecutor(new EditorCommand(this));
@@ -124,7 +123,7 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener {
 				getServer().getScheduler().cancelTask(autosaveHandle);
 			
 			autosaveHandle = getServer().getScheduler().scheduleSyncRepeatingTask(this,
-					() -> save(true),
+					() -> onSave(false),
 					autosave,
 					autosave
 			);
@@ -136,14 +135,15 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener {
 		lastSave = System.currentTimeMillis();
 	}
 	
-	public void reloadQWConfig() {
+	public void onReload() {
 		loadConfigs();
-		api.reload();
+		api.onReload();
+		hookInstaller.onReload();
 		GuideBook.reset();
 	}
 	
-	public void reloadQuests() {
-		api.unload();
+	public void onDiscard() {
+		api.onDiscard();
 		load();
 	}
 	
@@ -162,11 +162,13 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener {
 		return lastSave;
 	}
 
-	public void save(boolean force) {
+	public void onSave(boolean force) {
 		api.getFacade().save(force);
 
 		for(Player p : getServer().getOnlinePlayers())
-			api.getPlayerStatus(p).getTracker().save();
+			api.getPlayerStatus(p).getTracker().onSave();
+		
+		hookInstaller.save();
 		
 		lastSave = System.currentTimeMillis();
 	}
@@ -175,9 +177,9 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener {
 		api.getFacade().save(true);
 		
 		for(Player p : getServer().getOnlinePlayers())
-			api.getPlayerStatus(p).getTracker().save();
+			api.getPlayerStatus(p).getTracker().onSave();
 		
-		api.unload();
+		api.onDiscard();
 	}
 	
 	public boolean importPreset(String fileName) {
@@ -224,7 +226,7 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener {
 		
 		if (file.exists()) file.delete();
 		
-		save(true); // Why unload and load in a try/catch block when you can just use a save function?
+		onSave(true); // Why unload and load in a try/catch block when you can just use a save function?
 		
 		try {
 			file.createNewFile();

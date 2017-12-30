@@ -9,7 +9,6 @@ import org.bukkit.inventory.ItemStack;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.event.CancellableEvent;
 import me.mrCookieSlime.QuestWorld.api.event.MissionChangeEvent;
-import me.mrCookieSlime.QuestWorld.manager.ProgressTracker;
 import me.mrCookieSlime.QuestWorld.util.BitFlag;
 import me.mrCookieSlime.QuestWorld.util.BitFlag.BitString;
 
@@ -116,7 +115,6 @@ class MissionState extends Mission {
 		if(sendEvent()) {
 			copyTo(origin);
 			origin.updateLastModified();
-			ProgressTracker.saveDialogue(origin);
 			changeBits = 0;
 			return true;
 		}

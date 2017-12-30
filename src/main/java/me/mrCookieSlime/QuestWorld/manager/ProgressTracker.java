@@ -1,7 +1,6 @@
 package me.mrCookieSlime.QuestWorld.manager;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.text.ParseException;
@@ -19,8 +18,9 @@ import me.mrCookieSlime.QuestWorld.api.QuestStatus;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IMissionState;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
+import me.mrCookieSlime.QuestWorld.util.Reloadable;
 
-public class ProgressTracker {
+public class ProgressTracker implements Reloadable {
 	private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm");
 	private final File configFile;
 	private final YamlConfiguration config;
@@ -38,10 +38,24 @@ public class ProgressTracker {
 		config = YamlConfiguration.loadConfiguration(configFile);
 	}
 	
-	public void save() {
+	@Override
+	public void onSave() {
 		try {
 			config.save(configFile);
-		} catch (IOException e) {
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	@Override
+	public void onReload() {
+	}
+	
+	@Override
+	public void onDiscard() {
+		try {
+			config.load(configFile);
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
@@ -163,7 +177,7 @@ public class ProgressTracker {
 		try {
 			// The only downside to this is system-specific newlines
 			Files.write(file.toPath(), mission.getDialogue(), StandardCharsets.UTF_8);
-		} catch (IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
@@ -173,7 +187,7 @@ public class ProgressTracker {
 		if (file.exists()) {
 			try {
 				mission.setDialogue(Files.readAllLines(file.toPath(), StandardCharsets.UTF_8));
-			} catch (IOException e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 				return;
 			}

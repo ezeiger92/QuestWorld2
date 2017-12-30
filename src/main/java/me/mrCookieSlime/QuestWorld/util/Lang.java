@@ -72,7 +72,7 @@ public final class Lang implements Reloadable {
 	}
 
 	@Override
-	public void save() {
+	public void onSave() {
 		for(HashMap.Entry<String, YamlConfiguration> entry : languages.entrySet()) {
 			String path = "lang/" + entry.getKey() + ".yml";
 			try {
@@ -84,7 +84,7 @@ public final class Lang implements Reloadable {
 	}
 	
 	@Override
-	public void reload() {
+	public void onReload() {
 		for(String key : new ArrayList<>(languages.keySet())) {
 			languages.remove(key);
 			try {
@@ -94,5 +94,9 @@ public final class Lang implements Reloadable {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	@Override
+	public void onDiscard() {
 	}
 }

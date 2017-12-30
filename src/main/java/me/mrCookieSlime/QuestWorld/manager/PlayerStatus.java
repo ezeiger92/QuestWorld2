@@ -27,8 +27,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 public class PlayerStatus implements IPlayerStatus {
-	@Deprecated
-	public static PlayerStatus of(OfflinePlayer player) {
+	private static PlayerStatus of(OfflinePlayer player) {
 		return (PlayerStatus)QuestWorld.getAPI().getPlayerStatus(player);
 	}
 	
@@ -95,7 +94,7 @@ public class PlayerStatus implements IPlayerStatus {
 	}
 	
 	public void unload() {
-		tracker.save();
+		tracker.onSave();
 	}
 	
 	public long getCooldownEnd(IQuest quest) {
@@ -375,7 +374,7 @@ public class PlayerStatus implements IPlayerStatus {
 				String uuid = file.getName().substring(0, file.getName().length() - 4);
 				ProgressTracker t = new ProgressTracker(UUID.fromString(uuid));
 				t.clearQuest(quest);
-				t.save();
+				t.onSave();
 			}
 
 			// Second: go back to the main thread and make sure all player managers know what happened

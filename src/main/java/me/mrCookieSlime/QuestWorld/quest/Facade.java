@@ -14,6 +14,7 @@ import me.mrCookieSlime.QuestWorld.api.contract.IFacade;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
 import me.mrCookieSlime.QuestWorld.manager.PlayerStatus;
+import me.mrCookieSlime.QuestWorld.manager.ProgressTracker;
 import me.mrCookieSlime.QuestWorld.util.WeakValueMap;
 
 public class Facade implements IFacade {
@@ -28,7 +29,7 @@ public class Facade implements IFacade {
 	}
 	
 	@Deprecated
-	public Mission getMission(int unique) {
+	public Mission getMission(long unique) {
 		return missionMap.getOrNull(unique);
 	}
 	
@@ -46,9 +47,9 @@ public class Facade implements IFacade {
 		return q;
 	}
 	
-	
 	public Mission createMission(int id, IQuest quest) {
 		Mission m = new Mission(id, (Quest)quest);
+		ProgressTracker.loadDialogue(m);
 		missionMap.putWeak(m.getUnique(), m);
 		return m;
 	}
@@ -69,13 +70,7 @@ public class Facade implements IFacade {
 		
 		result[0] = Integer.parseInt(in.substring(0, mid - 1));
 		result[1] = Integer.parseInt(in.substring(mid + 1, len));
-		
-		if(swap) {
-			int temp = result[0];
-			result[0] = result[1];
-			result[1] = temp;
-		}
-		
+
 		return result;
 	}
 	
@@ -107,7 +102,6 @@ public class Facade implements IFacade {
 		public final int id;
 		public final YamlConfiguration file;
 	}
-	static boolean swap = false;
 	public void load() {
 		
 		ArrayList<ParseData> categoryData = new ArrayList<>();
@@ -149,16 +143,12 @@ public class Facade implements IFacade {
 			categoryMap.put(category.getID(), category);
 		}
 		
-		swap = QuestWorld.getPlugin().getConfig().getBoolean("danger.swap-parent", false);
-		
 		for (Category category: categories) {
 			category.refreshParent();
 			
 			for (Quest quest: category.getQuests())
 				quest.refreshParent();
 		}
-		
-		swap = false;
 	}
 	
 	public void unload() {
@@ -178,8 +168,18 @@ public class Facade implements IFacade {
 	public void save(boolean force) {
 		for(Category c : categoryMap.values()) {
 			c.save(force);
+			for(Quest q : c.getQuests())
+				for(Mission m : q.getMissions())
+					ProgressTracker.saveDialogue(m);
 		}
 		lastSave = System.currentTimeMillis();
+	}
+	
+	public void onReload() {
+		for(Category c: categoryMap.values())
+			for(Quest q : c.getQuests())
+				for(Mission m : q.getMissions())
+					ProgressTracker.loadDialogue(m);
 	}
 	
 	@Override

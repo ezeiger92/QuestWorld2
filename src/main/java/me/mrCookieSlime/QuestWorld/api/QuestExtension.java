@@ -1,17 +1,24 @@
 package me.mrCookieSlime.QuestWorld.api;
 
+import java.io.InputStream;
+import java.net.URI;
+
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.Plugin;
 
 import me.mrCookieSlime.QuestWorld.api.annotation.Control;
 import me.mrCookieSlime.QuestWorld.api.contract.QuestingAPI;
+import me.mrCookieSlime.QuestWorld.util.Reloadable;
+import me.mrCookieSlime.QuestWorld.util.ResourceLoader;
 
-public abstract class QuestExtension {
+public abstract class QuestExtension implements Reloadable{
 	private boolean initialized = false;
 	private QuestingAPI api = QuestWorld.getAPI();
 	private int remaining;
 	private String[] requirements;
 	private Plugin[] found;
 	private MissionType[] types = {};
+	private ResourceLoader loader;
 	
 	//TODO: Doc fix
 	/**
@@ -23,6 +30,7 @@ public abstract class QuestExtension {
 		this.requirements = requirements.clone();
 		remaining = requirements.length;
 		found = new Plugin[remaining];
+		loader = new ResourceLoader(getClass().getClassLoader(), api.getPlugin().getDataFolder().toPath());
 	}
 	
 	/**
@@ -60,6 +68,38 @@ public abstract class QuestExtension {
 	 */
 	public final String[] getDepends() {
 		return requirements;
+	}
+	
+	public final FileConfiguration getConfiguration(String path) {
+		return loader.loadConfigNoexpect(path, true);
+	}
+	
+	public final InputStream getResource(String path) {
+		return getClass().getResourceAsStream(path);
+	}
+	
+	public final URI getResourceLocation(String path) {
+		return URI.create(getClass().getResource(path).toString());
+	}
+	
+	public final ResourceLoader getResourceLoader() {
+		return loader;
+	}
+	
+	@Control
+	@Override
+	public void onReload() {
+	}
+	
+	
+	@Control
+	@Override
+	public void onSave() {
+	}
+	
+	@Control
+	@Override
+	public void onDiscard() {
 	}
 	
 	/**

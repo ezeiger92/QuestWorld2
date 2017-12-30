@@ -23,6 +23,7 @@ import me.mrCookieSlime.QuestWorld.manager.StatusManager;
 import me.mrCookieSlime.QuestWorld.quest.Facade;
 import me.mrCookieSlime.QuestWorld.util.BukkitService;
 import me.mrCookieSlime.QuestWorld.util.Lang;
+import me.mrCookieSlime.QuestWorld.util.Log;
 import me.mrCookieSlime.QuestWorld.util.Reloadable;
 import me.mrCookieSlime.QuestWorld.util.ResourceLoader;
 import me.mrCookieSlime.QuestWorld.util.Sounds;
@@ -41,6 +42,7 @@ public final class QuestingImpl implements QuestingAPI, Reloadable {
 	private StatusManager statusManager = new StatusManager();
 	
 	public QuestingImpl(QuestWorldPlugin questWorld) {
+		Log.setLogger(questWorld.getLogger());
 		this.questWorld = questWorld;
 		resources = new ResourceLoader(questWorld);
 		language = new Lang(resources);
@@ -123,11 +125,18 @@ public final class QuestingImpl implements QuestingAPI, Reloadable {
 	}
 
 	@Override
-	public void save() {
+	public void onSave() {
 		
 	}
+	@Override
+	public void onReload() {
+		facade.onReload();
+		eventSounds = new Sounds(resources.loadConfigNoexpect("sounds.yml", true));
+		language.onReload();
+	}
 	
-	public void unload() {
+	@Override
+	public void onDiscard() {
 		facade.unload();
 		viewer.clear();
 		statusManager.unloadAll();
@@ -136,12 +145,6 @@ public final class QuestingImpl implements QuestingAPI, Reloadable {
 		for(Player p : Bukkit.getOnlinePlayers())
 			if(p.getOpenInventory().getTopInventory().getHolder() instanceof Menu)
 				p.closeInventory();
-	}
-
-	@Override
-	public void reload() {
-		eventSounds = new Sounds(resources.loadConfigNoexpect("sounds.yml", true));
-		language.reload();
 	}
 	
 	public void unloadPlayerStatus(OfflinePlayer player) {

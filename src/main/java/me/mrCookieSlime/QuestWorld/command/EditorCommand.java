@@ -75,21 +75,21 @@ public class EditorCommand implements CommandExecutor {
 		}
 		else if(param.equals("save")) {
 			// Command, force save, this is probably desired over an incremental save
-			plugin.save(true);
+			plugin.onSave(true);
 			sender.sendMessage(Text.colorize("&7Saved all quests to disk"));
 		}
 		else if(param.equals("reload")) {
 			if(args.length > 1 && args[1].equalsIgnoreCase("config")) {
-				plugin.reloadQWConfig();
+				plugin.onReload();
 				sender.sendMessage(Text.colorize("&7Reloaded config from disk"));
 			}
 			else if(args.length > 1 && args[1].equalsIgnoreCase("quests")) {
-				plugin.reloadQuests();
+				plugin.onDiscard();
 				sender.sendMessage(Text.colorize("&7Reloaded all quests from disk"));
 			}
 			else if(args.length > 1 && args[1].equalsIgnoreCase("all")) {
-				plugin.reloadQWConfig();
-				plugin.reloadQuests();
+				plugin.onReload();
+				plugin.onDiscard();
 				sender.sendMessage(Text.colorize("&7Reloaded config and all quests from disk"));
 			}
 			else {
