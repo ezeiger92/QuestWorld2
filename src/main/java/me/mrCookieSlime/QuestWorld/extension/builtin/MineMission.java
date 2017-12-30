@@ -38,7 +38,7 @@ public class MineMission extends MissionType implements Listener, Decaying {
 	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
 	public void onMine(BlockBreakEvent e) {
 		for(MissionEntry r : QuestWorld.getMissionEntries(this, e.getPlayer())) {
-			if(PlayerTools.getStackOf(e.getBlock()).isSimilar(r.getMission().getItem()))
+			if(ItemBuilder.compareItems(PlayerTools.getStackOf(e.getBlock()), r.getMission().getItem()))
 				r.addProgress(1);
 		}
 	}

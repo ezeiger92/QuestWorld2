@@ -11,6 +11,7 @@ import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IMissionState;
 import me.mrCookieSlime.QuestWorld.api.contract.MissionEntry;
 import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
+import me.mrCookieSlime.QuestWorld.util.ItemBuilder;
 import me.mrCookieSlime.QuestWorld.util.Text;
 
 public class SubmitMission extends MissionType implements Manual {
@@ -29,21 +30,32 @@ public class SubmitMission extends MissionType implements Manual {
 	}
 
 	@Override
-	public void onManual(Player p, MissionEntry result) {
-		IMission mission = result.getMission();
-		int found = result.getRemaining();
+	public void onManual(Player p, MissionEntry entry) {
+		IMission mission = entry.getMission();
+		int needed = entry.getRemaining();
 		
 		ItemStack search = mission.getItem();
-		search.setAmount(found);
+		search.setAmount(needed);
+		for(ItemStack stack : p.getInventory().getStorageContents()) {
+			if(ItemBuilder.compareItems(mission.getItem(), stack)) {
+				int sa = search.getAmount();
+				int sub = Math.min(stack.getAmount(), sa);
+				stack.setAmount(stack.getAmount() - sub);
+				search.setAmount(sa - sub);
+				
+				if(sa == 0)
+					break;
+			}
+		}
 		
-		ItemStack missing = p.getInventory().removeItem(search).get(0);
-		if(missing != null)
-			found -= missing.getAmount();
+		//ItemStack missing = p.getInventory().removeItem(search).get(0);
+		//if(missing != null)
+		//	remaining -= missing.getAmount();
 		
-		if(found > 0) {
+		if(needed > search.getAmount()) {
 			QuestWorld.getSounds().MISSION_SUBMIT.playTo(p);
 			// TODO QuestWorld.getSounds().muteNext();
-			result.addProgress(found);
+			entry.addProgress(needed - search.getAmount());
 		}
 		else {
 			QuestWorld.getSounds().MISSION_REJECT.playTo(p);

@@ -94,32 +94,23 @@ public class ItemBuilder implements Cloneable {
 	public static boolean compareItems(ItemStack left, ItemStack right) {
 		if(left == null || right == null)
 			return left == right;
+		
+		if(left.getType() != right.getType() || left.getDurability() != right.getDurability())
+			return false;
+		
+		boolean hasMetaLeft = left.hasItemMeta();
+		ItemMeta metaLeft = hasMetaLeft ? left.getItemMeta() : null;
+		ItemMeta metaRight = right.hasItemMeta() ? right.getItemMeta() : null;
 
-		boolean wildcardLore = false;
-		
-		if(left.hasItemMeta()) {
-			ItemMeta meta = left.getItemMeta();
-			wildcardLore = meta.hasLore() && meta.getLore().get(0).equals("*");
-		}
-		
-		if(!wildcardLore && right.hasItemMeta()) {
-			ItemMeta meta = right.getItemMeta();
-			wildcardLore = meta.hasLore() && meta.getLore().get(0).equals("*");
-		}
-		
-		if(wildcardLore) {
-			left = left.clone();
-			ItemMeta meta = left.getItemMeta();
-			meta.setLore(null);
-			left.setItemMeta(meta);
-			
-			right = right.clone();
-			meta = right.getItemMeta();
-			meta.setLore(null);
-			right.setItemMeta(meta);
-		}
-		
-		return left.isSimilar(right);
+		if(!isWildcard(metaLeft) && !isWildcard(metaRight))
+			return hasMetaLeft == (metaRight == null) &&
+			(hasMetaLeft || Bukkit.getItemFactory().equals(metaLeft, metaRight));
+
+		return true;
+	}
+	
+	private static boolean isWildcard(ItemMeta meta) {
+		return meta != null && meta.hasLore() && meta.getLore().get(0).equals("*");
 	}
 	
 	/**
