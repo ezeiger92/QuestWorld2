@@ -87,14 +87,22 @@ public class Text {
 	}
 	
 	public static String stringOf(Location location) {
-		return "X: " + location.getBlockX() +
-				", Y: "+ location.getBlockY() +
-				", Z: "+ location.getBlockZ() +
-				", World: " + location.getWorld().getName();
+		if(location.getWorld() != null)
+			return "X: " + location.getBlockX() +
+					", Y: "+ location.getBlockY() +
+					", Z: "+ location.getBlockZ() +
+					", World: " + location.getWorld().getName();
+		return "Unknown world";
 	}
 	
 	public static String stringOf(Location location, int radius) {
-		return stringOf(location) + ", Range: " + radius;
+		if(location.getWorld() != null)
+			return "X: " + location.getBlockX() +
+					", Y: "+ location.getBlockY() +
+					", Z: "+ location.getBlockZ() +
+					", World: " + location.getWorld().getName() +
+					", Range: " + radius;
+		return "Unknown world";
 	}
 	
 	static Pattern firstLetter = Pattern.compile("\\b\\S");
