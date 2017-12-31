@@ -1,14 +1,11 @@
 package me.mrCookieSlime.QuestWorld.util;
 
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.URI;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystemAlreadyExistsException;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.HashMap;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -17,85 +14,70 @@ import org.bukkit.plugin.Plugin;
 
 public class ResourceLoader {
 	private final ClassLoader classLoader;
-	private final Path dataPath;
+	private final File dataPath;
 	public ResourceLoader(Plugin plugin) {
 		classLoader = plugin.getClass().getClassLoader();
-		dataPath = plugin.getDataFolder().toPath();
+		dataPath = plugin.getDataFolder();
 	}
 	
-	public ResourceLoader(ClassLoader loader, Path folder) {
+	public ResourceLoader(ClassLoader loader, File folder) {
 		classLoader = loader;
 		dataPath = folder;
 	}
-	private FileSystem zipFS = null;
 	
-	private Path jarPath(String resource) {
-		URI uri = URI.create(classLoader.getResource(resource).toString());
-		
-		try {
-			zipFS = FileSystems.newFileSystem(uri, new HashMap<>());
-			return zipFS.getPath(resource);
-		} catch(FileSystemAlreadyExistsException e) {
-			e.printStackTrace();
-			try {
-				return FileSystems.getFileSystem(uri).getPath(resource);
-			}
-			catch (Exception ee) {
-				ee.printStackTrace();
-			}
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-		return null;
+	private InputStream activeStream;
+	private InputStreamReader activeReader;
+	private InputStreamReader readerOf(String resource) {
+		activeStream = classLoader.getResourceAsStream(resource);
+		activeReader = activeStream != null ? new InputStreamReader(activeStream) : null;
+		return activeReader;
 	}
 	
-	private void closeZip() {
-		if(zipFS != null) {
-			try {
-				zipFS.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			
-			zipFS = null;
-		}
+	private void close() {
+		try { activeReader.close(); } catch (Exception e) {}
+		try { activeStream.close(); } catch (Exception e) {}
+		activeReader = null;
+		activeStream = null;
 	}
 	
-	public YamlConfiguration loadFileConfig(String path) {
-		return YamlConfiguration.loadConfiguration(dataPath.resolve(path).toFile());
+	public YamlConfiguration loadFileConfig(String resource) {
+		return YamlConfiguration.loadConfiguration(new File(dataPath, resource));
 	}
 	
-	public YamlConfiguration loadJarConfig(String jarPath) {
-		YamlConfiguration result = null;
-		try {
-			result = YamlConfiguration.loadConfiguration(Files.newBufferedReader(jarPath(jarPath)));
-			closeZip();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return result;
+	public YamlConfiguration loadJarConfig(String resource) {
+		try { return YamlConfiguration.loadConfiguration(readerOf(resource)); }
+		finally { close(); }
 	}
 	
-	public YamlConfiguration loadConfig(String path) throws FileNotFoundException, IOException, InvalidConfigurationException {
+	public YamlConfiguration loadConfig(String resource) throws FileNotFoundException, IOException, InvalidConfigurationException {
 		YamlConfiguration result = new YamlConfiguration();
-		Path file = dataPath.resolve(path);
+		File file = new File(dataPath, resource);
 		
-		result.setDefaults(YamlConfiguration.loadConfiguration(Files.newBufferedReader(jarPath(path))));
-		closeZip();
-		if(!Files.exists(file)) {
-			Files.copy(jarPath(path), file);
-			closeZip();
+		try { result.setDefaults(YamlConfiguration.loadConfiguration(readerOf(resource))); }
+		finally { close(); }
+		
+		if(!file.exists()) {
+			file.getParentFile().mkdirs();
+			try {
+				readerOf(resource);
+				try(FileOutputStream fos = new FileOutputStream(file)) {
+					byte[] buffer = new byte[2048];
+					int len;
+					while((len = activeStream.read(buffer)) != -1)
+						fos.write(buffer, 0, len);
+				}
+			}
+			finally { close(); }
 		}
-		result.load(file.toFile());
+		
+		result.load(file);
 		
 		return result;
 	}
 	
-	public YamlConfiguration loadConfigNoexpect(String path, boolean printException) {
+	public YamlConfiguration loadConfigNoexpect(String resource, boolean printException) {
 		try {
-			return loadConfig(path);
+			return loadConfig(resource);
 		}
 		catch(Exception e) {
 			if(printException)
@@ -105,13 +87,13 @@ public class ResourceLoader {
 		return new YamlConfiguration();
 	}
 	
-	public void saveConfig(FileConfiguration config, String path) throws IOException {
-		config.save(dataPath.resolve(path).toFile());
+	public void saveConfig(FileConfiguration config, String resource) throws IOException {
+		config.save(new File(dataPath, resource));
 	}
 	
-	public boolean saveConfigNoexcept(FileConfiguration config, String path, boolean printException) {
+	public boolean saveConfigNoexcept(FileConfiguration config, String resource, boolean printException) {
 		try {
-			saveConfig(config, path);
+			saveConfig(config, resource);
 		} catch (Exception e) {
 			if(printException)
 				e.printStackTrace();

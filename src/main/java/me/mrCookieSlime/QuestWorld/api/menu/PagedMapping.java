@@ -24,6 +24,7 @@ public class PagedMapping {
 
 	private int currentPage = 0;
 	private int activeSize;
+	private String backLabel = "";
 	private Consumer<InventoryClickEvent> backButton = null;
 	
 	@SuppressWarnings("unchecked")
@@ -65,7 +66,8 @@ public class PagedMapping {
 		this(cellsPerPanel, cellsPerPanel);
 	}
 	
-	public void setBackButton(Consumer<InventoryClickEvent> button) {
+	public void setBackButton(String label, Consumer<InventoryClickEvent> button) {
+		backLabel = label != null ? label : "";
 		backButton = button;
 	}
 
@@ -146,7 +148,7 @@ public class PagedMapping {
 		);
 		
 		if(backButton != null) 
-			frame.addButton(0, ItemBuilder.Proto.MAP_BACK.getItem(), backButton);
+			frame.addButton(0, ItemBuilder.Proto.MAP_BACK.get().wrapLore(backLabel).get(), backButton);
 		
 		frame.build(menu);
 	}

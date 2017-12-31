@@ -77,7 +77,10 @@ public class ProgressTracker implements Reloadable {
 	}
 	
 	public void setPartyLeader(OfflinePlayer player) {
-		config.set("party.associated", player.getUniqueId().toString());
+		if(player != null)
+			config.set("party.associated", player.getUniqueId().toString());
+		else
+			config.set("party.associated", null);
 	}
 	
 	public List<OfflinePlayer> getPartyMembers() {

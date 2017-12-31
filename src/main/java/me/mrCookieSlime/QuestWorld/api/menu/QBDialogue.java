@@ -119,7 +119,7 @@ public class QBDialogue {
 		
 		IMissionState changes = mission.getState();
 		//String title = Text.colorize(mission.getQuest().getName() + " &7- &8(Page " + (page+1) + "/" + (lastPage+1) + ")");
-		final Menu menu = new Menu(6, "&3Entity Selector: " + mission.getQuest().getName());
+		final Menu menu = new Menu(6, "&3Entity selector");
 		
 		PagedMapping pager = new PagedMapping(45);
 
@@ -138,7 +138,7 @@ public class QBDialogue {
 					}, true
 			);
 		}
-		pager.setBackButton(event -> QuestBook.openQuestMissionEditor(p, mission));
+		pager.setBackButton(" &3Mission editor", event -> QuestBook.openQuestMissionEditor(p, mission));
 		pager.build(menu, p);
 		menu.openFor(p);
 	}
@@ -222,14 +222,14 @@ public class QBDialogue {
 	public static void openQuestRequirementChooser(Player p, final IStateful quest) {
 		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
 		
-		Menu menu = new Menu(1, "&c&lQuest Editor");
+		Menu menu = new Menu(1, "&3Categories");
 
 		PagedMapping pager = new PagedMapping(45, 9);
 		for(ICategory category : QuestWorld.getFacade().getCategories()) {
 			pager.addButton(category.getID(), new ItemBuilder(category.getItem()).wrapText(
 					category.getName(),
 					"",
-					"&7&oLeft Click to open").get(),
+					"&e> Click to open category").get(),
 					event -> {
 						Player p2 = (Player)event.getWhoClicked();
 						PagedMapping.putPage(p2, 0);
@@ -237,8 +237,11 @@ public class QBDialogue {
 					}, true
 			);
 		}
-		pager.setBackButton(event -> {
-			if(quest instanceof IQuest)
+		
+		boolean isQuest = quest instanceof IQuest;
+		
+		pager.setBackButton(isQuest ? " &3Quest editor" : " &3Category editor", event -> {
+			if(isQuest)
 				QuestBook.openQuestEditor(p, (IQuest)quest);
 			else
 				QuestBook.openCategoryEditor(p, (ICategory)quest);
@@ -250,7 +253,10 @@ public class QBDialogue {
 	private static void openQuestRequirementChooser2(Player p, final IStateful q, ICategory category) {
 		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
 		
-		Menu menu = new Menu(1, "&c&lQuest Editor");
+		Menu menu = new Menu(1, "&3Quests");
+		
+		boolean isQuest = q instanceof IQuest;
+		String name = isQuest ? ((IQuest)q).getName() : ((ICategory)q).getName();
 		
 		PagedMapping pager = new PagedMapping(45, 9);
 		for(IQuest quest : category.getQuests()) {
@@ -258,9 +264,8 @@ public class QBDialogue {
 					new ItemBuilder(quest.getItem()).wrapText(
 							quest.getName(),
 							"",
-							"&7&oClick to select it as a Requirement",
-							"&7&ofor the Quest:",
-							"&r" + quest.getName()).get(),
+							"&e> Click to set requirement for " +
+							(isQuest ? "quest" : "category") + ": &f&o" + name).get(),
 					event -> {
 						Player p2 = (Player) event.getWhoClicked();
 						PagedMapping.popPage(p2);
@@ -286,7 +291,7 @@ public class QBDialogue {
 					}, false
 			);
 		}
-		pager.setBackButton(event -> openQuestRequirementChooser(p, q));
+		pager.setBackButton(" &3Categories", event -> openQuestRequirementChooser(p, q));
 		pager.build(menu, p);
 		menu.openFor(p);
 	}

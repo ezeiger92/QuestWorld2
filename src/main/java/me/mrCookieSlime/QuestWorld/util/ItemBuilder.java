@@ -45,7 +45,7 @@ public class ItemBuilder implements Cloneable {
 	public static enum Proto {
 		RED_WOOL(new ItemBuilder(Material.WOOL).color(DyeColor.RED).get()),
 		LIME_WOOL(new ItemBuilder(Material.WOOL).color(DyeColor.LIME).get()),
-		MAP_BACK(new ItemBuilder(Material.MAP).display(QuestWorld.translate(Translation.button_back_general)).get()),
+		MAP_BACK(new ItemBuilder(Material.MAP).flagAll().display(QuestWorld.translate(Translation.button_back_general)).get()),
 		;
 		private ItemStack item;
 		Proto(ItemStack item) {

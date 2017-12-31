@@ -35,7 +35,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 
 public class QuestBook {
-	
 	public static IStateful getLastViewed(Player p) {
 		return p.getMetadata("questworld.last-object")
 				.stream().findFirst()
@@ -131,7 +130,7 @@ public class QuestBook {
 		}
 		
 		return new ItemBuilder(Material.ENCHANTED_BOOK).wrapText(
-				"&eQuest Book",
+				QuestWorld.translate(Translation.gui_title),
 				"",
 				progress).get();
 	}
@@ -192,7 +191,7 @@ public class QuestBook {
 		
 		Menu menu = new Menu(2, QuestWorld.translate(Translation.gui_party));
 		
-		menu.put(4, new ItemBuilder(Material.MAP).wrapText(
+		menu.put(4, new ItemBuilder(Material.MAP).flagAll().wrapText(
 				QuestWorld.translate(Translation.gui_title),
 				"",
 				QuestWorld.translate(Translation.button_back_quests)).get(),
@@ -313,7 +312,7 @@ public class QuestBook {
 		// TODO: manager.update(false);
 		setLastViewed(p, category);
 		
-		Menu menu = new Menu(1, QuestWorld.translate(Translation.gui_title));
+		Menu menu = new Menu(1, category.getName());
 		ItemBuilder glassPane = new ItemBuilder(Material.STAINED_GLASS_PANE).color(DyeColor.RED);
 		PagedMapping view = new PagedMapping(45, 9);
 		
@@ -323,7 +322,7 @@ public class QuestBook {
 			PagedMapping.putPage(p, 0);
 		}
 		
-		view.setBackButton(event -> {
+		view.setBackButton(" " + QuestWorld.translate(Translation.gui_title), event -> {
 			openMainMenu((Player) event.getWhoClicked());
 		});
 		
@@ -393,14 +392,14 @@ public class QuestBook {
 		// TODO: manager.update(false);
 		setLastViewed(p, quest);
 		
-		Menu menu = new Menu(3, QuestWorld.translate(Translation.gui_title));
+		Menu menu = new Menu(3, quest.getName());
 		
 		if(!back) {
 			PagedMapping.clearPages(p);
 			PagedMapping.putPage(p, quest.getID() / 45);
 		}
 		
-		menu.put(0, ItemBuilder.Proto.MAP_BACK.getItem(), event -> {
+		menu.put(0, ItemBuilder.Proto.MAP_BACK.get().wrapLore(" " + quest.getCategory().getName()).get(), event -> {
 			openCategory((Player) event.getWhoClicked(), quest.getCategory(), categoryBack);
 		});
 		
@@ -605,14 +604,14 @@ public class QuestBook {
 	public static void openQuestList(Player p, final ICategory category) {
 		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
 		
-		final Menu menu = new Menu(6, "&3Quest Editor");
+		final Menu menu = new Menu(6, "&3Quests");
 
 		ItemBuilder defaultItem = new ItemBuilder(Material.STAINED_GLASS_PANE)
 				.color(DyeColor.RED).display("&7&o> New Quest");
 		
 		PagedMapping view = new PagedMapping(45);
 		view.reserve(1);
-		view.setBackButton(event -> {
+		view.setBackButton(" &3Categories", event -> {
 			openCategoryList((Player) event.getWhoClicked());
 		});
 		
@@ -667,10 +666,10 @@ public class QuestBook {
 	public static void openCategoryEditor(Player p, final ICategory category) {
 		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
 		
-		final Menu menu = new Menu(2, "&3Quest Editor");
+		final Menu menu = new Menu(2, "&3Category editor");
 		ICategoryState changes = category.getState();
 		
-		menu.put(0,  Proto.MAP_BACK.getItem(), event -> {
+		menu.put(0,  Proto.MAP_BACK.get().wrapLore(" &3Categories").get(), event -> {
 			openCategoryList((Player) event.getWhoClicked());
 		});
 		
@@ -801,10 +800,10 @@ public class QuestBook {
 	}
 	
 	public static Menu getQuestEditor(IQuest quest) {
-		final Menu menu = new Menu(6, "&3Quest Editor");
+		final Menu menu = new Menu(6, "&3Quest editor");
 		IQuestState changes = quest.getState();
 		
-		menu.put(0, ItemBuilder.Proto.MAP_BACK.getItem(), event -> {
+		menu.put(0, ItemBuilder.Proto.MAP_BACK.get().wrapLore(" &3Quests").get(), event -> {
 			openQuestList((Player) event.getWhoClicked(), quest.getCategory());
 		});
 		
@@ -1124,9 +1123,9 @@ public class QuestBook {
 	public static void openWorldEditor(Player p, final IQuest quest) {
 		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
 		
-		final Menu menu = new Menu(2, "&3Quest Editor");
+		final Menu menu = new Menu(2, "&3World selector");
 		
-		menu.put(0, ItemBuilder.Proto.MAP_BACK.getItem(), event -> {
+		menu.put(0, ItemBuilder.Proto.MAP_BACK.get().wrapLore(" &3Quest editor").get(), event -> {
 			openQuestEditor((Player) event.getWhoClicked(), quest);
 		});
 		
@@ -1153,9 +1152,9 @@ public class QuestBook {
 	public static void openWorldEditor(Player p, final ICategory category) {
 		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
 		
-		final Menu menu = new Menu(2, "&3Quest Editor");
+		final Menu menu = new Menu(2, "&3World selector");
 		
-		menu.put(0, ItemBuilder.Proto.MAP_BACK.getItem(), event -> {
+		menu.put(0, ItemBuilder.Proto.MAP_BACK.get().wrapLore(" &3Category editor").get(), event -> {
 			openCategoryEditor((Player) event.getWhoClicked(), category);
 		});
 		
@@ -1182,9 +1181,9 @@ public class QuestBook {
 	public static void openQuestMissionEditor(Player p, final IMission mission) {
 		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
 		
-		Menu menu = new Menu(2, "&3Quest Editor");
+		Menu menu = new Menu(2, "&3Mission editor");
 
-		menu.put(0, ItemBuilder.Proto.MAP_BACK.getItem(), e -> {
+		menu.put(0, ItemBuilder.Proto.MAP_BACK.get().wrapLore(" &3Quest editor").get(), e -> {
 			openQuestEditor(p, mission.getQuest());
 		});
 		
@@ -1207,10 +1206,10 @@ public class QuestBook {
 		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
 
 		IMissionState changes = mission.getState();
-		final Menu menu = new Menu(3, Text.colorize("&3Mission Selector: " + mission.getQuest().getName()));
+		final Menu menu = new Menu(3, "&3Mission selector");
 
 		PagedMapping view = new PagedMapping(45, 9);
-		view.setBackButton(event -> {
+		view.setBackButton(" &3Mission editor", event -> {
 			openQuestMissionEditor((Player) event.getWhoClicked(), mission);
 		});
 		
@@ -1230,7 +1229,6 @@ public class QuestBook {
 			}, false);
 			++i;
 		}
-		view.setBackButton(event -> openQuestMissionEditor(p, mission));
 		view.build(menu, p);
 		
 		menu.openFor(p);

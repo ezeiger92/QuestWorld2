@@ -30,7 +30,7 @@ public abstract class QuestExtension implements Reloadable{
 		this.requirements = requirements.clone();
 		remaining = requirements.length;
 		found = new Plugin[remaining];
-		loader = new ResourceLoader(getClass().getClassLoader(), api.getPlugin().getDataFolder().toPath());
+		loader = new ResourceLoader(getClass().getClassLoader(), api.getPlugin().getDataFolder());
 	}
 	
 	/**
