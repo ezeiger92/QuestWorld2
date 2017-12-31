@@ -103,8 +103,8 @@ public class ItemBuilder implements Cloneable {
 		ItemMeta metaRight = right.hasItemMeta() ? right.getItemMeta() : null;
 
 		if(!isWildcard(metaLeft) && !isWildcard(metaRight))
-			return hasMetaLeft == (metaRight == null) &&
-			(hasMetaLeft || Bukkit.getItemFactory().equals(metaLeft, metaRight));
+			return (hasMetaLeft == (metaRight != null)) &&
+			(!hasMetaLeft || Bukkit.getItemFactory().equals(metaLeft, metaRight));
 
 		return true;
 	}

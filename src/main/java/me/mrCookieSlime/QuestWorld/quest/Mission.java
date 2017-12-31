@@ -104,7 +104,9 @@ class Mission extends UniqueObject implements IMissionState {
 
 	@Override
 	public Location getLocation() {
-		return location;
+		if(location.getWorld() != null)
+			return location;
+		return Bukkit.getWorlds().get(0).getSpawnLocation();
 	}
 	
 	@Override

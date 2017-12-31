@@ -1,6 +1,7 @@
 package me.mrCookieSlime.QuestWorld.extension.builtin;
 
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -9,12 +10,13 @@ import org.bukkit.inventory.ItemStack;
 
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.QuestWorld;
+import me.mrCookieSlime.QuestWorld.api.Ticking;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IMissionState;
 import me.mrCookieSlime.QuestWorld.api.contract.MissionEntry;
 import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
 
-public class LevelMission extends MissionType implements Listener {
+public class LevelMission extends MissionType implements Listener, Ticking {
 	public LevelMission() {
 		super("REACH_LEVEL", false, new ItemStack(Material.EXP_BOTTLE));
 	}
@@ -38,5 +40,10 @@ public class LevelMission extends MissionType implements Listener {
 	@Override
 	protected void layoutMenu(IMissionState changes) {
 		putButton(17, MissionButton.amount(changes));
+	}
+
+	@Override
+	public void onManual(Player player, MissionEntry entry) {
+		entry.setProgress(player.getLevel());
 	}
 }
