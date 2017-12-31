@@ -130,6 +130,14 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener {
 		}
 	}
 	
+	public ExtensionInstaller getInstaller() {
+		return hookInstaller;
+	}
+	
+	public ExtensionLoader getLoader() {
+		return extLoader;
+	}
+	
 	public void load() {
 		api.getFacade().load();
 		lastSave = System.currentTimeMillis();

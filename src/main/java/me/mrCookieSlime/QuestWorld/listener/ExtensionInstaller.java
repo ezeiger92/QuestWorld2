@@ -2,6 +2,7 @@ package me.mrCookieSlime.QuestWorld.listener;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -52,6 +53,14 @@ public class ExtensionInstaller implements Listener {
 		}
 	}
 	
+	public List<QuestExtension> getActiveExtensions() {
+		return Collections.unmodifiableList(active);
+	}
+	
+	public List<QuestExtension> getInactiveExtensions() {
+		return Collections.unmodifiableList(extensions);
+	}
+	
 	public void add(QuestExtension extension) {
 		PluginManager manager = parent.getServer().getPluginManager();
 		
@@ -65,13 +74,13 @@ public class ExtensionInstaller implements Listener {
 				Plugin p = manager.getPlugin(reqs[i]);
 				if(p != null && p.isEnabled()) {
 					extension.directEnablePlugin(p, i);
-					active.add(extension);
 				}
 			}
 		
 		if(extension.isReady()) {
 			Log.fine("Installer - Dependencies found: " + name);
 			initialize(extension, name);
+			active.add(extension);
 		}
 		else {
 			Log.fine("Installer - Listening for dependencies: " + name);
