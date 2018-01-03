@@ -5,10 +5,10 @@ import java.util.UUID;
 import me.mrCookieSlime.QuestWorld.api.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
+import me.mrCookieSlime.QuestWorld.api.contract.IParty;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
 import me.mrCookieSlime.QuestWorld.api.menu.PagedMapping;
 import me.mrCookieSlime.QuestWorld.api.menu.QuestBook;
-import me.mrCookieSlime.QuestWorld.manager.Party;
 import me.mrCookieSlime.QuestWorld.util.PlayerTools;
 import me.mrCookieSlime.QuestWorld.util.Text;
 
@@ -27,7 +27,7 @@ public class QuestsCommand implements CommandExecutor {
 			if (args.length == 0) QuestBook.openLastMenu(p);
 			else {
 				if (args.length == 2 && args[0].equalsIgnoreCase("accept")) {
-					Party party = QuestWorld.getPlayerStatus(Bukkit.getOfflinePlayer(UUID.fromString(args[1]))).getParty();
+					IParty party = QuestWorld.getParty(Bukkit.getOfflinePlayer(UUID.fromString(args[1])));
 					if (party != null && party.hasInvited(p)) {
 						int maxParty = QuestWorld.getPlugin().getConfig().getInt("party.max-members");
 						if (party.getSize() >= maxParty) {

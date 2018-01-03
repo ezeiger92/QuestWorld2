@@ -10,12 +10,13 @@ import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategoryState;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IMissionState;
+import me.mrCookieSlime.QuestWorld.api.contract.IParty.LeaveReason;
+import me.mrCookieSlime.QuestWorld.api.contract.IParty;
 import me.mrCookieSlime.QuestWorld.api.contract.IPlayerStatus;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuestState;
 import me.mrCookieSlime.QuestWorld.api.contract.IStateful;
-import me.mrCookieSlime.QuestWorld.manager.Party;
-import me.mrCookieSlime.QuestWorld.manager.Party.LeaveReason;
+//import me.mrCookieSlime.QuestWorld.manager.Party;
 import me.mrCookieSlime.QuestWorld.util.ItemBuilder;
 import me.mrCookieSlime.QuestWorld.util.PlayerTools;
 import me.mrCookieSlime.QuestWorld.util.Text;
@@ -151,9 +152,38 @@ public class QuestBook {
 				}
 		);
 
-		final Party party = QuestWorld.getPlayerStatus(p).getParty();
+		final IParty party = QuestWorld.getParty(p);
 		if (party != null) {
-			for (int i = 0; i < party.getSize(); i++) {
+			int i = 0;
+			for(OfflinePlayer member : party.getGroup()) {
+				if (!party.isLeader(p)) {
+					menu.put(i + 9,
+							skull.skull(member).wrapText(
+									"&e" + member.getName(),
+									"",
+									(party.isLeader(member) ? "&4Party Leader": "&eParty Member")).get(),
+							null
+					);
+				}
+				else {
+					menu.put(i + 9,
+							skull.skull(member).wrapText(
+									"&e" + member.getName(),
+									"",
+									(party.isLeader(member) ? "&5&lParty Leader": "&e&lParty Member"),
+									"",
+									(party.isLeader(member) ? "": "&7&oClick here to kick this Member")).get(),
+							event -> {
+								if (!party.isLeader(member)) {
+									party.playerLeave(member, LeaveReason.KICKED);
+									openPartyMembers((Player) event.getWhoClicked());
+								}
+							}
+					);
+				}
+				++i;
+			}
+			/*for (int i = 0; i < party.getSize(); i++) {
 				final OfflinePlayer player = party.getPlayers().get(i);
 				if (!party.isLeader(p)) {
 					menu.put(i + 9,
@@ -180,7 +210,7 @@ public class QuestBook {
 							}
 					);
 				}
-			}
+			}*/
 		}
 		
 		menu.openFor(p);
@@ -200,7 +230,7 @@ public class QuestBook {
 				}
 		);
 		
-		final Party party = QuestWorld.getPlayerStatus(p).getParty();
+		final IParty party = QuestWorld.getParty(p);
 		
 		ItemBuilder wool = new ItemBuilder(Material.WOOL);
 		
@@ -212,7 +242,7 @@ public class QuestBook {
 							"&rCreates a brand new Party for you", "&rto invite Friends and share your Progress").getNew(),
 					event -> {
 						Player p2 = (Player) event.getWhoClicked();
-						Party.create(p2);
+						QuestWorld.createParty(p2);
 						openPartyMenu(p2);
 					}
 			);
@@ -243,13 +273,9 @@ public class QuestBook {
 
 											Player player = PlayerTools.getPlayer(name);
 											if (player != null) {
-												if (QuestWorld.getPlayerStatus(p).getParty() == null) {
+												if (QuestWorld.getParty(p) == null) {
 													PlayerTools.sendTranslation(p2, true, Translation.PARTY_LEADER_INVITED, name);
-													try {
-														party.invitePlayer(player);
-													} catch (Exception e1) {
-														e1.printStackTrace();
-													}
+													party.invitePlayer(player);
 													openPartyMenu(p);
 													return true;
 												}
@@ -272,7 +298,7 @@ public class QuestBook {
 								"&rDeletes this Party",
 								"&rBe careful with this Option!").getNew(),
 						event -> {
-							party.disband();
+							QuestWorld.disbandParty(party);
 							openPartyMenu((Player) event.getWhoClicked());
 						}
 				);

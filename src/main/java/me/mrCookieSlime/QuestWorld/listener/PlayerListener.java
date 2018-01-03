@@ -5,13 +5,13 @@ import me.mrCookieSlime.QuestWorld.QuestingImpl;
 import me.mrCookieSlime.QuestWorld.api.Decaying;
 import me.mrCookieSlime.QuestWorld.api.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
+import me.mrCookieSlime.QuestWorld.api.contract.IParty;
+import me.mrCookieSlime.QuestWorld.api.contract.IParty.LeaveReason;
 import me.mrCookieSlime.QuestWorld.api.contract.IPlayerStatus;
 import me.mrCookieSlime.QuestWorld.api.event.CancellableEvent;
 import me.mrCookieSlime.QuestWorld.api.event.GenericPlayerLeaveEvent;
 import me.mrCookieSlime.QuestWorld.api.menu.QuestBook;
-import me.mrCookieSlime.QuestWorld.manager.Party;
 import me.mrCookieSlime.QuestWorld.manager.ProgressTracker;
-import me.mrCookieSlime.QuestWorld.manager.Party.LeaveReason;
 
 import java.util.HashMap;
 import java.util.UUID;
@@ -85,19 +85,19 @@ public class PlayerListener implements Listener {
 		
 		int autokick = QuestWorld.getPlugin().getConfig().getInt("party.auto-kick", -1);
 		if(autokick == 0) {
-			Party party = QuestWorld.getPlayerStatus(player).getParty();
+			IParty party = QuestWorld.getParty(player);
 			if(party.isLeader(player))
-				party.disband();
+				QuestWorld.disbandParty(party);
 			else
 				party.playerLeave(player, LeaveReason.DISCONNECT);
 		}
 		else if(autokick > 0) {
-			Party party = QuestWorld.getPlayerStatus(player).getParty();
+			IParty party = QuestWorld.getParty(player);
 			int task_id = new BukkitRunnable(){
 				@Override
 				public void run() {
 					if(party.isLeader(player))
-						party.disband();
+						QuestWorld.disbandParty(party);
 					else
 						party.playerLeave(player, LeaveReason.DISCONNECT);
 					partyKick.remove(getTaskId());

@@ -2,6 +2,7 @@ package me.mrCookieSlime.QuestWorld.api;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.bukkit.OfflinePlayer;
 import org.bukkit.plugin.Plugin;
@@ -9,6 +10,7 @@ import org.bukkit.plugin.Plugin;
 import me.mrCookieSlime.QuestWorld.api.contract.QuestingAPI;
 import me.mrCookieSlime.QuestWorld.api.contract.IFacade;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
+import me.mrCookieSlime.QuestWorld.api.contract.IParty;
 import me.mrCookieSlime.QuestWorld.api.contract.IPlayerStatus;
 import me.mrCookieSlime.QuestWorld.api.contract.MissionEntry;
 import me.mrCookieSlime.QuestWorld.util.Sounds;
@@ -93,6 +95,30 @@ public final class QuestWorld {
 	
 	public static IPlayerStatus getPlayerStatus(OfflinePlayer player) {
 		return api.getPlayerStatus(player);
+	}
+	
+	public static IPlayerStatus getPlayerStatus(UUID uuid) {
+		return api.getPlayerStatus(uuid);
+	}
+	
+	public static IParty getParty(OfflinePlayer player) {
+		return api.getParty(player);
+	}
+	
+	public static IParty getParty(UUID uuid) {
+		return api.getParty(uuid);
+	}
+	
+	public static IParty createParty(OfflinePlayer player) {
+		return api.createParty(player);
+	}
+	
+	public static IParty createParty(UUID uuid) {
+		return api.createParty(uuid);
+	}
+	
+	public static void disbandParty(IParty party) {
+		api.disbandParty(party);
 	}
 	
 	public static QuestingAPI getAPI() {

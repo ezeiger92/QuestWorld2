@@ -13,6 +13,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
 
 public class ResourceLoader {
+	private static final int BUFFER_SIZE = 16 * 1024;
 	private final ClassLoader classLoader;
 	private final File dataPath;
 	public ResourceLoader(Plugin plugin) {
@@ -61,7 +62,7 @@ public class ResourceLoader {
 			try {
 				readerOf(resource);
 				try(FileOutputStream fos = new FileOutputStream(file)) {
-					byte[] buffer = new byte[2048];
+					byte[] buffer = new byte[BUFFER_SIZE];
 					int len;
 					while((len = activeStream.read(buffer)) != -1)
 						fos.write(buffer, 0, len);

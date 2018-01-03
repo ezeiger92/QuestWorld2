@@ -31,6 +31,10 @@ public class PlayerStatus implements IPlayerStatus {
 		return (PlayerStatus)QuestWorld.getAPI().getPlayerStatus(player);
 	}
 	
+	private static PlayerStatus of(UUID uuid) {
+		return (PlayerStatus)QuestWorld.getAPI().getPlayerStatus(uuid);
+	}
+	
 	private final UUID playerUUID;
 	private final ProgressTracker tracker;
 	
@@ -174,8 +178,12 @@ public class PlayerStatus implements IPlayerStatus {
 		Player p = asOnline(playerUUID);
 		if (quest.getParent() != null && !hasFinished(quest.getParent())) return QuestStatus.LOCKED;
 		if (p != null && !PlayerTools.checkPermission(p, quest.getPermission())) return QuestStatus.LOCKED;
-		if (quest.getPartySize() == 0 && getParty() != null) return QuestStatus.LOCKED_NO_PARTY;
-		if (quest.getPartySize() > 1 && (getParty() == null || getParty().getSize() < quest.getPartySize())) return QuestStatus.LOCKED_PARTY_SIZE;
+		
+		Party party = (Party)QuestWorld.getParty(p);
+		int partySize = party != null ? party.getSize() : -1;
+		
+		if (quest.getPartySize() == 0 && partySize > 0) return QuestStatus.LOCKED_NO_PARTY;
+		if (quest.getPartySize() > 1 && partySize < quest.getPartySize()) return QuestStatus.LOCKED_PARTY_SIZE;
 		
 		return tracker.getQuestStatus(quest);
 	}
@@ -262,9 +270,10 @@ public class PlayerStatus implements IPlayerStatus {
 	}
 
 	public void setProgress(IMission task, int amount) {
-		if(task.getQuest().supportsParties() && getParty() != null)
-			for(OfflinePlayer player: getParty().getPlayers())
-				of(player).setSingleProgress(task, amount);
+		Party party = (Party)QuestWorld.getParty(playerUUID);
+		if(task.getQuest().supportsParties() && party != null)
+			for(UUID memberUuid: party.getGroupUUIDs())
+				of(memberUuid).setSingleProgress(task, amount);
 		else
 			setSingleProgress(task, amount);
 	}
@@ -345,14 +354,6 @@ public class PlayerStatus implements IPlayerStatus {
 				 setProgress(task, 0);
 			 }
 		}
-	}
-	
-	@Override
-	public Party getParty() {
-		OfflinePlayer leader = tracker.getPartyLeader();
-		if(leader != null)
-			return new Party(leader);
-		return null;
 	}
 	
 	public ProgressTracker getTracker() {

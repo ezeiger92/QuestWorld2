@@ -5,12 +5,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import me.mrCookieSlime.QuestWorld.QuestWorldPlugin;
@@ -60,10 +58,10 @@ public class ProgressTracker implements Reloadable {
 		}
 	}
 	
-	private static OfflinePlayer tryOfflinePlayer(String uuid) {
+	private static UUID tryUUID(String uuid) {
 		if(uuid != null)
 			try {
-				return Bukkit.getOfflinePlayer(UUID.fromString(uuid));
+				return UUID.fromString(uuid);
 			}
 			catch(IllegalArgumentException e) {
 			}
@@ -72,40 +70,40 @@ public class ProgressTracker implements Reloadable {
 	}
 	
 	//// PARTY
-	public OfflinePlayer getPartyLeader() {
-		return tryOfflinePlayer(config.getString("party.associated", null));
+	public UUID getPartyLeader() {
+		return tryUUID(config.getString("party.associated", null));
 	}
 	
-	public void setPartyLeader(OfflinePlayer player) {
-		if(player != null)
-			config.set("party.associated", player.getUniqueId().toString());
+	public void setPartyLeader(UUID uuid) {
+		if(uuid != null)
+			config.set("party.associated", uuid.toString());
 		else
 			config.set("party.associated", null);
 	}
 	
-	public List<OfflinePlayer> getPartyMembers() {
+	public Set<UUID> getPartyMembers() {
 		return config.getStringList("party.members").stream()
-				.map(string -> tryOfflinePlayer(string))
-				.filter(player -> player != null)
-				.collect(Collectors.toList());
+				.map(ProgressTracker::tryUUID)
+				.filter(uuid -> uuid != null)
+				.collect(Collectors.toSet());
 	}
 	
-	public void setPartyMembers(List<OfflinePlayer> members) {
+	public void setPartyMembers(Set<UUID> members) {
 		config.set("party.members", members.stream()
-				.map(player -> player.getUniqueId())
+				.map(UUID::toString)
 				.collect(Collectors.toList()));
 	}
 	
-	public List<OfflinePlayer> getPartyPending() {
+	public Set<UUID> getPartyPending() {
 		return config.getStringList("party.pending-requests").stream()
-				.map(string -> tryOfflinePlayer(string))
-				.filter(player -> player != null)
-				.collect(Collectors.toList());
+				.map(ProgressTracker::tryUUID)
+				.filter(uuid -> uuid != null)
+				.collect(Collectors.toSet());
 	}
 	
-	public void setPartyPending(List<OfflinePlayer> pending) {
+	public void setPartyPending(Set<UUID> pending) {
 		config.set("party.pending-requests", pending.stream()
-				.map(player -> player.getUniqueId().toString())
+				.map(UUID::toString)
 				.collect(Collectors.toList()));
 	}
 	

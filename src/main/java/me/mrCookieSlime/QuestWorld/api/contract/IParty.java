@@ -1,15 +1,24 @@
 package me.mrCookieSlime.QuestWorld.api.contract;
 
-import java.util.List;
+import java.util.Set;
 
 import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
 
 public interface IParty extends IStateful {
-	OfflinePlayer getLeader();
-	List<OfflinePlayer> getPlayers();
-	List<OfflinePlayer> getPending();
-	public int getSize();
+	public enum LeaveReason {
+		ABANDON,
+		DISCONNECT,
+		KICKED,
+	}
 	
+	Set<OfflinePlayer> getGroup();
+	Set<OfflinePlayer> getMembers();
+	OfflinePlayer getLeader();
 	boolean isLeader(OfflinePlayer player);
-	boolean hasInvited(OfflinePlayer p);
+	int getSize();
+	boolean hasInvited(OfflinePlayer player);
+	void playerLeave(OfflinePlayer traitor, LeaveReason reason);
+	void invitePlayer(Player p);
+	void playerJoin(Player p);
 }

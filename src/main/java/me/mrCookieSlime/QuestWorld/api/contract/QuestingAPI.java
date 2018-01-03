@@ -2,6 +2,7 @@ package me.mrCookieSlime.QuestWorld.api.contract;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.bukkit.OfflinePlayer;
 import org.bukkit.plugin.Plugin;
@@ -40,4 +41,13 @@ public interface QuestingAPI {
 	Plugin getPlugin();
 	
 	IPlayerStatus getPlayerStatus(OfflinePlayer player);
+	IPlayerStatus getPlayerStatus(UUID uuid);
+	
+	IParty getParty(OfflinePlayer player);
+	IParty getParty(UUID uuid);
+	
+	IParty createParty(OfflinePlayer player);
+	IParty createParty(UUID uuid);
+
+	void disbandParty(IParty party);
 }

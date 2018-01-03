@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -14,12 +15,13 @@ import me.mrCookieSlime.QuestWorld.api.MissionViewer;
 import me.mrCookieSlime.QuestWorld.api.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.Translator;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
+import me.mrCookieSlime.QuestWorld.api.contract.IParty;
 import me.mrCookieSlime.QuestWorld.api.contract.MissionEntry;
 import me.mrCookieSlime.QuestWorld.api.contract.QuestingAPI;
 import me.mrCookieSlime.QuestWorld.api.menu.Menu;
 import me.mrCookieSlime.QuestWorld.manager.MissionSet;
+import me.mrCookieSlime.QuestWorld.manager.Party;
 import me.mrCookieSlime.QuestWorld.manager.PlayerStatus;
-import me.mrCookieSlime.QuestWorld.manager.StatusManager;
 import me.mrCookieSlime.QuestWorld.quest.Facade;
 import me.mrCookieSlime.QuestWorld.util.BukkitService;
 import me.mrCookieSlime.QuestWorld.util.Lang;
@@ -31,7 +33,7 @@ import net.milkbowl.vault.economy.Economy;
 
 public final class QuestingImpl implements QuestingAPI, Reloadable {
 	private Map<String, MissionType> types = new HashMap<>();
-	//private Map<String, MissionType> immutableTypes = 
+	
 	private MissionViewer viewer = new MissionViewer();
 	private Optional<Economy> econ = Optional.ofNullable(null);
 	private Facade facade = new Facade();
@@ -39,7 +41,9 @@ public final class QuestingImpl implements QuestingAPI, Reloadable {
 	private ResourceLoader resources;
 	private Lang language;
 	private QuestWorldPlugin questWorld;
-	private StatusManager statusManager = new StatusManager();
+	
+	private HashMap<UUID, PlayerStatus> statuses = new HashMap<>();
+	private HashMap<UUID, Party> parties = new HashMap<>();
 	
 	public QuestingImpl(QuestWorldPlugin questWorld) {
 		Log.setLogger(questWorld.getLogger());
@@ -104,12 +108,12 @@ public final class QuestingImpl implements QuestingAPI, Reloadable {
 	
 	@Override
 	public Iterable<MissionEntry> getMissionEntries(MissionType type, OfflinePlayer player) {
-		return new MissionSet(statusManager.get(player.getUniqueId()), type);
+		return new MissionSet(getPlayerStatus(player), type);
 	}
 	
 	@Override
 	public MissionEntry getMissionEntry(IMission mission, OfflinePlayer player) {
-		return new MissionSet.Result(mission, statusManager.get(player.getUniqueId()));
+		return new MissionSet.Result(mission, getPlayerStatus(player));
 	}
 	
 	@Override
@@ -119,9 +123,58 @@ public final class QuestingImpl implements QuestingAPI, Reloadable {
 	
 	@Override
 	public PlayerStatus getPlayerStatus(OfflinePlayer player) {
-		return statusManager.get(player.getUniqueId());
+		return getPlayerStatus(player.getUniqueId());
+	}
+	
+	@Override
+	public PlayerStatus getPlayerStatus(UUID uuid) {
+		PlayerStatus result = statuses.get(uuid);
+		
+		if(result != null)
+			return result;
+		
+		result = new PlayerStatus(uuid);
+		statuses.put(uuid, result);
+		return result;
+	}
+	
+	public Party getParty(OfflinePlayer player) {
+		return getParty(player.getUniqueId());
+	}
+	
+	public Party getParty(UUID uuid) {
+		UUID leader = getPlayerStatus(uuid).getTracker().getPartyLeader();
+		
+		if(leader != null) {
+			Party p = parties.get(leader);
+			if(p != null)
+				return p;
+			
+			return createParty(leader);
+		}
+		
+		return null;
+	}
+	
+	@Override
+	public void disbandParty(IParty party) {
+		Party rawParty = (Party)party;
+		parties.remove(rawParty.getLeaderUUID());
+		rawParty.disband();
+	}
+	
+	@Override
+	public Party createParty(OfflinePlayer player) {
+		return createParty(player.getUniqueId());
 	}
 
+	@Override
+	public Party createParty(UUID uuid) {
+		Party p = new Party(uuid);
+		parties.put(uuid, p);
+		return p;
+	}
+	
 	@Override
 	public void onSave() {
 		
@@ -137,7 +190,10 @@ public final class QuestingImpl implements QuestingAPI, Reloadable {
 	public void onDiscard() {
 		facade.onDiscard();
 		viewer.clear();
-		statusManager.unloadAll();
+		
+		for(PlayerStatus status : statuses.values())
+			status.unload();
+		statuses.clear();
 		
 		// TODO: Better place, message
 		for(Player p : Bukkit.getOnlinePlayers())
@@ -146,6 +202,8 @@ public final class QuestingImpl implements QuestingAPI, Reloadable {
 	}
 	
 	public void unloadPlayerStatus(OfflinePlayer player) {
-		statusManager.unload(player.getUniqueId());
+		PlayerStatus status = statuses.remove(player.getUniqueId());
+		if(status != null)
+			status.unload();
 	}
 }
