@@ -2,20 +2,16 @@ package me.mrCookieSlime.QuestWorld.command;
 
 import me.mrCookieSlime.QuestWorld.QuestWorldPlugin;
 import me.mrCookieSlime.QuestWorld.api.QuestWorld;
-import me.mrCookieSlime.QuestWorld.api.SinglePrompt;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuestState;
 import me.mrCookieSlime.QuestWorld.api.menu.PagedMapping;
-import me.mrCookieSlime.QuestWorld.api.menu.QBDialogue;
 import me.mrCookieSlime.QuestWorld.api.menu.QuestBook;
 import me.mrCookieSlime.QuestWorld.util.Log;
-import me.mrCookieSlime.QuestWorld.util.PlayerTools;
 import me.mrCookieSlime.QuestWorld.util.Text;
 
 import java.util.Arrays;
 
-import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -143,36 +139,6 @@ public class EditorCommand implements CommandExecutor {
 			sender.sendMessage(Text.colorize("  &7If you wish to continue, type /", label, " upgrade confirm"));
 			
 			return true;
-		}
-		else if (args.length == 4 && param.equals("delete_command") && sender instanceof Player) {
-			IQuest quest = QuestWorld.getFacade().getCategory(Integer.parseInt(args[1])).getQuest(Integer.parseInt(args[2]));
-			
-			IQuestState changes = quest.getState();
-			changes.removeCommand(Integer.parseInt(args[3]));
-			if(changes.apply()) {
-				
-			}
-			
-			QBDialogue.openCommandEditor((Player) sender, quest);
-		}
-		else if (args.length == 3 && param.equals("add_command") && sender instanceof Player) {
-			IQuest quest = QuestWorld.getFacade().getCategory(Integer.parseInt(args[1])).getQuest(Integer.parseInt(args[2]));
-			//sender.sendMessage(Text.colorize("&7Type in your desired Command:"));
-			//QuestWorld.getInstance().storeInput(((Player) sender).getUniqueId(), new Input(InputType.COMMAND_ADD, quest));
-			
-			PlayerTools.promptInput(p, new SinglePrompt(
-					"&7Type in your desired Command:",
-					(c,s) -> {
-						IQuestState changes = quest.getState();
-						changes.addCommand(ChatColor.stripColor(s));
-						changes.apply();
-
-						QBDialogue.openCommandEditor(p, quest);
-						return true;
-					}
-			));
-			sender.sendMessage(Text.colorize("&7Usable Variables: @p (Username)"));
-			
 		}
 		else {
 			help(label, sender);

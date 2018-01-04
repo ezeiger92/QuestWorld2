@@ -501,7 +501,7 @@ public class ItemBuilder implements Cloneable {
 	public @Mutable ItemBuilder wrapText(String... text) {
 		int length = QuestWorld.getPlugin().getConfig().getInt("options.text-wrap", 32);
 		text[0] = "&f&o" + text[0];
-		ArrayList<String> lines = Text.wrap(length, text);
+		ArrayList<String> lines = Text.wrap(length, Text.colorizeList(text));
 		
 		ItemMeta stackMeta = resultStack.getItemMeta();
 		if(lines.size() > 0) {
@@ -525,7 +525,7 @@ public class ItemBuilder implements Cloneable {
 	public @Mutable ItemBuilder wrapLore(String... lore) {
 		int length = QuestWorld.getPlugin().getConfig().getInt("options.text-wrap", 32);
 		lore[0] = "&f&o" + lore[0];
-		return directLore(Text.wrap(length, lore));
+		return directLore(Text.wrap(length, Text.colorizeList(lore)));
 	}
 	
 	/**

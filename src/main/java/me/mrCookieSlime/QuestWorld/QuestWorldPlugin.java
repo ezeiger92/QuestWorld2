@@ -13,6 +13,7 @@ import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.QuestExtension;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
 import me.mrCookieSlime.QuestWorld.api.contract.QuestingAPI;
+import me.mrCookieSlime.QuestWorld.command.ClickCommand;
 import me.mrCookieSlime.QuestWorld.command.EditorCommand;
 import me.mrCookieSlime.QuestWorld.command.QuestsCommand;
 import me.mrCookieSlime.QuestWorld.extension.builtin.Builtin;
@@ -97,6 +98,7 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener {
 		pm.registerEvents(api.getViewer(), this);
 		pm.registerEvents(new MenuListener(), this);
 		pm.registerEvents(new SpawnerListener(), this);
+		pm.registerEvents(new ClickCommand(), this);
 
 		getServer().addRecipe(GuideBook.recipe());
 	}

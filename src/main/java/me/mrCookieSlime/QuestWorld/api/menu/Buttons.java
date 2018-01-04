@@ -12,6 +12,7 @@ import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategoryState;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
 import me.mrCookieSlime.QuestWorld.util.PlayerTools;
+import me.mrCookieSlime.QuestWorld.util.Text;
 
 public class Buttons {
 	public static Consumer<InventoryClickEvent> onCategory(ICategory category) {
@@ -37,6 +38,7 @@ public class Buttons {
 			PlayerTools.promptInput(p, new SinglePrompt(
 					PlayerTools.makeTranslation(true, Translation.CATEGORY_NAME_EDIT, defaultCategoryName),
 					(c,s) -> {
+						s = Text.colorize(s);
 						QuestWorld.getFacade().createCategory(s, id);
 						PlayerTools.sendTranslation(p, true, Translation.CATEGORY_CREATED, s);
 						QuestBook.openCategoryList(p);
@@ -72,6 +74,7 @@ public class Buttons {
 					PlayerTools.makeTranslation(true, Translation.QUEST_NAME_EDIT, defaultQuestName),
 					(c,s) -> {
 						ICategoryState state = category.getState();
+						s = Text.colorize(s);
 						state.addQuest(s, id);
 						if(state.apply()) {
 							PlayerTools.sendTranslation(p, true, Translation.QUEST_CREATED, s);

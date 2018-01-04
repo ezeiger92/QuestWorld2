@@ -1,6 +1,9 @@
 package me.mrCookieSlime.QuestWorld.api.menu;
 
+import static me.mrCookieSlime.QuestWorld.util.json.Prop.*;
+
 import me.mrCookieSlime.QuestWorld.api.QuestWorld;
+import me.mrCookieSlime.QuestWorld.api.SinglePrompt;
 import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategoryState;
@@ -17,11 +20,11 @@ import me.mrCookieSlime.QuestWorld.util.EntityTools;
 import me.mrCookieSlime.QuestWorld.util.ItemBuilder;
 import me.mrCookieSlime.QuestWorld.util.PlayerTools;
 import me.mrCookieSlime.QuestWorld.util.Text;
+import me.mrCookieSlime.QuestWorld.util.json.JsonBlob;
+import me.mrCookieSlime.QuestWorld.util.json.Prop;
 
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-
-import com.google.gson.JsonObject;
 
 public class QBDialogue {
 	public static void openDeletionConfirmation(Player p, final IStateful q) {
@@ -144,79 +147,46 @@ public class QBDialogue {
 	}
 
 	public static void openCommandEditor(Player p, IQuest quest) {
-		try {
-			p.sendMessage(Text.colorize("&7&m----------------------------"));
-			for (int i = 0; i < quest.getCommands().size(); i++) {
-				String command = quest.getCommands().get(i).replaceAll("(\"|\\\\)", "\\\\$1");
-				
-				JsonObject redX = new JsonObject();
-				redX.addProperty("text", "X ");
-				redX.addProperty("color", "dark_red");
-				
-				JsonObject commandDisplay = new JsonObject();
-				commandDisplay.addProperty("text", command);
-				commandDisplay.addProperty("color", "gray");
-				{
-					JsonObject clickEvent = new JsonObject();
-					clickEvent.addProperty("action", "run_command");
-					clickEvent.addProperty("value",  "/questeditor delete_command " + quest.getCategory().getID() + " " + quest.getID() + " " + i);
-
-					redX.add("clickEvent", clickEvent);
-					commandDisplay.add("clickEvent", clickEvent);
-				}
-				{
-					JsonObject hoverEvent = new JsonObject();
-					hoverEvent.addProperty("action", "show_text");
-					{
-						JsonObject hoverText = new JsonObject();
-						hoverText.addProperty("text", "Click to remove this Command");
-						hoverText.addProperty("color", "gray");
-
-						hoverEvent.add("value",  hoverText);
-					}
-
-					redX.add("hoverEvent", hoverEvent);
-					commandDisplay.add("hoverEvent", hoverEvent);
-				}
-				
-				PlayerTools.tellraw(p, redX.toString(), commandDisplay.toString());
-			}
+		p.sendMessage(Text.colorize("&7&m----------------------------"));
+		for (int i = 0; i < quest.getCommands().size(); i++) {
+			String command = quest.getCommands().get(i).replaceAll("(\"|\\\\)", "\\\\$1");
 			
-			JsonObject greenPlus = new JsonObject();
-			greenPlus.addProperty("text", "+ ");
-			greenPlus.addProperty("color", "dark_green");
+			int index = i;
+			Prop remove = FUSE(
+					HOVER.TEXT("Click to remove this Command", GRAY),
+					CLICK.RUN(() -> {
+						IQuestState changes = quest.getState();
+						changes.removeCommand(index);
+						if(changes.apply())
+							QBDialogue.openCommandEditor(p, quest);
+					}));
 			
-			JsonObject prompt = new JsonObject();
-			prompt.addProperty("text", "Add more Commands... (Click)");
-			prompt.addProperty("color", "gray");
-			{
-				JsonObject clickEvent = new JsonObject();
-				clickEvent.addProperty("action", "run_command");
-				clickEvent.addProperty("value", "/questeditor add_command " + quest.getCategory().getID() + " " + quest.getID());
-				
-				greenPlus.add("clickEvent", clickEvent);
-				prompt.add("clickEvent", clickEvent);
-			}
-			{
-				JsonObject hoverEvent = new JsonObject();
-				hoverEvent.addProperty("action", "show_text");
-				{
-					JsonObject hoverText = new JsonObject();
-					hoverText.addProperty("text", "Click to add a new Command");
-					hoverText.addProperty("color", "gray");
-					
-					hoverEvent.add("value", hoverText);
-				}
-				
-				greenPlus.add("hoverEvent", hoverEvent);
-				prompt.add("hoverEvent", hoverEvent);
-			}
-			
-			PlayerTools.tellraw(p, greenPlus.toString(), prompt.toString());
-			p.sendMessage(Text.colorize("&7&m----------------------------"));
-		} catch (Exception x) {
-			x.printStackTrace();
+			PlayerTools.tellraw(p, new JsonBlob("X ", DARK_RED, remove)
+					.add(command, GRAY, remove).toString());
 		}
+		
+		Prop add = FUSE(
+				HOVER.TEXT("Click to add a new Command", GRAY),
+				CLICK.RUN(() -> {
+					PlayerTools.promptCommand(p, new SinglePrompt(
+							"&7Type in your desired Command:",
+							(c,s) -> {
+								IQuestState changes = quest.getState();
+								changes.addCommand(s.substring(1));
+								if(changes.apply())
+									QBDialogue.openCommandEditor(p, quest);
+								
+								return true;
+							}
+					));
+					p.sendMessage(Text.colorize("&7Usable Variables: @p (Username)"));
+					
+				}));
+		
+		PlayerTools.tellraw(p, new JsonBlob("+ ", DARK_GREEN, add)
+				.add("Add more Commands... (Click)", GRAY, add).toString());
+		
+		p.sendMessage(Text.colorize("&7&m----------------------------"));
 	}
 
 	public static void openQuestRequirementChooser(Player p, final IStateful quest) {

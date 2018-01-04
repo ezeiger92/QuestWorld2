@@ -7,38 +7,38 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static me.mrCookieSlime.QuestWorld.util.json.Prop.*;
+
 import me.mrCookieSlime.QuestWorld.QuestWorldPlugin;
 import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.api.contract.IPartyState;
 import me.mrCookieSlime.QuestWorld.util.PlayerTools;
+import me.mrCookieSlime.QuestWorld.util.json.JsonBlob;
 
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
-import com.google.gson.JsonObject;
-
 public class Party implements IPartyState {
 	private final UUID leader;
-	private final PlayerStatus manager;
+	private final ProgressTracker tracker;
 	private Set<UUID> members = new HashSet<>();
 	private Set<UUID> pending = new HashSet<>();
 
 	public Party(UUID leader) {
 		this.leader = leader;
-		manager = QuestWorldPlugin.getImpl().getPlayerStatus(leader);
+		tracker = QuestWorldPlugin.getImpl().getPlayerStatus(leader).getTracker();
 		
-		if(manager.getTracker().getPartyLeader() != null)
-			throw new IllegalArgumentException("Cannot create party where one exists");
+		if(tracker.getPartyLeader() == null)
+			tracker.setPartyLeader(leader);
 		
-		manager.getTracker().setPartyLeader(leader);
-		members.addAll(manager.getTracker().getPartyMembers());
-		pending.addAll(manager.getTracker().getPartyPending());
+		members.addAll(tracker.getPartyMembers());
+		pending.addAll(tracker.getPartyPending());
 	}
 
 	protected Party(Party source) {
 		leader = source.leader;
-		manager = source.manager;
+		tracker = source.tracker;
 		members.addAll(source.members);
 		pending.addAll(source.pending);
 	}
@@ -81,31 +81,13 @@ public class Party implements IPartyState {
 		
 		PlayerTools.sendTranslation(p, true, Translation.PARTY_PLAYER_INVITED, Bukkit.getOfflinePlayer(leader).getName());
 		
-		JsonObject accept = new JsonObject();
-		accept.addProperty("text", "ACCEPT");
-		accept.addProperty("color", "green");
-		accept.addProperty("bold", true);
-		{
-			JsonObject clickEvent = new JsonObject();
-			clickEvent.addProperty("action", "run_command");
-			clickEvent.addProperty("value", "/quests accept " + leader);
-			
-			accept.add("clickEvent", clickEvent);
-		}
-		{
-			JsonObject hoverEvent = new JsonObject();
-			hoverEvent.addProperty("action", "show_text");
-			{
-				JsonObject hoverText = new JsonObject();
-				hoverText.addProperty("text", "Click to deny this Invitation");
-				hoverText.addProperty("color", "gray");
-				
-				hoverEvent.add("value", hoverText);
-			}
-			
-			accept.add("hoverEvent", hoverEvent);
-		}
-		PlayerTools.tellraw(p, accept.toString());
+		PlayerTools.tellraw(p, new JsonBlob("ACCEPT", GREEN, BOLD,
+				HOVER.TEXT("Click to accept this Invitation", GRAY),
+				CLICK.RUN("/quests accept " + leader))
+			.add(" ")
+			.add("DENY", DARK_RED, BOLD,
+				HOVER.TEXT("Click to deny this Invitation", GRAY))
+			.toString());
 		
 		pending.add(p.getUniqueId());
 		save();
@@ -169,7 +151,7 @@ public class Party implements IPartyState {
 		}
 		
 		members.clear();
-		manager.getTracker().setPartyLeader(null);
+		tracker.setPartyLeader(null);
 		save();
 	}
 	
@@ -184,8 +166,8 @@ public class Party implements IPartyState {
 	}
 	
 	public void save() {
-		manager.getTracker().setPartyMembers(members);
-		manager.getTracker().setPartyPending(pending);
+		tracker.setPartyMembers(members);
+		tracker.setPartyPending(pending);
 	}
 
 	@Override

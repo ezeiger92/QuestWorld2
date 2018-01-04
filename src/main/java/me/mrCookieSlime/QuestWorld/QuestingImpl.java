@@ -149,7 +149,7 @@ public final class QuestingImpl implements QuestingAPI, Reloadable {
 			Party p = parties.get(leader);
 			if(p != null)
 				return p;
-			
+
 			return createParty(leader);
 		}
 		

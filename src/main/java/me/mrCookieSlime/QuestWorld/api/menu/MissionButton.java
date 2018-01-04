@@ -9,9 +9,12 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
+import static me.mrCookieSlime.QuestWorld.util.json.Prop.*;
+
 import me.mrCookieSlime.QuestWorld.api.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.SinglePrompt;
 import me.mrCookieSlime.QuestWorld.api.Translation;
+import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IMissionState;
 import me.mrCookieSlime.QuestWorld.manager.PlayerStatus;
 import me.mrCookieSlime.QuestWorld.manager.ProgressTracker;
@@ -19,6 +22,10 @@ import me.mrCookieSlime.QuestWorld.util.EntityTools;
 import me.mrCookieSlime.QuestWorld.util.ItemBuilder;
 import me.mrCookieSlime.QuestWorld.util.PlayerTools;
 import me.mrCookieSlime.QuestWorld.util.Text;
+import me.mrCookieSlime.QuestWorld.util.json.JsonBlob;
+import me.mrCookieSlime.QuestWorld.util.json.Prop;
+import me.mrCookieSlime.QuestWorld.util.json.Prop.CLICK;
+import me.mrCookieSlime.QuestWorld.util.json.Prop.HOVER;
 
 public class MissionButton {
 	public static MenuData item(IMissionState changes) {
@@ -116,7 +123,7 @@ public class MissionButton {
 					Player p = (Player)event.getWhoClicked();
 			
 					if(event.getClick().isRightClick()) {
-						changes.setDisplayName(null);
+						changes.setDisplayName("");
 						apply(event, changes);
 					}
 					else {
@@ -179,6 +186,78 @@ public class MissionButton {
 		);
 	}
 	
+	private static void dialogueThing(Player p, IMission mission) {
+		
+		List<String> dialogue = mission.getDialogue();
+		
+		p.sendMessage(Text.colorize("&7&m----------------------------"));
+		int size = dialogue.size();
+		for(int i = 0; i < size; ++i) {
+			String s = dialogue.get(i);
+			int index = i;
+			Prop remove = FUSE(
+					HOVER.TEXT("Click to remove command"),
+					CLICK.RUN(() -> {
+						dialogue.remove(index);
+						
+						IMissionState state = mission.getState();
+						state.setDialogue(dialogue);
+						if(state.apply())
+							dialogueThing(p, mission);
+					}));
+			
+			PlayerTools.tellraw(p,
+					new JsonBlob("X ", DARK_RED, remove)
+					.addLegacy(Text.colorize(s), WHITE, remove).toString());
+		}
+		
+		Prop add = FUSE(
+				HOVER.TEXT("Click to add dialogue", GRAY),
+				CLICK.RUN(() -> {
+					
+					PlayerTools.promptInputOrCommand(p, new SinglePrompt(
+							PlayerTools.makeTranslation(true, Translation.MISSION_DIALOG_ADD),
+							null,
+							(c,s) -> {
+								if (s.equalsIgnoreCase("exit()") || s.equalsIgnoreCase("/exit")) {
+									IMissionState state = mission.getState();
+									state.setDialogue(dialogue);
+									if(state.apply()) {
+										String filename = ProgressTracker.dialogueFile(state.getSource()).getName();
+										PlayerTools.sendTranslation(p, true, Translation.MISSION_DIALOG_SET, filename);
+										dialogueThing(p, mission);
+									}
+									return true;
+								}
+								dialogue.add(s);
+								
+								Translation translator = s.startsWith("/") ?
+										Translation.MISSION_COMMAND_ADDED : Translation.MISSION_DIALOG_ADDED;
+								
+								SinglePrompt.setNextDisplay(c, PlayerTools.makeTranslation(true, translator, s));
+								QuestWorld.getSounds().DIALOG_ADD.playTo(p);
+								
+								return false;
+							}
+					));
+					
+					p.sendMessage(Text.colorize("&7Usable Variables: @p (Username)"));
+					
+				}));
+		
+		PlayerTools.tellraw(p, new JsonBlob("+ ", DARK_GREEN, add)
+				.add("Add more Commands... (Click)", GRAY, add).toString());
+		
+		Prop back = FUSE(
+				HOVER.TEXT("Open mission editor", GRAY),
+				CLICK.RUN( () -> QuestBook.openQuestMissionEditor(p, mission) ));
+		
+		PlayerTools.tellraw(p, new JsonBlob("< ", BLUE, back)
+				.add("Return to mission editor", GRAY, back).toString());
+		
+		p.sendMessage(Text.colorize("&7&m----------------------------"));
+	}
+	
 	public static MenuData dialogue(IMissionState changes) {
 		return new MenuData(
 				new ItemBuilder(Material.PAPER).wrapText(
@@ -196,35 +275,9 @@ public class MissionButton {
 							PlayerStatus.sendDialogue(p.getUniqueId(), changes, changes.getDialogue().iterator());
 						return;
 					}
-					
-					List<String> dialogue = changes.getDialogue();
-					dialogue.clear();
-					
+
+					dialogueThing(p, changes.getSource());
 					p.closeInventory();
-					PlayerTools.promptInputOrCommand(p, new SinglePrompt(
-							PlayerTools.makeTranslation(true, Translation.MISSION_DIALOG_ADD),
-							null,
-							(c,s) -> {
-								if (s.equalsIgnoreCase("exit()") || s.equalsIgnoreCase("/exit")) {
-									changes.setDialogue(dialogue);
-									if(changes.apply()) {
-										String filename = ProgressTracker.dialogueFile(changes.getSource()).getName();
-										PlayerTools.sendTranslation(p, true, Translation.MISSION_DIALOG_SET, filename);
-									}
-									QuestBook.openQuestMissionEditor(p, changes.getSource());
-									return true;
-								}
-								dialogue.add(s);
-								
-								Translation translator = s.startsWith("/") ?
-										Translation.MISSION_COMMAND_ADDED : Translation.MISSION_DIALOG_ADDED;
-								
-								SinglePrompt.setNextDisplay(c, PlayerTools.makeTranslation(true, translator, s));
-								QuestWorld.getSounds().DIALOG_ADD.playTo(p);
-								
-								return false;
-							}
-					));
 				}
 		);
 	}

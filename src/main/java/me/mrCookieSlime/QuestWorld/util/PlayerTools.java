@@ -10,6 +10,7 @@ import org.bukkit.conversations.ConversationFactory;
 import org.bukkit.conversations.Prompt;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
@@ -115,7 +116,7 @@ public class PlayerTools {
 	
 	private static Listener commandListener(Conversation con, Prompt prompt) {
 		Listener listener = new Listener() {
-			@EventHandler
+			@EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled=true)
 			public void onCommand(PlayerCommandPreprocessEvent event) {
 				if(event.getPlayer() == con.getForWhom()) {
 					event.setCancelled(true);

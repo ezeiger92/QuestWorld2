@@ -24,6 +24,7 @@ public class QuestsCommand implements CommandExecutor {
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 		if (sender instanceof Player) {
 			Player p = (Player)sender;
+			
 			if (args.length == 0) QuestBook.openLastMenu(p);
 			else {
 				if (args.length == 2 && args[0].equalsIgnoreCase("accept")) {

@@ -170,14 +170,12 @@ public class Text {
 	
 	/**
 	 * This function wraps words to align at a specific length, and works with
-	 * color *formatted* strings (rather than colorized strings). If you supply
-	 * strings from {@link Text.colorize}, they will fail to wrap colors across
-	 * multiple lines. The minimum length is 8 characters, and shorter lengths
-	 * will be set to 8.
+	 * colorized strings. The minimum length is 8 characters, and shorter
+	 * lengths will be set to 8.
 	 * 
 	 * @param max_length The maximum length of string
-	 * @param input An array of non-colorized strings
-	 * @return An array of strings, split by length and colorized
+	 * @param input An array of colorized strings
+	 * @return An array of strings, split by length
 	 */
 	public static ArrayList<String> wrap(int max_length, String... input) {
 		ArrayList<String> output = new ArrayList<>(input.length);
@@ -196,47 +194,40 @@ public class Text {
 			String committed_format = format;
 			for(int i = 0, n = 0; i < s.length(); ++i) {
 				char c1 = s.charAt(i);
-				if(c1 == Text.dummyChar) {
+				if(c1 == colorChar)
 					if(i + 1 != s.length()) {
-						char c = s.charAt(i + 1);
-						if("0123456789aAbBcCdDeEfFrR".indexOf(c) != -1)  {
-							prepared_format = String.valueOf(Text.dummyChar) + c;
+						char c = Character.toLowerCase(s.charAt(i + 1));
+						if("0123456789abcdefr".indexOf(c) != -1)  {
+							prepared_format = String.valueOf(colorChar) + c;
 							n -= 2;
 							if(i > seq_end)
 								seq_begin = i;
 							seq_end = i+1;
 						}
-						else if("oOlLmMnNkK".indexOf(c) != -1) {
-							prepared_format += String.valueOf(Text.dummyChar) + c;
+						else if("olmnk".indexOf(c) != -1) {
+							prepared_format += String.valueOf(colorChar) + c;
 							n -= 2;
 							if(i > seq_end)
 								seq_begin = i;
 							seq_end = i+1;
 						}
 					}
-				}
-				if(c1 == ' ' && i > 0) {
-					end = i;
-				}
 				
-				//Log.info("n: " + n + ", c: " + s.charAt(i) + ", i: " + i +  ", s: " + seq_begin + ", e: " + seq_end + ", p: " + prepared_format + ", co: " + committed_format);
+				if(c1 == ' ' && i > 0)
+					end = i;
 				
 				if(n == max_length) {
 					if(end == -1) {
-						if(i-2 == seq_end || i-1 == seq_end) {
+						if(i-2 == seq_end || i-1 == seq_end)
 							end = seq_begin + i - seq_end - 2;
-						}
 						else
 							end = i - 1;
 
-						//Log.info("truncate: " + s.substring(begin, end) + '-');
-						output.add(Text.colorize(format + s.substring(begin, end) + '-'));
+						output.add(format + s.substring(begin, end) + '-');
 					}
-					else {
-						//Log.info("full: " + s.substring(begin, end));
-						output.add(Text.colorize(format + s.substring(begin, end)));
-					}
-					//Log.info("prepared: " + prepared_format + ", committed: " + committed_format + ", format: " + format);
+					else
+						output.add(format + s.substring(begin, end));
+					
 					begin = end;
 					n = i - end;
 					end = -1;
@@ -245,12 +236,10 @@ public class Text {
 				else
 					++n;
 				
-				if(i > seq_end) {
+				if(i > seq_end)
 					committed_format = prepared_format;
-				}
 			}
-			output.add(Text.colorize(format + s.substring(begin)));
-			//Log.info("prepared: " + prepared_format + ", committed: " + committed_format + ", format: " + format);
+			output.add(format + s.substring(begin));
 			format = prepared_format;
 		}
 		
