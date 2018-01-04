@@ -12,7 +12,7 @@ book:
 dialogue:
   prefix: '&f'
 data:
-  player:     ../../data-storage/Quest World/
+  player:     playerdata/
   questing:   quests/
   dialogue:   dialogues/
   presets:    presets/
