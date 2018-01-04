@@ -28,14 +28,19 @@ import me.mrCookieSlime.QuestWorld.util.json.Prop;
 public class MissionButton {
 	public static MenuData item(IMissionState changes) {
 		return simpleButton(changes,
-				new ItemBuilder(changes.getItem()).wrapLore(
+				new ItemBuilder(changes.getItem()).display("&7" + Text.itemName(changes.getItem())).wrapLore(
 						"",
-						"&e> Click to set the Item to the one in your hand").get(),
+						"&e> Click to change the mission item").get(),
 				event -> {
 					Player p = (Player)event.getWhoClicked();
-					ItemStack hand = p.getInventory().getItemInMainHand();
-					if(hand != null && hand.getType() != Material.AIR)
-						changes.setItem(hand.clone());
+					ItemStack cursor = p.getItemOnCursor();
+					if(cursor != null && cursor.getType() != Material.AIR)
+						changes.setItem(cursor.clone());
+					else {
+						ItemStack hand = p.getInventory().getItemInMainHand();
+						if(hand != null && hand.getType() != Material.AIR)
+							changes.setItem(hand.clone());
+					}
 				}
 		);
 	}
@@ -49,10 +54,10 @@ public class MissionButton {
 				new ItemBuilder(Material.REDSTONE).wrapText(
 						"&7Amount: &b" + changes.getAmount(),
 						"",
-						"&rLeft Click: &e+1",
-						"&rRight Click: &e-1",
-						"&rShift + Left Click: &e+"+groupSize,
-						"&rShift + Right Click: &e-"+groupSize).get(),
+						"&rLeft click: &e+1",
+						"&rRight click: &e-1",
+						"&rShift left click: &e+"+groupSize,
+						"&rShift right click: &e-"+groupSize).get(),
 				event -> {
 					int amt = clickNumber(changes.getAmount(), groupSize, event);
 					changes.setAmount(Math.max(amt, 1));
@@ -66,7 +71,7 @@ public class MissionButton {
 				EntityTools.getEntityDisplay(entity).wrapText(
 						"&7Entity Type: &r" + EntityTools.nameOf(entity),
 						"",
-						"&e> Click to change the Entity").get(),
+						"&e> Click to change the entity").get(),
 				event -> {
 					QBDialogue.openQuestMissionEntityEditor((Player)event.getWhoClicked(), changes);
 				}
@@ -76,9 +81,9 @@ public class MissionButton {
 	public static MenuData location(IMissionState changes) {
 		return simpleButton(changes,
 				new ItemBuilder(changes.getDisplayItem()).wrapText(
-						Text.stringOf(changes.getLocation(), changes.getCustomInt()),
+						"&7"+Text.stringOf(changes.getLocation(), changes.getCustomInt()),
 						"",
-						"&e> Click to change the Location to your current Position").get(),
+						"&e> Click to update the location").get(),
 				event -> {
 					changes.setLocation(event.getWhoClicked().getLocation().getBlock().getLocation());
 				}
@@ -113,10 +118,10 @@ public class MissionButton {
 	public static MenuData missionName(IMissionState changes) {
 		return new MenuData(
 				new ItemBuilder(Material.NAME_TAG).wrapText(
-						changes.getText(),
+						"&7" + changes.getText(),
 						"",
-						"&rLeft Click: Edit Mission Name",
-						"&rRight Click: Reset Mission Name").get(),
+						"&rLeft click: Edit mission name",
+						"&rRight click: Reset mission name").get(),
 				event -> {
 					Player p = (Player)event.getWhoClicked();
 			
@@ -145,12 +150,12 @@ public class MissionButton {
 	public static MenuData timeframe(IMissionState changes) {
 		return simpleButton(changes,
 				new ItemBuilder(Material.WATCH).wrapText(
-						"&7Complete Mission within: &b" + Text.timeFromNum(changes.getTimeframe()),
+						"&7Complete mission within: &b" + Text.timeFromNum(changes.getTimeframe()),
 						"",
-						"&rLeft Click: &e+1m",
-						"&rRight Click: &e-1m",
-						"&rShift + Left Click: &e+1h",
-						"&rShift + Right Click: &e-1h").get(),
+						"&rLeft click: &e+1m",
+						"&rRight click: &e-1m",
+						"&rShift left click: &e+1h",
+						"&rShift right click: &e-1h").get(),
 				event -> {
 					int amt = clickNumber(changes.getTimeframe(), 60, event);
 					changes.setTimeframe(Math.max(amt, 0));
@@ -162,7 +167,7 @@ public class MissionButton {
 		String icon = changes.getDeathReset() ? "&2&l\u2714": "&4&l\u2718";
 		return simpleButton(changes,
 				new ItemBuilder(Material.SKULL_ITEM).wrapText(
-						"&7Resets on Death: " + icon,
+						"&7Resets on death: " + icon,
 						"",
 						"&e> Click to change whether this Mission's Progress resets when a Player dies").get(),
 				event -> {
@@ -259,7 +264,7 @@ public class MissionButton {
 	public static MenuData dialogue(IMissionState changes) {
 		return new MenuData(
 				new ItemBuilder(Material.PAPER).wrapText(
-						"&rDialogue",
+						"&7Dialogue",
 						"",
 						"&rLeft Click: Edit the Dialogue",
 						"&rRight Click: Dialogue Preview").get(),

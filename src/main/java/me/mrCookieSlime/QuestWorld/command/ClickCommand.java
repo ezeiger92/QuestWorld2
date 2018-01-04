@@ -21,17 +21,18 @@ public class ClickCommand implements Listener {
 		return key;
 	}
 	
-	public static void link(UUID source, UUID callbackHandle) {
+	public static UUID add(UUID source, Runnable callback) {
+		UUID callbackHandle = add(callback);
 		Set<UUID> linked = linked_callbacks.get(source);
 		
-		if(linked != null) {
+		if(linked != null)
 			linked.add(callbackHandle);
-			return;
+		else {
+			linked = new HashSet<UUID>();
+			linked.add(callbackHandle);
+			linked_callbacks.put(source, linked);
 		}
-		
-		linked = new HashSet<UUID>();
-		linked.add(callbackHandle);
-		linked_callbacks.put(source, linked);
+		return callbackHandle;
 	}
 	
 	@EventHandler

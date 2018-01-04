@@ -1218,10 +1218,10 @@ public class QuestBook {
 		// Mission types now handle their own menu data!
 		mission.getType().buildMenu(mission.getState(), menu);
 		
-		ItemStack missionSelector = new ItemBuilder(mission.getType().getSelectorItem()).wrapText(
-				"&7" + mission.getType().toString(),
+		ItemStack missionSelector = new ItemBuilder(mission.getType().getSelectorItem()).flagAll().wrapText(
+				"&7" + Text.niceName(mission.getType().toString()),
 				"",
-				"&e> Click to change the Mission Type").get();
+				"&e> Click to change the mission type").get();
 		
 		menu.put(9, missionSelector, e -> {
 			openMissionSelector(p, mission);
@@ -1250,7 +1250,7 @@ public class QuestBook {
 		for(MissionType type : types) {
 			String name = Text.niceName(type.getName());
 			view.addButton(i,
-					new ItemBuilder(type.getSelectorItem()).display("&f" + name).get(),
+					new ItemBuilder(type.getSelectorItem()).display("&7" + name).flagAll().get(),
 					event -> {
 				changes.setType(type);
 				MissionButton.apply(event, changes);

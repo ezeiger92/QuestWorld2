@@ -1,7 +1,6 @@
 package me.mrCookieSlime.QuestWorld.util.json;
 
 import java.util.Map;
-import java.util.UUID;
 
 import org.bukkit.entity.Player;
 
@@ -41,28 +40,25 @@ public interface Prop {
 	}
 	
 	public static Prop CLICK_RUN(String command) {
-		return new DefaultProp("\"clickEvent\"", pre("run_command", command));
+		return new DefaultProp("\"clickEvent\"", pre("run_command", '"' + command + '"'));
 	}
 	
 	public static Prop CLICK_RUN(Player p, Runnable callback) {
-		UUID uuid = ClickCommand.add(callback);
-		ClickCommand.link(p.getUniqueId(), uuid);
-		
-		return CLICK_RUN("/qw-invoke " + uuid.toString());
+		return CLICK_RUN("/qw-invoke " + ClickCommand.add(p.getUniqueId(), callback));
 	}
 	
 	public static Prop CLICK_SUGGEST(String command) {
-		return new DefaultProp("\"clickEvent\"", pre("suggest_command", command));
+		return new DefaultProp("\"clickEvent\"", pre("suggest_command", '"' + command + '"'));
 	}
 	
 	public static Prop CLICK_URL(String url) {
-		return new DefaultProp("\"clickEvent\"", pre("open_url", url));
+		return new DefaultProp("\"clickEvent\"", pre("open_url", '"' + url + '"'));
 	}
 	
 	////
 	
 	static String pre(String action, String value) {
-		return "{\"action\":\"" + action + "\",\"value\":\"" + value + "\"}";
+		return "{\"action\":\"" + action + "\",\"value\":" + value + "}";
 	}
 	
 	/*public static final class HOVER {

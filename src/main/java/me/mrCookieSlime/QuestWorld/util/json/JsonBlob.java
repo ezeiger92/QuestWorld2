@@ -41,9 +41,8 @@ public class JsonBlob {
 	
 	@Override
 	public String toString() {
-		StringBuilder builder = new StringBuilder();
+		StringBuilder builder = new StringBuilder().append('[');
 		
-		builder.append('[');
 		String prefix = "";
 		for(HashMap<String,String> map : message) {
 			appendMap(map, builder.append(prefix));
