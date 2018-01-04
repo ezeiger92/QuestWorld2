@@ -186,6 +186,13 @@ public class QBDialogue {
 		PlayerTools.tellraw(p, new JsonBlob("+ ", DARK_GREEN, add)
 				.add("Add more Commands... (Click)", GRAY, add).toString());
 		
+		Prop back = FUSE(
+				HOVER.TEXT("Open quest editor", GRAY),
+				CLICK.RUN(p, () -> QuestBook.openQuestEditor(p, quest) ));
+		
+		PlayerTools.tellraw(p, new JsonBlob("< ", BLUE, back)
+				.add("Return to quest editor", GRAY, back).toString());
+		
 		p.sendMessage(Text.colorize("&7&m----------------------------"));
 	}
 

@@ -48,13 +48,14 @@ public class ClickCommand implements Listener {
 			
 			Runnable callback = callbacks.remove(key);
 			
-			Set<UUID> linked = linked_callbacks.get(event.getPlayer().getUniqueId());
-			if(linked != null)
-				for(UUID link : linked)
-					callbacks.remove(link);
-			
-			if(callback != null)
+			if(callback != null) {
+				Set<UUID> linked = linked_callbacks.remove(event.getPlayer().getUniqueId());
+				if(linked != null)
+					for(UUID link : linked)
+						callbacks.remove(link);
+				
 				callback.run();
+			}
 			
 			event.setCancelled(true);
 		}
