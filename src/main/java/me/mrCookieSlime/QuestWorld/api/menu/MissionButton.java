@@ -80,7 +80,7 @@ public class MissionButton {
 	
 	public static MenuData location(IMissionState changes) {
 		return simpleButton(changes,
-				new ItemBuilder(changes.getDisplayItem()).wrapText(
+				new ItemBuilder(changes.getDisplayItem()).flagAll().wrapText(
 						"&7"+Text.stringOf(changes.getLocation(), changes.getCustomInt()),
 						"",
 						"&e> Click to update the location").get(),

@@ -836,9 +836,9 @@ public class QuestBook {
 		
 		menu.put(9,
 				new ItemBuilder(quest.getItem()).wrapText(
-						quest.getName(),
+						"&7" + quest.getName(),
 						"",
-						"&e> Click to set the Item to the one in your hand").get(),
+						"&e> Click to set the display item").get(),
 				event -> {
 					Player p2 = (Player) event.getWhoClicked();
 					ItemStack mainItem = p2.getInventory().getItemInMainHand();
@@ -853,9 +853,9 @@ public class QuestBook {
 		
 		menu.put(10,
 				new ItemBuilder(Material.NAME_TAG).wrapText(
-						quest.getName(),
+						"&7" + quest.getName(),
 						"",
-						"&e> Click to change the Name").get(),
+						"&e> Click to set quest name").get(),
 				event -> {
 					Player p2 = (Player) event.getWhoClicked();
 					p2.closeInventory();
@@ -877,9 +877,9 @@ public class QuestBook {
 		
 		menu.put(11,
 				new ItemBuilder(Material.CHEST).wrapText(
-						"&rRewards &7(Item)",
+						"&7Item reward",
 						"",
-						"&e> Click to change the Rewards to be the Items in your Hotbar").get(),
+						"&e> Click to set the reward to the items in your hotbar").get(),
 				event -> {
 					Player p2 = (Player) event.getWhoClicked();
 					changes.setItemRewards(p2);
@@ -893,10 +893,10 @@ public class QuestBook {
 				new ItemBuilder(Material.WATCH).wrapText(
 						"&7Cooldown: &b" + quest.getFormattedCooldown(),
 						"",
-						"&rLeft Click: &e+1m",
-						"&rRight Click: &e-1m",
-						"&rShift + Left Click: &e+1h",
-						"&rShift + Right Click: &e-1h").get(),
+						"&rLeft click: &e+1m",
+						"&rRight click: &e-1m",
+						"&rShift left click: &e+1h",
+						"&rShift right click: &e-1h").get(),
 				event -> {
 					// Work with raw cooldowns so -1 is actually -1
 					long cooldown = quest.getRawCooldown();
@@ -919,7 +919,6 @@ public class QuestBook {
 						cooldown += delta;
 					
 					changes.setRawCooldown(cooldown);
-					
 					changes.apply();
 					
 					openQuestEditor((Player) event.getWhoClicked(), quest);
@@ -929,16 +928,14 @@ public class QuestBook {
 		if(QuestWorld.getEconomy().isPresent())
 			menu.put(13,
 					new ItemBuilder(Material.GOLD_INGOT).wrapText(
-							"&7Monetary Reward: &6$" + quest.getMoney(),
+							"&7Monetary reward: &6$" + quest.getMoney(),
 							"",
-							"&rLeft Click: &e+1",
-							"&rRight Click: &e-1",
-							"&rShift + Left Click: &e+100",
-							"&rShift + Right Click: &e-100").get(),
+							"&rLeft click: &e+1",
+							"&rRight click: &e-1",
+							"&rShift left click: &e+100",
+							"&rShift right click: &e-100").get(),
 					event -> {
-						int money = quest.getMoney();
-						if (event.isRightClick()) money = money - (event.isShiftClick() ? 100: 1);
-						else money = money + (event.isShiftClick() ? 100: 1);
+						int money = MissionButton.clickNumber(quest.getMoney(), 100, event);
 						if (money < 0) money = 0;
 						changes.setMoney(money);
 						changes.apply();
@@ -948,16 +945,14 @@ public class QuestBook {
 		
 		menu.put(14,
 				new ItemBuilder(Material.EXP_BOTTLE).wrapText(
-						"&7XP Reward: &b" + quest.getXP() + " Level",
+						"&7Level reward: &b" + quest.getXP(),
 						"",
-						"&rLeft Click: &e+1",
-						"&rRight Click: &e-1",
-						"&rShift + Left Click: &e+10",
-						"&rShift + Right Click: &e-10").get(),
+						"&rLeft click: &e+1",
+						"&rRight click: &e-1",
+						"&rShift left click: &e+10",
+						"&rShift right click: &e-10").get(),
 				event -> {
-					int xp = quest.getXP();
-					if (event.isRightClick()) xp = xp - (event.isShiftClick() ? 10: 1);
-					else xp = xp + (event.isShiftClick() ? 10: 1);
+					int xp = MissionButton.clickNumber(quest.getXP(), 10, event);
 					if (xp < 0) xp = 0;
 					changes.setXP(xp);
 					changes.apply();
@@ -965,14 +960,13 @@ public class QuestBook {
 				}
 		);
 		
+		IQuest parent = quest.getParent();
 		menu.put(15,
 				new ItemBuilder(Material.BOOK_AND_QUILL).wrapText(
-						"&7Quest Requirement:",
+						"&7Requirement: " + (parent != null ? "&e" + parent.getName() : "&o-none-"),
 						"",
-						(quest.getParent() != null ? "&r" + quest.getParent().getName(): "&7&oNone"),
-						"",
-						"&rLeft Click: &eChange Quest Requirement",
-						"&rRight Click: &eRemove Quest Requirement").get(),
+						"&rLeft click: &eOpen requirement selector",
+						"&rRight click: &eRemove requirement").get(),
 				event -> {
 					Player p2 = (Player) event.getWhoClicked();
 					if (event.isRightClick()) {
@@ -989,9 +983,9 @@ public class QuestBook {
 		
 		menu.put(16,
 				new ItemBuilder(Material.COMMAND).wrapText(
-						"&7Commands executed upon Completion",
+						"&7Command rewards",
 						"",
-						"&rLeft Click: &eOpen Command Editor").get(),
+						"&e> Click to open command editor").get(),
 				event -> {
 					Player p2 = (Player) event.getWhoClicked();
 					// TODO: Reopen menu
@@ -1002,9 +996,9 @@ public class QuestBook {
 		
 		menu.put(17,
 				new ItemBuilder(Material.NAME_TAG).wrapText(
-						"&r" + (quest.getPermission().equals("") ? "None": quest.getPermission()),
+						"&7" + (quest.getPermission().equals("") ? "&o-none-": quest.getPermission()),
 						"",
-						"&e> Click to change the required Permission Node").get(),
+						"&e> Click to change the required permission").get(),
 				event -> {
 					Player p2 = (Player) event.getWhoClicked();
 					p2.closeInventory();
@@ -1026,9 +1020,9 @@ public class QuestBook {
 		
 		menu.put(18,
 				new ItemBuilder(Material.FIREWORK).wrapText(
-						"&rParty Support: " + (quest.supportsParties() ? "&2&l\u2714": "&4&l\u2718"),
+						"&7Party support: " + (quest.supportsParties() ? "&2&l\u2714": "&4&l\u2718"),
 						"",
-						"&e> Click to change whether this Quest can be done in Parties or not").get(),
+						"&e> Toggle whether this quest allows parties").get(),
 				event -> {
 					changes.setPartySupport(!quest.supportsParties());
 					changes.apply();
@@ -1038,9 +1032,9 @@ public class QuestBook {
 		
 		menu.put(19,
 				new ItemBuilder(Material.COMMAND).wrapText(
-						"&rOrdered Completion Mode: " + (quest.getOrdered() ? "&2&l\u2714": "&4&l\u2718"),
+						"&7Ordered completion: " + (quest.getOrdered() ? "&2&l\u2714": "&4&l\u2718"),
 						"",
-						"&e> Click to change whether this Quest's Tasks have to be done in the Order they are arranged").get(),
+						"&e> Toggle whether tasks must be completed in order").get(),
 				event -> {
 					changes.setOrdered(!quest.getOrdered());
 					changes.apply();
@@ -1050,9 +1044,9 @@ public class QuestBook {
 		
 		menu.put(20,
 				new ItemBuilder(Material.CHEST).wrapText(
-						"&rAuto-Claim Rewards: " + (quest.getAutoClaimed() ? "&2&l\u2714": "&4&l\u2718"),
+						"&7Auto-claim rewards: " + (quest.getAutoClaimed() ? "&2&l\u2714": "&4&l\u2718"),
 						"",
-						"&e> Click to change whether this Quest's Rewards will be"
+						"&e> Toggle whether this quest's rewards will be"
 						+" automatically given or have to be claimed manually").get(),
 				event -> {
 					changes.setAutoClaim(!changes.getAutoClaimed());
@@ -1065,21 +1059,21 @@ public class QuestBook {
 				new ItemBuilder(Material.GRASS).wrapText(
 						"&7World Blacklist",
 						"",
-						"&e> Click to configure in which Worlds this Quest is able to be completed").get(),
+						"&e> Click to open world selector").get(),
 				event -> {
 					openWorldEditor((Player) event.getWhoClicked(), quest);
 				}
 		);
 		
-		String wtfString = "&rMinimal Party Size: " + (quest.getPartySize() < 1 ? "&4Players aren't allowed be in a Party": (quest.getPartySize() == 1 ? ("&ePlayers can but don't have to be in a Party") : ("&aPlayers need to be in a Party of " + quest.getPartySize() + " or more")));
+		String wtfString = "&7Minimum party size: " + (quest.getPartySize() < 0 ? "&4Parties not allowed": (quest.getPartySize() == 0 ? ("&aAny size") : ("&e" + quest.getPartySize() + " members")));
 		menu.put(22,
 				new ItemBuilder(Material.FIREWORK).wrapText(
 						wtfString,
 						"",
 						"&eChange the min. Amount of Players in a Party needed to start this Quest",
 						"",
-						"&r1 = &7Players can but don't have to be in a Party",
-						"&r0 = &7Players aren't allowed to be in a Party",
+						"&r0 = &7Players can but don't have to be in a Party",
+						"&r-1 = &7Players aren't allowed to be in a Party",
 						"",
 						"&rLeft Click: &e+1",
 						"&rRight Click: &e-1").get(),
@@ -1096,10 +1090,9 @@ public class QuestBook {
 		
 		menu.put(26,
 				ItemBuilder.Proto.RED_WOOL.get().wrapText(
-						"&4Delete Database",
+						"&4Reset progress",
 						"",
-						"&rThis is going to delete this Quest's Database and will"
-						+" clear all Player's Progress associated with this Quest.").get(),
+						"&e> Click to clear all player progress for this quest").get(),
 				event -> {
 					quest.clearAllUserData();
 					QuestWorld.getSounds().DESTRUCTIVE_CLICK.playTo((Player) event.getWhoClicked());
@@ -1129,8 +1122,8 @@ public class QuestBook {
 						new ItemBuilder(Material.BOOK).wrapText(
 								mission.getText(),
 								"",
-								"&c&oLeft Click to edit",
-								"&c&oRight Click to delete").get(),
+								"&rLeft click: &eOpen mission editor",
+								"&rRight click: &eRemove mission").get(),
 						event -> {
 							Player p2 = (Player) event.getWhoClicked();
 							if (event.isRightClick()) QBDialogue.openDeletionConfirmation(p2, mission);
@@ -1161,7 +1154,7 @@ public class QuestBook {
 		for (final World world: Bukkit.getWorlds()) {
 			menu.put(index,
 					new ItemBuilder(Material.GRASS)
-					.display("&r" + world.getName() + ": " + (quest.getWorldEnabled(world.getName()) ? "&2&l\u2714": "&4&l\u2718")).get(),
+					.display("&7" + Text.niceName(world.getName()) + ": " + (quest.getWorldEnabled(world.getName()) ? "&2&l\u2714": "&4&l\u2718")).get(),
 					event -> {
 						IQuestState changes = quest.getState();
 						changes.toggleWorld(world.getName());
@@ -1190,7 +1183,7 @@ public class QuestBook {
 		for (final World world: Bukkit.getWorlds()) {
 			menu.put(index,
 					new ItemBuilder(Material.GRASS)
-					.display("&r" + world.getName() + ": " + (category.isWorldEnabled(world.getName()) ? "&2&l\u2714": "&4&l\u2718")).get(),
+					.display("&7" + Text.niceName(world.getName()) + ": " + (category.isWorldEnabled(world.getName()) ? "&2&l\u2714": "&4&l\u2718")).get(),
 					event -> {
 						ICategoryState changes = category.getState();
 						changes.toggleWorld(world.getName());
