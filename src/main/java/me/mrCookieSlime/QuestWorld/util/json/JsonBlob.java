@@ -2,9 +2,7 @@ package me.mrCookieSlime.QuestWorld.util.json;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 
 import me.mrCookieSlime.QuestWorld.util.Text;
 
@@ -29,47 +27,30 @@ public class JsonBlob {
 		return this;
 	}
 	
-	private StringBuilder appendEntry(Map.Entry<String, String> entry, StringBuilder builder) {
-		return builder.append(entry.getKey()).append(':').append(entry.getValue());
-	}
-	
-	private StringBuilder appendMap(int index, StringBuilder builder) {
+	private static void appendMap(HashMap<String, String> map, StringBuilder builder) {
 		builder.append('{');
 		
-		Set<Map.Entry<String, String>> entries = message.get(index).entrySet();
-		int end = entries.size() - 1;
-		
-		if(end >= 0) {
-			Iterator<Map.Entry<String, String>> iterator = entries.iterator();
-			
-			for(int i = 0; i < end; ++i)
-				appendEntry(iterator.next(), builder).append(',');
-			
-			appendEntry(iterator.next(), builder);
+		String prefix = "";
+		for(Map.Entry<String, String> entry : map.entrySet()) {
+			builder.append(prefix).append(entry.getKey()).append(':').append(entry.getValue());
+			prefix = ",";
 		}
 		
-		return builder.append('}');
+		builder.append('}');
 	}
 	
 	@Override
 	public String toString() {
-		int end = message.size() - 1;
-		if(end < 0)
-			return "\"\"";
-		
 		StringBuilder builder = new StringBuilder();
 		
-		if(end == 0)
-			return appendMap(0, builder).toString();
-		
 		builder.append('[');
-		for(int i = 0; i < end; ++i)
-			appendMap(i, builder).append(',');
+		String prefix = "";
+		for(HashMap<String,String> map : message) {
+			appendMap(map, builder.append(prefix));
+			prefix = ",";
+		}
 		
-		appendMap(end, builder);
-		builder.append(']');
-		
-		return builder.toString();
+		return builder.append(']').toString();
 	}
 	
 	private static Prop ofChar(char in, Prop normal) {
@@ -103,8 +84,7 @@ public class JsonBlob {
 	}
 	
 	public JsonBlob addLegacy(String legacy, Prop... defaults) {
-		JsonBlob blob = fromLegacy(legacy, defaults);
-		message.addAll(blob.message);
+		message.addAll(fromLegacy(legacy, defaults).message);
 		return this;
 	}
 	
@@ -149,8 +129,7 @@ public class JsonBlob {
 			
 			++end;
 		}
-		result.add(legacy.substring(start, legacy.length()), normal, color, style);
 		
-		return result;
+		return result.add(legacy.substring(start, legacy.length()), normal, color, style);
 	}
 }

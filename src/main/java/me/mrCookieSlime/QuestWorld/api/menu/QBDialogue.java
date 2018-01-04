@@ -153,8 +153,8 @@ public class QBDialogue {
 			
 			int index = i;
 			Prop remove = FUSE(
-					HOVER.TEXT("Click to remove this Command", GRAY),
-					CLICK.RUN(p, () -> {
+					HOVER_TEXT("Click to remove this Command", GRAY),
+					CLICK_RUN(p, () -> {
 						IQuestState changes = quest.getState();
 						changes.removeCommand(index);
 						if(changes.apply())
@@ -166,8 +166,8 @@ public class QBDialogue {
 		}
 		
 		Prop add = FUSE(
-				HOVER.TEXT("Click to add a new Command", GRAY),
-				CLICK.RUN(p, () -> {
+				HOVER_TEXT("Click to add a new Command", GRAY),
+				CLICK_RUN(p, () -> {
 					PlayerTools.promptCommand(p, new SinglePrompt(
 							"&7Type in your desired Command:",
 							(c,s) -> {
@@ -187,8 +187,8 @@ public class QBDialogue {
 				.add("Add more Commands... (Click)", GRAY, add).toString());
 		
 		Prop back = FUSE(
-				HOVER.TEXT("Open quest editor", GRAY),
-				CLICK.RUN(p, () -> QuestBook.openQuestEditor(p, quest) ));
+				HOVER_TEXT("Open quest editor", GRAY),
+				CLICK_RUN(p, () -> QuestBook.openQuestEditor(p, quest) ));
 		
 		PlayerTools.tellraw(p, new JsonBlob("< ", BLUE, back)
 				.add("Return to quest editor", GRAY, back).toString());

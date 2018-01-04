@@ -82,11 +82,11 @@ public class Party implements IPartyState {
 		PlayerTools.sendTranslation(p, true, Translation.PARTY_PLAYER_INVITED, Bukkit.getOfflinePlayer(leader).getName());
 		
 		PlayerTools.tellraw(p, new JsonBlob("ACCEPT", GREEN, BOLD,
-				HOVER.TEXT("Click to accept this Invitation", GRAY),
-				CLICK.RUN("/quests accept " + leader))
+				HOVER_TEXT("Click to accept this Invitation", GRAY),
+				CLICK_RUN("/quests accept " + leader))
 			.add(" ")
 			.add("DENY", DARK_RED, BOLD,
-				HOVER.TEXT("Click to deny this Invitation", GRAY))
+				HOVER_TEXT("Click to deny this Invitation", GRAY))
 			.toString());
 		
 		pending.add(p.getUniqueId());

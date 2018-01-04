@@ -24,8 +24,6 @@ import me.mrCookieSlime.QuestWorld.util.PlayerTools;
 import me.mrCookieSlime.QuestWorld.util.Text;
 import me.mrCookieSlime.QuestWorld.util.json.JsonBlob;
 import me.mrCookieSlime.QuestWorld.util.json.Prop;
-import me.mrCookieSlime.QuestWorld.util.json.Prop.CLICK;
-import me.mrCookieSlime.QuestWorld.util.json.Prop.HOVER;
 
 public class MissionButton {
 	public static MenuData item(IMissionState changes) {
@@ -196,8 +194,8 @@ public class MissionButton {
 			String s = dialogue.get(i);
 			int index = i;
 			Prop remove = FUSE(
-					HOVER.TEXT("Click to remove " + (s.startsWith("/") ? "command" : "dialogue")),
-					CLICK.RUN(p, () -> {
+					HOVER_TEXT("Click to remove " + (s.startsWith("/") ? "command" : "dialogue")),
+					CLICK_RUN(p, () -> {
 						dialogue.remove(index);
 						
 						IMissionState state = mission.getState();
@@ -212,8 +210,8 @@ public class MissionButton {
 		}
 		
 		Prop add = FUSE(
-				HOVER.TEXT("Click to add dialogue", GRAY),
-				CLICK.RUN(p, () -> {
+				HOVER_TEXT("Click to add dialogue", GRAY),
+				CLICK_RUN(p, () -> {
 					
 					PlayerTools.promptInputOrCommand(p, new SinglePrompt(
 							PlayerTools.makeTranslation(true, Translation.MISSION_DIALOG_ADD),
@@ -249,8 +247,8 @@ public class MissionButton {
 				.add("Add more dialogue", GRAY, add).toString());
 		
 		Prop back = FUSE(
-				HOVER.TEXT("Open mission editor", GRAY),
-				CLICK.RUN(p, () -> QuestBook.openQuestMissionEditor(p, mission) ));
+				HOVER_TEXT("Open mission editor", GRAY),
+				CLICK_RUN(p, () -> QuestBook.openQuestMissionEditor(p, mission) ));
 		
 		PlayerTools.tellraw(p, new JsonBlob("< ", BLUE, back)
 				.add("Return to mission editor", GRAY, back).toString());

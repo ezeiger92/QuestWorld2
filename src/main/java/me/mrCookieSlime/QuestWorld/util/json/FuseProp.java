@@ -2,7 +2,7 @@ package me.mrCookieSlime.QuestWorld.util.json;
 
 import java.util.Map;
 
-public class FuseProp implements Prop {
+class FuseProp implements Prop {
 	private Prop[] props;
 	public FuseProp(Prop... props) {
 		this.props = props;

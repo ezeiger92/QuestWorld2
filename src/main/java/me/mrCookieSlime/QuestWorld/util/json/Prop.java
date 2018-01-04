@@ -3,52 +3,69 @@ package me.mrCookieSlime.QuestWorld.util.json;
 import java.util.Map;
 import java.util.UUID;
 
-import org.bukkit.ChatColor;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
+
+import me.mrCookieSlime.QuestWorld.command.ClickCommand;
 
 public interface Prop {
-	public static final Prop BLACK        = new ColorProp(ChatColor.BLACK);
-	public static final Prop DARK_BLUE    = new ColorProp(ChatColor.DARK_BLUE);
-	public static final Prop DARK_GREEN   = new ColorProp(ChatColor.DARK_GREEN);
-	public static final Prop DARK_AQUA    = new ColorProp(ChatColor.DARK_AQUA);
-	public static final Prop DARK_RED     = new ColorProp(ChatColor.DARK_RED);
-	public static final Prop DARK_PURPLE  = new ColorProp(ChatColor.DARK_PURPLE);
-	public static final Prop GOLD         = new ColorProp(ChatColor.GOLD);
-	public static final Prop GRAY         = new ColorProp(ChatColor.GRAY);
-	public static final Prop DARK_GRAY    = new ColorProp(ChatColor.DARK_GRAY);
-	public static final Prop BLUE         = new ColorProp(ChatColor.BLUE);
-	public static final Prop GREEN        = new ColorProp(ChatColor.GREEN);
-	public static final Prop AQUA         = new ColorProp(ChatColor.AQUA);
-	public static final Prop RED          = new ColorProp(ChatColor.RED);
-	public static final Prop LIGHT_PURPLE = new ColorProp(ChatColor.LIGHT_PURPLE);
-	public static final Prop YELLOW       = new ColorProp(ChatColor.YELLOW);
-	public static final Prop WHITE        = new ColorProp(ChatColor.WHITE);
+	void apply(Map<String, String> properties);
+	
+	public static final Prop BLACK        = new DefaultProp("\"color\"", "\"black\"");
+	public static final Prop DARK_BLUE    = new DefaultProp("\"color\"", "\"dark_blue\"");
+	public static final Prop DARK_GREEN   = new DefaultProp("\"color\"", "\"dark_green\"");
+	public static final Prop DARK_AQUA    = new DefaultProp("\"color\"", "\"dark_aqua\"");
+	public static final Prop DARK_RED     = new DefaultProp("\"color\"", "\"dark_red\"");
+	public static final Prop DARK_PURPLE  = new DefaultProp("\"color\"", "\"dark_purple\"");
+	public static final Prop GOLD         = new DefaultProp("\"color\"", "\"dark_gold\"");
+	public static final Prop GRAY         = new DefaultProp("\"color\"", "\"gray\"");
+	public static final Prop DARK_GRAY    = new DefaultProp("\"color\"", "\"dark_gray\"");
+	public static final Prop BLUE         = new DefaultProp("\"color\"", "\"blue\"");
+	public static final Prop GREEN        = new DefaultProp("\"color\"", "\"green\"");
+	public static final Prop AQUA         = new DefaultProp("\"color\"", "\"aqua\"");
+	public static final Prop RED          = new DefaultProp("\"color\"", "\"red\"");
+	public static final Prop LIGHT_PURPLE = new DefaultProp("\"color\"", "\"light_purple\"");
+	public static final Prop YELLOW       = new DefaultProp("\"color\"", "\"yellow\"");
+	public static final Prop WHITE        = new DefaultProp("\"color\"", "\"white\"");
 
-	public static final Prop MAGIC     = MAGIC(true);
-	public static final Prop BOLD      = BOLD(true);
-	public static final Prop STRIKE    = STRIKE(true);
-	public static final Prop UNDERLINE = UNDERLINE(true);
-	public static final Prop ITALIC    = ITALIC(true);
-	
+	public static final Prop MAGIC     = new DefaultProp("\"obfuscated\"",    "\"true\"");
+	public static final Prop BOLD      = new DefaultProp("\"bold\"",          "\"true\"");
+	public static final Prop STRIKE    = new DefaultProp("\"strikethrough\"", "\"true\"");
+	public static final Prop UNDERLINE = new DefaultProp("\"underline\"",     "\"true\"");
+	public static final Prop ITALIC    = new DefaultProp("\"italic\"",        "\"true\"");
+
 	public static final Prop NONE = new NullProp();
-	
 	public static Prop FUSE(Prop... props) { return new FuseProp(props); }
 	
-	public static Prop MAGIC    (boolean state) { return new BoolProp("obfuscated",    state); }
-	public static Prop BOLD     (boolean state) { return new BoolProp("bold",          state); }
-	public static Prop STRIKE   (boolean state) { return new BoolProp("strikethrough", state); }
-	public static Prop UNDERLINE(boolean state) { return new BoolProp("underlined",    state); }
-	public static Prop ITALIC   (boolean state) { return new BoolProp("italic",        state); }
+	public static Prop HOVER_TEXT(String text, Prop... props) {
+		return new DefaultProp("\"hoverEvent\"", pre("show_text", new JsonBlob(text, props).toString()));
+	}
 	
-	public static final class HOVER {
-		static final String key = "\"hoverEvent\"";
+	public static Prop CLICK_RUN(String command) {
+		return new DefaultProp("\"clickEvent\"", pre("run_command", command));
+	}
+	
+	public static Prop CLICK_RUN(Player p, Runnable callback) {
+		UUID uuid = ClickCommand.add(callback);
+		ClickCommand.link(p.getUniqueId(), uuid);
 		
-		public static Prop TEXT(String text, Prop... props) {
-			return new HoverTextProp(text, props);
-		}
-		
+		return CLICK_RUN("/qw-invoke " + uuid.toString());
+	}
+	
+	public static Prop CLICK_SUGGEST(String command) {
+		return new DefaultProp("\"clickEvent\"", pre("suggest_command", command));
+	}
+	
+	public static Prop CLICK_URL(String url) {
+		return new DefaultProp("\"clickEvent\"", pre("open_url", url));
+	}
+	
+	////
+	
+	static String pre(String action, String value) {
+		return "{\"action\":\"" + action + "\",\"value\":\"" + value + "\"}";
+	}
+	
+	/*public static final class HOVER {
 		@Deprecated
 		public static Prop ITEM(ItemStack item) {
 			return null;
@@ -66,28 +83,9 @@ public interface Prop {
 	}
 	
 	public static final class CLICK {
-		static final String key = "\"clickEvent\"";
-		public static Prop RUN(String command) {
-			return new ClickProp("\"run_command\"", command);
-		}
-		
-		public static Prop RUN(Player p, Runnable callback) {
-			return new ClickRunnableProp(p, callback);
-		}
-		
-		public static Prop SUGGEST(String command) {
-			return new ClickProp("\"suggest_command\"", command);
-		}
-		
-		public static Prop URL(String url) {
-			return new ClickProp("\"open_url\"", url);
-		}
-		
 		@Deprecated
 		public static Prop PAGE() {
 			return null;
 		}
-	}
-	
-	void apply(Map<String, String> properties);
+	}*/
 }
