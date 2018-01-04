@@ -728,6 +728,7 @@ public class QuestBook {
 							PlayerTools.makeTranslation(true, Translation.CATEGORY_NAME_EDIT, category.getName()),
 							(c,s) -> {
 								String oldName = category.getName();
+								s = Text.colorize(s);
 								changes.setName(s);
 								if(changes.apply())
 									PlayerTools.sendTranslation(p2, true, Translation.CATEGORY_NAME_SET, s, oldName);
@@ -862,6 +863,7 @@ public class QuestBook {
 							PlayerTools.makeTranslation(true, Translation.QUEST_NAME_EDIT, quest.getName()),
 							(c,s) -> {
 								String oldName = quest.getName();
+								s = Text.colorize(s);
 								changes.setName(s);
 								if(changes.apply()) 
 									PlayerTools.sendTranslation(p2, true, Translation.QUEST_NAME_SET, s, oldName);

@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.bukkit.ChatColor;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 public interface Prop {
@@ -70,8 +71,8 @@ public interface Prop {
 			return new ClickProp("\"run_command\"", command);
 		}
 		
-		public static Prop RUN(Runnable callback) {
-			return new ClickRunnableProp(callback);
+		public static Prop RUN(Player p, Runnable callback) {
+			return new ClickRunnableProp(p, callback);
 		}
 		
 		public static Prop SUGGEST(String command) {

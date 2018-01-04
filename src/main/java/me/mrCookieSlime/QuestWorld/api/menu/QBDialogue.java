@@ -154,7 +154,7 @@ public class QBDialogue {
 			int index = i;
 			Prop remove = FUSE(
 					HOVER.TEXT("Click to remove this Command", GRAY),
-					CLICK.RUN(() -> {
+					CLICK.RUN(p, () -> {
 						IQuestState changes = quest.getState();
 						changes.removeCommand(index);
 						if(changes.apply())
@@ -167,7 +167,7 @@ public class QBDialogue {
 		
 		Prop add = FUSE(
 				HOVER.TEXT("Click to add a new Command", GRAY),
-				CLICK.RUN(() -> {
+				CLICK.RUN(p, () -> {
 					PlayerTools.promptCommand(p, new SinglePrompt(
 							"&7Type in your desired Command:",
 							(c,s) -> {
