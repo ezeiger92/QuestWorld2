@@ -31,7 +31,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class QuestWorldPlugin extends JavaPlugin implements Listener {
 	private static QuestWorldPlugin instance = null;
-	private long lastSave = 0;
 
 	private QuestingImpl api = new QuestingImpl(this);
 
@@ -142,7 +141,6 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener {
 	
 	public void load() {
 		api.getFacade().load();
-		lastSave = System.currentTimeMillis();
 	}
 	
 	public void onReload() {
@@ -167,10 +165,6 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener {
 		getServer().getServicesManager().unregisterAll(this);
 		getServer().getScheduler().cancelTasks(this);
 	}
-	
-	public long getLastSaved() {
-		return lastSave;
-	}
 
 	public void onSave(boolean force) {
 		api.getFacade().save(force);
@@ -179,8 +173,6 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener {
 			api.getPlayerStatus(p).getTracker().onSave();
 		
 		hookInstaller.save();
-		
-		lastSave = System.currentTimeMillis();
 	}
 
 	public void unload() {

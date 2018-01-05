@@ -787,7 +787,8 @@ public class QuestBook {
 						"&e> Click to clear all player progress for this category").get(),
 				event -> {
 					// TODO: Destructive action warning
-					category.clearAllUserData();
+					QuestWorld.getFacade().clearAllUserData(category);
+					
 					QuestWorld.getSounds().DESTRUCTIVE_CLICK.playTo((Player) event.getWhoClicked());
 				}
 		);
@@ -1060,7 +1061,7 @@ public class QuestBook {
 						"",
 						"&e> Click to clear all player progress for this quest").get(),
 				event -> {
-					quest.clearAllUserData();
+					QuestWorld.getFacade().clearAllUserData(quest);
 					QuestWorld.getSounds().DESTRUCTIVE_CLICK.playTo((Player) event.getWhoClicked());
 				}
 		);
@@ -1085,7 +1086,7 @@ public class QuestBook {
 			}
 			else {
 				menu.put(45 + i,
-						new ItemBuilder(mission.getType().getSelectorItem()).wrapText(
+						new ItemBuilder(mission.getType().getSelectorItem()).flagAll().wrapText(
 								mission.getText(),
 								"",
 								"&rLeft click: &eOpen mission editor",

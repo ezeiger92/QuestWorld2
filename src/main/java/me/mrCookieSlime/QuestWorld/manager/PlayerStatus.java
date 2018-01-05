@@ -181,7 +181,7 @@ public class PlayerStatus implements IPlayerStatus {
 		if (p != null && !PlayerTools.checkPermission(p, quest.getPermission())) return QuestStatus.LOCKED;
 		
 		Party party = (Party)QuestWorld.getParty(p);
-		int partySize = party != null ? party.getSize() : -1;
+		int partySize = party != null ? party.getSize() : 0;
 		
 		if (quest.getPartySize() == 0 && partySize > 0) return QuestStatus.LOCKED_NO_PARTY;
 		if (quest.getPartySize() > 1 && partySize < quest.getPartySize()) return QuestStatus.LOCKED_PARTY_SIZE;

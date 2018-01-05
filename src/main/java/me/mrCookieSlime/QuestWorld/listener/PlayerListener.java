@@ -82,29 +82,32 @@ public class PlayerListener implements Listener {
 	@EventHandler
 	public void onleave(GenericPlayerLeaveEvent event) {
 		Player player = event.getPlayer();
+		IParty party = QuestWorld.getParty(player);
 		
-		int autokick = QuestWorld.getPlugin().getConfig().getInt("party.auto-kick", -1);
-		if(autokick == 0) {
-			IParty party = QuestWorld.getParty(player);
-			if(party.isLeader(player))
-				QuestWorld.disbandParty(party);
-			else
-				party.playerLeave(player, LeaveReason.DISCONNECT);
-		}
-		else if(autokick > 0) {
-			IParty party = QuestWorld.getParty(player);
-			int task_id = new BukkitRunnable(){
-				@Override
-				public void run() {
-					if(party.isLeader(player))
-						QuestWorld.disbandParty(party);
-					else
-						party.playerLeave(player, LeaveReason.DISCONNECT);
-					partyKick.remove(getTaskId());
-				}
-			}.runTaskLater(QuestWorld.getPlugin(), autokick).getTaskId();
+		if(party != null) {
+			int autokick = QuestWorld.getPlugin().getConfig().getInt("party.auto-kick", -1);
 			
-			partyKick.put(player.getUniqueId(), task_id);
+			if(autokick == 0) {
+				if(party.isLeader(player))
+					QuestWorld.disbandParty(party);
+				else
+					party.playerLeave(player, LeaveReason.DISCONNECT);
+			}
+			else if(autokick > 0) {
+				
+				int task_id = new BukkitRunnable(){
+					@Override
+					public void run() {
+						if(party.isLeader(player))
+							QuestWorld.disbandParty(party);
+						else
+							party.playerLeave(player, LeaveReason.DISCONNECT);
+						partyKick.remove(getTaskId());
+					}
+				}.runTaskLater(QuestWorld.getPlugin(), autokick).getTaskId();
+				
+				partyKick.put(player.getUniqueId(), task_id);
+			}
 		}
 		
 		((QuestingImpl)QuestWorld.getAPI()).unloadPlayerStatus(player);

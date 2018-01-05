@@ -109,11 +109,6 @@ class Category extends UniqueObject implements ICategoryState {
 	}
 	
 	@Override
-	public void clearAllUserData() {
-		facade.clearAllUserData(getSource());
-	}
-	
-	@Override
 	public CategoryState getState() {
 		return new CategoryState(this);
 	}
@@ -162,18 +157,7 @@ class Category extends UniqueObject implements ICategoryState {
 		quests.remove(quest.getID());
 	}
 	
-	public void save(boolean force) {
-		long lastSave = facade.getLastSave();
-		for (Quest quest: quests.values()) {
-			// Forcing save or quest appears changed
-			if(force || lastSave < quest.getLastModified())
-				quest.save();
-		}
-		
-		// Not forcing a save and category appears unchanged
-		if(!force && lastSave >= getLastModified())
-			return;
-		
+	public void save() {
 		config.set("uniqueId", getUniqueId().toString());
 		config.set("id", id);
 		config.set("name", Text.serializeColor(name));

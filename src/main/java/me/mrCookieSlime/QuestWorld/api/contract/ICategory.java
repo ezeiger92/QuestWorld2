@@ -21,8 +21,6 @@ public interface ICategory extends IStateful {
 
 	@Nullable("No quest at index") IQuest getQuest(int index);
 	boolean isWorldEnabled(String world);
-	
-	void clearAllUserData();
 
 	@Override
 	ICategoryState getState();

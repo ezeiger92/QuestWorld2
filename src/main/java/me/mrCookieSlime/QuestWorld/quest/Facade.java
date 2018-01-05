@@ -19,7 +19,7 @@ import me.mrCookieSlime.QuestWorld.manager.ProgressTracker;
 import me.mrCookieSlime.QuestWorld.util.WeakValueMap;
 
 public class Facade implements IFacade {
-	private long lastSave;
+	private long lastSave = 0;
 	private HashMap<Integer, Category> categoryMap = new HashMap<>();
 	private WeakValueMap<UUID, Quest> questMap = new WeakValueMap<>();
 	private WeakValueMap<UUID, Mission> missionMap = new WeakValueMap<>();
@@ -40,7 +40,6 @@ public class Facade implements IFacade {
 		categoryMap.put(id, c);
 		return c;
 	}
-	
 	
 	public Quest createQuest(String name, int id, ICategory category) {
 		Quest q = new Quest(name, id, (Category)category);
@@ -150,6 +149,8 @@ public class Facade implements IFacade {
 			for (Quest quest: category.getQuests())
 				quest.refreshParent();
 		}
+		
+		lastSave = System.currentTimeMillis();
 	}
 	
 	public void onDiscard() {
@@ -173,11 +174,17 @@ public class Facade implements IFacade {
 	
 	public void save(boolean force) {
 		for(Category c : categoryMap.values()) {
-			c.save(force);
+			if(force || lastSave < c.getLastModified())
+				c.save();
+			
 			for(Quest q : c.getQuests())
-				for(Mission m : q.getMissions())
-					ProgressTracker.saveDialogue(m);
+				if(force || lastSave < q.getLastModified()) {
+					q.save();
+					for(Mission m : q.getMissions())
+						ProgressTracker.saveDialogue(m);
+				}
 		}
+		
 		lastSave = System.currentTimeMillis();
 	}
 	
@@ -223,12 +230,14 @@ public class Facade implements IFacade {
 		missionMap.remove(((Mission)mission).getUniqueId());
 	}
 	
-	public void clearAllUserData(Category category) {
-		for(Quest quest : category.getQuests())
+	@Override
+	public void clearAllUserData(ICategory category) {
+		for(IQuest quest : category.getQuests())
 			clearAllUserData(quest);
 	}
 	
-	public void clearAllUserData(Quest quest) {
+	@Override
+	public void clearAllUserData(IQuest quest) {
 		PlayerStatus.clearAllQuestData(quest);
 	}
 }

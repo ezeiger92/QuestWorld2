@@ -355,11 +355,6 @@ class Quest extends UniqueObject implements IQuestState {
 	}
 	
 	@Override
-	public void clearAllUserData() {
-		getCategory().getFacade().clearAllUserData(getSource());
-	}
-	
-	@Override
 	public boolean completeFor(Player p) {
 		if(CancellableEvent.send(new QuestCompleteEvent(getSource(), p))) {
 			handoutReward(p);

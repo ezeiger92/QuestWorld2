@@ -109,7 +109,7 @@ public class QBDialogue {
 						"",
 						"&rThis will reset this Quest's Database").get(),
 				event -> {
-					q.clearAllUserData();
+					QuestWorld.getFacade().clearAllUserData(q);
 					QuestBook.openQuestEditor((Player) event.getWhoClicked(), q);
 				}
 		);
