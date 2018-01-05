@@ -728,7 +728,7 @@ public class QuestBook {
 					}
 					else {
 						PagedMapping.putPage(p2, 0);
-						QBDialogue.openQuestRequirementChooser(p2, category);
+						QBDialogue.openRequirementCategories(p2, category);
 					}
 				}
 		);
@@ -947,7 +947,7 @@ public class QuestBook {
 					}
 					else {
 						PagedMapping.putPage(p2, 0);
-						QBDialogue.openQuestRequirementChooser(p2, quest);
+						QBDialogue.openRequirementCategories(p2, quest);
 					}
 				}
 		);

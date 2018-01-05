@@ -196,7 +196,7 @@ public class QBDialogue {
 		p.sendMessage(Text.colorize("&7&m----------------------------"));
 	}
 
-	public static void openQuestRequirementChooser(Player p, final IStateful quest) {
+	public static void openRequirementCategories(Player p, final IStateful quest) {
 		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
 		
 		Menu menu = new Menu(1, "&3Categories");
@@ -210,7 +210,7 @@ public class QBDialogue {
 					event -> {
 						Player p2 = (Player)event.getWhoClicked();
 						PagedMapping.putPage(p2, 0);
-						openQuestRequirementChooser2(p2, quest, category);
+						openRequirementQuests(p2, quest, category);
 					}, true
 			);
 		}
@@ -227,7 +227,7 @@ public class QBDialogue {
 		menu.openFor(p);
 	}
 
-	private static void openQuestRequirementChooser2(Player p, final IStateful q, ICategory category) {
+	private static void openRequirementQuests(Player p, final IStateful q, ICategory category) {
 		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
 		
 		Menu menu = new Menu(1, "&3Quests");
@@ -268,7 +268,7 @@ public class QBDialogue {
 					}, false
 			);
 		}
-		pager.setBackButton(" &3Categories", event -> openQuestRequirementChooser(p, q));
+		pager.setBackButton(" &3Categories", event -> openRequirementCategories(p, q));
 		pager.build(menu, p);
 		menu.openFor(p);
 	}

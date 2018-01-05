@@ -158,7 +158,7 @@ class Mission extends UniqueObject implements IMissionState {
 	public HashMap<String, Object> serialize() {
 		HashMap<String, Object> result = new HashMap<>(20);
 
-		result.put("id",       getUniqueId().toString());
+		result.put("uniqueId", getUniqueId().toString());
 		result.put("quest",    getQuest());
 		result.put("type",     type.toString());
 		result.put("item",     item);
@@ -173,6 +173,8 @@ class Mission extends UniqueObject implements IMissionState {
 		result.put("lore",           Text.serializeColor(description));
 		result.put("custom_int",     customInt);
 		result.put("exclude-spawners", !spawnerSupport);
+		
+		result.put("questId", getQuest().getUniqueId().toString());
 		
 		return result;
 	}
@@ -309,7 +311,7 @@ class Mission extends UniqueObject implements IMissionState {
 
 	@SuppressWarnings("unchecked")
 	private void loadMap(Map<String, Object> data) {
-		setUniqueId((String)data.get("id"));
+		setUniqueId((String)data.get("uniqueId"));
 		
 		quest    = new WeakReference<>((Quest)data.get("quest"));
 		type     = QuestWorld.getMissionType((String)data.getOrDefault("type", type.toString()));

@@ -18,17 +18,17 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 
 class Category extends UniqueObject implements ICategoryState {
-	private int id;
+	private YamlConfiguration config;
 	private Facade facade;
-	private boolean hidden;
-	private String name;
-	private String permission;
-	private ItemStack item;
+
+	private boolean   hidden = false;
+	private int       id = -1;
+	private ItemStack item = new ItemStack(Material.BOOK_AND_QUILL);
+	private String    name = "";
 	private WeakReference<Quest> parent = new WeakReference<>(null);
+	private String    permission = "";
 	private Map<Integer, Quest> quests = new HashMap<>();
 	private List<String> world_blacklist = new ArrayList<String>();
-	
-	private YamlConfiguration config;
 
 	// External
 	public Category(String name, int id, Facade facade) {
@@ -36,10 +36,6 @@ class Category extends UniqueObject implements ICategoryState {
 		this.name = name;
 		this.facade = facade;
 		config = YamlConfiguration.loadConfiguration(Facade.fileFor(this));
-		item = new ItemStack(Material.BOOK_AND_QUILL);
-		world_blacklist = new ArrayList<String>();
-		permission = "";
-		hidden = false;
 	}
 	
 	protected Category(Category copy) {
@@ -56,6 +52,9 @@ class Category extends UniqueObject implements ICategoryState {
 		this.id = id;
 		this.config = config;
 		this.facade = facade;
+		
+		setUniqueId(config.getString("uniqueId", null));
+		
 		name = Text.deserializeColor(config.getString("name"));
 		item = config.getItemStack("item", item);
 		hidden = config.getBoolean("hidden");
@@ -175,12 +174,17 @@ class Category extends UniqueObject implements ICategoryState {
 		if(!force && lastSave >= getLastModified())
 			return;
 		
+		config.set("uniqueId", getUniqueId().toString());
 		config.set("id", id);
 		config.set("name", Text.serializeColor(name));
 		config.set("item", item);
 		config.set("permission", permission);
 		config.set("hidden", this.hidden);
 		config.set("world-blacklist", world_blacklist);
+		
+		Quest parent = getParent();
+		if(parent != null)
+			config.set("parentId", parent.getUniqueId().toString());
 		
 		config.set("parent", Facade.stringOfQuest(getParent()));
 		

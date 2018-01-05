@@ -92,11 +92,13 @@ class Quest extends UniqueObject implements IQuestState {
 	}
 	
 	// Package
-	Quest(int id, YamlConfiguration file, Category category) {
-		this.category = new WeakReference<>(category);
+	Quest(int id, YamlConfiguration config, Category category) {
 		this.id = id;
+		this.config = config;
+		this.category = new WeakReference<>(category);
 		
-		config = file;
+		setUniqueId(config.getString("uniqueId", null));
+		
 		cooldown     = fromMaybeString(config.get("cooldown"));
 		partySupport = !config.getBoolean("disable-parties");
 		ordered      = config.getBoolean("in-order");
@@ -175,6 +177,7 @@ class Quest extends UniqueObject implements IQuestState {
 	}
 	
 	public void save() {
+		config.set("uniqueId", getUniqueId().toString());
 		config.set("id", id);
 		config.set("category", getCategory().getID());
 		config.set("cooldown", cooldown);
@@ -210,6 +213,10 @@ class Quest extends UniqueObject implements IQuestState {
 			config.set("missions." + mission.getIndex(), data);
 			//mission.save(config.createSection("missions." + mission.getID()));
 		}*/
+		
+		Quest parent = getParent();
+		if(parent != null)
+			config.set("parentId", parent.getUniqueId().toString());
 
 		config.set("parent", Facade.stringOfQuest(getParent()));
 		
