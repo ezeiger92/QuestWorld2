@@ -1,5 +1,6 @@
 package me.mrCookieSlime.QuestWorld.api.contract;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.bukkit.entity.Player;
@@ -12,7 +13,8 @@ public interface IQuest extends IStateful {
 	public static final long COOLDOWN_SCALE = 60 * 1000;
 	
 	int getID();
-	List<? extends IMission> getMissions();
+	List<? extends IMission> getOrderedMissions();
+	Collection<? extends IMission> getMissions();
 	ItemStack getItem();
 	ICategory getCategory();
 	List<ItemStack> getRewards();

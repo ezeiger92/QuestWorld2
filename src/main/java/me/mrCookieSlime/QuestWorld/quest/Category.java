@@ -46,10 +46,10 @@ class Category extends UniqueObject implements ICategoryState {
 		copy(copy);
 	}
 	
-	@Deprecated
+	/*@Deprecated
 	public Category(Map<String, Object> data) {
 		loadMap(data);
-	}
+	}*/
 	
 	// Package
 	Category(int id, YamlConfiguration config, Facade facade) {
@@ -210,21 +210,22 @@ class Category extends UniqueObject implements ICategoryState {
 		return true;
 	}
 	
-	@Deprecated
+	/*@Deprecated
 	public Map<String, Object> serialize() {
 		HashMap<String, Object> result = new HashMap<>();
 		
-		result.put("unique", (int)getUnique());
+		Quest parent = getParent();
+		result.put("unique", getUniqueId().toString());
 		result.put("index", id);
 		result.put("hidden", hidden);
 		result.put("name", name);
 		result.put("permission", permission);
 		result.put("item", item);
-		result.put("parent", getParent() == null ? null : (int)getParent().getUnique());
+		result.put("parent", parent != null ? parent.getUniqueId().toString() : null);
 		result.put("world-blacklist", world_blacklist);
 		
 		return result;
-	}
+	}*/
 	
 	protected void copy(Category source) {
 		id         = source.id;
@@ -249,7 +250,7 @@ class Category extends UniqueObject implements ICategoryState {
 		dest.copy(this);
 	}
 	
-	@Deprecated
+	/*@Deprecated
 	WeakReference<Quest> fancyParentResolveFunction(Integer id) {
 		if(id == null)
 			return null;
@@ -264,8 +265,6 @@ class Category extends UniqueObject implements ICategoryState {
 	@Deprecated
 	@SuppressWarnings("unchecked")
 	private void loadMap(Map<String, Object> data) {
-		setUnique((Integer)data.getOrDefault("unique", (int)getUnique()));
-		
 		id = (Integer)data.getOrDefault("index", -1);
 		hidden = (Boolean)data.getOrDefault("hidden", false);
 		name = (String)data.getOrDefault("name", "");
@@ -273,5 +272,5 @@ class Category extends UniqueObject implements ICategoryState {
 		item = (ItemStack)data.getOrDefault("item", new ItemStack(Material.STONE));
 		parent = fancyParentResolveFunction((Integer)data.getOrDefault("parent", null));
 		world_blacklist = (List<String>)data.getOrDefault("world-blacklist", new ArrayList<>());
-	}
+	}*/
 }

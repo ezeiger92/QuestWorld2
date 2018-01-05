@@ -28,19 +28,14 @@ import me.mrCookieSlime.QuestWorld.util.json.Prop;
 public class MissionButton {
 	public static MenuData item(IMissionState changes) {
 		return simpleButton(changes,
-				new ItemBuilder(changes.getItem()).display("&7" + Text.itemName(changes.getItem())).wrapLore(
+				new ItemBuilder(changes.getItem()).display(Text.itemName(changes.getItem())).wrapLore(
 						"",
 						"&e> Click to change the mission item").get(),
 				event -> {
 					Player p = (Player)event.getWhoClicked();
-					ItemStack cursor = p.getItemOnCursor();
-					if(cursor != null && cursor.getType() != Material.AIR)
-						changes.setItem(cursor.clone());
-					else {
-						ItemStack hand = p.getInventory().getItemInMainHand();
-						if(hand != null && hand.getType() != Material.AIR)
-							changes.setItem(hand.clone());
-					}
+					ItemStack hand = p.getInventory().getItemInMainHand();
+					if(hand != null && hand.getType() != Material.AIR)
+						changes.setItem(hand.clone());
 				}
 		);
 	}
@@ -69,7 +64,7 @@ public class MissionButton {
 		EntityType entity = changes.getEntity();
 		return new MenuData(
 				EntityTools.getEntityDisplay(entity).wrapText(
-						"&7Entity Type: &r" + EntityTools.nameOf(entity),
+						"&7Entity Type: &e" + EntityTools.nameOf(entity),
 						"",
 						"&e> Click to change the entity").get(),
 				event -> {
@@ -81,7 +76,7 @@ public class MissionButton {
 	public static MenuData location(IMissionState changes) {
 		return simpleButton(changes,
 				new ItemBuilder(changes.getDisplayItem()).flagAll().wrapText(
-						"&7"+Text.stringOf(changes.getLocation(), changes.getCustomInt()),
+						Text.stringOf(changes.getLocation(), changes.getCustomInt()),
 						"",
 						"&e> Click to update the location").get(),
 				event -> {
@@ -91,9 +86,10 @@ public class MissionButton {
 	}
 	
 	public static MenuData entityName(IMissionState changes) {
+		String name = changes.getCustomString();
 		return new MenuData(
 				new ItemBuilder(Material.NAME_TAG).wrapText(
-						"&r" + changes.getCustomString(),
+						"&7Entity name: &r&o" + (name.length() > 0 ? name : "-none-"),
 						"",
 						"&e> Click to change the Name").get(),
 				event -> {

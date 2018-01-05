@@ -48,10 +48,10 @@ public class PlayMission extends MissionType implements Ticking {
 				new ItemBuilder(Material.WATCH).wrapText(
 						"&7Time: &b" + Text.timeFromNum(changes.getAmount()),
 						"",
-						"&rLeft Click: &e+1m",
-						"&rRight Click: &e-1m",
-						"&rShift + Left Click: &e+1h",
-						"&rShift + Right Click: &e-1h"
+						"&rLeft click: &e+1m",
+						"&rRight click: &e-1m",
+						"&rShift left click: &e+1h",
+						"&rShift right click: &e-1h"
 						).get(),
 				 event -> {
 					int amount = MissionButton.clickNumber(changes.getAmount(), 60, event);

@@ -154,7 +154,8 @@ public class PlayerStatus implements IPlayerStatus {
 					boolean finished = quest.getMissions().size() != 0;
 					for (IMission task: quest.getMissions()) {
 						updateTimeframe(task, 0);
-						if (!hasCompletedTask(task)) finished = false;
+						if (!hasCompletedTask(task))
+							finished = false;
 					}
 					
 					if (finished) {
@@ -202,7 +203,7 @@ public class PlayerStatus implements IPlayerStatus {
 	public boolean hasUnlockedTask(IMission task) {
 		if (!task.getQuest().getOrdered()) return true;
 		
-		List<? extends IMission> tasks = task.getQuest().getMissions();
+		List<? extends IMission> tasks = task.getQuest().getOrderedMissions();
 		int index = tasks.indexOf(task) - 1;
 		if (index < 0) return true;
 		else return hasCompletedTask(tasks.get(index));
@@ -244,7 +245,7 @@ public class PlayerStatus implements IPlayerStatus {
 		
 		int amount = quest.getMissions().size();
 		
-		return Text.progressBar( progress, amount, null);
+		return Text.progressBar(progress, amount, null);
 	}
 	
 	@Override

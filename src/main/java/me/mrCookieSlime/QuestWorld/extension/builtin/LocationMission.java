@@ -124,10 +124,11 @@ public class LocationMission extends MissionType implements Ticking {
 	
 	@Override
 	protected void layoutMenu(IMissionState changes) {
+		String name = changes.getCustomString();
 		putButton(10, MissionButton.location(changes));
 		putButton(11, new MenuData(
 				new ItemBuilder(Material.NAME_TAG).wrapText(
-						"&r" + changes.getCustomString(),
+						"&7Location name: &r&o" + (name.length() > 0 ? name : "-none-"),
 						 "",
 						 "&e> Give your location a name",
 						 "",

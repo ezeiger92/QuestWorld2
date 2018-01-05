@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.UUID;
 
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -20,17 +21,17 @@ import me.mrCookieSlime.QuestWorld.util.WeakValueMap;
 public class Facade implements IFacade {
 	private long lastSave;
 	private HashMap<Integer, Category> categoryMap = new HashMap<>();
-	private WeakValueMap<Long, Quest> questMap = new WeakValueMap<>();
-	private WeakValueMap<Long, Mission> missionMap = new WeakValueMap<>();
+	private WeakValueMap<UUID, Quest> questMap = new WeakValueMap<>();
+	private WeakValueMap<UUID, Mission> missionMap = new WeakValueMap<>();
 	
 	@Deprecated
-	public Quest getQuest(long unique) {
-		return questMap.getOrNull(unique);
+	public Quest getQuest(UUID uniqueId) {
+		return questMap.getOrNull(uniqueId);
 	}
 	
 	@Deprecated
-	public Mission getMission(long unique) {
-		return missionMap.getOrNull(unique);
+	public Mission getMission(UUID uniqueId) {
+		return missionMap.getOrNull(uniqueId);
 	}
 	
 	@Override
@@ -43,14 +44,14 @@ public class Facade implements IFacade {
 	
 	public Quest createQuest(String name, int id, ICategory category) {
 		Quest q = new Quest(name, id, (Category)category);
-		questMap.putWeak(q.getUnique(), q);
+		questMap.putWeak(q.getUniqueId(), q);
 		return q;
 	}
 	
 	public Mission createMission(int id, IQuest quest) {
 		Mission m = new Mission(id, (Quest)quest);
 		ProgressTracker.loadDialogue(m);
-		missionMap.putWeak(m.getUnique(), m);
+		missionMap.putWeak(m.getUniqueId(), m);
 		return m;
 	}
 	
@@ -137,7 +138,7 @@ public class Facade implements IFacade {
 				for (ParseData qData: questData.get(cData.id)) {
 					Quest q = new Quest(qData.id, qData.file, category);
 					category.directAddQuest(q);
-					questMap.putWeak(q.getUnique(), q);
+					questMap.putWeak(q.getUniqueId(), q);
 				}
 			
 			categoryMap.put(category.getID(), category);
@@ -213,13 +214,13 @@ public class Facade implements IFacade {
 			deleteMission(mission);
 		
 		PlayerStatus.clearAllQuestData(quest);
-		questMap.remove(((Quest)quest).getUnique());
+		questMap.remove(((Quest)quest).getUniqueId());
 		deleteQuestFile(quest);
 	}
 	
 	@Override
 	public void deleteMission(IMission mission) {
-		missionMap.remove(((Mission)mission).getUnique());
+		missionMap.remove(((Mission)mission).getUniqueId());
 	}
 	
 	public void clearAllUserData(Category category) {

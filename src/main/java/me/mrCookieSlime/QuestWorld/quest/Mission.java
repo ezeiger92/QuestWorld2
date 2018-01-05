@@ -22,12 +22,12 @@ import org.bukkit.inventory.ItemStack;
 
 class Mission extends UniqueObject implements IMissionState {
 	private WeakReference<Quest> quest;
-	private int         amount = 1;
-	private int         customInt = 0;
-	private String      customString = "";
-	private boolean     deathReset = false;
-	private String      description = "Hey there! Do this Quest.";
-	private ArrayList<String> dialogue = new ArrayList<>();
+	private int     amount = 1;
+	private int     customInt = 0;
+	private String  customString = "";
+	private boolean deathReset = false;
+	private String  description = "Hey there! Do this Quest.";
+	private List<String> dialogue = new ArrayList<>();
 	private String      displayName = "";
 	private EntityType  entity = EntityType.PLAYER;
 	private ItemStack   item = new ItemStack(Material.STONE);
@@ -158,7 +158,7 @@ class Mission extends UniqueObject implements IMissionState {
 	public HashMap<String, Object> serialize() {
 		HashMap<String, Object> result = new HashMap<>(20);
 
-		result.put("unique",   (int)getUnique());
+		result.put("id",       getUniqueId().toString());
 		result.put("quest",    getQuest());
 		result.put("type",     type.toString());
 		result.put("item",     item);
@@ -272,7 +272,6 @@ class Mission extends UniqueObject implements IMissionState {
 	}
 	
 	protected void copy(Mission source) {
-		setUnique(source.getUnique());
 		quest = source.quest;
 		amount = source.amount;
 		customInt = source.customInt;
@@ -310,7 +309,7 @@ class Mission extends UniqueObject implements IMissionState {
 
 	@SuppressWarnings("unchecked")
 	private void loadMap(Map<String, Object> data) {
-		setUnique((Integer)data.getOrDefault("unique", (int)getUnique()));
+		setUniqueId((String)data.get("id"));
 		
 		quest    = new WeakReference<>((Quest)data.get("quest"));
 		type     = QuestWorld.getMissionType((String)data.getOrDefault("type", type.toString()));

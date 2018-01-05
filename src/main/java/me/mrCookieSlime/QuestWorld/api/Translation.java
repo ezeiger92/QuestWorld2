@@ -25,9 +25,9 @@ public enum Translation implements Translator {
 	CATEGORY_CREATED  ("editor.category.created",     "name"),
 	CATEGORY_DELETED  ("editor.category.deleted",     "name"),
 	CATEGORY_NAME_EDIT("editor.category.name-change", "name"),
-	CATEGORY_NAME_SET ("editor.category.name-set",    "name", "name_old"),
-	CATEGORY_PERM_EDIT("editor.category.perm-change", "name", "perm"),
-	CATEGORY_PERM_SET ("editor.category.perm-set",    "name", "perm", "perm_old"),
+	CATEGORY_NAME_SET ("editor.category.name-set",    "name",  "name_old"),
+	CATEGORY_PERM_EDIT("editor.category.perm-change", "name",  "perm"),
+	CATEGORY_PERM_SET ("editor.category.perm-set",    "name",  "perm",      "perm_old"),
 	CATEGORY_DESC     ("editor.category.description", "total", "completed", "available", "cooldown", "reward", "progress"),
 	
 	QUEST_CREATED  ("editor.quest.created",     "name"),

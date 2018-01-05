@@ -3,7 +3,9 @@ package me.mrCookieSlime.QuestWorld.quest;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -24,29 +26,25 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 class Quest extends UniqueObject implements IQuestState {
-	
-	WeakReference<Category> category;
-	int id;
-	long cooldown;
-	String name;
-	ItemStack item = new ItemStack(Material.BOOK_AND_QUILL);
-	List<Mission> tasks = new ArrayList<>();
-	
-	List<String> commands = new ArrayList<>();
-	List<String> world_blacklist = new ArrayList<>();
-	List<ItemStack> rewards = new ArrayList<>();
-	int money;
-	int xp;
-	int partysize;
-	
-	boolean partySupport;
-	boolean ordered;
-	boolean autoclaim;
-	
-	WeakReference<Quest> parent = new WeakReference<>(null);
-	String permission;
-	
-	YamlConfiguration config;
+	private WeakReference<Category> category;
+	private YamlConfiguration config;
+
+	private boolean      autoclaim = false;
+	private List<String> commands = new ArrayList<>();
+	private long         cooldown = -1;
+	private int          id = -1;
+	private ItemStack    item = new ItemStack(Material.BOOK_AND_QUILL);
+	private int          money = 0;
+	private String       name = "";
+	private boolean      ordered = false;
+	private WeakReference<Quest> parent = new WeakReference<>(null);
+	private int          partySize = 1;
+	private boolean      partySupport = true;
+	private String       permission = "";
+	private List<ItemStack> rewards = new ArrayList<>();
+	private Map<Integer, Mission> tasks = new HashMap<>(9);
+	private List<String> world_blacklist = new ArrayList<>();
+	private int          xp = 0;
 	
 	// Internal
 	protected Quest(Quest quest) {
@@ -62,7 +60,7 @@ class Quest extends UniqueObject implements IQuestState {
 		item     = source.item.clone();
 
 		tasks.clear();
-		tasks.addAll(source.tasks);
+		tasks.putAll(source.tasks);
 		commands.clear();
 		commands.addAll(source.commands);
 		world_blacklist.clear();
@@ -72,7 +70,7 @@ class Quest extends UniqueObject implements IQuestState {
 
 		money          = source.money;
 		xp             = source.xp;
-		partysize      = source.partysize;
+		partySize      = source.partySize;
 		partySupport   = source.partySupport;
 		ordered        = source.ordered;
 		autoclaim      = source.autoclaim;
@@ -113,7 +111,7 @@ class Quest extends UniqueObject implements IQuestState {
 		commands        = config.getStringList("rewards.commands");
 		world_blacklist = config.getStringList("world-blacklist");
 		
-		partysize  = config.getInt("min-party-size", 1);
+		partySize  = config.getInt("min-party-size", 1);
 		permission = config.getString("permission", "");
 		
 		loadMissions();
@@ -126,15 +124,6 @@ class Quest extends UniqueObject implements IQuestState {
 		this.name = name;
 		
 		config = YamlConfiguration.loadConfiguration(Facade.fileFor(this));
-		cooldown = -1;
-
-		money = 0;
-		xp = 0;
-		partySupport = true;
-		permission = "";
-		ordered = false;
-		autoclaim = false;
-		partysize = 1;
 	}
 	
 	public void refreshParent() {
@@ -143,24 +132,40 @@ class Quest extends UniqueObject implements IQuestState {
 	}
 	
 	private void loadMissions() {
-		ConfigurationSection missions = config.getConfigurationSection("missions");
-		if (missions == null)
-			return;
-		
 		ArrayList<Mission> arr = new ArrayList<>();
-
-		for (String key: missions.getKeys(false)) {
-			// TODO mess
-			Map<String, Object> data = missions.getConfigurationSection(key).getValues(false);
-			// getValues wont recurse through sections, so we have to manually map to... map
-			data.put("location", ((ConfigurationSection)data.get("location")).getValues(false));
+		List<Map<?, ?>> sa = config.getMapList("missions");
+		
+		if(!sa.isEmpty())
+			for(Map<?, ?> map : sa) {
+				@SuppressWarnings("unchecked")
+				Map<String, Object> data = (Map<String, Object>)map;
+				
+				data.put("quest", this);
+				
+				Mission m = new Mission(data);
+				m.validate();
+				arr.add(m);
+			}
+		else {
+			ConfigurationSection missions = config.getConfigurationSection("missions");
+			if (missions == null)
+				return;
 			
-			data.put("index", Integer.valueOf(key));
-			data.put("quest", this);
-			
-			Mission m = new Mission(data);
-			m.validate();
-			arr.add(m);
+			for (String key: missions.getKeys(false)) {
+				// TODO mess
+				Map<String, Object> data = missions.getConfigurationSection(key).getValues(false);
+				// getValues wont recurse through sections, so we have to manually map to... map
+				data.put("location", ((ConfigurationSection)data.get("location")).getValues(false));
+				
+				if(!data.containsKey("index"))
+					data.put("index", Integer.valueOf(key));
+				
+				data.put("quest", this);
+				
+				Mission m = new Mission(data);
+				m.validate();
+				arr.add(m);
+			}
 		}
 		
 		QuestState state = getState();
@@ -186,17 +191,25 @@ class Quest extends UniqueObject implements IQuestState {
 		config.set("in-order", ordered);
 		config.set("auto-claim", autoclaim);
 		config.set("world-blacklist", world_blacklist);
-		config.set("min-party-size", partysize);
+		config.set("min-party-size", partySize);
 		
 		config.set("rewards.items", rewards);
 		
-		for (Mission mission: tasks) {
+		List<Map<String, Object>> missions = new ArrayList<>(tasks.size());
+		for(Mission mission : getOrderedMissions()) {
+			Map<String, Object> data = mission.serialize();
+			data.remove("quest");
+			missions.add(data);
+		}
+		config.set("missions", missions);
+		
+		/*for (Mission mission: tasks.values()) {
 			Map<String, Object> data = mission.serialize();
 			// TODO keep a quest id
 			data.remove("quest");
 			config.set("missions." + mission.getIndex(), data);
 			//mission.save(config.createSection("missions." + mission.getID()));
-		}
+		}*/
 
 		config.set("parent", Facade.stringOfQuest(getParent()));
 		
@@ -219,8 +232,14 @@ class Quest extends UniqueObject implements IQuestState {
 		return category.get();
 	}
 
-	public List<Mission> getMissions() {
-		return Collections.unmodifiableList(tasks);
+	public List<Mission> getOrderedMissions() {
+		List<Mission> missions = new ArrayList<>(tasks.values());
+		Collections.sort(missions, (l, r) -> l.getIndex() - r.getIndex());
+		return missions;
+	}
+	
+	public Collection<Mission> getMissions() {
+		return tasks.values();
 	}
 	
 	private List<ItemStack> loadRewards() {
@@ -273,23 +292,23 @@ class Quest extends UniqueObject implements IQuestState {
 	}
 	
 	public Mission getMission(int i) {
-		return tasks.size() > i ? tasks.get(i): null;
+		return tasks.get(i);
 	}
 	
 	public void addMission(int index) {
-		tasks.add(getCategory().getFacade().createMission(index, getSource()));
+		tasks.put(index, getCategory().getFacade().createMission(index, getSource()));
 	}
 	
 	public void directAddMission(Mission m) {
-		tasks.add(m);
+		tasks.put(m.getIndex(), m);
 	}
 	
 	public void removeMission(IMission mission) {
-		tasks.remove(((Mission)mission).getSource());
+		tasks.remove(mission.getIndex());
 	}
 	
 	public void setPartySize(int size) {
-		partysize = size;
+		partySize = size;
 	}
 
 	public long getRawCooldown() {
@@ -313,7 +332,7 @@ class Quest extends UniqueObject implements IQuestState {
 	}
 	
 	public int getPartySize() {
-		return partysize;
+		return partySize;
 	}
 
 	public int getXP() {
@@ -454,7 +473,7 @@ class Quest extends UniqueObject implements IQuestState {
 		return true;
 	}
 	
-	@Deprecated
+	/*@Deprecated
 	Quest(Map<String, Object> data) {
 		loadMap(data);
 	}
@@ -467,5 +486,5 @@ class Quest extends UniqueObject implements IQuestState {
 	@Deprecated
 	private void loadMap(Map<String, Object> data) {
 		
-	}
+	}*/
 }

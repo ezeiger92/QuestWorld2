@@ -15,7 +15,6 @@ class QuestState extends Quest {
 	
 	public QuestState(Quest copy) {
 		super(copy);
-		setUnique(copy.getUnique());
 		origin = copy;
 	}
 

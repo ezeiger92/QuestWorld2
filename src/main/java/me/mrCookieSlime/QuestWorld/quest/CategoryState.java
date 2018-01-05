@@ -13,7 +13,6 @@ class CategoryState extends Category {
 	
 	public CategoryState(Category copy) {
 		super(copy);
-		setUnique(copy.getUnique());
 		origin = copy;
 	}
 	

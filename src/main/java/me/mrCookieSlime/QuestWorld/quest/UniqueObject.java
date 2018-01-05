@@ -1,16 +1,20 @@
 package me.mrCookieSlime.QuestWorld.quest;
 
+import java.util.UUID;
+
 class UniqueObject {
-	private static long s_uniqueId = 0;
-	
-	private final long uniqueId = s_uniqueId++;
-	public final long getUnique() {
+	private UUID uniqueId = UUID.randomUUID();
+	public final UUID getUniqueId() {
 		return uniqueId;
 	}
 	
-	protected final void setUnique(long number) {
-		s_uniqueId = lastModified = number;
-		++s_uniqueId;
+	protected final void setUniqueId(String uuid) {
+		if(uuid != null)
+			try {
+				uniqueId = UUID.fromString(uuid);
+			}
+			catch(IllegalArgumentException e) {
+			}
 	}
 	
 	private long lastModified = System.currentTimeMillis();
@@ -24,6 +28,6 @@ class UniqueObject {
 
 	@Override
 	public int hashCode() {
-		return (int)getUnique();
+		return getUniqueId().hashCode();
 	}
 }

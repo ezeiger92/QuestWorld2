@@ -29,7 +29,7 @@ public class FishMission extends MissionType implements Listener, Decaying {
 	
 	@Override
 	protected String userInstanceDescription(IMission instance) {
-		return "&7Fish up " + instance.getAmount() + "x " + Text.itemName(instance.getDisplayItem());
+		return "&7Reel in " + instance.getAmount() + "x " + Text.itemName(instance.getDisplayItem());
 	}
 	
 	@EventHandler

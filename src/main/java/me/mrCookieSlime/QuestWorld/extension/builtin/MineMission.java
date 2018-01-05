@@ -48,8 +48,7 @@ public class MineMission extends MissionType implements Listener, Decaying {
 		putButton(10, new MenuData(
 				new ItemBuilder(changes.getDisplayItem()).wrapLore(
 						"",
-						"&e> Click to change the Block to",
-						"&ethe Item you are currently holding").get(),
+						"&e> Click to set the block type").get(),
 				event -> {
 					Player p = (Player)event.getWhoClicked();
 					ItemStack mainItem = p.getInventory().getItemInMainHand();
