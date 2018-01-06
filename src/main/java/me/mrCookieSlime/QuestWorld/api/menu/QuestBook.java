@@ -992,9 +992,9 @@ public class QuestBook {
 		
 		menu.put(18,
 				new ItemBuilder(Material.FIREWORK).wrapText(
-						"&7Party support: " + (quest.supportsParties() ? "&2&l\u2714": "&4&l\u2718"),
+						"&7Party progress: " + (quest.supportsParties() ? "&2&l\u2714": "&4&l\u2718"),
 						"",
-						"&e> Toggle whether this quest allows parties").get(),
+						"&e> Toggle whether all party members get progress when a single member makes progress").get(),
 				event -> {
 					changes.setPartySupport(!quest.supportsParties());
 					changes.apply();

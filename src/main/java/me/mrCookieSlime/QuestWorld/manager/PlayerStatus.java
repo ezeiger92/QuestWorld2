@@ -205,8 +205,8 @@ public class PlayerStatus implements IPlayerStatus {
 		
 		List<? extends IMission> tasks = task.getQuest().getOrderedMissions();
 		int index = tasks.indexOf(task) - 1;
-		if (index < 0) return true;
-		else return hasCompletedTask(tasks.get(index));
+		if (index < 0 || hasCompletedTask(task)) return true;
+		else return !inDialogue && hasCompletedTask(tasks.get(index));
 	}
 	
 	@Override
@@ -292,7 +292,10 @@ public class PlayerStatus implements IPlayerStatus {
 		}
 	}
 	
+	protected boolean inDialogue = false;
+	
 	public static void sendDialogue(UUID uuid, IMission task, Iterator<String> dialogue) {
+		of(uuid).inDialogue = false;
 		ifOnline(uuid).ifPresent(player -> {
 			String line;
 			
@@ -305,7 +308,7 @@ public class PlayerStatus implements IPlayerStatus {
 				line = dialogue.next();
 			else if(task.getDialogue().isEmpty())
 				line = "*";
-			else
+			else 
 				return;
 			
 			if(line.equals("*"))
@@ -316,9 +319,11 @@ public class PlayerStatus implements IPlayerStatus {
 			else
 				sendDialogueComponent(player, line);
 			
-			if(hasNext)
+			if(hasNext) {
+				of(uuid).inDialogue = true;
 				Bukkit.getScheduler().scheduleSyncDelayedTask(QuestWorld.getPlugin(),
 						() -> sendDialogue(uuid, task, dialogue), 70L);
+			}
 		});
 	}
 

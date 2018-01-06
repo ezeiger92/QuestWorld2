@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -17,6 +18,7 @@ import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IMissionState;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
 import me.mrCookieSlime.QuestWorld.util.Reloadable;
+import me.mrCookieSlime.QuestWorld.util.Text;
 
 public class ProgressTracker implements Reloadable {
 	private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm");
@@ -166,18 +168,27 @@ public class ProgressTracker implements Reloadable {
 	}
 	
 	public static File dialogueFile(IMission mission) {
+		return new File(QuestWorldPlugin.getPath("data.dialogue"),
+				mission.getUniqueId().toString() + ".dialogue");
+	}
+	
+	public static File oldDialogueFile(IMission mission) {
 		return new File(QuestWorldPlugin.getPath("data.dialogue"), mission.getQuest().getCategory().getID()
 				+ "+" + mission.getQuest().getID() + "+" + mission.getIndex() + ".txt");
 	}
 	
 	public static void saveDialogue(IMission mission) {
 		File file = dialogueFile(mission);
-		if(file.exists())
+		
+		if(mission.getDialogue().isEmpty()) {
 			file.delete();
+			return;
+		}
 		
 		try {
 			// The only downside to this is system-specific newlines
-			Files.write(file.toPath(), mission.getDialogue(), StandardCharsets.UTF_8);
+			Files.write(file.toPath(), mission.getDialogue().stream()
+					.map(Text::serializeColor).collect(Collectors.toList()), StandardCharsets.UTF_8);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -185,13 +196,38 @@ public class ProgressTracker implements Reloadable {
 	
 	public static void loadDialogue(IMissionState mission) {
 		File file = dialogueFile(mission);
-		if (file.exists()) {
+		
+		if(!file.exists()) {
+			File oldFile = oldDialogueFile(mission);
+			if(!oldFile.exists())
+				return;
+			
 			try {
-				mission.setDialogue(Files.readAllLines(file.toPath(), StandardCharsets.UTF_8));
-			} catch (Exception e) {
+				List<String> lines = Files.readAllLines(oldFile.toPath());
+				if(lines.isEmpty())
+					return;
+				
+				Files.write(file.toPath(), lines);
+			}
+			catch(Exception e) {
 				e.printStackTrace();
 				return;
 			}
+			
+			try {
+				Files.delete(oldFile.toPath());
+			}
+			catch(Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
+		try {
+			mission.setDialogue(Files.readAllLines(file.toPath(), StandardCharsets.UTF_8).stream()
+					.map(Text::deserializeColor).collect(Collectors.toList()));
+		} catch (Exception e) {
+			e.printStackTrace();
+			return;
 		}
 	}
 	

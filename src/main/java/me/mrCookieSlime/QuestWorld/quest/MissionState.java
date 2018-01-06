@@ -21,11 +21,6 @@ class MissionState extends Mission {
 		origin = source;
 	}
 	
-	@Override
-	public MissionState getState() {
-		return this;
-	}
-	
 	//// IMissionWrite
 	@Override
 	public void setAmount(int amount) {
@@ -116,6 +111,7 @@ class MissionState extends Mission {
 			copyTo(origin);
 			origin.updateLastModified();
 			changeBits = 0;
+			validate();
 			return true;
 		}
 		return false;
@@ -134,6 +130,11 @@ class MissionState extends Mission {
 	@Override
 	public Mission getSource() {
 		return origin;
+	}
+	
+	@Override
+	public MissionState getState() {
+		return this;
 	}
 	
 	@Override

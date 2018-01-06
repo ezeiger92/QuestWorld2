@@ -30,6 +30,14 @@ public class KillNamedMission extends KillMission {
 	}
 	
 	@Override
+	public void validate(IMissionState state) {
+		if(state.getCustomString().length() == 0)
+			state.setCustomString("Jerry");
+		
+		state.apply();
+	}
+	
+	@Override
 	@EventHandler
 	public void onKill(EntityDeathEvent e) {
 		Player killer = e.getEntity().getKiller();
