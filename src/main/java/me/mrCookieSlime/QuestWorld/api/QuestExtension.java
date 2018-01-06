@@ -1,41 +1,64 @@
 package me.mrCookieSlime.QuestWorld.api;
 
+import java.io.InputStream;
+import java.net.URI;
+
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.Plugin;
 
-import me.mrCookieSlime.QuestWorld.api.contract.QuestLoader;
-import me.mrCookieSlime.QuestWorld.util.BukkitService;
-import me.mrCookieSlime.QuestWorld.util.Log;
+import me.mrCookieSlime.QuestWorld.api.annotation.Control;
+import me.mrCookieSlime.QuestWorld.api.contract.QuestingAPI;
+import me.mrCookieSlime.QuestWorld.util.Reloadable;
+import me.mrCookieSlime.QuestWorld.util.ResourceLoader;
 
-public abstract class QuestExtension {
-	private String[] requirements;
+public abstract class QuestExtension implements Reloadable{
+	private boolean initialized = false;
+	private QuestingAPI api = QuestWorld.getAPI();
 	private int remaining;
+	private String[] requirements;
 	private Plugin[] found;
-	private QuestLoader loader = null;
+	private MissionType[] types = {};
+	private ResourceLoader loader;
 	
-	public QuestExtension() {
-		setup();
-		loader = BukkitService.get(QuestLoader.class);
-		
-		requirements = getDepends();
-		if(requirements == null)
-			requirements = new String[0];
+	//TODO: Doc fix
+	/**
+	 * Performs setup for this extension. In particular, this calls user methods
+	 * {@link QuestExtension#setup setup} and
+	 * {@link QuestExtension#getDepends getDepends}, in that order.
+	 */
+	public QuestExtension(String... requirements) {
+		this.requirements = requirements.clone();
 		remaining = requirements.length;
 		found = new Plugin[remaining];
-		
-		loader.attach(this);
+		loader = new ResourceLoader(getClass().getClassLoader(), api.getPlugin().getDataFolder());
 	}
 	
+	/**
+	 * Supplies access to the QuestWorld API. The static form
+	 * <tt>QuestWorld.<i>method</i></tt> may also be used, depending on your
+	 * preference.
+	 * 
+	 * @see QuestingAPI
+	 * @see QuestWorld
+	 * 
+	 * @return The API
+	 */
+	public final QuestingAPI getAPI() {
+		return api;
+	}
+	
+	/**
+	 * Supplies the extension name, primarily used for printing status info.
+	 * <p> The default value is the simple name of the class.
+	 * 
+	 * @return The extension name
+	 */
+	@Control
 	public String getName() {
 		return getClass().getSimpleName();
 	}
 	
-	/**
-	 * Called before anything else, use this for things not dependent on other
-	 * plugins.
-	 */
-	public void setup() {
-	}
-	
+	//TODO Doc fix
 	/**
 	 * This must return a list of all plugins that the hook depends on. It is
 	 * called after {@link #setup}, so override that method if you need to
@@ -43,7 +66,41 @@ public abstract class QuestExtension {
 	 * 
 	 * @return A list of all names of plugin dependencies
 	 */
-	public abstract String[] getDepends();
+	public final String[] getDepends() {
+		return requirements;
+	}
+	
+	public final FileConfiguration getConfiguration(String path) {
+		return loader.loadConfigNoexpect(path, true);
+	}
+	
+	public final InputStream getResource(String path) {
+		return getClass().getResourceAsStream(path);
+	}
+	
+	public final URI getResourceLocation(String path) {
+		return URI.create(getClass().getResource(path).toString());
+	}
+	
+	public final ResourceLoader getResourceLoader() {
+		return loader;
+	}
+	
+	@Control
+	@Override
+	public void onReload() {
+	}
+	
+	
+	@Control
+	@Override
+	public void onSave() {
+	}
+	
+	@Control
+	@Override
+	public void onDiscard() {
+	}
 	
 	/**
 	 * When all dependencies are found, initialize is called. A handle to
@@ -56,25 +113,34 @@ public abstract class QuestExtension {
 	 * 
 	 * @param parent The handle to QuestWorld
 	 */
-	protected abstract void initialize(Plugin parent);
+	@Control
+	protected void initialize(Plugin parent) {
+	}
 	
-	private boolean initialized = false;
-	public final void init(Plugin parent) {
-		if(initialized)
+	/**
+	 * Initializes the extension after all dependencies have been located. This
+	 * is an internal function and should not be called directly.
+	 * 
+	 * @param parent The plugin loading extensions (QuestWorld)
+	 * 
+	 * @throws Throwable Any (likely unchecked) exception raised by
+	 * {@link QuestExtension#initialize initialize} will be passed up the stack
+	 */
+	public final void init(Plugin parent) throws Throwable {
+		if(initialized || !isReady())
 			return;
 		
-		try {
-			initialize(parent);
-		}
-		catch(RuntimeException e) {
-			Log.warning("Failed to initialize hook " + getName());
-			e.printStackTrace();
-			return;
-		}
-		loader.enable(this);
+		// Never trust user code, this may throw anything
+		initialize(parent);
+
 		initialized = true;
 	}
 	
+	public void setMissionTypes(MissionType... types) {
+		this.types = types.clone();
+	}
+	
+	// TODO fix doc
 	/**
 	 * This must return all custom MissionTypes so QuestWorld can prepare them.
 	 * <p>
@@ -84,7 +150,9 @@ public abstract class QuestExtension {
 	 * 
 	 * @return A list of all custom MissionTypes in this hook
 	 */
-	public abstract MissionType[] getMissions();
+	public final MissionType[] getMissionTypes() {
+		return types;
+	}
 	
 	/**
 	 * Only use this if you know what you are doing! Assigns a plugin to a
@@ -124,6 +192,10 @@ public abstract class QuestExtension {
 	 */
 	public final boolean isReady() {
 		return remaining <= 0;
+	}
+	
+	public final boolean isInitialized() {
+		return initialized;
 	}
 	
 	/**

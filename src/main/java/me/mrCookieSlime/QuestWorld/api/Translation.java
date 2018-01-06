@@ -1,5 +1,13 @@
 package me.mrCookieSlime.QuestWorld.api;
 
+/**
+ * The default translation mapping from <tt>lang/**_**.yml</tt>
+ * 
+ * @see me.mrCookieSlime.QuestWorld.util.Lang Lang
+ * @see Translator
+ * 
+ * @author Erik Zeiger
+ */
 public enum Translation implements Translator {
 	DEFAULT_CATEGORY("defaults.category.name"),
 	DEFAULT_QUEST   ("defaults.quest.name"),
@@ -8,18 +16,18 @@ public enum Translation implements Translator {
 	
 	GUIDE_BOOK("guide-book"),
 	
-	NAV_ITEM(   "navigation.item", "page", "pages", "pre-next", "pre-last"),
-	NAV_NEXT(   "navigation.prefix-next"),
-	NAV_PREV(   "navigation.prefix-last"),
+	NAV_ITEM   ("navigation.item", "page", "pages", "pre-next", "pre-last"),
+	NAV_NEXT   ("navigation.prefix-next"),
+	NAV_PREV   ("navigation.prefix-last"),
 	NAV_NEXTBAD("navigation.prefix-next-inactive"),
 	NAV_PREVBAD("navigation.prefix-last-inactive"),
 	
 	CATEGORY_CREATED  ("editor.category.created",     "name"),
 	CATEGORY_DELETED  ("editor.category.deleted",     "name"),
 	CATEGORY_NAME_EDIT("editor.category.name-change", "name"),
-	CATEGORY_NAME_SET ("editor.category.name-set",    "name", "name_old"),
-	CATEGORY_PERM_EDIT("editor.category.perm-change", "name", "perm"),
-	CATEGORY_PERM_SET ("editor.category.perm-set",    "name", "perm", "perm_old"),
+	CATEGORY_NAME_SET ("editor.category.name-set",    "name",  "name_old"),
+	CATEGORY_PERM_EDIT("editor.category.perm-change", "name",  "perm"),
+	CATEGORY_PERM_SET ("editor.category.perm-set",    "name",  "perm",      "perm_old"),
 	CATEGORY_DESC     ("editor.category.description", "total", "completed", "available", "cooldown", "reward", "progress"),
 	
 	QUEST_CREATED  ("editor.quest.created",     "name"),
@@ -30,27 +38,37 @@ public enum Translation implements Translator {
 	QUEST_PERM_SET ("editor.quest.perm-set",    "name", "perm", "perm_old"),
 
 	// TODO Description is only used by QW-Citizens, potentially export to CitizenTranslation
-	MISSION_DESC_EDIT("editor.misssion-description"),
-	MISSION_DESC_SET("editor.mission.desc-set", "name", "desc"),
+	MISSION_DESC_EDIT ("editor.misssion-description"),
+	MISSION_DESC_SET  ("editor.mission.desc-set", "name", "desc"),
 	MISSION_DIALOG_ADD("editor.add-dialogue"),
-	MISSION_DIALOG_SET("editor.set-dialogue", "path"),
-	MISSION_NAME_EDIT("editor.await-mission-name"),
-	MISSION_NAME_SET ("editor.edit-mission-name"),
+	MISSION_DIALOG_ADDED("editor.added-dialogue-text", "line"),
+	MISSION_COMMAND_ADDED("editor.added-dialogue-command", "command"),
+	MISSION_DIALOG_SET("editor.set-dialogue",     "path"),
+	MISSION_NAME_EDIT ("editor.await-mission-name"),
+	MISSION_NAME_SET  ("editor.edit-mission-name"),
 	
 	KILLMISSION_NAME_EDIT("editor.rename-kill-mission"),
 	KILLMISSION_NAME_SET ("editor.renamed-kill-type"),
-	LOCMISSION_NAME_EDIT("editor.rename-location"),
-	LOCMISSION_NAME_SET ("editor.renamed-location"),
-
-	PARTY_ERROR_FULL  ("party.full",       "max"),
-	PARTY_ERROR_ABSENT("party.not-online", "name"),
-	PARTY_ERROR_MEMBER("party.already",    "name"),
-	PARTY_PLAYER_PICK ("party.invite"),
-	PARTY_PLAYER_ADD  ("party.invited",    "name"),
-	PARTY_PLAYER_JOIN ("party.join",       "name"),
-	PARTY_PLAYER_KICK ("party.kicked",     "name"),
-	PARTY_GROUP_INVITE("party.invitation", "name"),
-	PARTY_GROUP_JOIN  ("party.joined",     "name"),
+	LOCMISSION_NAME_EDIT ("editor.rename-location"),
+	LOCMISSION_NAME_SET  ("editor.renamed-location"),
+	
+	// New party translations
+	PARTY_ERROR_FULL   ("party.error.full",    "max"),
+	PARTY_ERROR_MEMBER ("party.error.member",  "name"),
+	PARTY_ERROR_OFFLINE("party.error.offline", "name"),
+	
+	PARTY_GROUP_ABANDON("party.group.abandon", "name"),
+	PARTY_GROUP_DISBAND("party.group.disband"),
+	PARTY_GROUP_JOIN   ("party.group.join",    "name"),
+	PARTY_GROUP_KICK   ("party.group.kick",    "name"),
+	
+	PARTY_LEADER_INVITED ("party.leader.invite-sent", "name"),
+	PARTY_LEADER_PICKNAME("party.leader.pick-player"),
+	
+	PARTY_PLAYER_ABANDON("party.player.abandon", "leader"),
+	PARTY_PLAYER_INVITED("party.player.invited", "leader"),
+	PARTY_PLAYER_JOINED ("party.player.joined",  "leader"),
+	PARTY_PLAYER_KICKED ("party.player.kicked",  "leader"),
 
 	NOTIFY_COMPLETED ("notifications.task-completed",         "quest"),
 	NOTIFY_TIME_FAIL ("notifications.task-failed-timeframe",  "quest"),

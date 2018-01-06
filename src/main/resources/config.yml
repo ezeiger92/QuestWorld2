@@ -6,12 +6,13 @@ options:
 party:
   max-members: 4
   enabled: true
+  auto-kick: 5
 book:
   on-first-join: true
 dialogue:
   prefix: '&f'
 data:
-  player:     ../../data-storage/Quest World/
+  player:     playerdata/
   questing:   quests/
   dialogue:   dialogues/
   presets:    presets/

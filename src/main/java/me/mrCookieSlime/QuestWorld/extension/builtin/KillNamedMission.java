@@ -7,9 +7,10 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.inventory.ItemStack;
 
-import me.mrCookieSlime.QuestWorld.api.MissionSet;
+import me.mrCookieSlime.QuestWorld.api.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IMissionState;
+import me.mrCookieSlime.QuestWorld.api.contract.MissionEntry;
 import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
 import me.mrCookieSlime.QuestWorld.util.EntityTools;
 import me.mrCookieSlime.QuestWorld.util.ItemBuilder;
@@ -29,6 +30,14 @@ public class KillNamedMission extends KillMission {
 	}
 	
 	@Override
+	public void validate(IMissionState state) {
+		if(state.getCustomString().length() == 0)
+			state.setCustomString("Jerry");
+		
+		state.apply();
+	}
+	
+	@Override
 	@EventHandler
 	public void onKill(EntityDeathEvent e) {
 		Player killer = e.getEntity().getKiller();
@@ -44,7 +53,7 @@ public class KillNamedMission extends KillMission {
 		if(name == null)
 			return;
 		
-		for(MissionSet.Result r : MissionSet.of(this, killer)) {
+		for(MissionEntry r : QuestWorld.getMissionEntries(this, killer)) {
 			IMission mission = r.getMission();
 			EntityType type = mission.getEntity();
 			if((type == e.getEntityType() || type == EntityType.COMPLEX_PART)
@@ -61,7 +70,7 @@ public class KillNamedMission extends KillMission {
 		putButton(12, MissionButton.entityName(changes));
 		putButton(16, MissionButton.simpleButton(
 				changes,
-				new ItemBuilder(Material.GOLDEN_APPLE).display("&7Match Type")	
+				new ItemBuilder(Material.GOLDEN_APPLE).display("&7Name match type")	
 				.selector(changes.getCustomInt(), "Exact", "Contains").get(),
 				event -> {
 					changes.setCustomInt(1 - changes.getCustomInt());

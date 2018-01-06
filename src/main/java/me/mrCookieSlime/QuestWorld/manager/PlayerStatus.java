@@ -4,10 +4,10 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import me.mrCookieSlime.QuestWorld.QuestWorldPlugin;
-import me.mrCookieSlime.QuestWorld.api.MissionSet;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.QuestStatus;
 import me.mrCookieSlime.QuestWorld.api.QuestWorld;
@@ -16,59 +16,46 @@ import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.api.annotation.Nullable;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
+import me.mrCookieSlime.QuestWorld.api.contract.IPlayerStatus;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
-import me.mrCookieSlime.QuestWorld.api.contract.IStateful;
-import me.mrCookieSlime.QuestWorld.party.Party;
+import me.mrCookieSlime.QuestWorld.api.event.MissionCompletedEvent;
 import me.mrCookieSlime.QuestWorld.util.PlayerTools;
 import me.mrCookieSlime.QuestWorld.util.Text;
 
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
-import org.bukkit.metadata.FixedMetadataValue;
 
-public class PlayerManager {
-	
-	public static PlayerManager of(Player player) {
-		PlayerManager result;
-		try {
-			result = (PlayerManager)player.getMetadata("questworld.playermanager").get(0).value();
-		}
-		catch(IndexOutOfBoundsException e) {
-			result = new PlayerManager(player.getUniqueId());
-			player.setMetadata("questworld.playermanager", new FixedMetadataValue(QuestWorld.getPlugin(), result));
-		}
-		return result;
-	}
-
-	public static PlayerManager of(UUID uuid) {
-		Player p = Bukkit.getPlayer(uuid);
-		if(p != null)
-			return of(p);
-		return new PlayerManager(uuid);
+public class PlayerStatus implements IPlayerStatus {
+	private static PlayerStatus of(OfflinePlayer player) {
+		return (PlayerStatus)QuestWorld.getAPI().getPlayerStatus(player);
 	}
 	
-	private UUID uuid;
-	private IStateful last;
+	private static PlayerStatus of(UUID uuid) {
+		return (PlayerStatus)QuestWorld.getAPI().getPlayerStatus(uuid);
+	}
 	
+	private final UUID playerUUID;
 	private final ProgressTracker tracker;
 	
-	public PlayerManager(UUID uuid) {
-		this.uuid = uuid;
+	public PlayerStatus(UUID uuid) {
+		this.playerUUID = uuid;
 		tracker = new ProgressTracker(uuid);
 	}
 	
+	@Override
 	public int countQuests(@Nullable ICategory root, @Nullable QuestStatus status) {
 		if(root != null)
-			return _countQuests(root, status);
+			return questsInCategory(root, status);
 		
 		int result = 0;
 		for(ICategory category : QuestWorld.getFacade().getCategories())
-			result += _countQuests(category, status);
+			result += questsInCategory(category, status);
 
 		return result;
 	}
 	
-	private int _countQuests(ICategory category, @Nullable QuestStatus status) {
+	private int questsInCategory(ICategory category, @Nullable QuestStatus status) {
 		if(status == null)
 			return category.getQuests().size();
 
@@ -80,14 +67,26 @@ public class PlayerManager {
 		return result;
 	}
 	
+	private static Player asOnline(UUID playerUUID) {
+		OfflinePlayer player = Bukkit.getOfflinePlayer(playerUUID);
+		if(player.isOnline())
+			return (Player)player;
+		
+		throw new IllegalArgumentException("Player " + player.getName() + " ("+player.getUniqueId()+") is offline");
+	}
+	
+	private static Optional<Player> ifOnline(UUID playerUUID) {
+		return Optional.ofNullable(Bukkit.getPlayer(playerUUID));
+	}
+	
 	public List<IMission> getActiveMissions(MissionType type) {
 		List<IMission> result = new ArrayList<>();
 		
-		Player player = Bukkit.getPlayer(uuid);
+		Player player = asOnline(playerUUID);
 		String worldName = player.getWorld().getName();
 		
 		for(IMission task : QuestWorld.getViewer().getMissionsOf(type)) {
-			IQuest quest = task.getQuest();	
+			IQuest quest = task.getQuest();
 			
 			if (quest.getCategory().isWorldEnabled(worldName) && quest.getWorldEnabled(worldName)
 				&& !hasCompletedTask(task) && hasUnlockedTask(task)
@@ -99,11 +98,7 @@ public class PlayerManager {
 	}
 	
 	public void unload() {
-		tracker.save();
-	}
-
-	public UUID getUUID() {
-		return uuid;
+		tracker.onSave();
 	}
 	
 	public long getCooldownEnd(IQuest quest) {
@@ -116,42 +111,51 @@ public class PlayerManager {
 		return date > System.currentTimeMillis();
 	}
 	
-	public static boolean updateTimeframe(UUID uuid, IMission task, int amount) {
-		if (task.getTimeframe() == 0) return true;
-		Player p = Bukkit.getPlayer(uuid);
-		PlayerManager manager = of(p);
+	public boolean updateTimeframe(IMission task, int amount) {
+		if (task.getTimeframe() == 0)
+			return true;
 
-		if (!manager.isWithinTimeframe(task)) {
-			manager.tracker.setMissionCompleted(task, null);
-			manager.tracker.setMissionProgress(task, 0);
-			if (p != null) {
-				PlayerTools.sendTranslation(p, false, Translation.NOTIFY_TIME_FAIL, task.getQuest().getName());
-			}
+		if (isWithinTimeframe(task)) {
+			tracker.setMissionCompleted(task, null);
+			tracker.setMissionProgress(task, 0);
+			ifOnline(playerUUID).ifPresent(player ->
+				PlayerTools.sendTranslation(player, false, Translation.NOTIFY_TIME_FAIL, task.getQuest().getName())
+			);
 			return false;
 		}
-		else if (manager.getProgress(task) == 0 && amount > 0) {
-			manager.tracker.setMissionCompleted(task, System.currentTimeMillis() + task.getTimeframe() * 60 * 1000);
-			if (p != null) 
-				PlayerTools.sendTranslation(p, false, Translation.NOTIFY_TIME_START, task.getText(), Text.timeFromNum(task.getTimeframe()));
+		else if (getProgress(task) == 0 && amount > 0) {
+			tracker.setMissionCompleted(task, System.currentTimeMillis() + task.getTimeframe() * 60 * 1000);
+			
+			ifOnline(playerUUID).ifPresent(player ->
+				PlayerTools.sendTranslation(player, false, Translation.NOTIFY_TIME_START, task.getText(), Text.timeFromNum(task.getTimeframe()))
+			);
 		}
 		return true;
 	}
 	
+	@Override
+	public boolean isMissionActive(IMission mission) {
+		return getStatus(mission.getQuest()).equals(QuestStatus.AVAILABLE)
+				&& !hasCompletedTask(mission)
+				&& hasUnlockedTask(mission);
+	}
+	
 	public void update(boolean quest_check) {
-		Player p = Bukkit.getPlayer(uuid);
+		Player p = asOnline(playerUUID);
 		
 		if (p != null && quest_check)
-			for (IMission task: QuestWorld.getViewer().getTickingMissions())
-				if (getStatus(task.getQuest()).equals(QuestStatus.AVAILABLE) && !hasCompletedTask(task) && hasUnlockedTask(task))
-					((Ticking) task.getType()).onTick(p, new MissionSet.Result(task, this));
+			for (IMission mission: QuestWorld.getViewer().getTickingMissions())
+				if (isMissionActive(mission))
+					((Ticking) mission.getType()).onTick(p, new MissionSet.Result(mission, this));
 		
 		for (ICategory category: QuestWorld.getFacade().getCategories()) {
 			for (IQuest quest: category.getQuests()) {
 				if (getStatus(quest).equals(QuestStatus.AVAILABLE)) {
 					boolean finished = quest.getMissions().size() != 0;
 					for (IMission task: quest.getMissions()) {
-						updateTimeframe(this.uuid, task, 0);
-						if (!hasCompletedTask(task)) finished = false;
+						updateTimeframe(task, 0);
+						if (!hasCompletedTask(task))
+							finished = false;
 					}
 					
 					if (finished) {
@@ -159,11 +163,8 @@ public class PlayerManager {
 						
 						if (!quest.getAutoClaimed() || p == null)
 							tracker.setQuestStatus(quest, QuestStatus.REWARD_CLAIMABLE);
-						else {
-							// TODO manually handout and complete... reconsider
-							quest.handoutReward(p);
-							completeQuest(quest);
-						}
+						else
+							quest.completeFor(p);
 					}
 				}
 				else if(getStatus(quest).equals(QuestStatus.ON_COOLDOWN))
@@ -173,39 +174,49 @@ public class PlayerManager {
 		}
 	}
 
+	@Override
 	public QuestStatus getStatus(IQuest quest) {
-		Player p = Bukkit.getPlayer(uuid);
+		Player p = asOnline(playerUUID);
 		if (quest.getParent() != null && !hasFinished(quest.getParent())) return QuestStatus.LOCKED;
 		if (p != null && !PlayerTools.checkPermission(p, quest.getPermission())) return QuestStatus.LOCKED;
-		if (quest.getPartySize() == 0 && getParty() != null) return QuestStatus.LOCKED_NO_PARTY;
-		if (quest.getPartySize() > 1 && (getParty() == null || getParty().getSize() < quest.getPartySize())) return QuestStatus.LOCKED_PARTY_SIZE;
+		
+		Party party = (Party)QuestWorld.getParty(p);
+		int partySize = party != null ? party.getSize() : 0;
+		
+		if (quest.getPartySize() == 0 && partySize > 0) return QuestStatus.LOCKED_NO_PARTY;
+		if (quest.getPartySize() > 1 && partySize < quest.getPartySize()) return QuestStatus.LOCKED_PARTY_SIZE;
 		
 		return tracker.getQuestStatus(quest);
 	}
 
+	@Override
 	public boolean hasFinished(IQuest quest) {
 		return tracker.isQuestFinished(quest);
 	}
 
+	@Override
 	public boolean hasCompletedTask(IMission task) {
 		return getProgress(task) >= task.getAmount();
 	}
 
+	@Override
 	public boolean hasUnlockedTask(IMission task) {
 		if (!task.getQuest().getOrdered()) return true;
 		
-		List<? extends IMission> tasks = task.getQuest().getMissions();
+		List<? extends IMission> tasks = task.getQuest().getOrderedMissions();
 		int index = tasks.indexOf(task) - 1;
-		if (index < 0) return true;
-		else return hasCompletedTask(tasks.get(index));
+		if (index < 0 || hasCompletedTask(task)) return true;
+		else return !inDialogue && hasCompletedTask(tasks.get(index));
 	}
 	
+	@Override
 	public int getProgress(IMission task) {
 		int progress = tracker.getMissionProgress(task);
 		
 		return Math.min(progress, task.getAmount());
 	}
 	
+	@Override
 	public int getProgress(IQuest quest) {
 		int progress = 0;
 		for(IMission task : quest.getMissions())
@@ -215,6 +226,7 @@ public class PlayerManager {
 		return progress;
 	}
 	
+	@Override
 	public int getProgress(ICategory category) {
 		int progress = 0;
 		for(IQuest quest : category.getQuests())
@@ -224,6 +236,7 @@ public class PlayerManager {
 		return progress;
 	}
 	
+	@Override
 	public String progressString(IQuest quest) {
 		int progress = 0;
 		for(IMission mission : quest.getMissions())
@@ -232,9 +245,10 @@ public class PlayerManager {
 		
 		int amount = quest.getMissions().size();
 		
-		return Text.progressBar( progress, amount, null);
+		return Text.progressBar(progress, amount, null);
 	}
 	
+	@Override
 	public String progressString() {
 		int done = 0;
 		int total = 0;
@@ -257,76 +271,84 @@ public class PlayerManager {
 	}
 
 	public void setProgress(IMission task, int amount) {
-		if(task.getQuest().supportsParties() && getParty() != null)
-			for(UUID uuid : getParty().getPlayers())
-				setSingleProgress(uuid, task, amount);
+		Party party = (Party)QuestWorld.getParty(playerUUID);
+		if(task.getQuest().supportsParties() && party != null)
+			for(UUID memberUuid: party.getGroupUUIDs())
+				of(memberUuid).setSingleProgress(task, amount);
 		else
-			setSingleProgress(this.uuid, task, amount);
+			setSingleProgress(task, amount);
 	}
 	
-	private static void setSingleProgress(UUID uuid, IMission task, int amount) {
+	private void setSingleProgress(IMission task, int amount) {
 		amount = Math.min(amount, task.getAmount());
-		if (!updateTimeframe(uuid, task, amount))
+		if (!updateTimeframe(task, amount))
 			return;
 		
-		PlayerManager.of(uuid).tracker.setMissionProgress(task, amount);
+		tracker.setMissionProgress(task, amount);
 		
 		if(amount == task.getAmount()) {
-			Player player = Bukkit.getPlayer(uuid);
-			if(player != null)
-				sendDialogue(player, task, task.getDialogue().iterator());
+			Bukkit.getPluginManager().callEvent(new MissionCompletedEvent(task));
+			sendDialogue(playerUUID, task, task.getDialogue().iterator());
 		}
 	}
 	
+	protected boolean inDialogue = false;
 	
-	public static void sendDialogue(final Player player, final IMission task, final Iterator<String> dialogue) {
-		if(!player.isOnline())
-			return;
-		
-		String line;
-		
-		// Grab a line if we can
-		// Otherwise if there was no dialogue, use the completion placeholder
-		// If there are no lines, and there was dialogue, we're clearly done so return
-		// Refactor for ezeiger92/QuestWorld2#57
-		boolean hasNext = dialogue.hasNext();
-		if(hasNext)
-			line = dialogue.next();
-		else if(task.getDialogue().isEmpty())
-			line = "*";
-		else
-			return;
-		
-		if(line.equals("*"))
-			// Change for ezeiger92/QuestWorld2#43 - Remove default complete message if dialog is present
-			// Previously "check !task.getType().getID().equals("ACCEPT_QUEST_FROM_NPC") && "
-			// This was done to keep quests quiet when interacting with citizens
-			PlayerTools.sendTranslation(player, false, Translation.NOTIFY_COMPLETED, task.getQuest().getName());
-		else
-			sendDialogueComponent(player, line);
-		
-		if(hasNext)
-			Bukkit.getScheduler().scheduleSyncDelayedTask(QuestWorld.getPlugin(),
-					() -> sendDialogue(player, task, dialogue), 70L);
+	public static void sendDialogue(UUID uuid, IMission task, Iterator<String> dialogue) {
+		of(uuid).inDialogue = false;
+		ifOnline(uuid).ifPresent(player -> {
+			String line;
+			
+			// Grab a line if we can
+			// Otherwise if there was no dialogue, use the completion placeholder
+			// If there are no lines, and there was dialogue, we're clearly done so return
+			// Refactor for ezeiger92/QuestWorld2#57
+			boolean hasNext = dialogue.hasNext();
+			if(hasNext)
+				line = dialogue.next();
+			else if(task.getDialogue().isEmpty())
+				line = "*";
+			else 
+				return;
+			
+			if(line.equals("*"))
+				// Change for ezeiger92/QuestWorld2#43 - Remove default complete message if dialog is present
+				// Previously "check !task.getType().getID().equals("ACCEPT_QUEST_FROM_NPC") && "
+				// This was done to keep quests quiet when interacting with citizens
+				PlayerTools.sendTranslation(player, false, Translation.NOTIFY_COMPLETED, task.getQuest().getName());
+			else
+				sendDialogueComponent(player, line);
+			
+			if(hasNext) {
+				of(uuid).inDialogue = true;
+				Bukkit.getScheduler().scheduleSyncDelayedTask(QuestWorld.getPlugin(),
+						() -> sendDialogue(uuid, task, dialogue), 70L);
+			}
+		});
 	}
 
 	private static void sendDialogueComponent(Player player, String line) {
+		line = line.replace("@p", player.getName());
+
+		// TODO: remove
+		line = line.replace("<player>", player.getName());
+		
 		if(line.startsWith("/"))
-			Bukkit.dispatchCommand(Bukkit.getConsoleSender(), line.substring(1).replace("<player>", player.getName()));
+			Bukkit.dispatchCommand(Bukkit.getConsoleSender(), line.substring(1));
 
 		else {
 			line = QuestWorld.getPlugin().getConfig().getString("dialogue.prefix") + line;
 			
-			player.sendMessage(Text.colorize(line.replace("<player>", player.getName())));
+			player.sendMessage(Text.colorize(line));
 		}
 	}
 
 	public void completeQuest(IQuest quest) {
-		if (quest.getCooldown() == -1)
+		if (quest.getRawCooldown() < 0)
 			tracker.setQuestStatus(quest, QuestStatus.FINISHED);
 		
 		else {
-			if (quest.getCooldown() == 0)
+			if (quest.getRawCooldown() == 0)
 				tracker.setQuestStatus(quest, QuestStatus.AVAILABLE);
 			
 			else {
@@ -340,24 +362,10 @@ public class PlayerManager {
 		}
 	}
 	
-	public Party getParty() {
-		UUID leader = tracker.getPartyLeader();
-		if(leader != null)
-			return new Party(leader);
-		return null;
-	}
-	
 	public ProgressTracker getTracker() {
 		return tracker;
 	}
-	
-	public IStateful getLastEntry() {
-		return last;
-	}
-	
-	public void setLastEntry(IStateful entry) {
-		this.last = entry;
-	}
+
 	public void clearQuestData(IQuest quest) {
 		tracker.clearQuest(quest);
 	}
@@ -373,7 +381,7 @@ public class PlayerManager {
 				String uuid = file.getName().substring(0, file.getName().length() - 4);
 				ProgressTracker t = new ProgressTracker(UUID.fromString(uuid));
 				t.clearQuest(quest);
-				t.save();
+				t.onSave();
 			}
 
 			// Second: go back to the main thread and make sure all player managers know what happened
@@ -384,5 +392,19 @@ public class PlayerManager {
 				return false;
 			});
 		});
+	}
+
+	@Override
+	public boolean hasDeathEvent(IMission mission) {
+		return ifOnline(playerUUID).map(player -> {
+			IQuest quest = mission.getQuest();
+			String playerWorld = player.getWorld().getName();
+			
+			return getStatus(quest).equals(QuestStatus.AVAILABLE)
+					&& mission.getDeathReset()
+					&& quest.getWorldEnabled(playerWorld)
+					&& quest.getCategory().isWorldEnabled(playerWorld);
+		})
+		.orElse(false);
 	}
 }

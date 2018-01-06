@@ -11,8 +11,8 @@ import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategoryState;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
-import me.mrCookieSlime.QuestWorld.container.PagedMapping;
 import me.mrCookieSlime.QuestWorld.util.PlayerTools;
+import me.mrCookieSlime.QuestWorld.util.Text;
 
 public class Buttons {
 	public static Consumer<InventoryClickEvent> onCategory(ICategory category) {
@@ -24,7 +24,7 @@ public class Buttons {
 				QuestBook.openCategoryEditor(p, category);
 			else {
 				PagedMapping.putPage(p, 0);
-				QuestBook.openCategoryQuestEditor(p, category);
+				QuestBook.openQuestList(p, category);
 			}
 		};
 	}
@@ -34,18 +34,18 @@ public class Buttons {
 			Player p = (Player) event.getWhoClicked();
 			String defaultCategoryName = QuestWorld.translate(Translation.DEFAULT_CATEGORY);
 			
+			p.closeInventory();
 			PlayerTools.promptInput(p, new SinglePrompt(
 					PlayerTools.makeTranslation(true, Translation.CATEGORY_NAME_EDIT, defaultCategoryName),
 					(c,s) -> {
+						s = Text.colorize(s);
 						QuestWorld.getFacade().createCategory(s, id);
 						PlayerTools.sendTranslation(p, true, Translation.CATEGORY_CREATED, s);
-						QuestBook.openEditor(p);
+						QuestBook.openCategoryList(p);
 
 						return true;
 					}
 			));
-			
-			PlayerTools.closeInventoryWithEvent(p);
 		};
 	}
 	
@@ -69,22 +69,22 @@ public class Buttons {
 			Player p = (Player) event.getWhoClicked();
 			String defaultQuestName = QuestWorld.translate(Translation.DEFAULT_QUEST);
 			
+			p.closeInventory();
 			PlayerTools.promptInput(p, new SinglePrompt(
 					PlayerTools.makeTranslation(true, Translation.QUEST_NAME_EDIT, defaultQuestName),
 					(c,s) -> {
 						ICategoryState state = category.getState();
+						s = Text.colorize(s);
 						state.addQuest(s, id);
 						if(state.apply()) {
 							PlayerTools.sendTranslation(p, true, Translation.QUEST_CREATED, s);
 						}
 						
-						QuestBook.openCategoryQuestEditor(p, category);
+						QuestBook.openQuestList(p, category);
 
 						return true;
 					}
 			));
-
-			PlayerTools.closeInventoryWithEvent(p);
 		};
 	}
 	

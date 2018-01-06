@@ -7,9 +7,8 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
 
 import me.mrCookieSlime.QuestWorld.api.MissionType;
-import me.mrCookieSlime.QuestWorld.event.CancellableEvent;
-import me.mrCookieSlime.QuestWorld.event.MissionChangeEvent;
-import me.mrCookieSlime.QuestWorld.manager.ProgressTracker;
+import me.mrCookieSlime.QuestWorld.api.event.CancellableEvent;
+import me.mrCookieSlime.QuestWorld.api.event.MissionChangeEvent;
 import me.mrCookieSlime.QuestWorld.util.BitFlag;
 import me.mrCookieSlime.QuestWorld.util.BitFlag.BitString;
 
@@ -20,11 +19,6 @@ class MissionState extends Mission {
 	public MissionState(Mission source) {
 		super(source);
 		origin = source;
-	}
-	
-	@Override
-	public MissionState getState() {
-		return this;
 	}
 	
 	//// IMissionWrite
@@ -116,8 +110,8 @@ class MissionState extends Mission {
 		if(sendEvent()) {
 			copyTo(origin);
 			origin.updateLastModified();
-			ProgressTracker.saveDialogue(origin);
 			changeBits = 0;
+			validate();
 			return true;
 		}
 		return false;
@@ -136,6 +130,11 @@ class MissionState extends Mission {
 	@Override
 	public Mission getSource() {
 		return origin;
+	}
+	
+	@Override
+	public MissionState getState() {
+		return this;
 	}
 	
 	@Override

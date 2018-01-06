@@ -2,18 +2,16 @@ package me.mrCookieSlime.QuestWorld.command;
 
 import me.mrCookieSlime.QuestWorld.QuestWorldPlugin;
 import me.mrCookieSlime.QuestWorld.api.QuestWorld;
-import me.mrCookieSlime.QuestWorld.api.SinglePrompt;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuestState;
-import me.mrCookieSlime.QuestWorld.api.menu.QBDialogue;
+import me.mrCookieSlime.QuestWorld.api.menu.PagedMapping;
 import me.mrCookieSlime.QuestWorld.api.menu.QuestBook;
-import me.mrCookieSlime.QuestWorld.container.PagedMapping;
 import me.mrCookieSlime.QuestWorld.util.Log;
-import me.mrCookieSlime.QuestWorld.util.PlayerTools;
 import me.mrCookieSlime.QuestWorld.util.Text;
 
-import org.bukkit.ChatColor;
+import java.util.Arrays;
+
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -27,7 +25,15 @@ public class EditorCommand implements CommandExecutor {
 	}
 	
 	private void help(String label, CommandSender sender) {
-		sender.sendMessage(Text.colorize("&4Usage: &c/", label, " <gui/save/upgrade/import <File>/export <File>/reload <config/quests/all>"));
+		sender.sendMessage(Text.colorize("&3== &b/", label, " help &3== "));
+		sender.sendMessage(Text.colorize("  &bgui &7- Open the editor gui"));
+		sender.sendMessage(Text.colorize("  &breload &7- Reloads config files from disk"));
+		sender.sendMessage(Text.colorize("  &bsave &7- Save all in-game config and quest changes to disk"));
+		sender.sendMessage(Text.colorize("  &bextension &7- View extensions"));
+		sender.sendMessage(Text.colorize("  &bexmport <file> &7- Save all quests to a preset"));
+		sender.sendMessage(Text.colorize("  &bimport <file> &4&l*&7 - Overwrite all quests with a preset"));
+		sender.sendMessage(Text.colorize("  &bdiscard &4&l*&7 - Reloads quest data from disk, losing changes"));
+		sender.sendMessage(Text.colorize("  &bupgrade &4&l*&7 - Replaces all cooldowns of 0 with -1"));
 	}
 
 	@Override
@@ -54,6 +60,9 @@ public class EditorCommand implements CommandExecutor {
 			else
 				sender.sendMessage(Text.colorize("&cThe Preset &4", args[1], " &ccould not be installed"));
 		}
+		else if (param.equals("extension")) {
+			ExtensionControl.func(sender, cmd, label, Arrays.copyOfRange(args, 1, args.length));
+		}
 		else if (param.equals("export")) {
 			if(args.length < 2) {
 				sender.sendMessage(Text.colorize("&cMissing argument: /", label, " export &6<File>"));
@@ -68,34 +77,35 @@ public class EditorCommand implements CommandExecutor {
 		else if (param.equals("gui")) {
 			if (p != null) {
 				PagedMapping.clearPages(p);
-				QuestBook.openEditor(p);
+				QuestBook.openCategoryList(p);
 			}
 			else
 				sender.sendMessage(Text.colorize("&4You are not a Player"));
 		}
+		else if(param.equals("discard")) {
+			plugin.onDiscard();
+			sender.sendMessage(Text.colorize("&7Reloaded all quests from disk"));
+		}
 		else if(param.equals("save")) {
 			// Command, force save, this is probably desired over an incremental save
-			plugin.save(true);
+			plugin.onSave(true);
 			sender.sendMessage(Text.colorize("&7Saved all quests to disk"));
 		}
 		else if(param.equals("reload")) {
-			if(args.length > 1 && args[1].equalsIgnoreCase("config")) {
-				plugin.reloadQWConfig();
-				sender.sendMessage(Text.colorize("&7Reloaded config from disk"));
-			}
-			else if(args.length > 1 && args[1].equalsIgnoreCase("quests")) {
-				plugin.reloadQuests();
+			if(args.length > 1 && args[1].equalsIgnoreCase("quests")) {
+				sender.sendMessage(Text.colorize("&cThis usage is deprecated! Use /qe discard instead"));
+				plugin.onDiscard();
 				sender.sendMessage(Text.colorize("&7Reloaded all quests from disk"));
 			}
 			else if(args.length > 1 && args[1].equalsIgnoreCase("all")) {
-				plugin.reloadQWConfig();
-				plugin.reloadQuests();
+				sender.sendMessage(Text.colorize("&cThis usage is deprecated! Use /qe reload and /qe discard instead"));
+				plugin.onReload();
+				plugin.onDiscard();
 				sender.sendMessage(Text.colorize("&7Reloaded config and all quests from disk"));
 			}
 			else {
-				sender.sendMessage(Text.colorize("&7/", label, " reload config - &fReload config files"));
-				sender.sendMessage(Text.colorize("&7/", label, " reload quests - &fReload quest files"));
-				sender.sendMessage(Text.colorize("&7/", label, " reload all - &fReload config and quest files"));
+				plugin.onReload();
+				sender.sendMessage(Text.colorize("&7Reloaded config from disk"));
 			}
 		}
 		else if(param.equals("upgrade")) {
@@ -107,7 +117,7 @@ public class EditorCommand implements CommandExecutor {
 							// Administrative process - bypass events and directly modify quest
 							// 99% of the time you should use .getState() and .apply()
 							IQuestState q = (IQuestState)quest;
-							q.setCooldown(-1);
+							q.setRawCooldown(-1);
 							++changeCount;
 							String questFile = quest.getID() + "-C" + category.getID();
 							Log.info("[Quest World 2] Upgrading "+category.getName()+"."+quest.getName()+" ("+questFile+".quest): Cooldown changed from 0 to -1");
@@ -129,36 +139,6 @@ public class EditorCommand implements CommandExecutor {
 			sender.sendMessage(Text.colorize("  &7If you wish to continue, type /", label, " upgrade confirm"));
 			
 			return true;
-		}
-		else if (args.length == 4 && param.equals("delete_command") && sender instanceof Player) {
-			IQuest quest = QuestWorld.getFacade().getCategory(Integer.parseInt(args[1])).getQuest(Integer.parseInt(args[2]));
-			
-			IQuestState changes = quest.getState();
-			changes.removeCommand(Integer.parseInt(args[3]));
-			if(changes.apply()) {
-				
-			}
-			
-			QBDialogue.openCommandEditor((Player) sender, quest);
-		}
-		else if (args.length == 3 && param.equals("add_command") && sender instanceof Player) {
-			IQuest quest = QuestWorld.getFacade().getCategory(Integer.parseInt(args[1])).getQuest(Integer.parseInt(args[2]));
-			//sender.sendMessage(Text.colorize("&7Type in your desired Command:"));
-			//QuestWorld.getInstance().storeInput(((Player) sender).getUniqueId(), new Input(InputType.COMMAND_ADD, quest));
-			
-			PlayerTools.promptInput(p, new SinglePrompt(
-					"&7Type in your desired Command:",
-					(c,s) -> {
-						IQuestState changes = quest.getState();
-						changes.addCommand(ChatColor.stripColor(s));
-						changes.apply();
-
-						QBDialogue.openCommandEditor(p, quest);
-						return true;
-					}
-			));
-			sender.sendMessage(Text.colorize("&7Usable Variables: @p (Username)"));
-			
 		}
 		else {
 			help(label, sender);

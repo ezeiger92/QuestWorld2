@@ -1,5 +1,6 @@
 package me.mrCookieSlime.QuestWorld.api;
 
+import me.mrCookieSlime.QuestWorld.api.annotation.Control;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IMissionState;
 import me.mrCookieSlime.QuestWorld.api.menu.Menu;
@@ -35,7 +36,7 @@ public abstract class MissionType {
 	
 	public abstract ItemStack userDisplayItem(IMission instance);
 	
-	private String formatTimeframe(IMission instance) {
+	private final String formatTimeframe(IMission instance) {
 		if(instance.getTimeframe() == 0 || !supportsTimeframes)
 			return "";
 		long duration = instance.getTimeframe();
@@ -43,43 +44,44 @@ public abstract class MissionType {
 		return " &7within " + Text.timeFromNum(duration);
 	}
 	
-	private String formatDeathReset(IMission instance) {
+	private final String formatDeathReset(IMission instance) {
 		if(!instance.getDeathReset() || !supportsDeathReset())
 			return "";
 		
 		return " &7without dying";
 	}
 
-	public ItemStack getSelectorItem() {
+	public final ItemStack getSelectorItem() {
 		return selectorItem;
 	}
 	
-	public String getName() {
+	public final String getName() {
 		return name;
 	}
 	
-	public boolean supportsTimeframes() {
+	public final boolean supportsTimeframes() {
 		return supportsTimeframes;
 	}
 	
 	@Override
+	@Control
 	public String toString() {
 		return getName();
 	}
 
-	public boolean supportsDeathReset() {
+	public final boolean supportsDeathReset() {
 		return this instanceof Decaying;
 	}
 
-	protected void setName(String newName) {
+	protected final void setName(String newName) {
 		name = newName;
 	}
 	
-	public boolean attemptUpgrade(IMissionState instance) {
-		return false;
+	@Control
+	public void validate(IMissionState instance) {
 	}
 	
-	protected void setSelectorItem(ItemStack material) {
+	protected final void setSelectorItem(ItemStack material) {
 		selectorItem = material.clone();
 	}
 	
@@ -101,16 +103,20 @@ public abstract class MissionType {
 	}
 	
 	public final void buildMenu(IMissionState changes, Menu menu) {
-		layoutMenu(changes);
-		for(Map.Entry<Integer, MenuData> entry : menuData.entrySet())
-			menu.put(entry.getKey(), entry.getValue().getItem(), entry.getValue().getHandler());
-	}
-	
-	protected void layoutMenu(IMissionState changes) {
 		if(supportsDeathReset()) putButton(5, MissionButton.deathReset(changes));
 		if(supportsTimeframes()) putButton(6, MissionButton.timeframe(changes));
 		putButton(7, MissionButton.missionName(changes));
 		putButton(8, MissionButton.dialogue(changes));
+		
+		validate(changes);
+		layoutMenu(changes);
+		
+		for(Map.Entry<Integer, MenuData> entry : menuData.entrySet())
+			menu.put(entry.getKey(), entry.getValue().getItem(), entry.getValue().getHandler());
+	}
+	
+	@Control
+	protected void layoutMenu(IMissionState changes) {
 	}
 	
 	@Override

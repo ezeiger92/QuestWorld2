@@ -5,6 +5,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
 
 import me.mrCookieSlime.QuestWorld.api.annotation.Nullable;
@@ -70,29 +71,38 @@ public class Text {
 		return output;
 	}
 	
-	public static String escape(@Nullable("Returns null") String input) {
+	public static String serializeColor(@Nullable("Returns null") String input) {
 		if(input == null)
 			return null;
 		
-		return input.replace(colorChar, dummyChar);
+		return input.replace("\\", "\\\\").replace("&", "\\&").replace(colorChar, dummyChar);
 	}
 	
-	public static String escape(String... inputs) {
-		StringBuilder sb = new StringBuilder(inputs.length);
+	public static String deserializeColor(@Nullable("Returns null") String input) {
+		if(input == null)
+			return null;
 		
-		for(String input : inputs)
-			sb.append(escape(input));
-		
-		return sb.toString();
+		input = input.replaceAll("(?i)(?<!\\\\)((?:\\\\\\\\)*)&([0-9A-FK-OR])", "$1"+colorChar+"$2");
+		return input.replace("\\\\", "\\");
 	}
 	
-	public static String[] escapeList(String... inputs) {
-		String[] output = new String[inputs.length];
-		
-		for(int i = 0; i < inputs.length; ++i)
-			output[i] = escape(inputs[i]);
-		
-		return output;
+	public static String stringOf(Location location) {
+		if(location.getWorld() != null)
+			return "X: " + location.getBlockX() +
+					", Y: "+ location.getBlockY() +
+					", Z: "+ location.getBlockZ() +
+					", World: " + location.getWorld().getName();
+		return "Unknown world";
+	}
+	
+	public static String stringOf(Location location, int radius) {
+		if(location.getWorld() != null)
+			return "X: " + location.getBlockX() +
+					", Y: "+ location.getBlockY() +
+					", Z: "+ location.getBlockZ() +
+					", World: " + location.getWorld().getName() +
+					", Range: " + radius;
+		return "Unknown world";
 	}
 	
 	static Pattern firstLetter = Pattern.compile("\\b\\S");
@@ -160,14 +170,12 @@ public class Text {
 	
 	/**
 	 * This function wraps words to align at a specific length, and works with
-	 * color *formatted* strings (rather than colorized strings). If you supply
-	 * strings from {@link Text.colorize}, they will fail to wrap colors across
-	 * multiple lines. The minimum length is 8 characters, and shorter lengths
-	 * will be set to 8.
+	 * colorized strings. The minimum length is 8 characters, and shorter
+	 * lengths will be set to 8.
 	 * 
 	 * @param max_length The maximum length of string
-	 * @param input An array of non-colorized strings
-	 * @return An array of strings, split by length and colorized
+	 * @param input An array of colorized strings
+	 * @return An array of strings, split by length
 	 */
 	public static ArrayList<String> wrap(int max_length, String... input) {
 		ArrayList<String> output = new ArrayList<>(input.length);
@@ -186,47 +194,40 @@ public class Text {
 			String committed_format = format;
 			for(int i = 0, n = 0; i < s.length(); ++i) {
 				char c1 = s.charAt(i);
-				if(c1 == Text.dummyChar) {
+				if(c1 == colorChar)
 					if(i + 1 != s.length()) {
-						char c = s.charAt(i + 1);
-						if("0123456789aAbBcCdDeEfFrR".indexOf(c) != -1)  {
-							prepared_format = String.valueOf(Text.dummyChar) + c;
+						char c = Character.toLowerCase(s.charAt(i + 1));
+						if("0123456789abcdefr".indexOf(c) != -1)  {
+							prepared_format = String.valueOf(colorChar) + c;
 							n -= 2;
 							if(i > seq_end)
 								seq_begin = i;
 							seq_end = i+1;
 						}
-						else if("oOlLmMnNkK".indexOf(c) != -1) {
-							prepared_format += String.valueOf(Text.dummyChar) + c;
+						else if("olmnk".indexOf(c) != -1) {
+							prepared_format += String.valueOf(colorChar) + c;
 							n -= 2;
 							if(i > seq_end)
 								seq_begin = i;
 							seq_end = i+1;
 						}
 					}
-				}
-				if(c1 == ' ' && i > 0) {
-					end = i;
-				}
 				
-				//Log.info("n: " + n + ", c: " + s.charAt(i) + ", i: " + i +  ", s: " + seq_begin + ", e: " + seq_end + ", p: " + prepared_format + ", co: " + committed_format);
+				if(c1 == ' ' && i > 0)
+					end = i;
 				
 				if(n == max_length) {
 					if(end == -1) {
-						if(i-2 == seq_end || i-1 == seq_end) {
+						if(i-2 == seq_end || i-1 == seq_end)
 							end = seq_begin + i - seq_end - 2;
-						}
 						else
 							end = i - 1;
 
-						//Log.info("truncate: " + s.substring(begin, end) + '-');
-						output.add(Text.colorize(format + s.substring(begin, end) + '-'));
+						output.add(format + s.substring(begin, end) + '-');
 					}
-					else {
-						//Log.info("full: " + s.substring(begin, end));
-						output.add(Text.colorize(format + s.substring(begin, end)));
-					}
-					//Log.info("prepared: " + prepared_format + ", committed: " + committed_format + ", format: " + format);
+					else
+						output.add(format + s.substring(begin, end));
+					
 					begin = end;
 					n = i - end;
 					end = -1;
@@ -235,12 +236,10 @@ public class Text {
 				else
 					++n;
 				
-				if(i > seq_end) {
+				if(i > seq_end)
 					committed_format = prepared_format;
-				}
 			}
-			output.add(Text.colorize(format + s.substring(begin)));
-			//Log.info("prepared: " + prepared_format + ", committed: " + committed_format + ", format: " + format);
+			output.add(format + s.substring(begin));
 			format = prepared_format;
 		}
 		

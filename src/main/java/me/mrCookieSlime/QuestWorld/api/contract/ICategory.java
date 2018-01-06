@@ -5,6 +5,7 @@ import java.util.Collection;
 import org.bukkit.inventory.ItemStack;
 
 import me.mrCookieSlime.QuestWorld.api.annotation.NoImpl;
+import me.mrCookieSlime.QuestWorld.api.annotation.Nullable;
 
 @NoImpl
 public interface ICategory extends IStateful {
@@ -18,7 +19,7 @@ public interface ICategory extends IStateful {
 	Collection<? extends IQuest> getQuests();
 	// getWorlds
 
-	IQuest getQuest(int i);
+	@Nullable("No quest at index") IQuest getQuest(int index);
 	boolean isWorldEnabled(String world);
 
 	@Override

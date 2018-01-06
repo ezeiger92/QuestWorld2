@@ -2,10 +2,10 @@ package me.mrCookieSlime.QuestWorld.util;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -13,32 +13,62 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
 
 public class ResourceLoader {
-	private final Plugin plugin;
+	private static final int BUFFER_SIZE = 16 * 1024;
+	private final ClassLoader classLoader;
+	private final File dataPath;
 	public ResourceLoader(Plugin plugin) {
-		this.plugin = plugin;
+		classLoader = plugin.getClass().getClassLoader();
+		dataPath = plugin.getDataFolder();
 	}
 	
-	private File relativeFile(String path) {
-		return new File(plugin.getDataFolder(), path);
+	public ResourceLoader(ClassLoader loader, File folder) {
+		classLoader = loader;
+		dataPath = folder;
 	}
 	
-	public YamlConfiguration loadFileConfig(String path) {
-		return YamlConfiguration.loadConfiguration(relativeFile(path));
+	private InputStream activeStream;
+	private InputStreamReader activeReader;
+	private InputStreamReader readerOf(String resource) {
+		activeStream = classLoader.getResourceAsStream(resource);
+		activeReader = activeStream != null ? new InputStreamReader(activeStream) : null;
+		return activeReader;
 	}
 	
-	public YamlConfiguration loadJarConfig(String jarPath) {
-		return YamlConfiguration.loadConfiguration(new InputStreamReader(plugin.getResource(jarPath), StandardCharsets.UTF_8));
+	private void close() {
+		try { activeReader.close(); } catch (Exception e) {}
+		try { activeStream.close(); } catch (Exception e) {}
+		activeReader = null;
+		activeStream = null;
 	}
 	
-	public YamlConfiguration loadConfig(String path) throws FileNotFoundException, IOException, InvalidConfigurationException {
+	public YamlConfiguration loadFileConfig(String resource) {
+		return YamlConfiguration.loadConfiguration(new File(dataPath, resource));
+	}
+	
+	public YamlConfiguration loadJarConfig(String resource) {
+		try { return YamlConfiguration.loadConfiguration(readerOf(resource)); }
+		finally { close(); }
+	}
+	
+	public YamlConfiguration loadConfig(String resource) throws FileNotFoundException, IOException, InvalidConfigurationException {
 		YamlConfiguration result = new YamlConfiguration();
-		InputStream resource = plugin.getResource(path);
-		File file = relativeFile(path);
+		File file = new File(dataPath, resource);
 		
-		if(resource != null) {
-			result.setDefaults(YamlConfiguration.loadConfiguration(new InputStreamReader(resource, StandardCharsets.UTF_8)));
-			if(!file.exists())
-				plugin.saveResource(path, false);
+		try { result.setDefaults(YamlConfiguration.loadConfiguration(readerOf(resource))); }
+		finally { close(); }
+		
+		if(!file.exists()) {
+			file.getParentFile().mkdirs();
+			try {
+				readerOf(resource);
+				try(FileOutputStream fos = new FileOutputStream(file)) {
+					byte[] buffer = new byte[BUFFER_SIZE];
+					int len;
+					while((len = activeStream.read(buffer)) != -1)
+						fos.write(buffer, 0, len);
+				}
+			}
+			finally { close(); }
 		}
 		
 		result.load(file);
@@ -46,9 +76,9 @@ public class ResourceLoader {
 		return result;
 	}
 	
-	public YamlConfiguration loadConfigNoexpect(String path, boolean printException) {
+	public YamlConfiguration loadConfigNoexpect(String resource, boolean printException) {
 		try {
-			return loadConfig(path);
+			return loadConfig(resource);
 		}
 		catch(Exception e) {
 			if(printException)
@@ -58,13 +88,13 @@ public class ResourceLoader {
 		return new YamlConfiguration();
 	}
 	
-	public void saveConfig(FileConfiguration config, String path) throws IOException {
-		config.save(relativeFile(path));
+	public void saveConfig(FileConfiguration config, String resource) throws IOException {
+		config.save(new File(dataPath, resource));
 	}
 	
-	public boolean saveConfigNoexcept(FileConfiguration config, String path, boolean printException) {
+	public boolean saveConfigNoexcept(FileConfiguration config, String resource, boolean printException) {
 		try {
-			saveConfig(config, path);
+			saveConfig(config, resource);
 		} catch (Exception e) {
 			if(printException)
 				e.printStackTrace();

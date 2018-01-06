@@ -5,11 +5,11 @@ import org.bukkit.Statistic;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import me.mrCookieSlime.QuestWorld.api.MissionSet;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.Ticking;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IMissionState;
+import me.mrCookieSlime.QuestWorld.api.contract.MissionEntry;
 import me.mrCookieSlime.QuestWorld.api.menu.MenuData;
 import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
 import me.mrCookieSlime.QuestWorld.util.ItemBuilder;
@@ -38,21 +38,20 @@ public class PlayMission extends MissionType implements Ticking {
 	}
 	
 	@Override
-	public void onManual(Player player, MissionSet.Result result) {
+	public void onManual(Player player, MissionEntry result) {
 		result.setProgress(player.getStatistic(Statistic.PLAY_ONE_TICK) / 20 / 60);
 	}
 	
 	@Override
 	protected void layoutMenu(IMissionState changes) {
-		super.layoutMenu(changes);
 		putButton(17, new MenuData(
 				new ItemBuilder(Material.WATCH).wrapText(
 						"&7Time: &b" + Text.timeFromNum(changes.getAmount()),
 						"",
-						"&rLeft Click: &e+1m",
-						"&rRight Click: &e-1m",
-						"&rShift + Left Click: &e+1h",
-						"&rShift + Right Click: &e-1h"
+						"&rLeft click: &e+1m",
+						"&rRight click: &e-1m",
+						"&rShift left click: &e+1h",
+						"&rShift right click: &e-1h"
 						).get(),
 				 event -> {
 					int amount = MissionButton.clickNumber(changes.getAmount(), 60, event);

@@ -10,17 +10,18 @@ import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.util.Log;
 
 public class UnknownMission extends MissionType {
-	
-	private static HashMap<String, UnknownMission> cache = new HashMap<>();
+	private static HashMap<String, UnknownMission> unknown = new HashMap<>();
 	public static UnknownMission get(String name) {
-		UnknownMission result = cache.get(name);
-		if(result == null) {
-			result = new UnknownMission(name);
-			cache.put(name, result);
-			Log.warning("Tried to fetch unknown mission type: " + name + ". Did an extension fail to load?");
-			Log.warning("Supplying dummy mission for " + name);
-		}
-		return result;
+		UnknownMission mission = unknown.get(name);
+		
+		if(mission != null)
+			return mission;
+		
+		Log.warning("Tried to fetch unknown mission type: " + name + ". Did an extension fail to load?");
+		Log.warning("Supplying dummy mission for " + name);
+		mission = new UnknownMission(name);
+		unknown.put(name, mission);
+		return mission;
 	}
 
 	private UnknownMission(String name) {

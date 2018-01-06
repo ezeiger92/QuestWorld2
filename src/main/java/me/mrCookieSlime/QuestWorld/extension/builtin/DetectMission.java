@@ -4,11 +4,11 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import me.mrCookieSlime.QuestWorld.api.MissionSet;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.Ticking;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IMissionState;
+import me.mrCookieSlime.QuestWorld.api.contract.MissionEntry;
 import me.mrCookieSlime.QuestWorld.api.menu.MissionButton;
 import me.mrCookieSlime.QuestWorld.util.ItemBuilder;
 import me.mrCookieSlime.QuestWorld.util.Text;
@@ -29,7 +29,7 @@ public class DetectMission extends MissionType implements Ticking {
 	}
 
 	@Override
-	public void onManual(Player p, MissionSet.Result result) {
+	public void onManual(Player p, MissionEntry result) {
 		IMission mission = result.getMission();
 		int amount = 0;
 		for (int i = 0; i < 36; i++) {
@@ -44,12 +44,11 @@ public class DetectMission extends MissionType implements Ticking {
 
 	@Override
 	public String getLabel() {
-		return "Detect";
+		return "&r> Click to check for items";
 	}
 	
 	@Override
 	protected void layoutMenu(IMissionState changes) {
-		super.layoutMenu(changes);
 		putButton(10, MissionButton.item(changes));
 		putButton(17, MissionButton.amount(changes));
 	}

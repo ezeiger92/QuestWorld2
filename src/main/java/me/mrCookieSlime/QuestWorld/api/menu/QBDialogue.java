@@ -1,6 +1,9 @@
 package me.mrCookieSlime.QuestWorld.api.menu;
 
+import static me.mrCookieSlime.QuestWorld.util.json.Prop.*;
+
 import me.mrCookieSlime.QuestWorld.api.QuestWorld;
+import me.mrCookieSlime.QuestWorld.api.SinglePrompt;
 import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategoryState;
@@ -9,21 +12,19 @@ import me.mrCookieSlime.QuestWorld.api.contract.IMissionState;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuestState;
 import me.mrCookieSlime.QuestWorld.api.contract.IStateful;
-import me.mrCookieSlime.QuestWorld.container.PagedMapping;
-import me.mrCookieSlime.QuestWorld.event.CancellableEvent;
-import me.mrCookieSlime.QuestWorld.event.CategoryDeleteEvent;
-import me.mrCookieSlime.QuestWorld.event.MissionDeleteEvent;
-import me.mrCookieSlime.QuestWorld.event.QuestDeleteEvent;
-import me.mrCookieSlime.QuestWorld.manager.PlayerManager;
+import me.mrCookieSlime.QuestWorld.api.event.CancellableEvent;
+import me.mrCookieSlime.QuestWorld.api.event.CategoryDeleteEvent;
+import me.mrCookieSlime.QuestWorld.api.event.MissionDeleteEvent;
+import me.mrCookieSlime.QuestWorld.api.event.QuestDeleteEvent;
 import me.mrCookieSlime.QuestWorld.util.EntityTools;
 import me.mrCookieSlime.QuestWorld.util.ItemBuilder;
 import me.mrCookieSlime.QuestWorld.util.PlayerTools;
 import me.mrCookieSlime.QuestWorld.util.Text;
+import me.mrCookieSlime.QuestWorld.util.json.JsonBlob;
+import me.mrCookieSlime.QuestWorld.util.json.Prop;
 
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-
-import com.google.gson.JsonObject;
 
 public class QBDialogue {
 	public static void openDeletionConfirmation(Player p, final IStateful q) {
@@ -34,7 +35,7 @@ public class QBDialogue {
 		menu.put(6, ItemBuilder.Proto.RED_WOOL.get().display("&cNo").get(), event -> {
 			Player p2 = (Player) event.getWhoClicked();
 			if (q instanceof IQuest) QuestBook.openCategoryEditor(p2, ((IQuest) q).getCategory());
-			else if (q instanceof ICategory) QuestBook.openEditor(p2);
+			else if (q instanceof ICategory) QuestBook.openCategoryList(p2);
 			else if (q instanceof IMission) QuestBook.openQuestEditor(p2, ((IMission) q).getQuest());
 		});
 		
@@ -59,7 +60,7 @@ public class QBDialogue {
 						if(CancellableEvent.send(new CategoryDeleteEvent(category))) {
 							QuestWorld.getFacade().deleteCategory(category);
 							p2.closeInventory();
-							QuestBook.openEditor(p2);
+							QuestBook.openCategoryList(p2);
 							PlayerTools.sendTranslation(p2, true, Translation.CATEGORY_DELETED, category.getName());
 						}
 					}
@@ -72,7 +73,7 @@ public class QBDialogue {
 								QuestWorld.getFacade().deleteQuest(quest);
 
 							p2.closeInventory();
-							QuestBook.openCategoryQuestEditor(p2, quest.getCategory());
+							QuestBook.openQuestList(p2, quest.getCategory());
 							PlayerTools.sendTranslation(p2, true, Translation.QUEST_DELETED, quest.getName());
 						}
 					}
@@ -108,7 +109,7 @@ public class QBDialogue {
 						"",
 						"&rThis will reset this Quest's Database").get(),
 				event -> {
-					PlayerManager.clearAllQuestData(q);
+					QuestWorld.getFacade().clearAllUserData(q);
 					QuestBook.openQuestEditor((Player) event.getWhoClicked(), q);
 				}
 		);
@@ -121,7 +122,7 @@ public class QBDialogue {
 		
 		IMissionState changes = mission.getState();
 		//String title = Text.colorize(mission.getQuest().getName() + " &7- &8(Page " + (page+1) + "/" + (lastPage+1) + ")");
-		final Menu menu = new Menu(6, "&3Entity Selector: " + mission.getQuest().getName());
+		final Menu menu = new Menu(6, "&3Entity selector");
 		
 		PagedMapping pager = new PagedMapping(45);
 
@@ -130,7 +131,7 @@ public class QBDialogue {
 			EntityType entity = entities[i];
 			pager.addButton(i,
 					EntityTools.getEntityDisplay(entity).wrapText(
-							"&7Entity Type: &r" + EntityTools.nameOf(entity),
+							"&7Entity Type: &e" + EntityTools.nameOf(entity),
 							"",
 							"&e> Click to select").get(),
 					event -> {
@@ -140,107 +141,84 @@ public class QBDialogue {
 					}, true
 			);
 		}
-		pager.setBackButton(event -> QuestBook.openQuestMissionEditor(p, mission));
+		pager.setBackButton(" &3Mission editor", event -> QuestBook.openQuestMissionEditor(p, mission));
 		pager.build(menu, p);
 		menu.openFor(p);
 	}
 
 	public static void openCommandEditor(Player p, IQuest quest) {
-		try {
-			p.sendMessage(Text.colorize("&7&m----------------------------"));
-			for (int i = 0; i < quest.getCommands().size(); i++) {
-				String command = quest.getCommands().get(i).replaceAll("(\"|\\\\)", "\\\\$1");
-				
-				JsonObject redX = new JsonObject();
-				redX.addProperty("text", "X ");
-				redX.addProperty("color", "dark_red");
-				
-				JsonObject commandDisplay = new JsonObject();
-				commandDisplay.addProperty("text", command);
-				commandDisplay.addProperty("color", "gray");
-				{
-					JsonObject clickEvent = new JsonObject();
-					clickEvent.addProperty("action", "run_command");
-					clickEvent.addProperty("value",  "/questeditor delete_command " + quest.getCategory().getID() + " " + quest.getID() + " " + i);
-
-					redX.add("clickEvent", clickEvent);
-					commandDisplay.add("clickEvent", clickEvent);
-				}
-				{
-					JsonObject hoverEvent = new JsonObject();
-					hoverEvent.addProperty("action", "show_text");
-					{
-						JsonObject hoverText = new JsonObject();
-						hoverText.addProperty("text", "Click to remove this Command");
-						hoverText.addProperty("color", "gray");
-
-						hoverEvent.add("value",  hoverText);
-					}
-
-					redX.add("hoverEvent", hoverEvent);
-					commandDisplay.add("hoverEvent", hoverEvent);
-				}
-				
-				PlayerTools.tellraw(p, redX.toString(), commandDisplay.toString());
-			}
+		p.sendMessage(Text.colorize("&7&m----------------------------"));
+		for (int i = 0; i < quest.getCommands().size(); i++) {
+			String command = quest.getCommands().get(i).replaceAll("(\"|\\\\)", "\\\\$1");
 			
-			JsonObject greenPlus = new JsonObject();
-			greenPlus.addProperty("text", "+ ");
-			greenPlus.addProperty("color", "dark_green");
+			int index = i;
+			Prop remove = FUSE(
+					HOVER_TEXT("Click to remove this Command", GRAY),
+					CLICK_RUN(p, () -> {
+						IQuestState changes = quest.getState();
+						changes.removeCommand(index);
+						if(changes.apply())
+							QBDialogue.openCommandEditor(p, quest);
+					}));
 			
-			JsonObject prompt = new JsonObject();
-			prompt.addProperty("text", "Add more Commands... (Click)");
-			prompt.addProperty("color", "gray");
-			{
-				JsonObject clickEvent = new JsonObject();
-				clickEvent.addProperty("action", "run_command");
-				clickEvent.addProperty("value", "/questeditor add_command " + quest.getCategory().getID() + " " + quest.getID());
-				
-				greenPlus.add("clickEvent", clickEvent);
-				prompt.add("clickEvent", clickEvent);
-			}
-			{
-				JsonObject hoverEvent = new JsonObject();
-				hoverEvent.addProperty("action", "show_text");
-				{
-					JsonObject hoverText = new JsonObject();
-					hoverText.addProperty("text", "Click to add a new Command");
-					hoverText.addProperty("color", "gray");
-					
-					hoverEvent.add("value", hoverText);
-				}
-				
-				greenPlus.add("hoverEvent", hoverEvent);
-				prompt.add("hoverEvent", hoverEvent);
-			}
-			
-			PlayerTools.tellraw(p, greenPlus.toString(), prompt.toString());
-			p.sendMessage(Text.colorize("&7&m----------------------------"));
-		} catch (Exception x) {
-			x.printStackTrace();
+			PlayerTools.tellraw(p, new JsonBlob("X ", DARK_RED, remove)
+					.add(command, GRAY, remove).toString());
 		}
+		
+		Prop add = FUSE(
+				HOVER_TEXT("Click to add a new Command", GRAY),
+				CLICK_RUN(p, () -> {
+					PlayerTools.promptCommand(p, new SinglePrompt(
+							"&7Type in your desired Command:",
+							(c,s) -> {
+								IQuestState changes = quest.getState();
+								changes.addCommand(s.substring(1));
+								if(changes.apply())
+									QBDialogue.openCommandEditor(p, quest);
+								
+								return true;
+							}
+					));
+					p.sendMessage(Text.colorize("&7Usable Variables: @p (Username)"));
+					
+				}));
+		
+		PlayerTools.tellraw(p, new JsonBlob("+ ", DARK_GREEN, add)
+				.add("Add more Commands... (Click)", GRAY, add).toString());
+		
+		Prop back = FUSE(
+				HOVER_TEXT("Open quest editor", GRAY),
+				CLICK_RUN(p, () -> QuestBook.openQuestEditor(p, quest) ));
+		
+		PlayerTools.tellraw(p, new JsonBlob("< ", BLUE, back)
+				.add("Return to quest editor", GRAY, back).toString());
+		
+		p.sendMessage(Text.colorize("&7&m----------------------------"));
 	}
 
-	public static void openQuestRequirementChooser(Player p, final IStateful quest) {
+	public static void openRequirementCategories(Player p, final IStateful quest) {
 		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
 		
-		Menu menu = new Menu(1, "&c&lQuest Editor");
+		Menu menu = new Menu(1, "&3Categories");
 
 		PagedMapping pager = new PagedMapping(45, 9);
 		for(ICategory category : QuestWorld.getFacade().getCategories()) {
 			pager.addButton(category.getID(), new ItemBuilder(category.getItem()).wrapText(
 					category.getName(),
 					"",
-					"&7&oLeft Click to open").get(),
+					"&e> Click to open category").get(),
 					event -> {
 						Player p2 = (Player)event.getWhoClicked();
 						PagedMapping.putPage(p2, 0);
-						openQuestRequirementChooser2(p2, quest, category);
+						openRequirementQuests(p2, quest, category);
 					}, true
 			);
 		}
-		pager.setBackButton(event -> {
-			if(quest instanceof IQuest)
+		
+		boolean isQuest = quest instanceof IQuest;
+		
+		pager.setBackButton(isQuest ? " &3Quest editor" : " &3Category editor", event -> {
+			if(isQuest)
 				QuestBook.openQuestEditor(p, (IQuest)quest);
 			else
 				QuestBook.openCategoryEditor(p, (ICategory)quest);
@@ -249,10 +227,13 @@ public class QBDialogue {
 		menu.openFor(p);
 	}
 
-	private static void openQuestRequirementChooser2(Player p, final IStateful q, ICategory category) {
+	private static void openRequirementQuests(Player p, final IStateful q, ICategory category) {
 		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
 		
-		Menu menu = new Menu(1, "&c&lQuest Editor");
+		Menu menu = new Menu(1, "&3Quests");
+		
+		boolean isQuest = q instanceof IQuest;
+		String name = isQuest ? ((IQuest)q).getName() : ((ICategory)q).getName();
 		
 		PagedMapping pager = new PagedMapping(45, 9);
 		for(IQuest quest : category.getQuests()) {
@@ -260,9 +241,8 @@ public class QBDialogue {
 					new ItemBuilder(quest.getItem()).wrapText(
 							quest.getName(),
 							"",
-							"&7&oClick to select it as a Requirement",
-							"&7&ofor the Quest:",
-							"&r" + quest.getName()).get(),
+							"&e> Click to set requirement for " +
+							(isQuest ? "quest" : "category") + ": &f&o" + name).get(),
 					event -> {
 						Player p2 = (Player) event.getWhoClicked();
 						PagedMapping.popPage(p2);
@@ -288,7 +268,7 @@ public class QBDialogue {
 					}, false
 			);
 		}
-		pager.setBackButton(event -> openQuestRequirementChooser(p, q));
+		pager.setBackButton(" &3Categories", event -> openRequirementCategories(p, q));
 		pager.build(menu, p);
 		menu.openFor(p);
 	}

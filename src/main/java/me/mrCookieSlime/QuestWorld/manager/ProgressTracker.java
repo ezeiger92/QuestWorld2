@@ -1,25 +1,26 @@
 package me.mrCookieSlime.QuestWorld.manager;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.bukkit.configuration.file.YamlConfiguration;
-
-import com.google.common.collect.Lists;
 
 import me.mrCookieSlime.QuestWorld.QuestWorldPlugin;
 import me.mrCookieSlime.QuestWorld.api.QuestStatus;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IMissionState;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
+import me.mrCookieSlime.QuestWorld.util.Reloadable;
+import me.mrCookieSlime.QuestWorld.util.Text;
 
-public class ProgressTracker {
+public class ProgressTracker implements Reloadable {
 	private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm");
 	private final File configFile;
 	private final YamlConfiguration config;
@@ -37,10 +38,24 @@ public class ProgressTracker {
 		config = YamlConfiguration.loadConfiguration(configFile);
 	}
 	
-	public void save() {
+	@Override
+	public void onSave() {
 		try {
 			config.save(configFile);
-		} catch (IOException e) {
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	@Override
+	public void onReload() {
+	}
+	
+	@Override
+	public void onDiscard() {
+		try {
+			config.load(configFile);
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
@@ -62,23 +77,36 @@ public class ProgressTracker {
 	}
 	
 	public void setPartyLeader(UUID uuid) {
-		config.set("party.associated", uuid.toString());
+		if(uuid != null)
+			config.set("party.associated", uuid.toString());
+		else
+			config.set("party.associated", null);
 	}
 	
-	public List<UUID> getPartyMembers() {
-		return Lists.transform(config.getStringList("party.members"), s -> tryUUID(s));
+	public Set<UUID> getPartyMembers() {
+		return config.getStringList("party.members").stream()
+				.map(ProgressTracker::tryUUID)
+				.filter(uuid -> uuid != null)
+				.collect(Collectors.toSet());
 	}
 	
-	public void setPartyMembers(List<UUID> members) {
-		config.set("party.members", Lists.transform(members, uuid -> uuid.toString()));
+	public void setPartyMembers(Set<UUID> members) {
+		config.set("party.members", members.stream()
+				.map(UUID::toString)
+				.collect(Collectors.toList()));
 	}
 	
-	public List<UUID> getPartyPending() {
-		return Lists.transform(config.getStringList("party.pending-requests"), s -> tryUUID(s));
+	public Set<UUID> getPartyPending() {
+		return config.getStringList("party.pending-requests").stream()
+				.map(ProgressTracker::tryUUID)
+				.filter(uuid -> uuid != null)
+				.collect(Collectors.toSet());
 	}
 	
-	public void setPartyPending(List<UUID> pending) {
-		config.set("party.pending-requests", Lists.transform(pending, uuid -> uuid.toString()));
+	public void setPartyPending(Set<UUID> pending) {
+		config.set("party.pending-requests", pending.stream()
+				.map(UUID::toString)
+				.collect(Collectors.toList()));
 	}
 	
 	//// QUEST
@@ -140,32 +168,66 @@ public class ProgressTracker {
 	}
 	
 	public static File dialogueFile(IMission mission) {
+		return new File(QuestWorldPlugin.getPath("data.dialogue"),
+				mission.getUniqueId().toString() + ".dialogue");
+	}
+	
+	public static File oldDialogueFile(IMission mission) {
 		return new File(QuestWorldPlugin.getPath("data.dialogue"), mission.getQuest().getCategory().getID()
 				+ "+" + mission.getQuest().getID() + "+" + mission.getIndex() + ".txt");
 	}
 	
 	public static void saveDialogue(IMission mission) {
 		File file = dialogueFile(mission);
-		if(file.exists())
+		
+		if(mission.getDialogue().isEmpty()) {
 			file.delete();
+			return;
+		}
 		
 		try {
 			// The only downside to this is system-specific newlines
-			Files.write(file.toPath(), mission.getDialogue(), StandardCharsets.UTF_8);
-		} catch (IOException e) {
+			Files.write(file.toPath(), mission.getDialogue().stream()
+					.map(Text::serializeColor).collect(Collectors.toList()), StandardCharsets.UTF_8);
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 	
 	public static void loadDialogue(IMissionState mission) {
 		File file = dialogueFile(mission);
-		if (file.exists()) {
+		
+		if(!file.exists()) {
+			File oldFile = oldDialogueFile(mission);
+			if(!oldFile.exists())
+				return;
+			
 			try {
-				mission.setDialogue(Files.readAllLines(file.toPath(), StandardCharsets.UTF_8));
-			} catch (IOException e) {
+				List<String> lines = Files.readAllLines(oldFile.toPath());
+				if(lines.isEmpty())
+					return;
+				
+				Files.write(file.toPath(), lines);
+			}
+			catch(Exception e) {
 				e.printStackTrace();
 				return;
 			}
+			
+			try {
+				Files.delete(oldFile.toPath());
+			}
+			catch(Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
+		try {
+			mission.setDialogue(Files.readAllLines(file.toPath(), StandardCharsets.UTF_8).stream()
+					.map(Text::deserializeColor).collect(Collectors.toList()));
+		} catch (Exception e) {
+			e.printStackTrace();
+			return;
 		}
 	}
 	

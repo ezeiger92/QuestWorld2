@@ -6,16 +6,10 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.metadata.FixedMetadataValue;
-import org.bukkit.plugin.Plugin;
 
 import me.mrCookieSlime.QuestWorld.api.QuestWorld;
 
-public class TaskListener implements Listener {
-
-	public TaskListener(Plugin plugin) {
-		plugin.getServer().getPluginManager().registerEvents(this, plugin);
-	}
-	
+public class SpawnerListener implements Listener {
 	@EventHandler(priority=EventPriority.MONITOR,ignoreCancelled=true)
 	public void onCreatureSpawn(CreatureSpawnEvent e) {
 		if (e.getSpawnReason().equals(SpawnReason.SPAWNER))

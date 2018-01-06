@@ -27,4 +27,7 @@ public interface IFacade {
 	void deleteCategory(ICategory category);
 	void deleteQuest(IQuest quest);
 	void deleteMission(IMission mission);
+
+	void clearAllUserData(ICategory category);
+	void clearAllUserData(IQuest quest);
 }

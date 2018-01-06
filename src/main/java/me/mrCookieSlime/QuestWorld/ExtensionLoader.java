@@ -5,6 +5,9 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -14,6 +17,16 @@ import me.mrCookieSlime.QuestWorld.util.Log;
 public class ExtensionLoader {
 	private ClassLoader loader;
 	private File folder;
+	private Map<ClassLoader, List<QuestExtension>> classLoaders = new HashMap<>();
+	
+	private URL urlOf(File file) {
+		try {
+			return file.toURI().toURL();
+		}
+		catch(Exception e) {
+			return null;
+		}
+	}
 	
 	public ExtensionLoader(ClassLoader loader, File folder) {
 		this.loader = loader;
@@ -32,11 +45,6 @@ public class ExtensionLoader {
 	
 	public void load(File extensionFile) {
 		Log.fine("Loader - Reading file: " + extensionFile.getName());
-		URL[] jarURLs = {null};
-		try { jarURLs[0] = extensionFile.toURI().toURL(); }
-		catch (Exception e) { e.printStackTrace(); return; }
-		
-		URLClassLoader newLoader = URLClassLoader.newInstance(jarURLs, loader);
 		
 		JarFile jar;
 		try { jar = new JarFile(extensionFile); }
@@ -45,6 +53,11 @@ public class ExtensionLoader {
 			e.printStackTrace();
 			return;
 		}
+		
+		URL[] jarURLs = { urlOf(extensionFile) };
+		
+		//URLClassLoader newLoader = URLClassLoader.newInstance(jarURLs, loader);
+		URLClassLoader newLoader = new URLClassLoader(jarURLs, loader);
 		
 		Enumeration<JarEntry> entries = jar.entries();
 		ArrayList<Class<?>> extensionClasses = new ArrayList<>();
@@ -58,9 +71,10 @@ public class ExtensionLoader {
 			Log.finer("Loader - Loading class: " + className);
 			Class<?> clazz;
 			try { clazz = newLoader.loadClass(className); }
-			catch (ClassNotFoundException e) {
-				Log.severe("Could not load class \""+className+"\"!");
-				e.printStackTrace();
+			catch (Throwable e) {
+				// Hide these exceptions because extension may not be enabled
+				Log.fine("Could not load class \""+className+"\"");
+				//e.printStackTrace();
 				continue;
 			}
 
@@ -70,17 +84,30 @@ public class ExtensionLoader {
 			}
 		}
 		
+		List<QuestExtension> extensions = new ArrayList<>();
+		
 		for(Class<?> extensionClass : extensionClasses) {
 			Log.fine("Loader - Constructing: " + extensionClass.getName());
-			try { extensionClass.getConstructor().newInstance(); }
+			QuestExtension extension;
+			try { extension = (QuestExtension)extensionClass.getConstructor().newInstance(); }
 			catch (Throwable e) {
 				Log.severe("Exception while constructing extension class \""+extensionClass+"\"!");
 				Log.severe("Is it missing a default constructor?");
 				e.printStackTrace();
+				continue;
 			}
+			
+			extensions.add(extension);
+			QuestWorldPlugin.getImpl().getPlugin().attach(extension);
 		}
+		
+		classLoaders.put(newLoader, extensions);
 		
 		try { jar.close(); }
 		catch (Exception e) { e.printStackTrace(); }
+	}
+	
+	void unload() {
+		
 	}
 }

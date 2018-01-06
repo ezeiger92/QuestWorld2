@@ -3,30 +3,34 @@ package me.mrCookieSlime.QuestWorld.api.menu;
 import java.util.List;
 import java.util.function.Consumer;
 
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
+import static me.mrCookieSlime.QuestWorld.util.json.Prop.*;
+
 import me.mrCookieSlime.QuestWorld.api.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.SinglePrompt;
 import me.mrCookieSlime.QuestWorld.api.Translation;
+import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IMissionState;
-import me.mrCookieSlime.QuestWorld.manager.PlayerManager;
+import me.mrCookieSlime.QuestWorld.manager.PlayerStatus;
 import me.mrCookieSlime.QuestWorld.manager.ProgressTracker;
 import me.mrCookieSlime.QuestWorld.util.EntityTools;
 import me.mrCookieSlime.QuestWorld.util.ItemBuilder;
 import me.mrCookieSlime.QuestWorld.util.PlayerTools;
 import me.mrCookieSlime.QuestWorld.util.Text;
+import me.mrCookieSlime.QuestWorld.util.json.JsonBlob;
+import me.mrCookieSlime.QuestWorld.util.json.Prop;
 
 public class MissionButton {
 	public static MenuData item(IMissionState changes) {
 		return simpleButton(changes,
-				new ItemBuilder(changes.getItem()).wrapLore(
+				new ItemBuilder(changes.getItem()).display(Text.itemName(changes.getItem())).wrapLore(
 						"",
-						"&e> Click to set the Item to the one in your hand").get(),
+						"&e> Click to change the mission item").get(),
 				event -> {
 					Player p = (Player)event.getWhoClicked();
 					ItemStack hand = p.getInventory().getItemInMainHand();
@@ -45,10 +49,10 @@ public class MissionButton {
 				new ItemBuilder(Material.REDSTONE).wrapText(
 						"&7Amount: &b" + changes.getAmount(),
 						"",
-						"&rLeft Click: &e+1",
-						"&rRight Click: &e-1",
-						"&rShift + Left Click: &e+"+groupSize,
-						"&rShift + Right Click: &e-"+groupSize).get(),
+						"&rLeft click: &e+1",
+						"&rRight click: &e-1",
+						"&rShift left click: &e+"+groupSize,
+						"&rShift right click: &e-"+groupSize).get(),
 				event -> {
 					int amt = clickNumber(changes.getAmount(), groupSize, event);
 					changes.setAmount(Math.max(amt, 1));
@@ -60,9 +64,9 @@ public class MissionButton {
 		EntityType entity = changes.getEntity();
 		return new MenuData(
 				EntityTools.getEntityDisplay(entity).wrapText(
-						"&7Entity Type: &r" + EntityTools.nameOf(entity),
+						"&7Entity Type: &e" + EntityTools.nameOf(entity),
 						"",
-						"&e> Click to change the Entity").get(),
+						"&e> Click to change the entity").get(),
 				event -> {
 					QBDialogue.openQuestMissionEntityEditor((Player)event.getWhoClicked(), changes);
 				}
@@ -70,12 +74,11 @@ public class MissionButton {
 	}
 	
 	public static MenuData location(IMissionState changes) {
-		Location l = changes.getLocation();
 		return simpleButton(changes,
-				new ItemBuilder(changes.getDisplayItem()).wrapText(
-						"&rX: " + l.getBlockX() + ", Y: " + l.getBlockY() + ", Z: " + l.getBlockZ(),
+				new ItemBuilder(changes.getDisplayItem()).flagAll().wrapText(
+						Text.stringOf(changes.getLocation(), changes.getCustomInt()),
 						"",
-						"&e> Click to change the Location to your current Position").get(),
+						"&e> Click to update the location").get(),
 				event -> {
 					changes.setLocation(event.getWhoClicked().getLocation().getBlock().getLocation());
 				}
@@ -83,15 +86,16 @@ public class MissionButton {
 	}
 	
 	public static MenuData entityName(IMissionState changes) {
+		String name = changes.getCustomString();
 		return new MenuData(
 				new ItemBuilder(Material.NAME_TAG).wrapText(
-						"&r" + changes.getCustomString(),
+						"&7Entity name: &r&o" + (name.length() > 0 ? name : "-none-"),
 						"",
 						"&e> Click to change the Name").get(),
 				event -> {
 					Player p = (Player)event.getWhoClicked();
 
-					PlayerTools.closeInventoryWithEvent(p);
+					p.closeInventory();
 					PlayerTools.promptInput(p, new SinglePrompt(
 							PlayerTools.makeTranslation(true, Translation.KILLMISSION_NAME_EDIT),
 							(c,s) -> {
@@ -110,19 +114,19 @@ public class MissionButton {
 	public static MenuData missionName(IMissionState changes) {
 		return new MenuData(
 				new ItemBuilder(Material.NAME_TAG).wrapText(
-						changes.getText(),
+						"&7" + changes.getText(),
 						"",
-						"&rLeft Click: Edit Mission Name",
-						"&rRight Click: Reset Mission Name").get(),
+						"&rLeft click: Edit mission name",
+						"&rRight click: Reset mission name").get(),
 				event -> {
 					Player p = (Player)event.getWhoClicked();
 			
 					if(event.getClick().isRightClick()) {
-						changes.setDisplayName(null);
+						changes.setDisplayName("");
 						apply(event, changes);
 					}
 					else {
-						PlayerTools.closeInventoryWithEvent(p);
+						p.closeInventory();
 						PlayerTools.promptInput(p, new SinglePrompt(
 								PlayerTools.makeTranslation(true, Translation.MISSION_NAME_EDIT),
 								(c,s) -> {
@@ -142,12 +146,12 @@ public class MissionButton {
 	public static MenuData timeframe(IMissionState changes) {
 		return simpleButton(changes,
 				new ItemBuilder(Material.WATCH).wrapText(
-						"&7Complete Mission within: &b" + Text.timeFromNum(changes.getTimeframe()),
+						"&7Complete mission within: &b" + Text.timeFromNum(changes.getTimeframe()),
 						"",
-						"&rLeft Click: &e+1m",
-						"&rRight Click: &e-1m",
-						"&rShift + Left Click: &e+1h",
-						"&rShift + Right Click: &e-1h").get(),
+						"&rLeft click: &e+1m",
+						"&rRight click: &e-1m",
+						"&rShift left click: &e+1h",
+						"&rShift right click: &e-1h").get(),
 				event -> {
 					int amt = clickNumber(changes.getTimeframe(), 60, event);
 					changes.setTimeframe(Math.max(amt, 0));
@@ -159,7 +163,7 @@ public class MissionButton {
 		String icon = changes.getDeathReset() ? "&2&l\u2714": "&4&l\u2718";
 		return simpleButton(changes,
 				new ItemBuilder(Material.SKULL_ITEM).wrapText(
-						"&7Resets on Death: " + icon,
+						"&7Resets on death: " + icon,
 						"",
 						"&e> Click to change whether this Mission's Progress resets when a Player dies").get(),
 				event -> {
@@ -181,10 +185,82 @@ public class MissionButton {
 		);
 	}
 	
+	private static void dialogueThing(Player p, IMission mission) {
+		
+		List<String> dialogue = mission.getDialogue();
+		
+		p.sendMessage(Text.colorize("&7&m----------------------------"));
+		int size = dialogue.size();
+		for(int i = 0; i < size; ++i) {
+			String s = dialogue.get(i);
+			int index = i;
+			Prop remove = FUSE(
+					HOVER_TEXT("Click to remove " + (s.startsWith("/") ? "command" : "dialogue")),
+					CLICK_RUN(p, () -> {
+						dialogue.remove(index);
+						
+						IMissionState state = mission.getState();
+						state.setDialogue(dialogue);
+						if(state.apply())
+							dialogueThing(p, mission);
+					}));
+			
+			PlayerTools.tellraw(p,
+					new JsonBlob("X ", DARK_RED, remove)
+					.addLegacy(Text.colorize(s), WHITE, remove).toString());
+		}
+		
+		Prop add = FUSE(
+				HOVER_TEXT("Click to add dialogue", GRAY),
+				CLICK_RUN(p, () -> {
+					
+					PlayerTools.promptInputOrCommand(p, new SinglePrompt(
+							PlayerTools.makeTranslation(true, Translation.MISSION_DIALOG_ADD),
+							null,
+							(c,s) -> {
+								if (s.equalsIgnoreCase("exit()") || s.equalsIgnoreCase("/exit")) {
+									IMissionState state = mission.getState();
+									state.setDialogue(dialogue);
+									if(state.apply()) {
+										String filename = ProgressTracker.dialogueFile(state.getSource()).getName();
+										PlayerTools.sendTranslation(p, true, Translation.MISSION_DIALOG_SET, filename);
+										dialogueThing(p, mission);
+									}
+									return true;
+								}
+								dialogue.add(s);
+								
+								Translation translator = s.startsWith("/") ?
+										Translation.MISSION_COMMAND_ADDED : Translation.MISSION_DIALOG_ADDED;
+								
+								SinglePrompt.setNextDisplay(c, PlayerTools.makeTranslation(true, translator, s));
+								QuestWorld.getSounds().DIALOG_ADD.playTo(p);
+								
+								return false;
+							}
+					));
+					
+					p.sendMessage(Text.colorize("&7Usable Variables: @p (Username)"));
+					
+				}));
+		
+		PlayerTools.tellraw(p, new JsonBlob("+ ", DARK_GREEN, add)
+				.add("Add more dialogue", GRAY, add).toString());
+		
+		Prop back = FUSE(
+				HOVER_TEXT("Open mission editor", GRAY),
+				CLICK_RUN(p, () -> QuestBook.openQuestMissionEditor(p, mission) ));
+		
+		PlayerTools.tellraw(p, new JsonBlob("< ", BLUE, back)
+				.add("Return to mission editor", GRAY, back).toString());
+		
+		p.sendMessage(Text.colorize("&7&m----------------------------"));
+	}
+	
 	public static MenuData dialogue(IMissionState changes) {
 		return new MenuData(
 				new ItemBuilder(Material.PAPER).wrapText(
-						"&rDialogue",
+						"&7Dialogue",
 						"",
 						"&rLeft Click: Edit the Dialogue",
 						"&rRight Click: Dialogue Preview").get(),
@@ -195,33 +271,12 @@ public class MissionButton {
 						if (changes.getDialogue().isEmpty())
 							p.sendMessage(Text.colorize("&4No Dialogue found!"));
 						else
-							PlayerManager.sendDialogue(p, changes, changes.getDialogue().iterator());
+							PlayerStatus.sendDialogue(p.getUniqueId(), changes, changes.getDialogue().iterator());
 						return;
 					}
-					
-					List<String> dialogue = changes.getDialogue();
-					dialogue.clear();
-					
-					PlayerTools.closeInventoryWithEvent(p);
-					PlayerTools.promptInput(p, new SinglePrompt(
-							PlayerTools.makeTranslation(true, Translation.MISSION_DIALOG_ADD),
-							(c,s) -> {
-								Player p2 = (Player) c.getForWhom();
-								if (s.equalsIgnoreCase("exit()")) {
-									changes.setDialogue(dialogue);
-									if(changes.apply()) {
-										String filename = ProgressTracker.dialogueFile(changes.getSource()).getName();
-										PlayerTools.sendTranslation(p2, true, Translation.MISSION_DIALOG_SET, filename);
-									}
-									QuestBook.openQuestMissionEditor(p2, changes.getSource());
-									return true;
-								}
-								
-								dialogue.add(s);
-								QuestWorld.getSounds().DIALOG_ADD.playTo(p2);
-								return false;
-							}
-					));
+
+					dialogueThing(p, changes.getSource());
+					p.closeInventory();
 				}
 		);
 	}

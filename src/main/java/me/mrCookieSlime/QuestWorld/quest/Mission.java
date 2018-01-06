@@ -20,14 +20,14 @@ import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
 
-class Mission extends Renderable implements IMissionState {
+class Mission extends UniqueObject implements IMissionState {
 	private WeakReference<Quest> quest;
-	private int         amount = 1;
-	private int         customInt = 0;
-	private String      customString = "";
-	private boolean     deathReset = false;
-	private String      description = "Hey there! Do this Quest.";
-	private ArrayList<String> dialogue = new ArrayList<>();
+	private int     amount = 1;
+	private int     customInt = 0;
+	private String  customString = "";
+	private boolean deathReset = false;
+	private String  description = "Hey there! Do this Quest.";
+	private List<String> dialogue = new ArrayList<>();
 	private String      displayName = "";
 	private EntityType  entity = EntityType.PLAYER;
 	private ItemStack   item = new ItemStack(Material.STONE);
@@ -54,12 +54,10 @@ class Mission extends Renderable implements IMissionState {
 	protected Mission(Mission source) {
 		copy(source);
 	}
-	
-	public void sanitize() {
-		// Repair any quests that would have been broken by updates, namely location quests
-		MissionState changes = new MissionState(this);
-		type.attemptUpgrade(changes);
-		changes.apply();
+
+	// Repair any quests that would have been broken by updates, namely location quests
+	public void validate() {
+		type.validate(this.getState());
 	}
 
 	//// IMission
@@ -106,7 +104,7 @@ class Mission extends Renderable implements IMissionState {
 
 	@Override
 	public Location getLocation() {
-		return location;
+		return location.clone();
 	}
 	
 	@Override
@@ -160,7 +158,7 @@ class Mission extends Renderable implements IMissionState {
 	public HashMap<String, Object> serialize() {
 		HashMap<String, Object> result = new HashMap<>(20);
 
-		result.put("unique",   (int)getUnique());
+		result.put("uniqueId", getUniqueId().toString());
 		result.put("quest",    getQuest());
 		result.put("type",     type.toString());
 		result.put("item",     item);
@@ -168,13 +166,15 @@ class Mission extends Renderable implements IMissionState {
 		result.put("entity",   entity.toString());
 		result.put("location", locationHelper(location));
 		result.put("index",    index);
-		result.put("custom_string",  Text.escape(customString));
-		result.put("display-name",   Text.escape(displayName));
+		result.put("custom_string",  Text.serializeColor(customString));
+		result.put("display-name",   Text.serializeColor(displayName));
 		result.put("timeframe",      timeframe);
 		result.put("reset-on-death", deathReset);
-		result.put("lore",           Text.escape(description));
+		result.put("lore",           Text.serializeColor(description));
 		result.put("custom_int",     customInt);
 		result.put("exclude-spawners", !spawnerSupport);
+		
+		result.put("questId", getQuest().getUniqueId().toString());
 		
 		return result;
 	}
@@ -274,7 +274,6 @@ class Mission extends Renderable implements IMissionState {
 	}
 	
 	protected void copy(Mission source) {
-		setUnique(source.getUnique());
 		quest = source.quest;
 		amount = source.amount;
 		customInt = source.customInt;
@@ -312,7 +311,7 @@ class Mission extends Renderable implements IMissionState {
 
 	@SuppressWarnings("unchecked")
 	private void loadMap(Map<String, Object> data) {
-		setUnique((Integer)data.getOrDefault("unique", (int)getUnique()));
+		setUniqueId((String)data.get("uniqueId"));
 		
 		quest    = new WeakReference<>((Quest)data.get("quest"));
 		type     = QuestWorld.getMissionType((String)data.getOrDefault("type", type.toString()));
@@ -328,13 +327,13 @@ class Mission extends Renderable implements IMissionState {
 		index    = (Integer)data.getOrDefault("index", index);
 		// Chain to handle old name
 		customString = (String)data.getOrDefault("name", customString);
-		customString = Text.colorize((String)data.getOrDefault("custom_string", customString));
-		displayName  = Text.colorize((String)data.getOrDefault("display-name", displayName));
+		customString = Text.deserializeColor((String)data.getOrDefault("custom_string", customString));
+		displayName  = Text.deserializeColor((String)data.getOrDefault("display-name", displayName));
 		
 		timeframe    = fromMaybeString(data.getOrDefault("timeframe", timeframe));
 		
 		deathReset   = (Boolean)data.getOrDefault("reset-on-death", deathReset);
-		description  = Text.colorize((String)data.getOrDefault("lore", description));
+		description  = Text.deserializeColor((String)data.getOrDefault("lore", description));
 		// Chain to handle old name
 		customInt    = (Integer)data.getOrDefault("citizen", customInt);
 		customInt    = (Integer)data.getOrDefault("custom_int", customInt);

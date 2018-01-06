@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.UUID;
 
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -13,23 +14,24 @@ import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
 import me.mrCookieSlime.QuestWorld.api.contract.IFacade;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
-import me.mrCookieSlime.QuestWorld.container.WeakValueMap;
-import me.mrCookieSlime.QuestWorld.manager.PlayerManager;
+import me.mrCookieSlime.QuestWorld.manager.PlayerStatus;
+import me.mrCookieSlime.QuestWorld.manager.ProgressTracker;
+import me.mrCookieSlime.QuestWorld.util.WeakValueMap;
 
-public class RenderableFacade implements IFacade {
-	private long lastSave;
+public class Facade implements IFacade {
+	private long lastSave = 0;
 	private HashMap<Integer, Category> categoryMap = new HashMap<>();
-	private WeakValueMap<Long, Quest> questMap = new WeakValueMap<>();
-	private WeakValueMap<Long, Mission> missionMap = new WeakValueMap<>();
+	private WeakValueMap<UUID, Quest> questMap = new WeakValueMap<>();
+	private WeakValueMap<UUID, Mission> missionMap = new WeakValueMap<>();
 	
 	@Deprecated
-	public Quest getQuest(long unique) {
-		return questMap.getOrNull(unique);
+	public Quest getQuest(UUID uniqueId) {
+		return questMap.getOrNull(uniqueId);
 	}
 	
 	@Deprecated
-	public Mission getMission(int unique) {
-		return missionMap.getOrNull(unique);
+	public Mission getMission(UUID uniqueId) {
+		return missionMap.getOrNull(uniqueId);
 	}
 	
 	@Override
@@ -39,17 +41,16 @@ public class RenderableFacade implements IFacade {
 		return c;
 	}
 	
-	
 	public Quest createQuest(String name, int id, ICategory category) {
 		Quest q = new Quest(name, id, (Category)category);
-		questMap.putWeak(q.getUnique(), q);
+		questMap.putWeak(q.getUniqueId(), q);
 		return q;
 	}
 	
-	
 	public Mission createMission(int id, IQuest quest) {
 		Mission m = new Mission(id, (Quest)quest);
-		missionMap.putWeak(m.getUnique(), m);
+		ProgressTracker.loadDialogue(m);
+		missionMap.putWeak(m.getUniqueId(), m);
 		return m;
 	}
 	
@@ -69,13 +70,7 @@ public class RenderableFacade implements IFacade {
 		
 		result[0] = Integer.parseInt(in.substring(0, mid - 1));
 		result[1] = Integer.parseInt(in.substring(mid + 1, len));
-		
-		if(swap) {
-			int temp = result[0];
-			result[0] = result[1];
-			result[1] = temp;
-		}
-		
+
 		return result;
 	}
 	
@@ -107,7 +102,6 @@ public class RenderableFacade implements IFacade {
 		public final int id;
 		public final YamlConfiguration file;
 	}
-	static boolean swap = false;
 	public void load() {
 		
 		ArrayList<ParseData> categoryData = new ArrayList<>();
@@ -143,13 +137,11 @@ public class RenderableFacade implements IFacade {
 				for (ParseData qData: questData.get(cData.id)) {
 					Quest q = new Quest(qData.id, qData.file, category);
 					category.directAddQuest(q);
-					questMap.putWeak(q.getUnique(), q);
+					questMap.putWeak(q.getUniqueId(), q);
 				}
 			
 			categoryMap.put(category.getID(), category);
 		}
-		
-		swap = QuestWorld.getPlugin().getConfig().getBoolean("danger.swap-parent", false);
 		
 		for (Category category: categories) {
 			category.refreshParent();
@@ -158,10 +150,15 @@ public class RenderableFacade implements IFacade {
 				quest.refreshParent();
 		}
 		
-		swap = false;
+		lastSave = System.currentTimeMillis();
 	}
 	
-	public void unload() {
+	public void onDiscard() {
+		for(Category c: categoryMap.values())
+			for(Quest q : c.getQuests())
+				for(Mission m : q.getMissions())
+					ProgressTracker.loadDialogue(m);
+		
 		categoryMap.clear();
 		questMap.clear();
 		missionMap.clear();
@@ -177,9 +174,21 @@ public class RenderableFacade implements IFacade {
 	
 	public void save(boolean force) {
 		for(Category c : categoryMap.values()) {
-			c.save(force);
+			if(force || lastSave < c.getLastModified())
+				c.save();
+			
+			for(Quest q : c.getQuests())
+				if(force || lastSave < q.getLastModified()) {
+					q.save();
+					for(Mission m : q.getMissions())
+						ProgressTracker.saveDialogue(m);
+				}
 		}
+		
 		lastSave = System.currentTimeMillis();
+	}
+	
+	public void onReload() {
 	}
 	
 	@Override
@@ -211,13 +220,24 @@ public class RenderableFacade implements IFacade {
 		for(IMission mission : quest.getMissions())
 			deleteMission(mission);
 		
-		PlayerManager.clearAllQuestData(quest);
-		questMap.remove(((Quest)quest).getUnique());
+		PlayerStatus.clearAllQuestData(quest);
+		questMap.remove(((Quest)quest).getUniqueId());
 		deleteQuestFile(quest);
 	}
 	
 	@Override
 	public void deleteMission(IMission mission) {
-		missionMap.remove(((Mission)mission).getUnique());
+		missionMap.remove(((Mission)mission).getUniqueId());
+	}
+	
+	@Override
+	public void clearAllUserData(ICategory category) {
+		for(IQuest quest : category.getQuests())
+			clearAllUserData(quest);
+	}
+	
+	@Override
+	public void clearAllUserData(IQuest quest) {
+		PlayerStatus.clearAllQuestData(quest);
 	}
 }

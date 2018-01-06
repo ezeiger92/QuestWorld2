@@ -3,6 +3,7 @@ package me.mrCookieSlime.QuestWorld;
 import java.util.HashSet;
 
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 //import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapelessRecipe;
@@ -15,13 +16,17 @@ public class GuideBook {
 	private static HashSet<Integer> pastBooks = new HashSet<>();
 	private static GuideBook instance = null;
 	private ItemStack guide;
-	//private NamespacedKey key = new NamespacedKey(QuestWorld.getPlugin(), "GuideBook");
+	private NamespacedKey key = new NamespacedKey(QuestWorld.getPlugin(), "GuideBook");
 	
-	public static ItemStack get() {
+	private static GuideBook instance() {
 		if(instance == null)
 			instance = new GuideBook();
 		
-		return instance.guide.clone();
+		return instance;
+	}
+	
+	public static ItemStack get() {
+		return instance().guide.clone();
 	}
 	
 	public static void reset() {
@@ -32,9 +37,8 @@ public class GuideBook {
 		return item != null && pastBooks.contains(item.hashCode());
 	}
 	
-	@SuppressWarnings("deprecation")
 	public static ShapelessRecipe recipe() {
-		 return new ShapelessRecipe(/*instance.key(1.12+),*/ get())
+		 return new ShapelessRecipe(instance().key, get())
 				 .addIngredient(Material.WORKBENCH);
 	}
 	

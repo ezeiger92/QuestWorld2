@@ -1,6 +1,7 @@
 package me.mrCookieSlime.QuestWorld.api.contract;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
@@ -25,9 +26,11 @@ public interface IMission extends IStateful {
 	int          getTimeframe();
 	MissionType  getType();
 
+	ItemStack    getDisplayItem();
 	int          getIndex();
 	IQuest       getQuest();
-	ItemStack     getDisplayItem();
+	
+	UUID getUniqueId();
 	
 	@Override
 	IMissionState getState();

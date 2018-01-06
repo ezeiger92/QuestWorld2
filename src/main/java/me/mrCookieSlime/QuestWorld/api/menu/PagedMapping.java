@@ -1,4 +1,4 @@
-package me.mrCookieSlime.QuestWorld.container;
+package me.mrCookieSlime.QuestWorld.api.menu;
 
 import java.util.ArrayList;
 import java.util.ListIterator;
@@ -14,7 +14,6 @@ import org.bukkit.metadata.Metadatable;
 
 import me.mrCookieSlime.QuestWorld.api.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.Translation;
-import me.mrCookieSlime.QuestWorld.api.menu.Menu;
 import me.mrCookieSlime.QuestWorld.util.ItemBuilder;
 
 public class PagedMapping {
@@ -25,6 +24,7 @@ public class PagedMapping {
 
 	private int currentPage = 0;
 	private int activeSize;
+	private String backLabel = "";
 	private Consumer<InventoryClickEvent> backButton = null;
 	
 	@SuppressWarnings("unchecked")
@@ -66,7 +66,8 @@ public class PagedMapping {
 		this(cellsPerPanel, cellsPerPanel);
 	}
 	
-	public void setBackButton(Consumer<InventoryClickEvent> button) {
+	public void setBackButton(String label, Consumer<InventoryClickEvent> button) {
+		backLabel = label != null ? label : "";
 		backButton = button;
 	}
 
@@ -147,7 +148,7 @@ public class PagedMapping {
 		);
 		
 		if(backButton != null) 
-			frame.addButton(0, ItemBuilder.Proto.MAP_BACK.getItem(), backButton);
+			frame.addButton(0, ItemBuilder.Proto.MAP_BACK.get().wrapLore(backLabel).get(), backButton);
 		
 		frame.build(menu);
 	}

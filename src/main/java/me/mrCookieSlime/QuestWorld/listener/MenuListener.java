@@ -6,21 +6,21 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 
+import me.mrCookieSlime.QuestWorld.api.contract.IStateful;
+import me.mrCookieSlime.QuestWorld.api.event.CategoryDeleteEvent;
+import me.mrCookieSlime.QuestWorld.api.event.MissionDeleteEvent;
+import me.mrCookieSlime.QuestWorld.api.event.QuestDeleteEvent;
 import me.mrCookieSlime.QuestWorld.api.menu.Menu;
-import me.mrCookieSlime.QuestWorld.event.CategoryDeleteEvent;
-import me.mrCookieSlime.QuestWorld.event.MissionDeleteEvent;
-import me.mrCookieSlime.QuestWorld.event.QuestDeleteEvent;
-import me.mrCookieSlime.QuestWorld.manager.PlayerManager;
+import me.mrCookieSlime.QuestWorld.api.menu.QuestBook;
 
 public class MenuListener implements Listener {
 
 	@EventHandler(ignoreCancelled=true)
 	public void onInventoryClick(InventoryClickEvent event) {
-		Menu openMenu = Menu.forUUID(event.getWhoClicked().getUniqueId());
-		if(openMenu != null) {
+		if(event.getInventory().getHolder() instanceof Menu) {
+			Menu openMenu = (Menu)event.getInventory().getHolder();
 			boolean val = true;
 			try {
 				val = openMenu.click(event);
@@ -34,37 +34,33 @@ public class MenuListener implements Listener {
 	}
 	
 	@EventHandler
-	public void onClose(InventoryCloseEvent event) {
-		Menu.clear(event.getPlayer().getUniqueId());
-	}
-	
-	@EventHandler
 	public void onDrag(InventoryDragEvent event) {
-		Menu openMenu = Menu.forUUID(event.getWhoClicked().getUniqueId());
-		if(openMenu != null)
+		if(event.getInventory().getHolder() instanceof Menu) {
+			Menu openMenu = (Menu) event.getInventory().getHolder();
 			for(int key : event.getRawSlots())
 				if(openMenu.requestCancel(event.getInventory(), key)) {
 					event.setCancelled(true);
 					return;
 				}
+		}
 	}
 	
 	@EventHandler(ignoreCancelled = true)
 	public void onCategoryDelete(CategoryDeleteEvent event) {
 		for(Player p : Bukkit.getOnlinePlayers()) {
-			PlayerManager manager = PlayerManager.of(p);
-			if(event.getCategory() == manager.getLastEntry() ||
-					event.getCategory().getQuests().contains(manager.getLastEntry()))
-				manager.setLastEntry(null);
+			IStateful object = QuestBook.getLastViewed(p);
+			if(event.getCategory() == object ||
+					event.getCategory().getQuests().contains(object))
+				QuestBook.setLastViewed(p, null);
 		}
 	}
 	
 	@EventHandler(ignoreCancelled = true)
 	public void onQuestDelete(QuestDeleteEvent event) {
 		for(Player p : Bukkit.getOnlinePlayers()) {
-			PlayerManager manager = PlayerManager.of(p);
-			if(event.getQuest() == manager.getLastEntry())
-				manager.setLastEntry(event.getQuest().getCategory());
+			IStateful object = QuestBook.getLastViewed(p);
+			if(event.getQuest() == object)
+				QuestBook.setLastViewed(p, null);
 		}
 	}
 	

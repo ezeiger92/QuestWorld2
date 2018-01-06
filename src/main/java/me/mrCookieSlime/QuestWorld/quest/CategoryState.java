@@ -3,8 +3,8 @@ package me.mrCookieSlime.QuestWorld.quest;
 import org.bukkit.inventory.ItemStack;
 
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
-import me.mrCookieSlime.QuestWorld.event.CancellableEvent;
-import me.mrCookieSlime.QuestWorld.event.CategoryChangeEvent;
+import me.mrCookieSlime.QuestWorld.api.event.CancellableEvent;
+import me.mrCookieSlime.QuestWorld.api.event.CategoryChangeEvent;
 import me.mrCookieSlime.QuestWorld.util.BitFlag;
 
 class CategoryState extends Category {
@@ -13,7 +13,6 @@ class CategoryState extends Category {
 	
 	public CategoryState(Category copy) {
 		super(copy);
-		setUnique(copy.getUnique());
 		origin = copy;
 	}
 	

@@ -12,14 +12,15 @@ import java.util.zip.ZipOutputStream;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.QuestExtension;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
-import me.mrCookieSlime.QuestWorld.api.contract.QuestLoader;
+import me.mrCookieSlime.QuestWorld.api.contract.QuestingAPI;
+import me.mrCookieSlime.QuestWorld.command.ClickCommand;
 import me.mrCookieSlime.QuestWorld.command.EditorCommand;
 import me.mrCookieSlime.QuestWorld.command.QuestsCommand;
 import me.mrCookieSlime.QuestWorld.extension.builtin.Builtin;
 import me.mrCookieSlime.QuestWorld.listener.ExtensionInstaller;
 import me.mrCookieSlime.QuestWorld.listener.MenuListener;
 import me.mrCookieSlime.QuestWorld.listener.PlayerListener;
-import me.mrCookieSlime.QuestWorld.manager.PlayerManager;
+import me.mrCookieSlime.QuestWorld.listener.SpawnerListener;
 import me.mrCookieSlime.QuestWorld.util.Log;
 
 import org.bukkit.entity.Player;
@@ -28,9 +29,8 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class QuestWorldPlugin extends JavaPlugin implements Listener, QuestLoader {
+public class QuestWorldPlugin extends JavaPlugin implements Listener {
 	private static QuestWorldPlugin instance = null;
-	private long lastSave = 0;
 
 	private QuestingImpl api = new QuestingImpl(this);
 
@@ -42,14 +42,13 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener, QuestLoade
 	
 	public QuestWorldPlugin() {
 		instance = this;
-		Log.setLogger(getLogger());
 
 		saveDefaultConfig();
 		getPath("data.extensions");
 		getPath("data.presets");
 		
 		extLoader = new ExtensionLoader(getClassLoader(), getPath("data.extensions"));
-		getServer().getServicesManager().register(QuestLoader.class, this, this, ServicePriority.Normal);
+		getServer().getServicesManager().register(QuestingAPI.class, api, this, ServicePriority.Normal);
 	}
 	
 	private ArrayList<QuestExtension> preEnableHooks = new ArrayList<>();
@@ -69,12 +68,12 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener, QuestLoade
 	public void onEnable() {
 		api.onEnable();
 		hookInstaller = new ExtensionInstaller(this);
-		new Builtin();
+		hookInstaller.add(new Builtin());
 		hookInstaller.addAll(preEnableHooks);
 		preEnableHooks.clear();
 		preEnableHooks = null;
 		
-		if(api.getEconomy() == null)
+		if(!api.getEconomy().isPresent())
 			Log.info("No economy (vault) found, money rewards disabled");
 			
 		getServer().getScheduler().scheduleSyncDelayedTask(this, () -> {
@@ -88,7 +87,7 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener, QuestLoade
 			Log.fine("Successfully loaded " + quests + " Quests");
 		}, 0L);
 		
-		reloadQWConfig();
+		onReload();
 		
 		getCommand("quests").setExecutor(new QuestsCommand());
 		getCommand("questeditor").setExecutor(new EditorCommand(this));
@@ -97,6 +96,8 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener, QuestLoade
 		pm.registerEvents(new PlayerListener(), this);
 		pm.registerEvents(api.getViewer(), this);
 		pm.registerEvents(new MenuListener(), this);
+		pm.registerEvents(new SpawnerListener(), this);
+		pm.registerEvents(new ClickCommand(), this);
 
 		getServer().addRecipe(GuideBook.recipe());
 	}
@@ -110,7 +111,7 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener, QuestLoade
 		questCheckHandle = getServer().getScheduler().scheduleSyncRepeatingTask(this,
 				() -> {
 					for (Player p: getServer().getOnlinePlayers())
-						PlayerManager.of(p).update(true);
+						api.getPlayerStatus(p).update(true);
 				},
 				0L,
 				getConfig().getInt("options.quest-check-delay")
@@ -123,26 +124,34 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener, QuestLoade
 				getServer().getScheduler().cancelTask(autosaveHandle);
 			
 			autosaveHandle = getServer().getScheduler().scheduleSyncRepeatingTask(this,
-					() -> save(true),
+					() -> onSave(false),
 					autosave,
 					autosave
 			);
 		}
 	}
 	
-	public void load() {
-		api.getFacade().load();
-		lastSave = System.currentTimeMillis();
+	public ExtensionInstaller getInstaller() {
+		return hookInstaller;
 	}
 	
-	public void reloadQWConfig() {
+	public ExtensionLoader getLoader() {
+		return extLoader;
+	}
+	
+	public void load() {
+		api.getFacade().load();
+	}
+	
+	public void onReload() {
 		loadConfigs();
-		api.reload();
+		api.onReload();
+		hookInstaller.onReload();
 		GuideBook.reset();
 	}
 	
-	public void reloadQuests() {
-		api.getFacade().unload();
+	public void onDiscard() {
+		api.onDiscard();
 		load();
 	}
 	
@@ -156,27 +165,23 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener, QuestLoade
 		getServer().getServicesManager().unregisterAll(this);
 		getServer().getScheduler().cancelTasks(this);
 	}
-	
-	public long getLastSaved() {
-		return lastSave;
-	}
 
-	public void save(boolean force) {
+	public void onSave(boolean force) {
 		api.getFacade().save(force);
 
 		for(Player p : getServer().getOnlinePlayers())
-			PlayerManager.of(p).getTracker().save();
+			api.getPlayerStatus(p).getTracker().onSave();
 		
-		lastSave = System.currentTimeMillis();
+		hookInstaller.save();
 	}
 
 	public void unload() {
 		api.getFacade().save(true);
-		api.getFacade().unload();
-		api.getViewer().clear();
 		
 		for(Player p : getServer().getOnlinePlayers())
-			PlayerManager.of(p).getTracker().save();
+			api.getPlayerStatus(p).getTracker().onSave();
+		
+		api.onDiscard();
 	}
 	
 	public boolean importPreset(String fileName) {
@@ -223,7 +228,7 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener, QuestLoade
 		
 		if (file.exists()) file.delete();
 		
-		save(true); // Why unload and load in a try/catch block when you can just use a save function?
+		onSave(true); // Why unload and load in a try/catch block when you can just use a save function?
 		
 		try {
 			file.createNewFile();
@@ -251,9 +256,8 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener, QuestLoade
 		return true;
 	}
 	
-	@Override
 	public void enable(QuestExtension hook) {
-		for(MissionType type : hook.getMissions()) {
+		for(MissionType type : hook.getMissionTypes()) {
 			Log.fine("Registrar - Storing mission: " + type.getName());
 			api.registerType(type);
 			
@@ -288,5 +292,9 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener, QuestLoade
 			}
 		}
 		return result;
+	}
+	
+	public static QuestingImpl getImpl() {
+		return instance.api;
 	}
 }
