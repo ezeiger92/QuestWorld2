@@ -25,12 +25,13 @@ public class EditorCommand implements CommandExecutor {
 	}
 	
 	private void help(String label, CommandSender sender) {
-		sender.sendMessage(Text.colorize("&3== &b/", label, " help &3== "));
+		String version = plugin.getDescription().getVersion();
+		sender.sendMessage(Text.colorize("&3== &b/", label, " help &3: &bv"+version+" &3== "));
 		sender.sendMessage(Text.colorize("  &bgui &7- Open the editor gui"));
 		sender.sendMessage(Text.colorize("  &breload &7- Reloads config files from disk"));
 		sender.sendMessage(Text.colorize("  &bsave &7- Save all in-game config and quest changes to disk"));
 		sender.sendMessage(Text.colorize("  &bextension &7- View extensions"));
-		sender.sendMessage(Text.colorize("  &bexmport <file> &7- Save all quests to a preset"));
+		sender.sendMessage(Text.colorize("  &bexport <file> &7- Save all quests to a preset"));
 		sender.sendMessage(Text.colorize("  &bimport <file> &4&l*&7 - Overwrite all quests with a preset"));
 		sender.sendMessage(Text.colorize("  &bdiscard &4&l*&7 - Reloads quest data from disk, losing changes"));
 		sender.sendMessage(Text.colorize("  &bupgrade &4&l*&7 - Replaces all cooldowns of 0 with -1"));
