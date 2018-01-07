@@ -113,8 +113,9 @@ button:
     quests: '&7> Click to go back to the Quest Menu'
     general: '&c< Back'
 quests:
-  locked: '&4&lLOCKED'
-  locked-in-world: '&cThis Questline is not available in your World'
+  locked-parent: '&cRequires quest: &r%name%'
+  locked-in-world: '&cNot available in: %world%'
+  locked-no-perm: '&cNo permission: &r%desc%'
   tasks_completed: ' Tasks completed'
   state:
     cooldown: '&e&lON COOLDOWN'

@@ -177,8 +177,9 @@ public class PlayerStatus implements IPlayerStatus {
 	@Override
 	public QuestStatus getStatus(IQuest quest) {
 		Player p = asOnline(playerUUID);
-		if (quest.getParent() != null && !hasFinished(quest.getParent())) return QuestStatus.LOCKED;
-		if (p != null && !PlayerTools.checkPermission(p, quest.getPermission())) return QuestStatus.LOCKED;
+		if (quest.getParent() != null && !hasFinished(quest.getParent())) return QuestStatus.LOCKED_PARENT;
+		if (!quest.getWorldEnabled(p.getWorld().getName())) return QuestStatus.LOCKED_WORLD;
+		if (p != null && !PlayerTools.checkPermission(p, quest.getPermission())) return QuestStatus.LOCKED_NO_PERM;
 		
 		Party party = (Party)QuestWorld.getParty(p);
 		int partySize = party != null ? party.getSize() : 0;

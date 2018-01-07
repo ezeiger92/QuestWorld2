@@ -74,6 +74,10 @@ public enum Translation implements Translator {
 	NOTIFY_TIME_FAIL ("notifications.task-failed-timeframe",  "quest"),
 	NOTIFY_TIME_START("notifications.task-timeframe-started", "task", "time"),
 	
+	LOCKED_PARENT( "quests.locked-parent",   "name"),
+	LOCKED_NO_PERM("quests.locked-no-perm",  "node", "desc"),
+	LOCKED_WORLD(  "quests.locked-in-world", "world"),
+	
 	// TODO This is hacky, look again when less tired
 	gui_title,
 	gui_party,
@@ -81,8 +85,6 @@ public enum Translation implements Translator {
 	button_back_party,
 	button_back_quests,
 	button_back_general,
-	quests_locked,
-	quests_locked_in_world("quests.locked-in-world"),
 	quests_tasks_completed("quests.tasks_completed"),
 	quests_state_cooldown,
 	quests_state_completed,

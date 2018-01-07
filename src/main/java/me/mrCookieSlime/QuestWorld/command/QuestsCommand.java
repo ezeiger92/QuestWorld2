@@ -57,16 +57,27 @@ public class QuestsCommand implements CommandExecutor {
 					
 					ICategory category = QuestWorld.getFacade().getCategory(c_id);
 					if (category != null)  {
-						PagedMapping.clearPages(p);
-						if (args.length == 2) {
-							IQuest quest = category.getQuest(q_id);
-							if(quest != null)
-								QuestBook.openQuest(p, quest, false, false);
-							else
-								sender.sendMessage(Text.colorize("&cMissing quest for index ", args[1], " (in category ", args[0], ")"));
+						if(QuestBook.testCategory(p, category)) {
+							if (args.length == 2) {
+								IQuest quest = category.getQuest(q_id);
+								if(quest != null) {
+									if(QuestBook.testQuest(p, quest)) {
+										PagedMapping.clearPages(p);
+										QuestBook.openQuest(p, quest, false, false);
+									}
+									else
+										sender.sendMessage(Text.colorize("&cQuest unavailable"));
+								}
+								else
+									sender.sendMessage(Text.colorize("&cMissing quest for index ", args[1], " (in category ", args[0], ")"));
+							}
+							else {
+								PagedMapping.clearPages(p);
+								QuestBook.openCategory(p, category, false);
+							}
 						}
 						else
-							QuestBook.openCategory(p, category, false);
+							sender.sendMessage(Text.colorize("&cCategory unavailable"));
 					}
 					else
 						sender.sendMessage(Text.colorize("&cMissing category for index ", args[0]));
