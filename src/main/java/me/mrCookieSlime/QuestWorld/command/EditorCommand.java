@@ -1,5 +1,6 @@
 package me.mrCookieSlime.QuestWorld.command;
 
+import me.mrCookieSlime.QuestWorld.GuideBook;
 import me.mrCookieSlime.QuestWorld.QuestWorldPlugin;
 import me.mrCookieSlime.QuestWorld.api.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
@@ -8,6 +9,7 @@ import me.mrCookieSlime.QuestWorld.api.contract.IQuestState;
 import me.mrCookieSlime.QuestWorld.api.menu.PagedMapping;
 import me.mrCookieSlime.QuestWorld.api.menu.QuestBook;
 import me.mrCookieSlime.QuestWorld.util.Log;
+import me.mrCookieSlime.QuestWorld.util.PlayerTools;
 import me.mrCookieSlime.QuestWorld.util.Text;
 
 import java.util.Arrays;
@@ -25,12 +27,14 @@ public class EditorCommand implements CommandExecutor {
 	}
 	
 	private void help(String label, CommandSender sender) {
-		sender.sendMessage(Text.colorize("&3== &b/", label, " help &3== "));
+		String version = plugin.getDescription().getVersion();
+		sender.sendMessage(Text.colorize("&3== &b/", label, " help &3: &bv"+version+" &3== "));
 		sender.sendMessage(Text.colorize("  &bgui &7- Open the editor gui"));
+		sender.sendMessage(Text.colorize("  &bbook [player] &7- Give yourself (or player) a questbook"));
 		sender.sendMessage(Text.colorize("  &breload &7- Reloads config files from disk"));
 		sender.sendMessage(Text.colorize("  &bsave &7- Save all in-game config and quest changes to disk"));
 		sender.sendMessage(Text.colorize("  &bextension &7- View extensions"));
-		sender.sendMessage(Text.colorize("  &bexmport <file> &7- Save all quests to a preset"));
+		sender.sendMessage(Text.colorize("  &bexport <file> &7- Save all quests to a preset"));
 		sender.sendMessage(Text.colorize("  &bimport <file> &4&l*&7 - Overwrite all quests with a preset"));
 		sender.sendMessage(Text.colorize("  &bdiscard &4&l*&7 - Reloads quest data from disk, losing changes"));
 		sender.sendMessage(Text.colorize("  &bupgrade &4&l*&7 - Replaces all cooldowns of 0 with -1"));
@@ -60,9 +64,6 @@ public class EditorCommand implements CommandExecutor {
 			else
 				sender.sendMessage(Text.colorize("&cThe Preset &4", args[1], " &ccould not be installed"));
 		}
-		else if (param.equals("extension")) {
-			ExtensionControl.func(sender, cmd, label, Arrays.copyOfRange(args, 1, args.length));
-		}
 		else if (param.equals("export")) {
 			if(args.length < 2) {
 				sender.sendMessage(Text.colorize("&cMissing argument: /", label, " export &6<File>"));
@@ -74,6 +75,9 @@ public class EditorCommand implements CommandExecutor {
 			else
 				sender.sendMessage(Text.colorize("&cCould not save Preset &a", args[1]));
 		}
+		else if (param.equals("extension")) {
+			ExtensionControl.func(sender, cmd, label, Arrays.copyOfRange(args, 1, args.length));
+		}
 		else if (param.equals("gui")) {
 			if (p != null) {
 				PagedMapping.clearPages(p);
@@ -81,6 +85,20 @@ public class EditorCommand implements CommandExecutor {
 			}
 			else
 				sender.sendMessage(Text.colorize("&4You are not a Player"));
+		}
+		else if (param.equals("book")) {
+			Player recipient = p;
+			if(args.length > 1)
+				recipient = PlayerTools.getPlayer(args[1]);
+			
+			if(recipient != null) {
+				recipient.getInventory().addItem(GuideBook.get());
+				if(p != recipient)
+					p.sendMessage(Text.colorize("&3Given QuestBook to &b" + recipient.getName()));
+				recipient.sendMessage(Text.colorize("&3Recieved QuestBook"));
+			}
+			else
+				p.sendMessage(Text.colorize("&cCould not find player &e" + args[1]));
 		}
 		else if(param.equals("discard")) {
 			plugin.onDiscard();

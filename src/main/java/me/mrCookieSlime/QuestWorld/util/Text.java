@@ -181,66 +181,68 @@ public class Text {
 		ArrayList<String> output = new ArrayList<>(input.length);
 		max_length = Math.max(max_length, 8);
 		String format = "";
-		for(String s : input) {
-			if(s == null) {
+		for(String s1 : input) {
+			if(s1 == null) {
 				continue;
 			}
 			
-			int begin = 0;
-			int end = -1;
-			int seq_begin = 0;
-			int seq_end = -1;
-			String prepared_format = format;
-			String committed_format = format;
-			for(int i = 0, n = 0; i < s.length(); ++i) {
-				char c1 = s.charAt(i);
-				if(c1 == colorChar)
-					if(i + 1 != s.length()) {
-						char c = Character.toLowerCase(s.charAt(i + 1));
-						if("0123456789abcdefr".indexOf(c) != -1)  {
-							prepared_format = String.valueOf(colorChar) + c;
-							n -= 2;
-							if(i > seq_end)
-								seq_begin = i;
-							seq_end = i+1;
+			for(String s : s1.split("\\\\n")) {
+				int begin = 0;
+				int end = -1;
+				int seq_begin = 0;
+				int seq_end = -1;
+				String prepared_format = format;
+				String committed_format = format;
+				for(int i = 0, n = 0; i < s.length(); ++i) {
+					char c1 = s.charAt(i);
+					if(c1 == colorChar)
+						if(i + 1 != s.length()) {
+							char c = Character.toLowerCase(s.charAt(i + 1));
+							if("0123456789abcdefr".indexOf(c) != -1)  {
+								prepared_format = String.valueOf(colorChar) + c;
+								n -= 2;
+								if(i > seq_end)
+									seq_begin = i;
+								seq_end = i+1;
+							}
+							else if("olmnk".indexOf(c) != -1) {
+								prepared_format += String.valueOf(colorChar) + c;
+								n -= 2;
+								if(i > seq_end)
+									seq_begin = i;
+								seq_end = i+1;
+							}
 						}
-						else if("olmnk".indexOf(c) != -1) {
-							prepared_format += String.valueOf(colorChar) + c;
-							n -= 2;
-							if(i > seq_end)
-								seq_begin = i;
-							seq_end = i+1;
+					
+					if(c1 == ' ' && i > 0)
+						end = i;
+					
+					if(n == max_length) {
+						if(end == -1) {
+							if(i-2 == seq_end || i-1 == seq_end)
+								end = seq_begin + i - seq_end - 2;
+							else
+								end = i - 1;
+	
+							output.add(format + s.substring(begin, end) + '-');
 						}
-					}
-				
-				if(c1 == ' ' && i > 0)
-					end = i;
-				
-				if(n == max_length) {
-					if(end == -1) {
-						if(i-2 == seq_end || i-1 == seq_end)
-							end = seq_begin + i - seq_end - 2;
 						else
-							end = i - 1;
-
-						output.add(format + s.substring(begin, end) + '-');
+							output.add(format + s.substring(begin, end));
+						
+						begin = end;
+						n = i - end;
+						end = -1;
+						format = committed_format;
 					}
 					else
-						output.add(format + s.substring(begin, end));
+						++n;
 					
-					begin = end;
-					n = i - end;
-					end = -1;
-					format = committed_format;
+					if(i > seq_end)
+						committed_format = prepared_format;
 				}
-				else
-					++n;
-				
-				if(i > seq_end)
-					committed_format = prepared_format;
+				output.add(format + s.substring(begin));
+				format = prepared_format;
 			}
-			output.add(format + s.substring(begin));
-			format = prepared_format;
 		}
 		
 		return output;

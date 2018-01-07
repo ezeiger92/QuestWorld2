@@ -7,10 +7,19 @@ package me.mrCookieSlime.QuestWorld.api;
  */
 public enum QuestStatus {
 	/**
-	 * The parent quest has not been completed or the player lacks the
-	 * required permission.
+	 * The parent quest has not been completed.
 	 */
-	LOCKED,
+	LOCKED_PARENT,
+	
+	/**
+	 * The player lacks the required permission.
+	 */
+	LOCKED_NO_PERM,
+	
+	/**
+	 * The player's world is not allowed for this quest
+	 */
+	LOCKED_WORLD,
 	
 	/**
 	 * The player is part of a Party, but the quest forbids parties.

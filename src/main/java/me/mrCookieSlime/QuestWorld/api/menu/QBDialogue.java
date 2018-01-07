@@ -2,6 +2,9 @@ package me.mrCookieSlime.QuestWorld.api.menu;
 
 import static me.mrCookieSlime.QuestWorld.util.json.Prop.*;
 
+import java.util.ArrayDeque;
+import java.util.HashSet;
+
 import me.mrCookieSlime.QuestWorld.api.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.SinglePrompt;
 import me.mrCookieSlime.QuestWorld.api.Translation;
@@ -23,6 +26,7 @@ import me.mrCookieSlime.QuestWorld.util.Text;
 import me.mrCookieSlime.QuestWorld.util.json.JsonBlob;
 import me.mrCookieSlime.QuestWorld.util.json.Prop;
 
+import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 
@@ -195,6 +199,55 @@ public class QBDialogue {
 		
 		p.sendMessage(Text.colorize("&7&m----------------------------"));
 	}
+	
+	private static boolean test(ArrayDeque<IQuest> backlog, HashSet<IQuest> collision, IStateful changing) {
+		while(backlog.size() > 0) {
+			IQuest test = backlog.poll();
+			if(test != null) {
+				if(test == changing || test.getCategory() == changing)
+					return true;
+				
+				IQuest parent = test.getParent();
+				if(parent != null) {
+					if(!collision.add(parent))
+						return true;
+					
+					backlog.add(parent);
+				}
+				
+				IQuest catParent = test.getCategory().getParent();
+				if(catParent != null) {
+					if(!collision.add(catParent))
+						return true;
+					
+					backlog.add(catParent);
+				}
+			}
+		}
+		
+		return false;
+	}
+	
+	private static boolean cycleDetection(IStateful changing, IStateful peek) {
+		if(changing == peek)
+			return true;
+		
+		HashSet<IQuest> collision = new HashSet<>();
+		if(changing instanceof IQuest)
+			collision.add((IQuest)changing);
+		else
+			collision.addAll(((ICategory)changing).getQuests());
+		
+		ArrayDeque<IQuest> backlog = new ArrayDeque<>();
+		IQuest parent = peek instanceof IQuest ? ((IQuest)peek).getParent() : ((ICategory)peek).getParent();
+		
+		if(parent == null)
+			return false;
+		
+		backlog.add(parent);
+		
+		return test(backlog, collision, changing);
+	}
 
 	public static void openRequirementCategories(Player p, final IStateful quest) {
 		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
@@ -203,16 +256,24 @@ public class QBDialogue {
 
 		PagedMapping pager = new PagedMapping(45, 9);
 		for(ICategory category : QuestWorld.getFacade().getCategories()) {
-			pager.addButton(category.getID(), new ItemBuilder(category.getItem()).wrapText(
-					category.getName(),
-					"",
-					"&e> Click to open category").get(),
-					event -> {
-						Player p2 = (Player)event.getWhoClicked();
-						PagedMapping.putPage(p2, 0);
-						openRequirementQuests(p2, quest, category);
-					}, true
-			);
+			if(!cycleDetection(quest, category))
+				pager.addButton(category.getID(), new ItemBuilder(category.getItem()).wrapText(
+						category.getName(),
+						"",
+						"&e> Click to open category").get(),
+						event -> {
+							Player p2 = (Player)event.getWhoClicked();
+							PagedMapping.putPage(p2, 0);
+							openRequirementQuests(p2, quest, category);
+						}, true
+				);
+			else
+				pager.addButton(category.getID(), new ItemBuilder(Material.BARRIER).wrapText(
+						category.getName(),
+						"",
+						"&c> Requirement cycle").get(),
+						null, false
+				);
 		}
 		
 		boolean isQuest = quest instanceof IQuest;
@@ -237,36 +298,44 @@ public class QBDialogue {
 		
 		PagedMapping pager = new PagedMapping(45, 9);
 		for(IQuest quest : category.getQuests()) {
-			pager.addButton(quest.getID(),
-					new ItemBuilder(quest.getItem()).wrapText(
-							quest.getName(),
-							"",
-							"&e> Click to set requirement for " +
-							(isQuest ? "quest" : "category") + ": &f&o" + name).get(),
-					event -> {
-						Player p2 = (Player) event.getWhoClicked();
-						PagedMapping.popPage(p2);
-
-						if (q instanceof IQuest) {
-							IQuest child = (IQuest)q;
-							
-							IQuestState changes = child.getState();
-							changes.setParent(quest);
-							changes.apply();
-							
-							QuestBook.openQuestEditor(p2, child);
-						}
-						else {
-							ICategory child = (ICategory)q;
-							
-							ICategoryState changes = child.getState();
-							changes.setParent(quest);
-							changes.apply();
-							
-							QuestBook.openCategoryEditor(p2, child);
-						}
-					}, false
-			);
+			if(!cycleDetection(q, quest))
+				pager.addButton(quest.getID(),
+						new ItemBuilder(quest.getItem()).wrapText(
+								quest.getName(),
+								"",
+								"&e> Click to set requirement for " +
+								(isQuest ? "quest" : "category") + ": &f&o" + name).get(),
+						event -> {
+							Player p2 = (Player) event.getWhoClicked();
+							PagedMapping.popPage(p2);
+	
+							if (q instanceof IQuest) {
+								IQuest child = (IQuest)q;
+								
+								IQuestState changes = child.getState();
+								changes.setParent(quest);
+								changes.apply();
+								
+								QuestBook.openQuestEditor(p2, child);
+							}
+							else {
+								ICategory child = (ICategory)q;
+								
+								ICategoryState changes = child.getState();
+								changes.setParent(quest);
+								changes.apply();
+								
+								QuestBook.openCategoryEditor(p2, child);
+							}
+						}, false
+				);
+			else
+				pager.addButton(quest.getID(), new ItemBuilder(Material.BARRIER).wrapText(
+						quest.getName(),
+						"",
+						"&c> Requirement cycle").get(),
+						null, false
+				);
 		}
 		pager.setBackButton(" &3Categories", event -> openRequirementCategories(p, q));
 		pager.build(menu, p);

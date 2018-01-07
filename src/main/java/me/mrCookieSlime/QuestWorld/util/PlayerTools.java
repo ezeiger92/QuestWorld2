@@ -150,7 +150,7 @@ public class PlayerTools {
 	}
 	
 	public static boolean checkPermission(Player p, String permission) {
-		return permission == null || permission.length() == 0 || p.hasPermission(permission);
+		return permission == null || permission.length() == 0 || p.hasPermission(permission.split(" ", 2)[0]);
 	}
 	
 	public static void tellraw(Player p, String json, String... extra) {

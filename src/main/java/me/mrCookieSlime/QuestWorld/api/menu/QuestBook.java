@@ -43,6 +43,25 @@ public class QuestBook {
 				.orElse(null);
 	}
 	
+	public static boolean testCategory(Player p, ICategory category) {
+		IQuest parent = category.getParent();
+		IPlayerStatus playerStatus = QuestWorld.getPlayerStatus(p);
+		
+		return !category.isHidden()
+				&& category.isWorldEnabled(p.getWorld().getName())
+				&& PlayerTools.checkPermission(p, category.getPermission())
+				&& (parent == null || playerStatus.hasFinished(parent));
+	}
+	
+	public static boolean testQuest(Player p, IQuest quest) {
+		QuestStatus status = QuestWorld.getPlayerStatus(p).getStatus(quest);
+		
+		return status == QuestStatus.AVAILABLE
+				|| status == QuestStatus.REWARD_CLAIMABLE
+				|| status == QuestStatus.ON_COOLDOWN
+				|| status == QuestStatus.FINISHED;
+	}
+	
 	public static void setLastViewed(Player p, IStateful object) {
 		p.setMetadata("questworld.last-object", new FixedMetadataValue(QuestWorld.getPlugin(), object));
 	}
@@ -60,46 +79,55 @@ public class QuestBook {
 		view.addFrameButton(4, partyMenuItem(p), Buttons.partyMenu(), true);
 
 		for(ICategory category : QuestWorld.getFacade().getCategories()) {
+			IQuest parent = category.getParent();
+			
 			if (!category.isHidden()) {
-				if (category.isWorldEnabled(p.getWorld().getName())) {
-					if ((category.getParent() != null && !playerStatus.hasFinished(category.getParent())) || !PlayerTools.checkPermission(p, category.getPermission())) {
-						view.addButton(category.getID(),
-								new ItemBuilder(Material.BARRIER).wrapText(
-										category.getName(),
-										"",
-										QuestWorld.translate(Translation.quests_locked)).get(),
-								null, false);
-					}
-					else {
-						
-						int questCount = playerStatus.countQuests(category, null);
-						int finishedCount = playerStatus.getProgress(category);
-						view.addButton(category.getID(),
-								new ItemBuilder(category.getItem()).wrapText(
-										(category.getName() + "\n" + 
-										QuestWorld.translate(Translation.CATEGORY_DESC,
-												String.valueOf(questCount),
-												String.valueOf(finishedCount),
-												String.valueOf(playerStatus.countQuests(category, QuestStatus.AVAILABLE)),
-												String.valueOf(playerStatus.countQuests(category, QuestStatus.ON_COOLDOWN)),
-												String.valueOf(playerStatus.countQuests(category, QuestStatus.REWARD_CLAIMABLE)),
-												Text.progressBar(finishedCount, questCount, null)
-										)).split("\n")).get(),
-								event -> {
-									Player p2 = (Player) event.getWhoClicked();
-									PagedMapping.putPage(p2, 0);
-									openCategory(p2, category, true);
-								}, true
-						);
-					}
-				}
-				else {
+				if (!category.isWorldEnabled(p.getWorld().getName())) {
 					view.addButton(category.getID(),
 							new ItemBuilder(Material.BARRIER).wrapText(
 									category.getName(),
 									"",
-									QuestWorld.translate(Translation.quests_locked_in_world)).get(),
+									QuestWorld.translate(Translation.LOCKED_WORLD, p.getWorld().getName())).get(),
 							null, false);
+				}
+				else if(!PlayerTools.checkPermission(p, category.getPermission())) {
+					String parts[] = category.getPermission().split(" ", 2);
+					view.addButton(category.getID(),
+							new ItemBuilder(Material.BARRIER).wrapText(
+									category.getName(),
+									"",
+									QuestWorld.translate(Translation.LOCKED_NO_PERM, parts[0], parts[parts.length - 1])).get(),
+							null, false);
+				}
+				else if (parent != null && !playerStatus.hasFinished(parent)) {
+					view.addButton(category.getID(),
+							new ItemBuilder(Material.BARRIER).wrapText(
+									category.getName(),
+									"",
+									QuestWorld.translate(Translation.LOCKED_PARENT, category.getParent().getName())).get(),
+							null, false);
+				}
+				else {
+					
+					int questCount = playerStatus.countQuests(category, null);
+					int finishedCount = playerStatus.getProgress(category);
+					view.addButton(category.getID(),
+							new ItemBuilder(category.getItem()).wrapText(
+									(category.getName() + "\n" + 
+									QuestWorld.translate(Translation.CATEGORY_DESC,
+											String.valueOf(questCount),
+											String.valueOf(finishedCount),
+											String.valueOf(playerStatus.countQuests(category, QuestStatus.AVAILABLE)),
+											String.valueOf(playerStatus.countQuests(category, QuestStatus.ON_COOLDOWN)),
+											String.valueOf(playerStatus.countQuests(category, QuestStatus.REWARD_CLAIMABLE)),
+											Text.progressBar(finishedCount, questCount, null)
+									)).split("\n")).get(),
+							event -> {
+								Player p2 = (Player) event.getWhoClicked();
+								PagedMapping.putPage(p2, 0);
+								openCategory(p2, category, true);
+							}, true
+					);
 				}
 			}
 		}
@@ -327,12 +355,31 @@ public class QuestBook {
 		view.addFrameButton(4, partyMenuItem(p), Buttons.partyMenu(), true);
 		
 		for (final IQuest quest: category.getQuests()) {
-			if (playerStatus.getStatus(quest).equals(QuestStatus.LOCKED) || !quest.getWorldEnabled(p.getWorld().getName())) {
+			IQuest parent = quest.getParent();
+
+			if (playerStatus.getStatus(quest).equals(QuestStatus.LOCKED_WORLD)) {
 				view.addButton(quest.getID(), 
 						glassPane.wrapText(
 								quest.getName(),
 								"",
-								QuestWorld.translate(Translation.quests_locked)).getNew(),
+								QuestWorld.translate(Translation.LOCKED_WORLD, p.getWorld().getName())).getNew(),
+						null, false);
+			}
+			else if (playerStatus.getStatus(quest).equals(QuestStatus.LOCKED_NO_PERM)) {
+				String parts[] = quest.getPermission().split(" ", 2);
+				view.addButton(quest.getID(), 
+						glassPane.wrapText(
+								quest.getName(),
+								"",
+								QuestWorld.translate(Translation.LOCKED_NO_PERM, parts[0], parts[parts.length - 1])).getNew(),
+						null, false);
+			}
+			else if (playerStatus.getStatus(quest).equals(QuestStatus.LOCKED_PARENT)) {
+				view.addButton(quest.getID(), 
+						glassPane.wrapText(
+								quest.getName(),
+								"",
+								QuestWorld.translate(Translation.LOCKED_PARENT, parent.getName())).getNew(),
 						null, false);
 			}
 			else if (playerStatus.getStatus(quest).equals(QuestStatus.LOCKED_NO_PARTY)) {

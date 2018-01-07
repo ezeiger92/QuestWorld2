@@ -153,14 +153,14 @@ class Quest extends UniqueObject implements IQuestState {
 			if (missions == null)
 				return;
 			
+			int index = 54;
 			for (String key: missions.getKeys(false)) {
 				// TODO mess
 				Map<String, Object> data = missions.getConfigurationSection(key).getValues(false);
 				// getValues wont recurse through sections, so we have to manually map to... map
 				data.put("location", ((ConfigurationSection)data.get("location")).getValues(false));
 				
-				if(!data.containsKey("index"))
-					data.put("index", Integer.valueOf(key));
+				data.put("index", index++);
 				
 				data.put("quest", this);
 				
