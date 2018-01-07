@@ -119,7 +119,10 @@ public class PlayerStatus implements IPlayerStatus {
 			tracker.setMissionCompleted(task, null);
 			tracker.setMissionProgress(task, 0);
 			ifOnline(playerUUID).ifPresent(player ->
-				PlayerTools.sendTranslation(player, false, Translation.NOTIFY_TIME_FAIL, task.getQuest().getName())
+				PlayerTools.sendTranslation(player, false, Translation.NOTIFY_TIME_FAIL,
+						task.getQuest().getName(),
+						task.getText(),
+						getProgress(task)+"/"+task.getAmount())
 			);
 			return false;
 		}
@@ -316,7 +319,9 @@ public class PlayerStatus implements IPlayerStatus {
 				// Change for ezeiger92/QuestWorld2#43 - Remove default complete message if dialog is present
 				// Previously "check !task.getType().getID().equals("ACCEPT_QUEST_FROM_NPC") && "
 				// This was done to keep quests quiet when interacting with citizens
-				PlayerTools.sendTranslation(player, false, Translation.NOTIFY_COMPLETED, task.getQuest().getName());
+				PlayerTools.sendTranslation(player, false, Translation.NOTIFY_COMPLETED,
+						task.getQuest().getName(),
+						task.getText());
 			else
 				sendDialogueComponent(player, line);
 			

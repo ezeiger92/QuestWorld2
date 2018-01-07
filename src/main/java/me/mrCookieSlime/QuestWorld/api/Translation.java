@@ -70,9 +70,9 @@ public enum Translation implements Translator {
 	PARTY_PLAYER_JOINED ("party.player.joined",  "leader"),
 	PARTY_PLAYER_KICKED ("party.player.kicked",  "leader"),
 
-	NOTIFY_COMPLETED ("notifications.task-completed",         "quest"),
-	NOTIFY_TIME_FAIL ("notifications.task-failed-timeframe",  "quest"),
-	NOTIFY_TIME_START("notifications.task-timeframe-started", "task", "time"),
+	NOTIFY_COMPLETED ("notifications.task-completed",         "quest", "task"),
+	NOTIFY_TIME_FAIL ("notifications.task-failed-timeframe",  "quest", "task", "ratio"),
+	NOTIFY_TIME_START("notifications.task-timeframe-started", "task",  "time"),
 	
 	LOCKED_PARENT( "quests.locked-parent",   "name"),
 	LOCKED_NO_PERM("quests.locked-no-perm",  "node", "desc"),
