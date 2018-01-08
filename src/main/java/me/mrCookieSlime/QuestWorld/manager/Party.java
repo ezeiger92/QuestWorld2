@@ -102,7 +102,7 @@ public class Party implements IPartyState {
 		members.add(p.getUniqueId());
 		PlayerTools.sendTranslation(p, true, Translation.PARTY_GROUP_JOIN, p.getName(), Bukkit.getOfflinePlayer(leader).getName());
 		QuestWorldPlugin.getImpl().getPlayerStatus(p).getTracker().setPartyLeader(leader);
-		pending.remove(p);
+		pending.remove(p.getUniqueId());
 		save();
 	}
 	

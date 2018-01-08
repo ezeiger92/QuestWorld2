@@ -30,7 +30,6 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.scheduler.BukkitRunnable;
 
 public class PlayerListener implements Listener {
 	
@@ -58,11 +57,9 @@ public class PlayerListener implements Listener {
 	public void onJoin(PlayerJoinEvent e) {
 		Player p = e.getPlayer();
 		
-		int task_id = partyKick.getOrDefault(p.getUniqueId(), -1);
-		if(task_id > -1) {
+		Integer task_id = partyKick.remove(p.getUniqueId());
+		if(task_id != null)
 			Bukkit.getScheduler().cancelTask(task_id);
-			partyKick.remove(task_id);
-		}
 		
 		if (QuestWorld.getPlugin().getConfig().getBoolean("book.on-first-join") &&
 				!ProgressTracker.exists(p.getUniqueId()))
@@ -95,16 +92,13 @@ public class PlayerListener implements Listener {
 			}
 			else if(autokick > 0) {
 				
-				int task_id = new BukkitRunnable(){
-					@Override
-					public void run() {
-						if(party.isLeader(player))
-							QuestWorld.disbandParty(party);
-						else
-							party.playerLeave(player, LeaveReason.DISCONNECT);
-						partyKick.remove(getTaskId());
-					}
-				}.runTaskLater(QuestWorld.getPlugin(), autokick).getTaskId();
+				int task_id = Bukkit.getScheduler().runTaskLater(QuestWorld.getPlugin(), () -> {
+					if(party.isLeader(player))
+					QuestWorld.disbandParty(party);
+				else
+					party.playerLeave(player, LeaveReason.DISCONNECT);
+				partyKick.remove(player.getUniqueId());
+				}, autokick).getTaskId();
 				
 				partyKick.put(player.getUniqueId(), task_id);
 			}
