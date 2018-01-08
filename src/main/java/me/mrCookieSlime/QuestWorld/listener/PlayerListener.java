@@ -91,13 +91,12 @@ public class PlayerListener implements Listener {
 					party.playerLeave(player, LeaveReason.DISCONNECT);
 			}
 			else if(autokick > 0) {
-				
 				int task_id = Bukkit.getScheduler().runTaskLater(QuestWorld.getPlugin(), () -> {
 					if(party.isLeader(player))
-					QuestWorld.disbandParty(party);
-				else
-					party.playerLeave(player, LeaveReason.DISCONNECT);
-				partyKick.remove(player.getUniqueId());
+						QuestWorld.disbandParty(party);
+					else
+						party.playerLeave(player, LeaveReason.DISCONNECT);
+					partyKick.remove(player.getUniqueId());
 				}, autokick).getTaskId();
 				
 				partyKick.put(player.getUniqueId(), task_id);
