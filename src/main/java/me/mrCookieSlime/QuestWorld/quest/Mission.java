@@ -98,7 +98,6 @@ class Mission extends UniqueObject implements IMissionState {
 
 	@Override
 	public int getIndex() {
-		// TODO: return unique;
 		return index;
 	}
 
@@ -240,6 +239,11 @@ class Mission extends UniqueObject implements IMissionState {
 	@Override
 	public void setType(MissionType type) {
 		this.type = type;
+	}
+	
+	@Override
+	public void setIndex(int index) {
+		this.index = index;
 	}
 	
 	@Override

@@ -25,6 +25,8 @@ public interface IMissionState extends IMission {
 	void setSpawnerSupport(boolean acceptsSpawners);
 	void setTimeframe(int timeframe);
 	void setType(MissionType type);
+	
+	void setIndex(int index);
 
 	boolean  apply();
 	boolean  discard();

@@ -106,6 +106,13 @@ class MissionState extends Mission {
 	}
 	
 	@Override
+	public void setIndex(int index) {
+		super.setIndex(index);
+		
+		changeBits |= BitFlag.getBits(Member.INDEX);
+	}
+	
+	@Override
 	public boolean apply() {
 		if(sendEvent()) {
 			copyTo(origin);

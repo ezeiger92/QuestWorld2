@@ -15,7 +15,7 @@ public interface Prop {
 	public static final Prop DARK_AQUA    = new DefaultProp("\"color\"", "\"dark_aqua\"");
 	public static final Prop DARK_RED     = new DefaultProp("\"color\"", "\"dark_red\"");
 	public static final Prop DARK_PURPLE  = new DefaultProp("\"color\"", "\"dark_purple\"");
-	public static final Prop GOLD         = new DefaultProp("\"color\"", "\"dark_gold\"");
+	public static final Prop GOLD         = new DefaultProp("\"color\"", "\"gold\"");
 	public static final Prop GRAY         = new DefaultProp("\"color\"", "\"gray\"");
 	public static final Prop DARK_GRAY    = new DefaultProp("\"color\"", "\"dark_gray\"");
 	public static final Prop BLUE         = new DefaultProp("\"color\"", "\"blue\"");

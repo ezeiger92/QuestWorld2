@@ -201,6 +201,9 @@ public class QBDialogue {
 	}
 	
 	private static boolean test(ArrayDeque<IQuest> backlog, HashSet<IQuest> collision, IStateful changing) {
+		
+		HashSet<ICategory> cats = new HashSet<>();
+		
 		while(backlog.size() > 0) {
 			IQuest test = backlog.poll();
 			if(test != null) {
@@ -216,7 +219,7 @@ public class QBDialogue {
 				}
 				
 				IQuest catParent = test.getCategory().getParent();
-				if(catParent != null) {
+				if(catParent != null && cats.add(test.getCategory())) {
 					if(!collision.add(catParent))
 						return true;
 					

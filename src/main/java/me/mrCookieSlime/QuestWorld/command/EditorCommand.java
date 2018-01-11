@@ -53,6 +53,7 @@ public class EditorCommand implements CommandExecutor {
 			p = null;
 		
 		String param = args[0].toLowerCase();
+		
 		if (param.equals("import")) {
 			if(args.length < 2) {
 				sender.sendMessage(Text.colorize("&cMissing argument: /", label, " import &6<File>"));

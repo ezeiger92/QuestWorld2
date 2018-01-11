@@ -14,6 +14,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import me.mrCookieSlime.QuestWorld.QuestWorldPlugin;
 import me.mrCookieSlime.QuestWorld.api.QuestStatus;
+import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IMissionState;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
@@ -71,6 +72,10 @@ public class ProgressTracker implements Reloadable {
 		return null;
 	}
 	
+	public YamlConfiguration config() {
+		return config;
+	}
+	
 	//// PARTY
 	public UUID getPartyLeader() {
 		return tryUUID(config.getString("party.associated", null));
@@ -109,9 +114,18 @@ public class ProgressTracker implements Reloadable {
 				.collect(Collectors.toList()));
 	}
 	
+	//// CATEGORY
+	private static String path(ICategory category) {
+		return String.valueOf(category.getID());
+	}
+	
+	public void clearCategory(ICategory category) {
+		config.set(path(category), null);
+	}
+	
 	//// QUEST
 	private static String path(IQuest quest) {
-		return quest.getCategory().getID() + "." + quest.getID();
+		return path(quest.getCategory()) + "." + quest.getID();
 	}
 	
 	public long getQuestRefresh(IQuest quest) {
