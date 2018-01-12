@@ -69,6 +69,7 @@ public class QuestBook {
 	public static void openMainMenu(Player p) {
 		QuestWorld.getSounds().QUEST_CLICK.playTo(p);
 		IPlayerStatus playerStatus = QuestWorld.getPlayerStatus(p);
+		playerStatus.update();
 		
 		// TODO: playerStatus.update(false);
 		setLastViewed(p, null);
@@ -335,6 +336,7 @@ public class QuestBook {
 	public static void openCategory(Player p, ICategory category, final boolean back) {
 		QuestWorld.getSounds().QUEST_CLICK.playTo(p);
 		IPlayerStatus playerStatus = QuestWorld.getPlayerStatus(p);
+		playerStatus.update();
 		// TODO: manager.update(false);
 		setLastViewed(p, category);
 		
@@ -434,6 +436,7 @@ public class QuestBook {
 	public static void openQuest(final Player p, final IQuest quest, final boolean categoryBack, final boolean back) {
 		QuestWorld.getSounds().QUEST_CLICK.playTo(p);
 		IPlayerStatus manager = QuestWorld.getPlayerStatus(p);
+		manager.update();
 		// TODO: manager.update(false);
 		setLastViewed(p, quest);
 		
@@ -463,7 +466,6 @@ public class QuestBook {
 						}
 					}
 					
-					manager.update();
 					openQuest(p, quest, categoryBack, back);
 				}
 		);
@@ -544,7 +546,6 @@ public class QuestBook {
 					
 					if(mission.getType() instanceof Manual) {
 						((Manual) mission.getType()).onManual(p, QuestWorld.getMissionEntry(mission, p));
-						manager.update();
 						openQuest(p, quest, categoryBack, back);
 					}
 				}
