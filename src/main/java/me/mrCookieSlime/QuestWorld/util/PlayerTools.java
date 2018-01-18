@@ -87,7 +87,7 @@ public class PlayerTools {
 		if(!text.isEmpty() && prefixed)
 			text = QuestWorld.translate(Translation.DEFAULT_PREFIX) + text;
 
-		return Text.colorize(text);
+		return Text.deserializeColor(text);
 	}
 	
 	private static ConversationFactory factory;

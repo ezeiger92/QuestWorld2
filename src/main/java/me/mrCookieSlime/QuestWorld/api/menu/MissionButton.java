@@ -207,7 +207,7 @@ public class MissionButton {
 			
 			PlayerTools.tellraw(p,
 					new JsonBlob("X ", DARK_RED, remove)
-					.addLegacy(Text.colorize(s), WHITE, remove).toString());
+					.addLegacy(s, WHITE, remove).toString());
 		}
 		
 		Prop add = FUSE(
@@ -228,10 +228,9 @@ public class MissionButton {
 									}
 									return true;
 								}
-								dialogue.add(s);
 								
-								Translation translator = s.startsWith("/") ?
-										Translation.MISSION_COMMAND_ADDED : Translation.MISSION_DIALOG_ADDED;
+								Translation translator = s.startsWith("/") ? Translation.MISSION_COMMAND_ADDED : Translation.MISSION_DIALOG_ADDED;
+								dialogue.add(Text.colorize(s));
 								
 								SinglePrompt.setNextDisplay(c, PlayerTools.makeTranslation(true, translator, s));
 								QuestWorld.getSounds().DIALOG_ADD.playTo(p);

@@ -83,7 +83,7 @@ public class Text {
 			return null;
 		
 		input = input.replaceAll("(?i)(?<!\\\\)((?:\\\\\\\\)*)&([0-9A-FK-OR])", "$1"+colorChar+"$2");
-		return input.replace("\\\\", "\\");
+		return input.replace("\\&", "&").replace("\\\\", "\\");
 	}
 	
 	public static String stringOf(Location location) {
