@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import static me.mrCookieSlime.QuestWorld.util.json.Prop.*;
 
 import me.mrCookieSlime.QuestWorld.QuestWorldPlugin;
+import me.mrCookieSlime.QuestWorld.api.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.api.contract.IPartyState;
 import me.mrCookieSlime.QuestWorld.util.PlayerTools;
@@ -83,10 +84,19 @@ public class Party implements IPartyState {
 		
 		PlayerTools.tellraw(p, new JsonBlob("ACCEPT", GREEN, BOLD,
 				HOVER_TEXT("Click to accept this Invitation", GRAY),
-				CLICK_RUN("/quests accept " + leader))
+				CLICK_RUN(p, () -> {
+					if (hasInvited(p)) {
+						int maxParty = QuestWorld.getPlugin().getConfig().getInt("party.max-members");
+						if (getSize() >= maxParty) {
+							PlayerTools.sendTranslation(p, true, Translation.PARTY_ERROR_FULL, Integer.toString(maxParty));
+						}
+						else playerJoin(p);
+					}
+				}))
 			.add(" ")
 			.add("DENY", DARK_RED, BOLD,
-				HOVER_TEXT("Click to deny this Invitation", GRAY))
+				HOVER_TEXT("Click to deny this Invitation", GRAY),
+				CLICK_RUN(p, () -> {}))
 			.toString());
 		
 		pending.add(p.getUniqueId());

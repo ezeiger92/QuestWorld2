@@ -9,11 +9,11 @@ softdepend: [Vault]
 
 commands:
   quests:
-    description: Opens up your Quest Book
-    usage: /quests [Category ID]
+    description: Opens up your quest book
+    usage: /quests [category id [quest id]]
     permission: QuestWorld.quests
   questeditor:
-    description: Opens up the Quest Editor
+    description: Opens up the quest editor
     usage: /questeditor <gui/import/export>
     aliases: [qe]
     permission: QuestWorld.editor

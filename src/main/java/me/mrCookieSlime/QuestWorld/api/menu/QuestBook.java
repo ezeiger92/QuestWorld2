@@ -69,6 +69,7 @@ public class QuestBook {
 	public static void openMainMenu(Player p) {
 		QuestWorld.getSounds().QUEST_CLICK.playTo(p);
 		IPlayerStatus playerStatus = QuestWorld.getPlayerStatus(p);
+		playerStatus.update();
 		
 		// TODO: playerStatus.update(false);
 		setLastViewed(p, null);
@@ -335,6 +336,7 @@ public class QuestBook {
 	public static void openCategory(Player p, ICategory category, final boolean back) {
 		QuestWorld.getSounds().QUEST_CLICK.playTo(p);
 		IPlayerStatus playerStatus = QuestWorld.getPlayerStatus(p);
+		playerStatus.update();
 		// TODO: manager.update(false);
 		setLastViewed(p, category);
 		
@@ -434,6 +436,7 @@ public class QuestBook {
 	public static void openQuest(final Player p, final IQuest quest, final boolean categoryBack, final boolean back) {
 		QuestWorld.getSounds().QUEST_CLICK.playTo(p);
 		IPlayerStatus manager = QuestWorld.getPlayerStatus(p);
+		manager.update();
 		// TODO: manager.update(false);
 		setLastViewed(p, quest);
 		
@@ -462,6 +465,7 @@ public class QuestBook {
 								((Manual) mission.getType()).onManual(p, QuestWorld.getMissionEntry(mission, p));
 						}
 					}
+					
 					openQuest(p, quest, categoryBack, back);
 				}
 		);
@@ -1080,7 +1084,7 @@ public class QuestBook {
 						"",
 						"&e> Click to open world selector").get(),
 				event -> {
-					openWorldEditor((Player) event.getWhoClicked(), quest);
+					openWorldSelector((Player) event.getWhoClicked(), quest);
 				}
 		);
 		
@@ -1119,38 +1123,86 @@ public class QuestBook {
 			index++;
 		}
 		
-		for (int i = 0; i < 9; i++) {
-			final IMission mission = quest.getMission(54 + i);
-			if (mission == null) {
-				menu.put(45 + i,
-						new ItemBuilder(Material.STAINED_GLASS_PANE).color(DyeColor.RED).display("&7> Create mission").get(),
-						event -> {
-							changes.addMission(event.getSlot() + 9);
+		for(int i = 0; i < 9; ++i)
+			menu.put(45 + i,
+					new ItemBuilder(Material.STAINED_GLASS_PANE).color(DyeColor.RED).display("&7> Create mission").get(),
+					event -> {
+						changes.addMission(event.getSlot() + 9);
 
-							changes.apply();
-							openQuestEditor((Player) event.getWhoClicked(), quest);
-						});
-			}
-			else {
-				menu.put(45 + i,
-						new ItemBuilder(mission.getType().getSelectorItem()).flagAll().wrapText(
-								mission.getText(),
-								"",
-								"&rLeft click: &eOpen mission editor",
-								"&rRight click: &eRemove mission").get(),
-						event -> {
-							Player p2 = (Player) event.getWhoClicked();
-							if (event.isRightClick()) QBDialogue.openDeletionConfirmation(p2, mission);
-							else openQuestMissionEditor(p2, mission);
-						}
-				);
-			}
+						changes.apply();
+						openQuestEditor((Player) event.getWhoClicked(), quest);
+					});
+		
+		// TODO: Mission move
+		for (IMission mission : quest.getMissions()) {
+			menu.put(mission.getIndex() - 9,
+					new ItemBuilder(mission.getType().getSelectorItem()).flagAll().wrapText(
+							mission.getText(),
+							"",
+							"&rLeft click: &eOpen mission editor",
+							"&rRight click: &eRemove mission"/*,
+							"&rShift right click: &eMove mission"*/).get(),
+					event -> {
+						Player p2 = (Player) event.getWhoClicked();
+						if (!event.isRightClick())
+							openQuestMissionEditor(p2, mission);
+						//else if(event.isShiftClick())
+						//	openMissionMove(p, quest, mission);
+						else
+							QBDialogue.openDeletionConfirmation(p2, mission);
+					}
+			);
+		}
+		
+		menu.openFor(p);
+	}
+	
+	public static void openMissionMove(Player p, IQuest quest, IMission from) {
+		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
+		Menu menu = new Menu(2, "&3Mission order");
+		
+		menu.put(0, ItemBuilder.Proto.MAP_BACK.get().wrapLore(" &3QMission order").get(), event -> {
+			openQuestEditor((Player) event.getWhoClicked(), quest);
+		});
+		
+		for(int i = 0; i < 9; ++i) {
+			int index = i + 54;
+			menu.put(i + 9,
+					new ItemBuilder(Material.STAINED_GLASS_PANE).color(DyeColor.RED).display("&7Empty").lore(
+							"",
+							"&e> Move here").get(),
+					event -> {
+						IMissionState state = from.getState();
+						state.setIndex(index);
+						state.apply();
+						openQuestEditor(p, quest);
+					});
+		}
+		
+		for (IMission to : quest.getMissions()) {
+			int index = to.getIndex();
+			menu.put(index - 45,
+					new ItemBuilder(to.getType().getSelectorItem()).flagAll().wrapText(
+							to.getText(),
+							"",
+							"&e> Swap missions").get(),
+					event -> {
+						IMissionState toState = to.getState();
+						IMissionState fromState = from.getState();
+						
+						toState.setIndex(from.getIndex());
+						fromState.setIndex(index);
+						toState.apply();
+						fromState.apply();
+						openQuestEditor(p, quest);
+					}
+			);
 		}
 		
 		menu.openFor(p);
 	}
 
-	public static void openWorldEditor(Player p, final IQuest quest) {
+	public static void openWorldSelector(Player p, final IQuest quest) {
 		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
 		
 		final Menu menu = new Menu(2, "&3World selector");
@@ -1170,7 +1222,7 @@ public class QuestBook {
 						if(changes.apply()) {
 						}
 
-						openWorldEditor((Player) event.getWhoClicked(), quest);
+						openWorldSelector((Player) event.getWhoClicked(), quest);
 					}
 			);
 			index++;

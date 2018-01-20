@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 import me.mrCookieSlime.QuestWorld.QuestWorldPlugin;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
@@ -141,6 +142,11 @@ public class PlayerStatus implements IPlayerStatus {
 		return getStatus(mission.getQuest()).equals(QuestStatus.AVAILABLE)
 				&& !hasCompletedTask(mission)
 				&& hasUnlockedTask(mission);
+	}
+	
+	@Override
+	public void update() {
+		update(false);
 	}
 	
 	public void update(boolean quest_check) {
@@ -343,9 +349,9 @@ public class PlayerStatus implements IPlayerStatus {
 			Bukkit.dispatchCommand(Bukkit.getConsoleSender(), line.substring(1));
 
 		else {
-			line = QuestWorld.getPlugin().getConfig().getString("dialogue.prefix") + line;
+			line = Text.deserializeColor(QuestWorld.getPlugin().getConfig().getString("dialogue.prefix")) + line;
 			
-			player.sendMessage(Text.colorize(line));
+			player.sendMessage(line);
 		}
 	}
 
@@ -371,14 +377,29 @@ public class PlayerStatus implements IPlayerStatus {
 	public ProgressTracker getTracker() {
 		return tracker;
 	}
+	
 
-	public void clearQuestData(IQuest quest) {
-		tracker.clearQuest(quest);
+	public static void clearAllCategoryData(ICategory category) {
+		clearDataImpl(category);
 	}
 	
 	// Right, so this function USED to loop through every file in data-storage/Quest World on
 	// the main thread. W H A T
 	public static void clearAllQuestData(IQuest quest) {
+		clearDataImpl(quest);
+	}
+	
+	private static void clearDataImpl(Object object) {
+		Consumer<ProgressTracker> callback;
+		
+		if(object instanceof IQuest)
+			callback = tracker -> tracker.clearQuest((IQuest)object);
+		else if(object instanceof ICategory)
+			callback = tracker -> tracker.clearCategory((ICategory)object);
+		else {
+			throw new IllegalArgumentException("clearData called with: " + object.getClass().getSimpleName());
+		}
+		
 		Bukkit.getScheduler().runTaskAsynchronously(QuestWorld.getPlugin(), () -> {
 			// First: clear all the quest data on a new thread
 			File path = QuestWorldPlugin.getPath("data.player");
@@ -386,14 +407,14 @@ public class PlayerStatus implements IPlayerStatus {
 			for (File file: path.listFiles()) {
 				String uuid = file.getName().substring(0, file.getName().length() - 4);
 				ProgressTracker t = new ProgressTracker(UUID.fromString(uuid));
-				t.clearQuest(quest);
+				callback.accept(t);
 				t.onSave();
 			}
 
 			// Second: go back to the main thread and make sure all player managers know what happened
 			Bukkit.getScheduler().callSyncMethod(QuestWorld.getPlugin(), () -> {
 				for(Player player : Bukkit.getOnlinePlayers())
-					of(player).clearQuestData(quest);
+					callback.accept(of(player).getTracker());
 				
 				return false;
 			});

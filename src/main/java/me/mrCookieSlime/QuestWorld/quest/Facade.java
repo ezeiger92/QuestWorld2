@@ -86,6 +86,19 @@ public class Facade implements IFacade {
 		return null;
 	}
 	
+	@Deprecated
+	static Quest backwardsQuestOfString(String in) {
+		if(in == null)
+			return null;
+		
+		int[] parts = splitQuestString(in);
+		ICategory c = QuestWorld.getFacade().getCategory(parts[0]);
+		if (c != null)
+			return (Quest)c.getQuest(parts[1]);
+		
+		return null;
+	}
+	
 	static String stringOfQuest(IQuest quest) {
 		if(quest == null)
 			return null;
@@ -232,8 +245,7 @@ public class Facade implements IFacade {
 	
 	@Override
 	public void clearAllUserData(ICategory category) {
-		for(IQuest quest : category.getQuests())
-			clearAllUserData(quest);
+		PlayerStatus.clearAllCategoryData(category);
 	}
 	
 	@Override

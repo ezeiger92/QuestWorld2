@@ -5,7 +5,6 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -42,7 +41,7 @@ class Quest extends UniqueObject implements IQuestState {
 	private boolean      partySupport = true;
 	private String       permission = "";
 	private List<ItemStack> rewards = new ArrayList<>();
-	private Map<Integer, Mission> tasks = new HashMap<>(9);
+	private List<Mission> tasks = new ArrayList<>(9);
 	private List<String> world_blacklist = new ArrayList<>();
 	private int          xp = 0;
 	
@@ -60,7 +59,7 @@ class Quest extends UniqueObject implements IQuestState {
 		item     = source.item.clone();
 
 		tasks.clear();
-		tasks.putAll(source.tasks);
+		tasks.addAll(source.tasks);
 		commands.clear();
 		commands.addAll(source.commands);
 		world_blacklist.clear();
@@ -240,13 +239,13 @@ class Quest extends UniqueObject implements IQuestState {
 	}
 
 	public List<Mission> getOrderedMissions() {
-		List<Mission> missions = new ArrayList<>(tasks.values());
+		List<Mission> missions = new ArrayList<>(tasks);
 		Collections.sort(missions, (l, r) -> l.getIndex() - r.getIndex());
 		return missions;
 	}
 	
 	public Collection<Mission> getMissions() {
-		return tasks.values();
+		return tasks;
 	}
 	
 	private List<ItemStack> loadRewards() {
@@ -303,11 +302,11 @@ class Quest extends UniqueObject implements IQuestState {
 	}
 	
 	public void addMission(int index) {
-		tasks.put(index, getCategory().getFacade().createMission(index, getSource()));
+		tasks.add(getCategory().getFacade().createMission(index, getSource()));
 	}
 	
 	public void directAddMission(Mission m) {
-		tasks.put(m.getIndex(), m);
+		tasks.add(m);
 	}
 	
 	public void removeMission(IMission mission) {
