@@ -75,7 +75,7 @@ public class Text {
 		if(input == null)
 			return null;
 		
-		return input.replace("\\", "\\\\").replace("&", "\\&").replace(colorChar, dummyChar);
+		return input.replace("\\", "\\\\").replace("\n", "\\n").replace("&", "\\&").replace(colorChar, dummyChar);
 	}
 	
 	public static String deserializeColor(@Nullable("Returns null") String input) {
@@ -83,7 +83,7 @@ public class Text {
 			return null;
 		
 		input = input.replaceAll("(?i)(?<!\\\\)((?:\\\\\\\\)*)&([0-9A-FK-OR])", "$1"+colorChar+"$2");
-		return input.replace("\\&", "&").replace("\\\\", "\\");
+		return input.replace("\\&", "&").replace("\\n", "\n").replace("\\\\", "\\");
 	}
 	
 	public static String stringOf(Location location) {
