@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import me.mrCookieSlime.QuestWorld.api.contract.ICategoryState;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
@@ -135,8 +136,13 @@ class Category extends UniqueObject implements ICategoryState {
 	//// DONE
 	
 	public void refreshParent() {
-		parent = new WeakReference<>(
-				Facade.questOfString(config.getString("parent", null)));
+		String parentId = config.getString("parentId", null);
+		if(parentId != null)
+			parent = new WeakReference<>(facade.getQuest(UUID.fromString(parentId)));
+		else
+			// Old way
+			parent = new WeakReference<>(
+					Facade.questOfString(config.getString("parent", null)));
 	}
 	
 	@Override
@@ -167,10 +173,10 @@ class Category extends UniqueObject implements ICategoryState {
 		config.set("world-blacklist", world_blacklist);
 		
 		Quest parent = getParent();
-		if(parent != null)
+		if(parent != null) {
 			config.set("parentId", parent.getUniqueId().toString());
-		
-		config.set("parent", Facade.stringOfQuest(getParent()));
+			//config.set("parent", Facade.stringOfQuest(parent));
+		}
 		
 		try {
 			config.save(Facade.fileFor(this));

@@ -5,8 +5,10 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import me.mrCookieSlime.QuestWorld.QuestWorldPlugin;
 import me.mrCookieSlime.QuestWorld.api.QuestWorld;
@@ -41,7 +43,7 @@ class Quest extends UniqueObject implements IQuestState {
 	private boolean      partySupport = true;
 	private String       permission = "";
 	private List<ItemStack> rewards = new ArrayList<>();
-	private List<Mission> tasks = new ArrayList<>(9);
+	private Map<Integer, Mission> tasks = new HashMap<>(9);
 	private List<String> world_blacklist = new ArrayList<>();
 	private int          xp = 0;
 	
@@ -59,7 +61,7 @@ class Quest extends UniqueObject implements IQuestState {
 		item     = source.item.clone();
 
 		tasks.clear();
-		tasks.addAll(source.tasks);
+		tasks.putAll(source.tasks);
 		commands.clear();
 		commands.addAll(source.commands);
 		world_blacklist.clear();
@@ -128,8 +130,13 @@ class Quest extends UniqueObject implements IQuestState {
 	}
 	
 	public void refreshParent() {
-		parent = new WeakReference<>(
-				Facade.questOfString(config.getString("parent", null)));
+		String parentId = config.getString("parentId", null);
+		if(parentId != null)
+			parent = new WeakReference<>(getCategory().getFacade().getQuest(UUID.fromString(parentId)));
+		else
+			// Old way
+			parent = new WeakReference<>(
+					Facade.questOfString(config.getString("parent", null)));
 	}
 	
 	private void loadMissions() {
@@ -147,12 +154,13 @@ class Quest extends UniqueObject implements IQuestState {
 				m.validate();
 				arr.add(m);
 			}
+		
 		else {
 			ConfigurationSection missions = config.getConfigurationSection("missions");
 			if (missions == null)
 				return;
 			
-			int index = 54;
+			int index = 0;
 			for (String key: missions.getKeys(false)) {
 				// TODO mess
 				Map<String, Object> data = missions.getConfigurationSection(key).getValues(false);
@@ -177,6 +185,7 @@ class Quest extends UniqueObject implements IQuestState {
 	
 	public void save() {
 		config.set("uniqueId", getUniqueId().toString());
+		config.set("categoryId", getCategory().getUniqueId().toString());
 		config.set("id", id);
 		config.set("category", getCategory().getID());
 		config.set("cooldown", cooldown);
@@ -214,10 +223,10 @@ class Quest extends UniqueObject implements IQuestState {
 		}*/
 		
 		Quest parent = getParent();
-		if(parent != null)
+		if(parent != null) {
 			config.set("parentId", parent.getUniqueId().toString());
-
-		config.set("parent", Facade.stringOfQuest(getParent()));
+			//config.set("parent", Facade.stringOfQuest(parent));
+		}
 		
 		try {
 			config.save(Facade.fileFor(this));
@@ -239,13 +248,13 @@ class Quest extends UniqueObject implements IQuestState {
 	}
 
 	public List<Mission> getOrderedMissions() {
-		List<Mission> missions = new ArrayList<>(tasks);
+		List<Mission> missions = new ArrayList<>(tasks.values());
 		Collections.sort(missions, (l, r) -> l.getIndex() - r.getIndex());
 		return missions;
 	}
 	
 	public Collection<Mission> getMissions() {
-		return tasks;
+		return tasks.values();
 	}
 	
 	private List<ItemStack> loadRewards() {
@@ -302,11 +311,11 @@ class Quest extends UniqueObject implements IQuestState {
 	}
 	
 	public void addMission(int index) {
-		tasks.add(getCategory().getFacade().createMission(index, getSource()));
+		tasks.put(index, getCategory().getFacade().createMission(index, getSource()));
 	}
 	
 	public void directAddMission(Mission m) {
-		tasks.add(m);
+		tasks.put(m.getIndex(), m);
 	}
 	
 	public void removeMission(IMission mission) {

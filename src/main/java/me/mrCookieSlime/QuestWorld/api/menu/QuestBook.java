@@ -1127,7 +1127,7 @@ public class QuestBook {
 			menu.put(45 + i,
 					new ItemBuilder(Material.STAINED_GLASS_PANE).color(DyeColor.RED).display("&7> Create mission").get(),
 					event -> {
-						changes.addMission(event.getSlot() + 9);
+						changes.addMission(event.getSlot() - 45);
 
 						changes.apply();
 						openQuestEditor((Player) event.getWhoClicked(), quest);
@@ -1135,7 +1135,9 @@ public class QuestBook {
 		
 		// TODO: Mission move
 		for (IMission mission : quest.getMissions()) {
-			menu.put(mission.getIndex() - 9,
+			// TODO: Hack to maybe deal with out of order quests
+			int missionIndex = (mission.getIndex() + 45) % 9;
+			menu.put(missionIndex + 45,
 					new ItemBuilder(mission.getType().getSelectorItem()).flagAll().wrapText(
 							mission.getText(),
 							"",
@@ -1157,7 +1159,7 @@ public class QuestBook {
 		menu.openFor(p);
 	}
 	
-	public static void openMissionMove(Player p, IQuest quest, IMission from) {
+	/*public static void openMissionMove(Player p, IQuest quest, IMission from) {
 		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
 		Menu menu = new Menu(2, "&3Mission order");
 		
@@ -1181,7 +1183,7 @@ public class QuestBook {
 		
 		for (IMission to : quest.getMissions()) {
 			int index = to.getIndex();
-			menu.put(index - 45,
+			menu.put(index + 9,
 					new ItemBuilder(to.getType().getSelectorItem()).flagAll().wrapText(
 							to.getText(),
 							"",
@@ -1200,7 +1202,7 @@ public class QuestBook {
 		}
 		
 		menu.openFor(p);
-	}
+	}*/
 
 	public static void openWorldSelector(Player p, final IQuest quest) {
 		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
