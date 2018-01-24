@@ -178,6 +178,11 @@ public class ProgressTracker implements Reloadable {
 	
 	//// MISSION
 	private static String path(IMission mission) {
+		return path(mission.getQuest()) + ".mission." + mission.getUniqueId();
+	}
+	
+
+	private static String oldPath(IMission mission) {
 		return path(mission.getQuest()) + ".mission." + mission.getIndex();
 	}
 	
@@ -246,7 +251,20 @@ public class ProgressTracker implements Reloadable {
 	}
 	
 	public int getMissionProgress(IMission mission) {
-		return config.getInt(path(mission) + ".progress", 0);
+		int progress = config.getInt(path(mission) + ".progress", -1);
+		
+		if(progress == -1) {
+			progress = config.getInt(oldPath(mission) + ".progress", -1);
+			
+			if(progress != -1) {
+				config.set(oldPath(mission), null);
+				setMissionProgress(mission, progress);
+			}
+			else
+				progress = 0;
+		}
+
+		return progress;
 	}
 	
 	public void setMissionProgress(IMission mission, int progress) {
@@ -254,7 +272,20 @@ public class ProgressTracker implements Reloadable {
 	}
 	
 	public long getMissionCompleted(IMission mission) {
-		return config.getLong(path(mission) + ".complete-until", 0);
+		long completeUntil = config.getLong(path(mission) + ".complete-until", -1);
+		
+		if(completeUntil == -1) {
+			completeUntil = config.getInt(oldPath(mission) + ".complete-until", -1);
+			
+			if(completeUntil != -1) {
+				config.set(oldPath(mission), null);
+				setMissionCompleted(mission, completeUntil);
+			}
+			else
+				completeUntil = 0;
+		}
+
+		return completeUntil;
 	}
 	
 	public void setMissionCompleted(IMission mission, Long time) {
