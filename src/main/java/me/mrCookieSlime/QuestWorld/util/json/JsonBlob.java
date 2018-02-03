@@ -18,7 +18,7 @@ public class JsonBlob {
 	
 	public JsonBlob add(String text, Prop... props) {
 		HashMap<String, String> properties = new HashMap<>(props.length + 1);
-		properties.put("\"text\"", '"'+text+'"');
+		properties.put("\"text\"", '"'+text.replace("\\", "\\\\").replace("\"", "\\\"")+'"');
 		for(Prop p : props)
 			p.apply(properties);
 		
