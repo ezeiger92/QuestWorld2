@@ -8,12 +8,16 @@ import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuestState;
 import me.mrCookieSlime.QuestWorld.api.menu.PagedMapping;
 import me.mrCookieSlime.QuestWorld.api.menu.QuestBook;
+import me.mrCookieSlime.QuestWorld.manager.PlayerStatus;
 import me.mrCookieSlime.QuestWorld.util.Log;
 import me.mrCookieSlime.QuestWorld.util.PlayerTools;
 import me.mrCookieSlime.QuestWorld.util.Text;
 
 import java.util.Arrays;
+import java.util.UUID;
 
+import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -128,7 +132,71 @@ public class EditorCommand implements CommandExecutor {
 			}
 		}
 		else if(param.equals("reset")) {
-			
+			if(args.length > 1) {
+				String targetName = args[1];
+				UUID uuid = null;
+				OfflinePlayer target = PlayerTools.getPlayer(targetName);
+				
+				if(target != null)
+					uuid = target.getUniqueId();
+				else {
+					try {
+						uuid = UUID.fromString(targetName);
+					}
+					catch(IllegalArgumentException e) {
+						@SuppressWarnings("deprecation")
+						OfflinePlayer t = Bukkit.getOfflinePlayer(targetName);
+						if(t.hasPlayedBefore())
+							uuid = t.getUniqueId();
+					}
+				}
+				
+				if(uuid != null) {
+					PlayerStatus status = QuestWorldPlugin.getImpl().getPlayerStatus(uuid);
+					int c_id = -1;
+					int q_id = -1;
+					if(args.length <= 2) {
+						for(ICategory cat : QuestWorld.getFacade().getCategories())
+							status.getTracker().clearCategory(cat);
+						
+						return true;
+					}
+					else try {
+						c_id = Integer.parseInt(args[2]);
+					}
+					catch(NumberFormatException exception) {
+						sender.sendMessage(Text.colorize("&cError: invalid number for category (", args[2], ")"));
+						return true;
+					}
+					
+					if(args.length > 3) try {
+						q_id = Integer.parseInt(args[3]);
+					}
+					catch(NumberFormatException exception) {
+						sender.sendMessage(Text.colorize("&cError: invalid number for quest (", args[3], ")"));
+						return true;
+					}
+					
+					ICategory category = QuestWorld.getFacade().getCategory(c_id);
+					if (category != null)  {
+						if (q_id >= 0) {
+							IQuest quest = category.getQuest(q_id);
+							if(quest != null)
+								status.getTracker().clearQuest(quest);
+							else
+								sender.sendMessage(Text.colorize("&cMissing quest for index ", args[3], " (in category ", args[2], ")"));
+						}
+						else
+							status.getTracker().clearCategory(category);
+					}
+					else
+						sender.sendMessage(Text.colorize("&cMissing category for index ", args[2]));
+				}
+				else
+					sender.sendMessage(Text.colorize("&cCould not find player \""+targetName+"\""));
+			}
+			else
+				sender.sendMessage(Text.colorize("&c/"+label+" reset <player|uuid> [category_id [quest_id]]"));
 		}
 		else if(param.equals("upgrade")) {
 			if(args.length > 1 && args[1].equalsIgnoreCase("confirm")) {
