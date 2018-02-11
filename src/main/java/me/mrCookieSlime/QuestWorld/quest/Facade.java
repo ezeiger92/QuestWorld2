@@ -2,6 +2,7 @@ package me.mrCookieSlime.QuestWorld.quest;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.UUID;
@@ -82,19 +83,6 @@ public class Facade implements IFacade {
 		ICategory c = QuestWorld.getFacade().getCategory(parts[1]);
 		if (c != null)
 			return (Quest)c.getQuest(parts[0]);
-		
-		return null;
-	}
-	
-	@Deprecated
-	static Quest backwardsQuestOfString(String in) {
-		if(in == null)
-			return null;
-		
-		int[] parts = splitQuestString(in);
-		ICategory c = QuestWorld.getFacade().getCategory(parts[0]);
-		if (c != null)
-			return (Quest)c.getQuest(parts[1]);
 		
 		return null;
 	}
@@ -223,9 +211,10 @@ public class Facade implements IFacade {
 	public void deleteCategory(ICategory category) {
 		for (IQuest quest: category.getQuests())
 			deleteQuest(quest);
-		
-		categoryMap.remove(category.getID());
+
+		PlayerStatus.clearAllCategoryData(category);
 		deleteCategoryFile(category);
+		categoryMap.remove(category.getID());
 	}
 	
 	@Override
@@ -234,12 +223,16 @@ public class Facade implements IFacade {
 			deleteMission(mission);
 		
 		PlayerStatus.clearAllQuestData(quest);
-		questMap.remove(((Quest)quest).getUniqueId());
 		deleteQuestFile(quest);
+		questMap.remove(((Quest)quest).getUniqueId());
 	}
 	
 	@Override
 	public void deleteMission(IMission mission) {
+		((Mission)mission).setDialogue(Arrays.asList());
+		ProgressTracker.saveDialogue(mission);
+		
+		PlayerStatus.clearAllMissionData(mission);
 		missionMap.remove(((Mission)mission).getUniqueId());
 	}
 	

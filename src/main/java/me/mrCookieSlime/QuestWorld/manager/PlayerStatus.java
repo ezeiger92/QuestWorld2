@@ -383,6 +383,10 @@ public class PlayerStatus implements IPlayerStatus {
 		clearDataImpl(quest);
 	}
 	
+	public static void clearAllMissionData(IMission mission) {
+		clearDataImpl(mission);
+	}
+	
 	private static void clearDataImpl(Object object) {
 		Consumer<ProgressTracker> callback;
 		
@@ -390,6 +394,8 @@ public class PlayerStatus implements IPlayerStatus {
 			callback = tracker -> tracker.clearQuest((IQuest)object);
 		else if(object instanceof ICategory)
 			callback = tracker -> tracker.clearCategory((ICategory)object);
+		else if(object instanceof IMission)
+			callback = tracker -> tracker.clearMission((IMission)object);
 		else {
 			throw new IllegalArgumentException("clearData called with: " + object.getClass().getSimpleName());
 		}
