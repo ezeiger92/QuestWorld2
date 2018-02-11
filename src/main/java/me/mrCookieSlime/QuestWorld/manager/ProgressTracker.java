@@ -213,6 +213,21 @@ public class ProgressTracker implements Reloadable {
 		}
 	}
 	
+	private static List<String> readAllLines(File file) {
+		try {
+			return Files.readAllLines(file.toPath(), StandardCharsets.UTF_8);
+		}
+		catch(Exception e) {
+			try {
+				return Files.readAllLines(file.toPath(), StandardCharsets.US_ASCII);
+			}
+			catch(Exception e2) {
+				e2.addSuppressed(e);
+				throw new IllegalArgumentException("Only UTF8 and ANSI encodings are supported!", e2);
+			}
+		}
+	}
+	
 	public static void loadDialogue(IMissionState mission) {
 		File file = dialogueFile(mission);
 		
@@ -222,7 +237,7 @@ public class ProgressTracker implements Reloadable {
 				return;
 			
 			try {
-				List<String> lines = Files.readAllLines(oldFile.toPath());
+				List<String> lines = readAllLines(oldFile);
 				if(lines.isEmpty())
 					return;
 				
@@ -242,7 +257,7 @@ public class ProgressTracker implements Reloadable {
 		}
 		
 		try {
-			mission.setDialogue(Files.readAllLines(file.toPath(), StandardCharsets.UTF_8).stream()
+			mission.setDialogue(readAllLines(file).stream()
 					.map(Text::deserializeColor).collect(Collectors.toList()));
 		} catch (Exception e) {
 			e.printStackTrace();
