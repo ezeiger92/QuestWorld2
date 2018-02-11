@@ -86,10 +86,12 @@ public class QBDialogue {
 						if(CancellableEvent.send(new MissionDeleteEvent(mission))) {
 							IQuestState changes = mission.getQuest().getState();
 							changes.removeMission(mission);
-							changes.apply();
+							if(changes.apply())
+								QuestWorld.getFacade().deleteMission(mission);
 							
 							p2.closeInventory();
 							QuestBook.openQuestEditor(p2, mission.getQuest());
+							// TODO: Delete mission translation
 						}
 					}
 				}
@@ -125,7 +127,6 @@ public class QBDialogue {
 		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
 		
 		IMissionState changes = mission.getState();
-		//String title = Text.colorize(mission.getQuest().getName() + " &7- &8(Page " + (page+1) + "/" + (lastPage+1) + ")");
 		final Menu menu = new Menu(6, "&3Entity selector");
 		
 		PagedMapping pager = new PagedMapping(45);

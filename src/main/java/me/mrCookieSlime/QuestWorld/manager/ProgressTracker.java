@@ -306,4 +306,8 @@ public class ProgressTracker implements Reloadable {
 	public void setMissionEnd(IMission mission, Long time) {
 		config.set(path(mission) + ".complete-until", time);
 	}
+	
+	public void clearMission(IMission mission) {
+		config.set(path(mission), null);
+	}
 }
