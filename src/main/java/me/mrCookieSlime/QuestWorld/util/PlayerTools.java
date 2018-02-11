@@ -1,5 +1,8 @@
 package me.mrCookieSlime.QuestWorld.util;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
@@ -74,12 +77,60 @@ public class PlayerTools {
 			pi.setItemInMainHand(is);
 	}
 	
+	private static Pattern keywordPattern = Pattern.compile("%(tellraw|title|subtitle|actionbar)%((?:(?!%(?:tellraw|title|subtitle|actionbar)%).)*)", Pattern.CASE_INSENSITIVE);
 	public static void sendTranslation(CommandSender p, boolean prefixed, Translator key, String... replacements) {
 		String text = makeTranslation(prefixed, key, replacements);
 		if(text.isEmpty())
 			return;
 		
-		p.sendMessage(text);
+		int tellrawPos = text.indexOf("%tellraw%");
+		int titlePos = text.indexOf("%title%");
+		int subtitlePos = text.indexOf("%subtitle%");
+		int actionbarPos = text.indexOf("%actionbar%");
+		
+		if((tellrawPos & titlePos & subtitlePos & actionbarPos) == -1) {
+			p.sendMessage(text);
+			return;
+		}
+		
+		// negative bit
+		int nb = ~(1 << 31);
+		
+		// index of first match, need to exclude non-matches (-1)
+		int matchStart = Math.min(Math.min(tellrawPos & nb, titlePos & nb), Math.min(subtitlePos & nb, actionbarPos & nb));
+		if(matchStart > 0)
+			p.sendMessage(text.substring(0, matchStart));
+		
+		if(p instanceof Player) {
+			Player player = (Player) p;
+	
+			String tellrawMessage = "";
+			String titleMessage = "";
+			String subtitleMessage = "";
+			String actionbarMessage = "";
+			
+			Matcher matcher = keywordPattern.matcher(text.substring(matchStart));
+			
+			while(matcher.find()) {
+				String type = matcher.group(1).toLowerCase();
+				String message = matcher.group(2);
+				switch(type) {
+				case "tellraw":   tellrawMessage   += message; break;
+				case "title":     titleMessage     += message; break;
+				case "subtitle":  subtitleMessage  += message; break;
+				case "actionbar": actionbarMessage += message; break;
+				}
+			}
+			
+			if(!tellrawMessage.isEmpty())
+				tellraw(player, tellrawMessage);
+			
+			if(!titleMessage.isEmpty() || !subtitleMessage.isEmpty())
+				title(player, titleMessage, subtitleMessage);
+			
+			if(!actionbarMessage.isEmpty())
+				actionbar(player, actionbarMessage);
+		}
 	}
 	
 	public static String makeTranslation(boolean prefixed, Translator key, String... replacements) {
@@ -153,10 +204,18 @@ public class PlayerTools {
 		return permission == null || permission.length() == 0 || p.hasPermission(permission.split(" ", 2)[0]);
 	}
 	
-	public static void tellraw(Player p, String json, String... extra) {
-		if(extra.length > 0)
-			json = "[" + json + "," + String.join(",", extra) + "]";
+	public static void tellraw(Player p, String json) {
 		Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "minecraft:tellraw "+p.getName()+" "+json);
+	}
+	
+	public static void title(Player p, String titleJson, String subtitleJson) {
+		if(!subtitleJson.isEmpty())
+			Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "minecraft:title "+p.getName()+" subtitle "+subtitleJson);
+		Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "minecraft:title "+p.getName()+" title "+titleJson);
+	}
+	
+	public static void actionbar(Player p, String json) {
+		Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "minecraft:title "+p.getName()+" actionbar "+json);
 	}
 	
 	@SuppressWarnings("deprecation")

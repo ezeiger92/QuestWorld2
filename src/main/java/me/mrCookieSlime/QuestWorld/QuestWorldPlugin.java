@@ -269,14 +269,14 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener {
 	}
 	
 	public static File getPath(String key) {
-		File result = new File(instance.getDataFolder(), resolvePath(key));
+		File result = new File(instance.getDataFolder(), getString(key));
 		if(!result.exists())
 			result.mkdirs();
 		
 		return result;
 	}
 	
-	public static String resolvePath(String key) {
+	public static String getString(String key) {
 		String result = instance.getConfig().getString(key,null);
 		if(result == null) {
 			String fallback = instance.api.getResources().loadJarConfig("config.yml").getString(key, null);

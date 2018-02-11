@@ -271,7 +271,7 @@ public class ProgressTracker implements Reloadable {
 		config.set(path(mission) + ".progress", progress);
 	}
 	
-	public long getMissionCompleted(IMission mission) {
+	public long getMissionEnd(IMission mission) {
 		long completeUntil = config.getLong(path(mission) + ".complete-until", -1);
 		
 		if(completeUntil == -1) {
@@ -279,7 +279,7 @@ public class ProgressTracker implements Reloadable {
 			
 			if(completeUntil != -1) {
 				config.set(oldPath(mission), null);
-				setMissionCompleted(mission, completeUntil);
+				setMissionEnd(mission, completeUntil);
 			}
 			else
 				completeUntil = 0;
@@ -288,7 +288,7 @@ public class ProgressTracker implements Reloadable {
 		return completeUntil;
 	}
 	
-	public void setMissionCompleted(IMission mission, Long time) {
+	public void setMissionEnd(IMission mission, Long time) {
 		config.set(path(mission) + ".complete-until", time);
 	}
 }

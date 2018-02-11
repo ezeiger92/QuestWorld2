@@ -95,6 +95,8 @@ public enum Translation implements Translator {
 	quests_display_exp,
 	quests_display_rewards,
 	task_locked,
+	
+	DUMMY("test.node")
 	;
 	
 	private String path;

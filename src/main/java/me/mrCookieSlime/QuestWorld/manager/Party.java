@@ -34,7 +34,9 @@ public class Party implements IPartyState {
 			tracker.setPartyLeader(leader);
 		
 		members.addAll(tracker.getPartyMembers());
-		pending.addAll(tracker.getPartyPending());
+		
+		// This is actually not great. Players don't know which parties they're invited to
+		//pending.addAll(tracker.getPartyPending());
 	}
 
 	protected Party(Party source) {
@@ -96,7 +98,9 @@ public class Party implements IPartyState {
 			.add(" ")
 			.add("DENY", DARK_RED, BOLD,
 				HOVER_TEXT("Click to deny this Invitation", GRAY),
-				CLICK_RUN(p, () -> {}))
+				CLICK_RUN(p, () -> {
+					pending.remove(p.getUniqueId());
+				}))
 			.toString());
 		
 		pending.add(p.getUniqueId());
@@ -155,7 +159,6 @@ public class Party implements IPartyState {
 			Player player = Bukkit.getPlayer(member);
 			QuestWorldPlugin.getImpl().getPlayerStatus(member).getTracker().setPartyLeader(null);
 			
-			
 			if(player != null)
 				PlayerTools.sendTranslation(player, true, Translation.PARTY_GROUP_DISBAND);
 		}
@@ -177,7 +180,8 @@ public class Party implements IPartyState {
 	
 	public void save() {
 		tracker.setPartyMembers(members);
-		tracker.setPartyPending(pending);
+		// Invited players don't know they're invited, so this is bad
+		//tracker.setPartyPending(pending);
 	}
 
 	@Override
