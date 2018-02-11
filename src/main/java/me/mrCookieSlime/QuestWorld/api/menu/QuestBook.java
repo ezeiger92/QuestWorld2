@@ -227,7 +227,16 @@ public class QuestBook {
 				"",
 				QuestWorld.translate(Translation.button_back_quests)).get(),
 				event -> {
-					openMainMenu((Player) event.getWhoClicked());
+
+					IStateful s = QuestBook.getLastViewed(p);
+					if(s instanceof IQuest) {
+						openQuest((Player) event.getWhoClicked(), (IQuest)s, true, true);
+					}
+					else if(s instanceof ICategory) {
+						openCategory((Player) event.getWhoClicked(), (ICategory)s, true);
+					}
+					else
+						openMainMenu((Player) event.getWhoClicked());
 				}
 		);
 		
@@ -1291,6 +1300,8 @@ public class QuestBook {
 
 		IMissionState changes = mission.getState();
 		final Menu menu = new Menu(3, "&3Mission selector");
+		
+		PagedMapping.putPage(p, 0);
 
 		PagedMapping view = new PagedMapping(45, 9);
 		view.setBackButton(" &3Mission editor", event -> {
