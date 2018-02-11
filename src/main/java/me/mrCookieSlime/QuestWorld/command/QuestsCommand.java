@@ -1,10 +1,12 @@
 package me.mrCookieSlime.QuestWorld.command;
 
 import me.mrCookieSlime.QuestWorld.api.QuestWorld;
+import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
 import me.mrCookieSlime.QuestWorld.api.menu.PagedMapping;
 import me.mrCookieSlime.QuestWorld.api.menu.QuestBook;
+import me.mrCookieSlime.QuestWorld.util.PlayerTools;
 import me.mrCookieSlime.QuestWorld.util.Text;
 
 import org.bukkit.command.Command;
@@ -16,6 +18,7 @@ public class QuestsCommand implements CommandExecutor {
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+		PlayerTools.sendTranslation(sender, false, Translation.DUMMY);
 		if (sender instanceof Player) {
 			Player p = (Player)sender;
 			

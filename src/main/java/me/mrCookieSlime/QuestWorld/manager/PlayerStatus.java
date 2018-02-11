@@ -107,7 +107,7 @@ public class PlayerStatus implements IPlayerStatus {
 	}
 	
 	public boolean isWithinTimeframe(IMission task) {
-		long date = tracker.getMissionCompleted(task);
+		long date = tracker.getMissionEnd(task);
 		if (date == 0) return true;
 		return date > System.currentTimeMillis();
 	}
@@ -116,8 +116,8 @@ public class PlayerStatus implements IPlayerStatus {
 		if (task.getTimeframe() == 0)
 			return true;
 
-		if (isWithinTimeframe(task)) {
-			tracker.setMissionCompleted(task, null);
+		if (!isWithinTimeframe(task)) {
+			tracker.setMissionEnd(task, null);
 			tracker.setMissionProgress(task, 0);
 			ifOnline(playerUUID).ifPresent(player ->
 				PlayerTools.sendTranslation(player, false, Translation.NOTIFY_TIME_FAIL,
@@ -128,7 +128,7 @@ public class PlayerStatus implements IPlayerStatus {
 			return false;
 		}
 		else if (getProgress(task) == 0 && amount > 0) {
-			tracker.setMissionCompleted(task, System.currentTimeMillis() + task.getTimeframe() * 60 * 1000);
+			tracker.setMissionEnd(task, System.currentTimeMillis() + task.getTimeframe() * 60 * 1000);
 			
 			ifOnline(playerUUID).ifPresent(player ->
 				PlayerTools.sendTranslation(player, false, Translation.NOTIFY_TIME_START, task.getText(), Text.timeFromNum(task.getTimeframe()))
@@ -404,11 +404,15 @@ public class PlayerStatus implements IPlayerStatus {
 			// First: clear all the quest data on a new thread
 			File path = QuestWorldPlugin.getPath("data.player");
 			
-			for (File file: path.listFiles()) {
+			for (File file: path.listFiles((file, name) -> name.endsWith(".yml"))) {
 				String uuid = file.getName().substring(0, file.getName().length() - 4);
-				ProgressTracker t = new ProgressTracker(UUID.fromString(uuid));
-				callback.accept(t);
-				t.onSave();
+				try {
+					ProgressTracker t = new ProgressTracker(UUID.fromString(uuid));
+					callback.accept(t);
+					t.onSave();
+				}
+				// File name was not 
+				catch(IllegalArgumentException e) {}
 			}
 
 			// Second: go back to the main thread and make sure all player managers know what happened

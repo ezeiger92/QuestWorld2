@@ -1,7 +1,8 @@
 options:
   auto-update: true
-  quest-check-delay: 60
   autosave-interval: 5
+  quest-check-delay: 60
+  language: en_us
   text-wrap: 32
 party:
   max-members: 4
@@ -12,8 +13,8 @@ book:
 dialogue:
   prefix: '&f'
 data:
-  player:     playerdata/
-  questing:   quests/
   dialogue:   dialogues/
-  presets:    presets/
   extensions: extensions/
+  player:     playerdata/
+  presets:    presets/
+  questing:   quests/

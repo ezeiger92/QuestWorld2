@@ -127,6 +127,9 @@ public class EditorCommand implements CommandExecutor {
 				sender.sendMessage(Text.colorize("&7Reloaded config from disk"));
 			}
 		}
+		else if(param.equals("reset")) {
+			
+		}
 		else if(param.equals("upgrade")) {
 			if(args.length > 1 && args[1].equalsIgnoreCase("confirm")) {
 				int changeCount = 0;

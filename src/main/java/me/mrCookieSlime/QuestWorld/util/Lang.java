@@ -22,16 +22,20 @@ public final class Lang implements Reloadable {
 	}
 	
 	private void loadLang(String langCode) throws IllegalArgumentException {
-		String path = "lang/" + langCode + ".yml";
-		YamlConfiguration config;
-		try {
-			config = loader.loadConfig(path);
+		if(langCode != null) {
+			String path = "lang/" + langCode + ".yml";
+			YamlConfiguration config;
+			try {
+				config = loader.loadConfig(path);
+			}
+			catch(Exception e) {
+				throw new IllegalArgumentException("Failed read language \"" + path +"\"", e);
+			}
+			
+			languages.put(langCode.toLowerCase(), config);
 		}
-		catch(Exception e) {
-			throw new IllegalArgumentException("Failed read language \"" + path +"\"", e);
-		}
-		
-		languages.put(langCode.toLowerCase(), config);
+		else
+			throw new IllegalArgumentException("Language cannot be null");
 	}
 	
 	public boolean setLang(String langCode) {
@@ -62,7 +66,7 @@ public final class Lang implements Reloadable {
 			translation = languages.get(fallbackLang).getString(key.path());
 			if(translation == null) {
 				Log.severe("Lang " + currentLang + (currentLang.equals(fallbackLang) ? "" : " and fallback " + fallbackLang) + " missing " + key.toString());
-				return "ERROR: missing " + key.toString();
+				return "";
 			}
 			else
 				Log.warning("Lang " + currentLang + " missing " + key.toString());

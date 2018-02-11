@@ -22,6 +22,7 @@ import me.mrCookieSlime.QuestWorld.api.menu.Menu;
 import me.mrCookieSlime.QuestWorld.manager.MissionSet;
 import me.mrCookieSlime.QuestWorld.manager.Party;
 import me.mrCookieSlime.QuestWorld.manager.PlayerStatus;
+import me.mrCookieSlime.QuestWorld.manager.ProgressTracker;
 import me.mrCookieSlime.QuestWorld.quest.Facade;
 import me.mrCookieSlime.QuestWorld.util.BukkitService;
 import me.mrCookieSlime.QuestWorld.util.Lang;
@@ -82,6 +83,10 @@ public final class QuestingImpl implements QuestingAPI, Reloadable {
 	}
 	
 	public void onEnable() {
+		String lang = QuestWorldPlugin.getString("options.language");
+		if(lang != null)
+			language.setLang(lang);
+		
 		if(Bukkit.getPluginManager().getPlugin("Vault") != null)
 			econ = Optional.ofNullable(BukkitService.get(Economy.class));
 	}
@@ -143,14 +148,19 @@ public final class QuestingImpl implements QuestingAPI, Reloadable {
 	}
 	
 	public Party getParty(UUID uuid) {
-		UUID leader = getPlayerStatus(uuid).getTracker().getPartyLeader();
+		ProgressTracker tracker = getPlayerStatus(uuid).getTracker();
+		UUID leader = tracker.getPartyLeader();
 		
 		if(leader != null) {
 			Party p = parties.get(leader);
-			if(p != null)
-				return p;
+			if(p == null)
+				p = createParty(leader);
 
-			return createParty(leader);
+			if(p.getPending().contains(uuid))
+				return p;
+			
+			// Party did not contain the player, something unusual must have happened
+			tracker.setPartyLeader(null);
 		}
 		
 		return null;
