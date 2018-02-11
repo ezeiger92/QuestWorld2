@@ -9,21 +9,32 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import me.mrCookieSlime.QuestWorld.api.Translator;
 
 public final class Lang implements Reloadable {
-	private final String fallbackLang = "en_us";
+	private static String langPath(String langCode) {
+		return "lang/" + langCode.toLowerCase() + ".yml";
+	}
+	
+	private final String fallbackLang = langPath("en_us");
 	private final ResourceLoader loader;
 	private final HashMap<String, YamlConfiguration> languages = new HashMap<>();
 	private String currentLang;
 	
-	// TODO Load all languages from jar://lang/
 	public Lang(ResourceLoader loader) throws IllegalArgumentException {
+		
 		this.loader = loader;
 		loadLang(fallbackLang);
 		currentLang = fallbackLang;
+		
+		for(String langPath : loader.filesInResourceDir("lang/"))
+			if(!langPath.equals(currentLang))
+				try{
+					loadLang(langPath);
+				}
+				catch(IllegalArgumentException e) {}
 	}
 	
-	private void loadLang(String langCode) throws IllegalArgumentException {
-		if(langCode != null) {
-			String path = "lang/" + langCode + ".yml";
+	private void loadLang(String langPath) throws IllegalArgumentException {
+		if(langPath != null) {
+			String path = "lang/" + langPath + ".yml";
 			YamlConfiguration config;
 			try {
 				config = loader.loadConfig(path);
@@ -32,23 +43,24 @@ public final class Lang implements Reloadable {
 				throw new IllegalArgumentException("Failed read language \"" + path +"\"", e);
 			}
 			
-			languages.put(langCode.toLowerCase(), config);
+			languages.put(langPath, config);
 		}
 		else
 			throw new IllegalArgumentException("Language cannot be null");
 	}
 	
 	public boolean setLang(String langCode) {
-		if(!languages.containsKey(langCode))
+		String langPath = langPath(langCode);
+		if(!languages.containsKey(langPath))
 			try {
-				loadLang(langCode);
+				loadLang(langPath);
 			}
 			catch(IllegalArgumentException e) {
 				e.printStackTrace();
 				return false;
 			}
 		
-		currentLang = langCode;
+		currentLang = langPath;
 		return true;
 	}
 	
@@ -78,7 +90,7 @@ public final class Lang implements Reloadable {
 	@Override
 	public void onSave() {
 		for(HashMap.Entry<String, YamlConfiguration> entry : languages.entrySet()) {
-			String path = "lang/" + entry.getKey() + ".yml";
+			String path = entry.getKey();
 			try {
 				loader.saveConfig(entry.getValue(), path);
 			} catch (IOException e) {
