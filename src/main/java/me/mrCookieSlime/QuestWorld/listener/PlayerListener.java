@@ -48,7 +48,7 @@ public class PlayerListener implements Listener {
 		
 		for(IMission mission : QuestWorld.getViewer().getDecayingMissions())
 			if(playerStatus.hasDeathEvent(mission))
-				((Decaying) mission).onDeath(event, QuestWorld.getMissionEntry(mission, p));
+				((Decaying) mission.getType()).onDeath(event, QuestWorld.getMissionEntry(mission, p));
 	}
 	
 	HashMap<UUID, Integer> partyKick = new HashMap<>();

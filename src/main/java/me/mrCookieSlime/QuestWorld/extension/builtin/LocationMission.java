@@ -1,19 +1,25 @@
 package me.mrCookieSlime.QuestWorld.extension.builtin;
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.UUID;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
 
 import me.mrCookieSlime.QuestWorld.api.MissionType;
+import me.mrCookieSlime.QuestWorld.api.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.SinglePrompt;
 import me.mrCookieSlime.QuestWorld.api.Ticking;
 import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IMissionState;
+import me.mrCookieSlime.QuestWorld.api.contract.IPlayerStatus;
 import me.mrCookieSlime.QuestWorld.api.contract.MissionEntry;
 import me.mrCookieSlime.QuestWorld.api.event.GenericPlayerLeaveEvent;
 import me.mrCookieSlime.QuestWorld.api.menu.MenuData;
@@ -61,60 +67,60 @@ public class LocationMission extends MissionType implements Ticking {
 		missionState.apply();
 	}
 	
-	protected boolean withinRadius(Location left, Location right, int radius) {
-		return left.getWorld() == right.getWorld() && left.distanceSquared(right) <= radius * radius;
+	protected double worldDistance(Location left, Location right, int radius) {
+		if(left.getWorld() != right.getWorld())
+			return Double.MAX_VALUE;
+		
+		return left.distanceSquared(right) - radius * radius;
 	}
+	
+	private HashMap<UUID, HashSet<UUID>> close = new HashMap<>();
 	
 	@Override
 	public void onManual(Player p, MissionEntry entry) {
+		HashSet<UUID> closeMissions = close.get(p.getUniqueId());
+		
 		IMission mission = entry.getMission();
-		if(withinRadius(mission.getLocation(), p.getLocation(), mission.getCustomInt()))
+		double distance = worldDistance(mission.getLocation(), p.getLocation(), mission.getCustomInt());
+		if(distance < 0)
 			entry.addProgress(1);
+		
+		if(distance < 64 * 64) {
+			if(closeMissions == null) {
+				closeMissions = new HashSet<>();
+				close.put(entry.getMission().getUniqueId(), closeMissions);
+			}
+			closeMissions.add(entry.getMission().getUniqueId());
+		}
+		else if(closeMissions != null) {
+			closeMissions.remove(entry.getMission().getUniqueId());
+			if(closeMissions.isEmpty())
+				close.remove(p.getUniqueId());
+		}
 	}
 	
-	private HashMap<Player, Double> distanceMap = new HashMap<>();
-	
-	/*@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onPlayerMove(PlayerMoveEvent event) {
-		double moved = event.getFrom().distanceSquared(event.getTo());
+		Player p = event.getPlayer();
+		HashSet<UUID> closeMissions = close.get(p.getUniqueId());
 		
-		// Looking around
-		if(moved == 0)
-			return;
-		
-		Player player = event.getPlayer();
-		double distance = distanceMap.getOrDefault(player, 0.0);
-		
-		// Handle big moves (teleports)
-		if(distance > moved * 100) {
-			distanceMap.put(player, distance * 0.0000001);
-			return;
-		}
-		
-		double fdist = 1000000000000.0;
-		
-		for(MissionEntry entry : QuestWorld.getMissionEntries(this, player)) {
-			Location missionLoc = entry.getMission().getLocation();
-			if(missionLoc.getWorld() != player.getWorld())
-				continue;
+		if(closeMissions != null && !closeMissions.isEmpty()) {
+			IPlayerStatus status = QuestWorld.getPlayerStatus(p);
+			Location ploc = p.getLocation();
 			
-			int radSquared = entry.getMission().getCustomInt() * entry.getMission().getCustomInt();
-			
-			double difference = missionLoc.distanceSquared(player.getLocation());
-			if(radSquared < difference) {
-				fdist = Math.min(fdist, difference);
+			for(UUID missionUniqueId : closeMissions) {
+				IMission mission = QuestWorld.getFacade().getMission(missionUniqueId);
+				
+				if(worldDistance(mission.getLocation(), ploc, mission.getCustomInt()) < 0
+						&& status.isMissionActive(mission))
+					QuestWorld.getMissionEntry(mission, event.getPlayer()).addProgress(1);
 			}
-			else
-				entry.addProgress(1);
 		}
-		
-		fdist = Math.pow(fdist, 12);
-		distanceMap.put(player, fdist);
-	}*/
+	}
 	
 	@EventHandler
 	public void onPlayerLeave(GenericPlayerLeaveEvent event) {
-		distanceMap.remove(event.getPlayer());
+		close.remove(event.getPlayer().getUniqueId());
 	}
 	
 	@Override

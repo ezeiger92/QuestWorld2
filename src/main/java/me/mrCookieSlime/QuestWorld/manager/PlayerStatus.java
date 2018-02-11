@@ -83,17 +83,9 @@ public class PlayerStatus implements IPlayerStatus {
 	public List<IMission> getActiveMissions(MissionType type) {
 		List<IMission> result = new ArrayList<>();
 		
-		Player player = asOnline(playerUUID);
-		String worldName = player.getWorld().getName();
-		
-		for(IMission task : QuestWorld.getViewer().getMissionsOf(type)) {
-			IQuest quest = task.getQuest();
-			
-			if (quest.getCategory().isWorldEnabled(worldName) && quest.getWorldEnabled(worldName)
-				&& !hasCompletedTask(task) && hasUnlockedTask(task)
-				&& getStatus(quest).equals(QuestStatus.AVAILABLE))
+		for(IMission task : QuestWorld.getViewer().getMissionsOf(type))
+			if (isMissionActive(task))
 				result.add(task);
-		}
 		
 		return result;
 	}
@@ -186,9 +178,11 @@ public class PlayerStatus implements IPlayerStatus {
 	@Override
 	public QuestStatus getStatus(IQuest quest) {
 		Player p = asOnline(playerUUID);
+		String worldName = p.getWorld().getName();
+
+		if (!PlayerTools.checkPermission(p, quest.getPermission())) return QuestStatus.LOCKED_NO_PERM;
 		if (quest.getParent() != null && !hasFinished(quest.getParent())) return QuestStatus.LOCKED_PARENT;
-		if (!quest.getWorldEnabled(p.getWorld().getName())) return QuestStatus.LOCKED_WORLD;
-		if (p != null && !PlayerTools.checkPermission(p, quest.getPermission())) return QuestStatus.LOCKED_NO_PERM;
+		if (!quest.getWorldEnabled(worldName) || !quest.getCategory().isWorldEnabled(worldName)) return QuestStatus.LOCKED_WORLD;
 		
 		Party party = (Party)QuestWorld.getParty(p);
 		int partySize = party != null ? party.getSize() : 0;

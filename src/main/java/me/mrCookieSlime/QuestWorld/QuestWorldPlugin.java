@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -199,8 +200,18 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener {
 				f.delete();
 			}
 			
+			for (File f: getPath("data.dialogue").listFiles()) {
+				f.delete();
+			}
+			
 			while (entry != null) {
-				FileOutputStream output = new FileOutputStream(new File(getPath("data.questing"), entry.getName()));
+				File target;
+				if(entry.getName().startsWith("dialogue/"))
+					target = new File(getPath("data.dialogue"), entry.getName().substring(9));
+				else
+					target = new File(getPath("data.questing"), entry.getName());
+				
+				FileOutputStream output = new FileOutputStream(target);
 				
 				int length;
 				while ((length = input.read(buffer)) > 0) {
@@ -233,9 +244,20 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener {
 		try {
 			file.createNewFile();
 			
+			ArrayList<File> files = new ArrayList<>();
+			File dialogueDir = getPath("data.dialogue");
+			
+			files.addAll(Arrays.asList(getPath("data.questing").listFiles()));
+			files.addAll(Arrays.asList(dialogueDir.listFiles()));
+			
 			ZipOutputStream output = new ZipOutputStream(new FileOutputStream(file));
-			for (File f: getPath("data.questing").listFiles()) {
-				ZipEntry entry = new ZipEntry(f.getName());
+			for (File f: files) {
+				String entryName = f.getName();
+				
+				if(f.getParentFile().equals(dialogueDir))
+					entryName = "dialogue/"+entryName;
+				
+				ZipEntry entry = new ZipEntry(entryName);
 				output.putNextEntry(entry);
 				FileInputStream input = new FileInputStream(f);
 				
@@ -247,6 +269,7 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener {
 				input.close();
 				output.closeEntry();
 			}
+			
 			output.close();
 		} catch(IOException e) {
 			e.printStackTrace();

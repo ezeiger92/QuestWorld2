@@ -24,10 +24,12 @@ public class Facade implements IFacade {
 	private WeakValueMap<UUID, Quest> questMap = new WeakValueMap<>();
 	private WeakValueMap<UUID, Mission> missionMap = new WeakValueMap<>();
 	
+	@Override
 	public Quest getQuest(UUID uniqueId) {
 		return questMap.getOrNull(uniqueId);
 	}
 	
+	@Override
 	public Mission getMission(UUID uniqueId) {
 		return missionMap.getOrNull(uniqueId);
 	}
