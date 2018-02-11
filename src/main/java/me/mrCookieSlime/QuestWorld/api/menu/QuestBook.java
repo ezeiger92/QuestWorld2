@@ -71,7 +71,6 @@ public class QuestBook {
 		IPlayerStatus playerStatus = QuestWorld.getPlayerStatus(p);
 		playerStatus.update();
 		
-		// TODO: playerStatus.update(false);
 		setLastViewed(p, null);
 		
 		Menu menu = new Menu(1, QuestWorld.translate(Translation.gui_title));
@@ -346,7 +345,7 @@ public class QuestBook {
 		QuestWorld.getSounds().QUEST_CLICK.playTo(p);
 		IPlayerStatus playerStatus = QuestWorld.getPlayerStatus(p);
 		playerStatus.update();
-		// TODO: manager.update(false);
+		
 		setLastViewed(p, category);
 		
 		Menu menu = new Menu(1, category.getName());
@@ -446,7 +445,6 @@ public class QuestBook {
 		QuestWorld.getSounds().QUEST_CLICK.playTo(p);
 		IPlayerStatus manager = QuestWorld.getPlayerStatus(p);
 		manager.update();
-		// TODO: manager.update(false);
 		setLastViewed(p, quest);
 		
 		Menu menu = new Menu(3, quest.getName());
@@ -1020,7 +1018,6 @@ public class QuestBook {
 						"&e> Click to open command editor").get(),
 				event -> {
 					Player p2 = (Player) event.getWhoClicked();
-					// TODO: Reopen menu
 					p2.closeInventory();
 					QBDialogue.openCommandEditor(p2, quest);
 				}

@@ -214,18 +214,9 @@ class Quest extends UniqueObject implements IQuestState {
 		}
 		config.set("missions", missions);
 		
-		/*for (Mission mission: tasks.values()) {
-			Map<String, Object> data = mission.serialize();
-			// TODO keep a quest id
-			data.remove("quest");
-			config.set("missions." + mission.getIndex(), data);
-			//mission.save(config.createSection("missions." + mission.getID()));
-		}*/
-		
 		Quest parent = getParent();
 		if(parent != null) {
 			config.set("parentId", parent.getUniqueId().toString());
-			//config.set("parent", Facade.stringOfQuest(parent));
 		}
 		
 		try {

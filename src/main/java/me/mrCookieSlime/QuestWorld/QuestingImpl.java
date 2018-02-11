@@ -113,7 +113,7 @@ public final class QuestingImpl implements QuestingAPI, Reloadable {
 	
 	@Override
 	public Iterable<MissionEntry> getMissionEntries(MissionType type, OfflinePlayer player) {
-		return new MissionSet(getPlayerStatus(player), type);
+		return new MissionSet(type, getPlayerStatus(player));
 	}
 	
 	@Override

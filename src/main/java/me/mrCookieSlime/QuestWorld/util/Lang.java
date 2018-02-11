@@ -34,13 +34,12 @@ public final class Lang implements Reloadable {
 	
 	private void loadLang(String langPath) throws IllegalArgumentException {
 		if(langPath != null) {
-			String path = "lang/" + langPath + ".yml";
 			YamlConfiguration config;
 			try {
-				config = loader.loadConfig(path);
+				config = loader.loadConfig(langPath);
 			}
 			catch(Exception e) {
-				throw new IllegalArgumentException("Failed read language \"" + path +"\"", e);
+				throw new IllegalArgumentException("Failed read language \"" + langPath +"\"", e);
 			}
 			
 			languages.put(langPath, config);
