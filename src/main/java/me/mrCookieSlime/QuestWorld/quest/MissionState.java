@@ -10,7 +10,6 @@ import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.event.CancellableEvent;
 import me.mrCookieSlime.QuestWorld.api.event.MissionChangeEvent;
 import me.mrCookieSlime.QuestWorld.util.BitFlag;
-import me.mrCookieSlime.QuestWorld.util.BitFlag.BitString;
 
 class MissionState extends Mission {
 	private long changeBits = 0;
@@ -96,11 +95,6 @@ class MissionState extends Mission {
 
 	@Override
 	public void setType(MissionType type) {
-		// TODO RIP migrateFrom
-		if(true) {
-			loadDefaults();
-			changeBits |= BitString.ALL;
-		}
 		super.setType(type);
 		changeBits |= BitFlag.getBits(Member.TYPE);
 	}
@@ -112,13 +106,22 @@ class MissionState extends Mission {
 		changeBits |= BitFlag.getBits(Member.INDEX);
 	}
 	
+	private boolean applying = false;
+	
 	@Override
 	public boolean apply() {
+		
+		// Prevent re-entry in case of validate() changing more settings.
+		if(applying)
+			return false;
+		applying = true;
+		validate();
+		applying = false;
+		
 		if(sendEvent()) {
 			copyTo(origin);
 			origin.updateLastModified();
 			changeBits = 0;
-			validate();
 			return true;
 		}
 		return false;

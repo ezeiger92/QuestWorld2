@@ -1,26 +1,24 @@
 package me.mrCookieSlime.QuestWorld.manager;
 
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
 import me.mrCookieSlime.QuestWorld.api.MissionType;
+import me.mrCookieSlime.QuestWorld.api.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.MissionEntry;
 
 public class MissionSet implements Iterable<MissionEntry> {
-	private List<MissionEntry> results;
+	private final MissionType type;
+	private final PlayerStatus manager;
 
-	public MissionSet(PlayerStatus manager, MissionType type) {
-		List<IMission> active = manager.getActiveMissions(type);
-		results = new ArrayList<>(active.size());
-		for(IMission mission : active)
-			results.add(new Result(mission, manager));
+	public MissionSet(MissionType type, PlayerStatus manager) {
+		this.manager = manager;
+		this.type = type;
 	}
 	
 	public static class Result implements MissionEntry {
-		private IMission mission;
-		private PlayerStatus manager;
+		private final IMission mission;
+		private final PlayerStatus manager;
 		
 		public Result(IMission mission, PlayerStatus manager) {
 			this.mission = mission;
@@ -47,10 +45,46 @@ public class MissionSet implements Iterable<MissionEntry> {
 			return mission.getAmount() - getProgress();
 		}
 	}
+	
+	public static class MissionEntryIterator implements Iterator<MissionEntry> {
+		private final Iterator<IMission> missionIter;
+		private final PlayerStatus playerStatus;
+		
+		private MissionEntry nextEntry;
+		private boolean hadNext;
+		
+		public MissionEntryIterator(Iterator<IMission> missionIter, PlayerStatus playerStatus) {
+			this.missionIter = missionIter;
+			this.playerStatus = playerStatus;
+			
+			next();
+		}
+		
+		@Override
+		public boolean hasNext() {
+			return hadNext;
+		}
 
-	// TODO: Mission iterator, pulls results on request
+		@Override
+		public MissionEntry next() {
+			MissionEntry result = nextEntry;
+			
+			hadNext = false;
+			while(missionIter.hasNext()) {
+				IMission mission = missionIter.next();
+				if(playerStatus.isMissionActive(mission)) {
+					hadNext = true;
+					nextEntry = new Result(mission, playerStatus);
+					break;
+				}
+			}
+			
+			return result;
+		}
+	}
+
 	@Override
 	public Iterator<MissionEntry> iterator() {
-		return results.iterator();
+		return new MissionEntryIterator(QuestWorld.getViewer().getMissionsOf(type).iterator(), manager);
 	}
 }

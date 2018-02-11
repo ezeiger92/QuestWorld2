@@ -56,15 +56,17 @@ public class LocationMission extends MissionType implements Ticking {
 		
 		if(oldStyleRadius != 1) {
 			missionState.setAmount(1);
-			if(radius == 0)
+			if(radius == 0) {
 				missionState.setCustomInt(oldStyleRadius);
+				missionState.apply();
+			}
 		}
 		
 		// Minimum radius is 1, fixes ezeiger92/QuestWorld2#35	
-		if(radius <= 0)
+		if(radius <= 0) {
 			missionState.setCustomInt(3);
-		
-		missionState.apply();
+			missionState.apply();
+		}
 	}
 	
 	protected double worldDistance(Location left, Location right, int radius) {

@@ -31,10 +31,10 @@ public class KillNamedMission extends KillMission {
 	
 	@Override
 	public void validate(IMissionState state) {
-		if(state.getCustomString().length() == 0)
+		if(state.getCustomString().length() == 0) {
 			state.setCustomString("Jerry");
-		
-		state.apply();
+			state.apply();
+		}
 	}
 	
 	@Override

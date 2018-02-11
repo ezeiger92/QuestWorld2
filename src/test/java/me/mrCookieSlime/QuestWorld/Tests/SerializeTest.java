@@ -13,8 +13,6 @@ import org.junit.runners.Parameterized.Parameters;
 
 import me.mrCookieSlime.QuestWorld.util.Text;
 
-// Just to not have an empty directory for GitHub to complain about ...
-// TODO Real tests and stuff
 @RunWith(Parameterized.class)
 public class SerializeTest {
 	private String serialized;
