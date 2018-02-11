@@ -93,9 +93,6 @@ public class Buttons {
 			if (QuestWorld.getPlugin().getConfig().getBoolean("party.enabled")) {
 				Player p = (Player) event.getWhoClicked();
 				
-				// TODO openPartyMenu has no way to go back to where it came from, so it always goes to the main menu
-				// As a result, we need to clear pages to avoid odd behavior. RIP.
-				PagedMapping.clearPages(p);
 				QuestBook.openPartyMenu(p);
 			}
 		};
