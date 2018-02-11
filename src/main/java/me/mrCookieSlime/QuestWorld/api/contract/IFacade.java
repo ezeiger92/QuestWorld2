@@ -1,6 +1,7 @@
 package me.mrCookieSlime.QuestWorld.api.contract;
 
 import java.util.Collection;
+import java.util.UUID;
 
 public interface IFacade {
 	/**
@@ -30,4 +31,7 @@ public interface IFacade {
 
 	void clearAllUserData(ICategory category);
 	void clearAllUserData(IQuest quest);
+
+	IQuest getQuest(UUID uniqueId);
+	IMission getMission(UUID uniqueId);
 }

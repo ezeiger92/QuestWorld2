@@ -133,7 +133,7 @@ class Mission extends UniqueObject implements IMissionState {
 
 	@Override
 	public boolean getDeathReset() {
-		return deathReset;
+		return deathReset && type.supportsDeathReset();
 	}
 
 	@Override
