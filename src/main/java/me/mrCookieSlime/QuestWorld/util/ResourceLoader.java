@@ -6,6 +6,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLDecoder;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -24,6 +31,36 @@ public class ResourceLoader {
 	public ResourceLoader(ClassLoader loader, File folder) {
 		classLoader = loader;
 		dataPath = folder;
+	}
+	
+	public Set<String> filesInResourceDir(String path) {
+		Set<String> result = new HashSet<>();
+		URL dirUrl = classLoader.getResource(path);
+		if(dirUrl != null) {
+			String jarPath = dirUrl.getPath();
+			int end = jarPath.indexOf('!');
+			if(end >= 5 && jarPath.length() > 5) {
+				jarPath = dirUrl.getPath().substring(5, end);
+				
+				try (JarFile jar = new JarFile(URLDecoder.decode(jarPath, "UTF-8"))) {
+					Enumeration<JarEntry> entries = jar.entries(); //gives ALL entries in jar
+					while(entries.hasMoreElements()) {
+						String name = entries.nextElement().getName();
+						// Don't include (empty) path in list
+						if(name.length() == path.length())
+							continue;
+						
+						if (name.startsWith(path))
+							result.add(path);
+					}
+				}
+				catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		
+		return result;
 	}
 	
 	private InputStream activeStream;
