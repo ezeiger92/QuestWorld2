@@ -83,7 +83,8 @@ public final class QuestingImpl implements QuestingAPI, Reloadable {
 	}
 	
 	public void onEnable() {
-		String lang = QuestWorldPlugin.getString("options.language");
+		
+		String lang = getPlugin().getConfig().getString("options.language");
 		if(lang != null)
 			language.setLang(lang);
 		
@@ -189,6 +190,7 @@ public final class QuestingImpl implements QuestingAPI, Reloadable {
 	public void onSave() {
 		
 	}
+	
 	@Override
 	public void onReload() {
 		facade.onReload();

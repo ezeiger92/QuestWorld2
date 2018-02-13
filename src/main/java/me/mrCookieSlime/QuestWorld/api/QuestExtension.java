@@ -11,7 +11,8 @@ import me.mrCookieSlime.QuestWorld.api.contract.QuestingAPI;
 import me.mrCookieSlime.QuestWorld.util.Reloadable;
 import me.mrCookieSlime.QuestWorld.util.ResourceLoader;
 
-public abstract class QuestExtension implements Reloadable{
+// Only abstract because nobody should make a raw instance of this.
+public abstract class QuestExtension implements Reloadable {
 	private boolean initialized = false;
 	private QuestingAPI api = QuestWorld.getAPI();
 	private int remaining;
@@ -20,11 +21,9 @@ public abstract class QuestExtension implements Reloadable{
 	private MissionType[] types = {};
 	private ResourceLoader loader;
 	
-	//TODO: Doc fix
 	/**
-	 * Performs setup for this extension. In particular, this calls user methods
-	 * {@link QuestExtension#setup setup} and
-	 * {@link QuestExtension#getDepends getDepends}, in that order.
+	 * Performs setup for this extension. Do not assume plugin dependencies have
+	 * been loaded at this point.
 	 */
 	public QuestExtension(String... requirements) {
 		this.requirements = requirements.clone();
@@ -58,11 +57,8 @@ public abstract class QuestExtension implements Reloadable{
 		return getClass().getSimpleName();
 	}
 	
-	//TODO Doc fix
 	/**
-	 * This must return a list of all plugins that the hook depends on. It is
-	 * called after {@link #setup}, so override that method if you need to
-	 * prepare dependency names.
+	 * This must return a list of all plugins that the hook depends on.
 	 * 
 	 * @return A list of all names of plugin dependencies
 	 */
@@ -136,17 +132,25 @@ public abstract class QuestExtension implements Reloadable{
 		initialized = true;
 	}
 	
-	public void setMissionTypes(MissionType... types) {
-		this.types = types.clone();
-	}
-	
-	// TODO fix doc
 	/**
-	 * This must return all custom MissionTypes so QuestWorld can prepare them.
+	 * Set the mission types supplied by this extension.
 	 * <p>
 	 * If a MissionType implements {@link org.bukkit.event.Listener Listener},
 	 * it will be automatically registered by QuestWorld after
 	 * {@link #initialize} is called.
+	 * 
+	 * @return A list of all custom MissionTypes in this hook
+	 * @throws IllegalStateException if called after the extension is initialized.
+	 */
+	public final void setMissionTypes(MissionType... types) {
+		if(initialized)
+			throw new IllegalStateException("Cannot change mission types after initialization");
+		
+		this.types = types.clone();
+	}
+	
+	/**
+	 * Returns stored mission types set by {@link #setMissionTypes}.
 	 * 
 	 * @return A list of all custom MissionTypes in this hook
 	 */
