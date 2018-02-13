@@ -1,5 +1,4 @@
 options:
-  auto-update: true
   autosave-interval: 5
   quest-check-delay: 60
   language: en_us

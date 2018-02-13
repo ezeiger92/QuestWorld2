@@ -1,5 +1,6 @@
 package me.mrCookieSlime.QuestWorld.util;
 
+import java.util.function.BiConsumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -25,6 +26,7 @@ import me.mrCookieSlime.QuestWorld.api.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.api.Translator;
 import me.mrCookieSlime.QuestWorld.api.event.GenericPlayerLeaveEvent;
+import me.mrCookieSlime.QuestWorld.util.json.JsonBlob;
 
 public class PlayerTools {
 	public static ItemStack getActiveHandItem(Player p) {
@@ -77,7 +79,7 @@ public class PlayerTools {
 			pi.setItemInMainHand(is);
 	}
 	
-	private static Pattern keywordPattern = Pattern.compile("%(tellraw|title|subtitle|actionbar)%((?:(?!%(?:tellraw|title|subtitle|actionbar)%).)*)", Pattern.CASE_INSENSITIVE);
+	private static Pattern keywordPattern = Pattern.compile("\\s*%(tellraw|title|subtitle|actionbar)%\\s*((?:(?!%(?:tellraw|title|subtitle|actionbar)%).)*)", Pattern.CASE_INSENSITIVE);
 	public static void sendTranslation(CommandSender p, boolean prefixed, Translator key, String... replacements) {
 		String text = makeTranslation(prefixed, key, replacements);
 		if(text.isEmpty())
@@ -126,7 +128,7 @@ public class PlayerTools {
 				tellraw(player, tellrawMessage);
 			
 			if(!titleMessage.isEmpty() || !subtitleMessage.isEmpty())
-				title(player, titleMessage, subtitleMessage);
+				player.sendTitle(titleMessage, subtitleMessage, 10, 70, 20);
 			
 			if(!actionbarMessage.isEmpty())
 				actionbar(player, actionbarMessage);
@@ -208,17 +210,29 @@ public class PlayerTools {
 		Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "minecraft:tellraw "+p.getName()+" "+json);
 	}
 	
-	public static void title(Player p, String titleJson, String subtitleJson) {
-		if(!subtitleJson.isEmpty())
-			Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "minecraft:title "+p.getName()+" subtitle "+subtitleJson);
-		Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "minecraft:title "+p.getName()+" title "+titleJson);
+	private static final BiConsumer<Player, String> actionbarMethod;
+	static {
+		@SuppressWarnings("unused")
+		Class<?> clazz;
+		
+		BiConsumer<Player, String> abMethod;
+		try {
+			Class.forName("org.bukkit.entity.Player$Spigot");
+			abMethod = (p, m) -> p.spigot().sendMessage(
+						net.md_5.bungee.api.ChatMessageType.ACTION_BAR,
+						net.md_5.bungee.api.chat.TextComponent.fromLegacyText(m));
+		} catch (ClassNotFoundException e) {
+			abMethod = (p, m) -> Bukkit.dispatchCommand(
+					Bukkit.getConsoleSender(), 
+					"minecraft:title "+p.getName()+" actionbar "+JsonBlob.fromLegacy(m).toString());
+		}
+		actionbarMethod = abMethod;
 	}
 	
-	public static void actionbar(Player p, String json) {
-		Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "minecraft:title "+p.getName()+" actionbar "+json);
+	public static void actionbar(Player player, String message) {
+		actionbarMethod.accept(player, message);
 	}
 	
-	@SuppressWarnings("deprecation")
 	public static Player getPlayer(String name) {
 		return Bukkit.getPlayerExact(name);
 	}
