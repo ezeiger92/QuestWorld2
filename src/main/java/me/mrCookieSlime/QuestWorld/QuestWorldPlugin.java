@@ -3,7 +3,9 @@ package me.mrCookieSlime.QuestWorld;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.zip.ZipEntry;
@@ -31,7 +33,14 @@ import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class QuestWorldPlugin extends JavaPlugin implements Listener {
-	private static QuestWorldPlugin instance = null;
+	private static volatile QuestWorldPlugin instance = null;
+	
+	private static void setInstance(QuestWorldPlugin plugin) {
+		if(instance != null && plugin != null)
+			throw new IllegalStateException("Cannot redefine singleton");
+		
+		instance = plugin;
+	}
 
 	private QuestingImpl api = new QuestingImpl(this);
 
@@ -42,7 +51,7 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener {
 	private int autosaveHandle = -1;
 	
 	public QuestWorldPlugin() {
-		instance = this;
+		setInstance(this);
 
 		saveDefaultConfig();
 		getPath("data.extensions");
@@ -100,7 +109,7 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener {
 		pm.registerEvents(new SpawnerListener(), this);
 		pm.registerEvents(new ClickCommand(), this);
 
-		getServer().addRecipe(GuideBook.recipe());
+		getServer().addRecipe(GuideBook.instance().recipe());
 	}
 	
 	public void loadConfigs() {
@@ -161,7 +170,7 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener {
 		unload();
 		
 		Log.setLogger(null);
-		instance = null;
+		setInstance(null);
 		
 		getServer().getServicesManager().unregisterAll(this);
 		getServer().getScheduler().cancelTasks(this);
@@ -192,17 +201,14 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener {
 			return false;
 		
 		unload();
-		try {
-			ZipInputStream input = new ZipInputStream(new FileInputStream(file));
+		try(ZipInputStream input = new ZipInputStream(new FileInputStream(file))) {
 			ZipEntry entry = input.getNextEntry();
 			
-			for (File f: getPath("data.questing").listFiles()) {
-				f.delete();
-			}
+			for (File f: getFiles("data.questing"))
+				Files.delete(f.toPath());
 			
-			for (File f: getPath("data.dialogue").listFiles()) {
-				f.delete();
-			}
+			for (File f: getFiles("data.dialogue"))
+				Files.delete(f.toPath());
 			
 			while (entry != null) {
 				File target;
@@ -211,20 +217,18 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener {
 				else
 					target = new File(getPath("data.questing"), entry.getName());
 				
-				FileOutputStream output = new FileOutputStream(target);
-				
-				int length;
-				while ((length = input.read(buffer)) > 0) {
-					output.write(buffer, 0, length);
+				try (FileOutputStream output = new FileOutputStream(target)) {
+					int length;
+					while ((length = input.read(buffer)) > 0) {
+						output.write(buffer, 0, length);
+					}
 				}
-				
-				output.close();
 				entry = input.getNextEntry();
 			}
 			
 			input.closeEntry();
-			input.close();
-		} catch (IOException e) {
+		}
+		catch (IOException e) {
 			e.printStackTrace();
 			return false;
 		}
@@ -235,43 +239,45 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener {
 	
 	public boolean exportPreset(String fileName) {
 		File file = new File(getPath("data.presets"), fileName);
-		byte[] buffer = new byte[1024];
-		
-		if (file.exists()) file.delete();
 		
 		onSave(true); // Why unload and load in a try/catch block when you can just use a save function?
 		
 		try {
-			file.createNewFile();
+			Files.deleteIfExists(file.toPath());
+			
+			Files.createFile(file.toPath());
+			//if(!file.createNewFile())
+			//	throw new IOException("Failed to create file: "+file.getName());
 			
 			ArrayList<File> files = new ArrayList<>();
 			File dialogueDir = getPath("data.dialogue");
 			
-			files.addAll(Arrays.asList(getPath("data.questing").listFiles()));
-			files.addAll(Arrays.asList(dialogueDir.listFiles()));
+			files.addAll(Arrays.asList(getFiles("data.questing")));
+			files.addAll(Arrays.asList(getFiles("data.dialogue")));
 			
-			ZipOutputStream output = new ZipOutputStream(new FileOutputStream(file));
-			for (File f: files) {
-				String entryName = f.getName();
+			try(ZipOutputStream output = new ZipOutputStream(new FileOutputStream(file))) {
+				byte[] buffer = new byte[1024];
 				
-				if(f.getParentFile().equals(dialogueDir))
-					entryName = "dialogue/"+entryName;
-				
-				ZipEntry entry = new ZipEntry(entryName);
-				output.putNextEntry(entry);
-				FileInputStream input = new FileInputStream(f);
-				
-				int length;
-				while ((length = input.read(buffer)) > 0) {
-					output.write(buffer, 0, length);
+				for (File f: files) {
+					String entryName = f.getName();
+					
+					if(f.getParentFile().equals(dialogueDir))
+						entryName = "dialogue/"+entryName;
+					
+					ZipEntry entry = new ZipEntry(entryName);
+					output.putNextEntry(entry);
+					try(FileInputStream input = new FileInputStream(f)) {
+						int length;
+						while ((length = input.read(buffer)) > 0) {
+							output.write(buffer, 0, length);
+						}
+					}
+					output.closeEntry();
 				}
 				
-				input.close();
-				output.closeEntry();
 			}
-			
-			output.close();
-		} catch(IOException e) {
+		}
+		catch(IOException e) {
 			e.printStackTrace();
 			return false;
 		}
@@ -293,10 +299,28 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener {
 	
 	public static File getPath(String key) {
 		File result = new File(instance.getDataFolder(), getString(key));
-		if(!result.exists())
-			result.mkdirs();
+		if(!result.exists() && !result.mkdirs())
+			throw new IllegalArgumentException("Failed to create path for: "+key+" (file:"+result.getName()+")");
 		
 		return result;
+	}
+	
+	public static File[] getFiles(String key) {
+		File[] result = getPath(key).listFiles();
+		
+		if(result != null)
+			return result;
+		
+		return new File[0];
+	}
+	
+	public static File[] getFiles(String key, FilenameFilter filter) {
+		File[] result = getPath(key).listFiles(filter);
+		
+		if(result != null)
+			return result;
+		
+		return new File[0];
 	}
 	
 	public static String getString(String key) {

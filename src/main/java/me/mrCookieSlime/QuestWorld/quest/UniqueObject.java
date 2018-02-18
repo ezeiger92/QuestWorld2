@@ -30,4 +30,9 @@ class UniqueObject {
 	public int hashCode() {
 		return getUniqueId().hashCode();
 	}
+	
+	@Override
+	public boolean equals(Object o) {
+		return o instanceof UniqueObject && uniqueId.equals(((UniqueObject)o).uniqueId);
+	}
 }

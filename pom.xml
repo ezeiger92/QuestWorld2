@@ -37,12 +37,7 @@
 	</repositories>
 	<dependencies>
 		<!-- Bukkit/Spigot dep -->
-		<!-- <dependency>
-			<groupId>org.bukkit</groupId>
-			<artifactId>bukkit</artifactId>
-			<version>1.12.2-R0.1-SNAPSHOT</version>
-			<scope>provided</scope>
-		</dependency> -->
+		<!-- We use spigot-api for spigot specific code on supported servers -->
 		<dependency>
 			<groupId>org.spigotmc</groupId>
 			<artifactId>spigot-api</artifactId>
@@ -56,13 +51,6 @@
 			<version>1.6</version>
 			<scope>provided</scope>
 			<optional>true</optional>
-		</dependency>
-		<!-- Gson dep -->
-		<dependency>
-			<groupId>com.google.code.gson</groupId>
-			<artifactId>gson</artifactId>
-			<version>2.8.0</version>
-			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 	<properties>

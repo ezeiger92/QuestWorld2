@@ -1,6 +1,8 @@
 package me.mrCookieSlime.QuestWorld.quest;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -94,7 +96,7 @@ public class Facade implements IFacade {
 		return quest.getID() + "-C" + quest.getCategory().getID();
 	}
 	
-	private class ParseData {
+	private static class ParseData {
 		public ParseData(int id, File file) {
 			this.id = id;
 			this.file = YamlConfiguration.loadConfiguration(file);
@@ -108,7 +110,7 @@ public class Facade implements IFacade {
 		ArrayList<ParseData> categoryData = new ArrayList<>();
 		HashMap<Integer, ArrayList<ParseData>> questData = new HashMap<>();
 		
-		for (File file: QuestWorldPlugin.getPath("data.questing").listFiles()) {
+		for (File file: QuestWorldPlugin.getFiles("data.questing")) {
 			String fileName = file.getName();
 			
 			if (fileName.endsWith(".quest")) {
@@ -165,14 +167,6 @@ public class Facade implements IFacade {
 		missionMap.clear();
 	}
 	
-	private void deleteQuestFile(IQuest quest) {
-		fileFor(quest).delete();
-	}
-	
-	private void deleteCategoryFile(ICategory category) {
-		fileFor(category).delete();
-	}
-	
 	public void save(boolean force) {
 		for(Category c : categoryMap.values()) {
 			if(force || lastSave < c.getLastModified())
@@ -213,7 +207,14 @@ public class Facade implements IFacade {
 			deleteQuest(quest);
 
 		PlayerStatus.clearAllCategoryData(category);
-		deleteCategoryFile(category);
+		
+		try{
+			Files.delete(fileFor(category).toPath());
+		}
+		catch(IOException e) {
+			e.printStackTrace();
+		}
+		
 		categoryMap.remove(category.getID());
 	}
 	
@@ -223,7 +224,14 @@ public class Facade implements IFacade {
 			deleteMission(mission);
 		
 		PlayerStatus.clearAllQuestData(quest);
-		deleteQuestFile(quest);
+		
+		try{
+			Files.delete(fileFor(quest).toPath());
+		}
+		catch(IOException e) {
+			e.printStackTrace();
+		}
+		
 		questMap.remove(((Quest)quest).getUniqueId());
 	}
 	

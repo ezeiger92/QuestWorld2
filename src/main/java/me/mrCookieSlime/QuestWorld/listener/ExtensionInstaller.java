@@ -69,13 +69,13 @@ public class ExtensionInstaller implements Listener {
 		Log.fine("Installer - Adding extension: " + name);
 		
 		String[] reqs = extension.getDepends();
-		if(reqs != null)
-			for(int i = 0; i < reqs.length; ++i) {
-				Plugin p = manager.getPlugin(reqs[i]);
-				if(p != null && p.isEnabled()) {
-					extension.directEnablePlugin(p, i);
-				}
+
+		for(int i = 0; i < reqs.length; ++i) {
+			Plugin p = manager.getPlugin(reqs[i]);
+			if(p != null && p.isEnabled()) {
+				extension.directEnablePlugin(p, i);
 			}
+		}
 		
 		if(extension.isReady()) {
 			Log.fine("Installer - Dependencies found: " + name);

@@ -1,8 +1,7 @@
 package me.mrCookieSlime.QuestWorld.command;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 import org.bukkit.command.Command;
@@ -10,7 +9,6 @@ import org.bukkit.command.CommandSender;
 
 import me.mrCookieSlime.QuestWorld.QuestWorldPlugin;
 import me.mrCookieSlime.QuestWorld.listener.ExtensionInstaller;
-import me.mrCookieSlime.QuestWorld.util.Log;
 import me.mrCookieSlime.QuestWorld.util.Text;
 
 public class ExtensionControl {
@@ -30,7 +28,7 @@ public class ExtensionControl {
 		
 		ExtensionInstaller installer = QuestWorldPlugin.getImpl().getPlugin().getInstaller();
 		
-		String arg1 = args[0].toLowerCase();
+		String arg1 = args[0].toLowerCase(Locale.US);
 		
 		if(arg1.equals("list")) {
 			sender.sendMessage(Text.colorize("&3== &bExtensions &3== "));
@@ -65,7 +63,7 @@ public class ExtensionControl {
 			/*String type = useEnable ? "enable" : "disable"; 
 			
 			if(args.length > 1) {
-				String arg2 = args[1].toLowerCase();
+				String arg2 = args[1].toLowerCase(Locale.US);
 				
 				List<Path> extensionFiles;
 				try {
@@ -110,8 +108,7 @@ public class ExtensionControl {
 		}
 	}
 	
-	@SuppressWarnings("unused")
-	private static void enable(CommandSender sender, Path file) {
+	/*private static void enable(CommandSender sender, Path file) {
 		String fileName = file.toFile().getName();
 		fileName = fileName.substring(0, fileName.lastIndexOf('.')) +".jar";
 		try {
@@ -126,7 +123,6 @@ public class ExtensionControl {
 		QuestWorldPlugin.getImpl().getPlugin().getLoader().load(file.toFile());
 	}
 	
-	@SuppressWarnings("unused")
 	private static void disable(CommandSender sender, Path file) {
 		String fileName = file.toFile().getName();
 		fileName = fileName.substring(0, fileName.lastIndexOf('.')) +".disabled";
@@ -139,5 +135,5 @@ public class ExtensionControl {
 			return;
 		}
 		
-	}
+	}*/
 }

@@ -63,7 +63,7 @@ public class PlayerListener implements Listener {
 		
 		if (QuestWorld.getPlugin().getConfig().getBoolean("book.on-first-join") &&
 				!ProgressTracker.exists(p.getUniqueId()))
-			p.getInventory().addItem(GuideBook.get());
+			p.getInventory().addItem(GuideBook.instance().item());
 	}
 	
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -77,7 +77,7 @@ public class PlayerListener implements Listener {
 	}
 	
 	@EventHandler
-	public void onleave(GenericPlayerLeaveEvent event) {
+	public void onLeave(GenericPlayerLeaveEvent event) {
 		Player player = event.getPlayer();
 		IParty party = QuestWorld.getParty(player);
 		
@@ -119,6 +119,6 @@ public class PlayerListener implements Listener {
 			}
 		
 		if(hasTable)
-			e.getInventory().setResult(GuideBook.get());
+			e.getInventory().setResult(GuideBook.instance().item());
 	}
 }

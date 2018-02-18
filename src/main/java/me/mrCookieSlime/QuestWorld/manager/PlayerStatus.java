@@ -120,7 +120,7 @@ public class PlayerStatus implements IPlayerStatus {
 			return false;
 		}
 		else if (getProgress(task) == 0 && amount > 0) {
-			tracker.setMissionEnd(task, System.currentTimeMillis() + task.getTimeframe() * 60 * 1000);
+			tracker.setMissionEnd(task, System.currentTimeMillis() + task.getTimeframe() * 60L * 1000L);
 			
 			ifOnline(playerUUID).ifPresent(player ->
 				PlayerTools.sendTranslation(player, false, Translation.NOTIFY_TIME_START, task.getText(), Text.timeFromNum(task.getTimeframe()))
@@ -144,7 +144,7 @@ public class PlayerStatus implements IPlayerStatus {
 	public void update(boolean quest_check) {
 		Player p = asOnline(playerUUID);
 		
-		if (p != null && quest_check)
+		if (quest_check)
 			for (IMission mission: QuestWorld.getViewer().getTickingMissions())
 				if (isMissionActive(mission))
 					((Ticking) mission.getType()).onTick(p, new MissionSet.Result(mission, this));
@@ -162,7 +162,7 @@ public class PlayerStatus implements IPlayerStatus {
 					if (finished) {
 						tracker.setQuestFinished(quest, true);
 						
-						if (!quest.getAutoClaimed() || p == null)
+						if (!quest.getAutoClaimed())
 							tracker.setQuestStatus(quest, QuestStatus.REWARD_CLAIMABLE);
 						else
 							quest.completeFor(p);
@@ -402,9 +402,7 @@ public class PlayerStatus implements IPlayerStatus {
 		
 		Bukkit.getScheduler().runTaskAsynchronously(QuestWorld.getPlugin(), () -> {
 			// First: clear all the quest data on a new thread
-			File path = QuestWorldPlugin.getPath("data.player");
-			
-			for (File file: path.listFiles((file, name) -> name.endsWith(".yml"))) {
+			for (File file:QuestWorldPlugin.getFiles("data.player", (file, name) -> name.endsWith(".yml"))) {
 				String uuid = file.getName().substring(0, file.getName().length() - 4);
 				try {
 					ProgressTracker t = new ProgressTracker(UUID.fromString(uuid));

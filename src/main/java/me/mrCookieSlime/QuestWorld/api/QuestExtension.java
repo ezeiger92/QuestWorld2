@@ -1,8 +1,5 @@
 package me.mrCookieSlime.QuestWorld.api;
 
-import java.io.InputStream;
-import java.net.URI;
-
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.Plugin;
 
@@ -63,19 +60,11 @@ public abstract class QuestExtension implements Reloadable {
 	 * @return A list of all names of plugin dependencies
 	 */
 	public final String[] getDepends() {
-		return requirements;
+		return requirements.clone();
 	}
 	
 	public final FileConfiguration getConfiguration(String path) {
 		return loader.loadConfigNoexpect(path, true);
-	}
-	
-	public final InputStream getResource(String path) {
-		return getClass().getResourceAsStream(path);
-	}
-	
-	public final URI getResourceLocation(String path) {
-		return URI.create(getClass().getResource(path).toString());
 	}
 	
 	public final ResourceLoader getResourceLoader() {
@@ -155,7 +144,7 @@ public abstract class QuestExtension implements Reloadable {
 	 * @return A list of all custom MissionTypes in this hook
 	 */
 	public final MissionType[] getMissionTypes() {
-		return types;
+		return types.clone();
 	}
 	
 	/**
@@ -210,8 +199,8 @@ public abstract class QuestExtension implements Reloadable {
 	 */
 	public final Plugin[] getPlugins() {
 		if(!isReady())
-			return null;
+			throw new IllegalStateException("Attempted to get plugin references before they were resolved");
 		
-		return found;
+		return found.clone();
 	}
 }

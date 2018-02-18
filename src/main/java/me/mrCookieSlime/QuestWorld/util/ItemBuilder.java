@@ -34,7 +34,7 @@ import me.mrCookieSlime.QuestWorld.api.annotation.Mutable;
  * 
  * @author ezeiger92
  */
-public class ItemBuilder implements Cloneable {
+public class ItemBuilder {
 	/**
 	 * A handy set of builder prototypes that were being created by hand too
 	 * often.
@@ -552,16 +552,5 @@ public class ItemBuilder implements Cloneable {
 		result.set(index + 1, Text.colorize("&2>" + options[index]));
 		directLore(result);
 		return this;
-	}
-
-	/**
-	 * Clones the current ItemBuilder, copying the current state of its
-	 * ItemStack. Neither builder can access the others ItemStack.
-	 * 
-	 * @return A new ItemBuilder
-	 */
-	@Override
-	public ItemBuilder clone() {
-		return new ItemBuilder(resultStack);
 	}
 }

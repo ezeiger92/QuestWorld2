@@ -79,7 +79,7 @@ public class PlayerTools {
 			pi.setItemInMainHand(is);
 	}
 	
-	private static Pattern keywordPattern = Pattern.compile("\\s*%(tellraw|title|subtitle|actionbar)%\\s*((?:(?!%(?:tellraw|title|subtitle|actionbar)%).)*)", Pattern.CASE_INSENSITIVE);
+	private static Pattern keywordPattern = Pattern.compile("\\s*%(tellraw|title|subtitle|actionbar)%\\s*((?:(?!%(?:tellraw|title|subtitle|actionbar)%).)*)");
 	public static void sendTranslation(CommandSender p, boolean prefixed, Translator key, String... replacements) {
 		String text = makeTranslation(prefixed, key, replacements);
 		if(text.isEmpty())
@@ -106,23 +106,31 @@ public class PlayerTools {
 		if(p instanceof Player) {
 			Player player = (Player) p;
 	
-			String tellrawMessage = "";
-			String titleMessage = "";
-			String subtitleMessage = "";
-			String actionbarMessage = "";
+			StringBuilder tellrawBuilder = new StringBuilder();
+			StringBuilder titleBuilder = new StringBuilder();
+			StringBuilder subtitleBuilder = new StringBuilder();
+			StringBuilder actionbarBuilder = new StringBuilder();
 			
 			Matcher matcher = keywordPattern.matcher(text.substring(matchStart));
 			
 			while(matcher.find()) {
-				String type = matcher.group(1).toLowerCase();
+				String type = matcher.group(1);
 				String message = matcher.group(2);
 				switch(type) {
-				case "tellraw":   tellrawMessage   += message; break;
-				case "title":     titleMessage     += message; break;
-				case "subtitle":  subtitleMessage  += message; break;
-				case "actionbar": actionbarMessage += message; break;
+				case "tellraw":   tellrawBuilder.append(message); break;
+				case "title":     titleBuilder.append(message); break;
+				case "subtitle":  subtitleBuilder.append(message); break;
+				case "actionbar": actionbarBuilder.append(message); break;
+				
+				// Won't happen unless keywordPattern changes
+				default: break;
 				}
 			}
+			
+			String tellrawMessage = tellrawBuilder.toString();
+			String titleMessage = titleBuilder.toString();
+			String subtitleMessage = subtitleBuilder.toString();
+			String actionbarMessage = actionbarBuilder.toString();
 			
 			if(!tellrawMessage.isEmpty())
 				tellraw(player, tellrawMessage);
@@ -143,7 +151,7 @@ public class PlayerTools {
 		return Text.deserializeColor(text);
 	}
 	
-	private static ConversationFactory factory;
+	private static volatile ConversationFactory factory;
 	public static ConversationFactory getConversationFactory() {
 		if(factory == null)
 			factory = new ConversationFactory(QuestWorld.getPlugin());
@@ -167,32 +175,40 @@ public class PlayerTools {
 		con.begin();
 	}
 	
+	private static class ConversationListener implements Listener, ConversationAbandonedListener {
+		private Conversation con;
+		private Prompt prompt;
+		
+		private ConversationListener(Conversation con, Prompt prompt) {
+			this.con = con;
+			this.prompt = prompt;
+		}
+		
+		@EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled=true)
+		public void onCommand(PlayerCommandPreprocessEvent event) {
+			if(event.getPlayer() == con.getForWhom()) {
+				event.setCancelled(true);
+				if(prompt.acceptInput(con.getContext(), event.getMessage()) != Prompt.END_OF_CONVERSATION)
+					con.getForWhom().sendRawMessage(prompt.getPromptText(con.getContext()));
+				else
+					con.abandon();
+			}
+		}
+		
+		@EventHandler
+		public void onLeave(GenericPlayerLeaveEvent event) {
+			con.abandon();
+		}
+		
+		@Override
+		public void conversationAbandoned(ConversationAbandonedEvent abandonedEvent) {
+			HandlerList.unregisterAll(this);
+		}
+	}
+	
 	private static Listener commandListener(Conversation con, Prompt prompt) {
-		Listener listener = new Listener() {
-			@EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled=true)
-			public void onCommand(PlayerCommandPreprocessEvent event) {
-				if(event.getPlayer() == con.getForWhom()) {
-					event.setCancelled(true);
-					if(prompt.acceptInput(con.getContext(), event.getMessage()) != Prompt.END_OF_CONVERSATION)
-						con.getForWhom().sendRawMessage(prompt.getPromptText(con.getContext()));
-					else
-						con.abandon();
-				}
-			}
-			
-			@EventHandler
-			public void onLeave(GenericPlayerLeaveEvent event) {
-				con.abandon();
-			}
-		};
-		
-		con.addConversationAbandonedListener(new ConversationAbandonedListener() {
-			@Override
-			public void conversationAbandoned(ConversationAbandonedEvent abandonedEvent) {
-				HandlerList.unregisterAll(listener);
-			}
-		});
-		
+		ConversationListener listener = new ConversationListener(con, prompt);
+		con.addConversationAbandonedListener(listener);
 		return listener;
 	}
 	

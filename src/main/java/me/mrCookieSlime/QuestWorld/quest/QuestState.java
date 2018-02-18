@@ -177,4 +177,14 @@ class QuestState extends Quest {
 	public boolean hasChange(Member field) {
 		return (changeBits & BitFlag.getBits(field)) != 0;
 	}
+	
+	@Override
+	public int hashCode() {
+		return super.hashCode();
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		return super.equals(o);
+	}
 }

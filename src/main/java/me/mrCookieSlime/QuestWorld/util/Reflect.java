@@ -16,6 +16,9 @@ public final class Reflect {
 		try {
 			nms = serverClass.getMethod("getServer").getReturnType().getName().replaceFirst("[^.]+$", "");
 		}
+		catch(RuntimeException e) {
+			throw e;
+		}
 		catch(Exception e) {
 		}
 		

@@ -14,19 +14,20 @@ import me.mrCookieSlime.QuestWorld.util.ItemBuilder;
 
 public class GuideBook {
 	private static HashSet<Integer> pastBooks = new HashSet<>();
-	private static GuideBook instance = null;
+	private static volatile GuideBook instance = null;
+	
 	private ItemStack guide;
 	private NamespacedKey key = new NamespacedKey(QuestWorld.getPlugin(), "GuideBook");
 	
-	private static GuideBook instance() {
+	public static GuideBook instance() {
 		if(instance == null)
 			instance = new GuideBook();
 		
 		return instance;
 	}
 	
-	public static ItemStack get() {
-		return instance().guide.clone();
+	public ItemStack item() {
+		return guide.clone();
 	}
 	
 	public static void reset() {
@@ -37,8 +38,8 @@ public class GuideBook {
 		return item != null && pastBooks.contains(item.hashCode());
 	}
 	
-	public static ShapelessRecipe recipe() {
-		 return new ShapelessRecipe(instance().key, get())
+	public ShapelessRecipe recipe() {
+		 return new ShapelessRecipe(key, guide)
 				 .addIngredient(Material.WORKBENCH);
 	}
 	

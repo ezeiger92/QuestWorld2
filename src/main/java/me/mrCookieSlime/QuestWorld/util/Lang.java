@@ -3,6 +3,7 @@ package me.mrCookieSlime.QuestWorld.util;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Locale;
 
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -10,7 +11,7 @@ import me.mrCookieSlime.QuestWorld.api.Translator;
 
 public final class Lang implements Reloadable {
 	private static String langPath(String langCode) {
-		return "lang/" + langCode.toLowerCase() + ".yml";
+		return "lang/" + langCode.toLowerCase(Locale.US) + ".yml";
 	}
 	
 	private final String fallbackLang = langPath("en_us");

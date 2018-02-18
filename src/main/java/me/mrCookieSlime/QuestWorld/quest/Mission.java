@@ -308,7 +308,7 @@ class Mission extends UniqueObject implements IMissionState {
 		if(o instanceof Integer)
 			return ((Integer)o).intValue();
 		if(o instanceof String)
-			return Integer.valueOf((String)o);
+			return Integer.parseInt((String)o);
 		
 		throw new IllegalArgumentException("Expected Integer or String, got " + o.getClass().getSimpleName());
 	}
@@ -322,7 +322,7 @@ class Mission extends UniqueObject implements IMissionState {
 		item     = (ItemStack)data.getOrDefault("item", item);
 		amount   = (Integer)data.getOrDefault("amount", amount);
 		try { entity = EntityType.valueOf((String)data.get("entity")); }
-		catch(Exception e) {}
+		catch(IllegalArgumentException | NullPointerException e) {}
 		location = locationHelper((Map<String, Object>)data.get("location"));
 		if(location.getWorld() == null && !missingWorlds.contains(missingWorldName)) {
 			Log.warning("Mission location exists in missing world \"" + missingWorldName + "\". Was it deleted?");
@@ -369,5 +369,15 @@ class Mission extends UniqueObject implements IMissionState {
 		result.put("pitch", (double)location.getPitch());
 		
 		return result;
+	}
+	
+	@Override
+	public int hashCode() {
+		return super.hashCode();
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		return super.equals(o);
 	}
 }

@@ -3,6 +3,8 @@ package me.mrCookieSlime.QuestWorld;
 import java.io.File;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -57,7 +59,13 @@ public class ExtensionLoader {
 		URL[] jarURLs = { urlOf(extensionFile) };
 		
 		//URLClassLoader newLoader = URLClassLoader.newInstance(jarURLs, loader);
-		URLClassLoader newLoader = new URLClassLoader(jarURLs, loader);
+		
+		URLClassLoader newLoader = AccessController.doPrivileged(new PrivilegedAction<URLClassLoader>() {
+			@Override
+			public URLClassLoader run() {
+				return new URLClassLoader(jarURLs, loader);
+			}
+		});
 		
 		Enumeration<JarEntry> entries = jar.entries();
 		ArrayList<Class<?>> extensionClasses = new ArrayList<>();

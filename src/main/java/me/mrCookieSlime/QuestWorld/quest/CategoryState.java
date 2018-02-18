@@ -111,4 +111,14 @@ class CategoryState extends Category {
 	private boolean sendEvent() {
 		return changeBits != 0 && CancellableEvent.send(new CategoryChangeEvent(this));
 	}
+	
+	@Override
+	public int hashCode() {
+		return super.hashCode();
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		return super.equals(o);
+	}
 }

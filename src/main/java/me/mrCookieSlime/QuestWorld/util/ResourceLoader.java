@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
@@ -54,6 +55,9 @@ public class ResourceLoader {
 							result.add(path);
 					}
 				}
+				catch (RuntimeException e) {
+					throw e;
+				}
 				catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -67,13 +71,13 @@ public class ResourceLoader {
 	private InputStreamReader activeReader;
 	private InputStreamReader readerOf(String resource) {
 		activeStream = classLoader.getResourceAsStream(resource);
-		activeReader = activeStream != null ? new InputStreamReader(activeStream) : null;
+		activeReader = activeStream != null ? new InputStreamReader(activeStream, StandardCharsets.UTF_8) : null;
 		return activeReader;
 	}
 	
 	private void close() {
-		try { activeReader.close(); } catch (Exception e) {}
-		try { activeStream.close(); } catch (Exception e) {}
+		try { activeReader.close(); } catch (IOException e) { e.printStackTrace(); }
+		try { activeStream.close(); } catch (IOException e) { e.printStackTrace(); }
 		activeReader = null;
 		activeStream = null;
 	}
@@ -95,7 +99,9 @@ public class ResourceLoader {
 		finally { close(); }
 		
 		if(!file.exists()) {
-			file.getParentFile().mkdirs();
+			if(!file.getParentFile().mkdirs())
+				throw new IOException("Could not create directories for: "+file.getName());
+			
 			try {
 				readerOf(resource);
 				try(FileOutputStream fos = new FileOutputStream(file)) {

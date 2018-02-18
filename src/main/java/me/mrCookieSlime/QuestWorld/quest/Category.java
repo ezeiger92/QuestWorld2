@@ -244,6 +244,16 @@ class Category extends UniqueObject implements ICategoryState {
 		dest.copy(this);
 	}
 	
+	@Override
+	public int hashCode() {
+		return super.hashCode();
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		return super.equals(o);
+	}
+	
 	/*@Deprecated
 	WeakReference<Quest> fancyParentResolveFunction(Integer id) {
 		if(id == null)

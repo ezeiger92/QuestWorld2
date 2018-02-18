@@ -87,7 +87,7 @@ class Quest extends UniqueObject implements IQuestState {
 		if(o instanceof Long || o instanceof Integer)
 			return ((Number)o).longValue();
 		if(o instanceof String)
-			return Long.valueOf((String)o);
+			return Long.parseLong((String)o);
 		
 		throw new IllegalArgumentException("Expected (Long) Integer or String, got " + o.getClass().getSimpleName());
 	}
@@ -472,6 +472,16 @@ class Quest extends UniqueObject implements IQuestState {
 	@Override
 	public boolean hasChange(Member field) {
 		return true;
+	}
+	
+	@Override
+	public int hashCode() {
+		return super.hashCode();
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		return super.equals(o);
 	}
 	
 	/*@Deprecated

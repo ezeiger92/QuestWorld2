@@ -14,7 +14,7 @@ import org.bukkit.inventory.ItemStack;
 import me.mrCookieSlime.QuestWorld.util.ItemBuilder;
 import me.mrCookieSlime.QuestWorld.util.Text;
 
-public class Menu implements Cloneable, InventoryHolder {
+public class Menu implements InventoryHolder {
 	private static final int ROW_WIDTH = 9;
 	private Inventory inv;
 	private Consumer<InventoryClickEvent>[] handlers;
@@ -24,12 +24,6 @@ public class Menu implements Cloneable, InventoryHolder {
 		int cells = rows * ROW_WIDTH;
 		inv = makeInv(cells, Text.colorize(title));
 		handlers = new Consumer[cells];
-	}
-	
-	private Menu(Menu that) {
-		inv = makeInv(that.inv.getSize(), that.inv.getName());
-		inv.setContents(that.inv.getContents());
-		handlers = that.handlers.clone();
 	}
 	
 	private Inventory makeInv(int cells, String title) {
@@ -105,11 +99,6 @@ public class Menu implements Cloneable, InventoryHolder {
 		}
 		// Allow non-transfer clicks
 		return event.getClick().isShiftClick();
-	}
-	
-	@Override
-	public Menu clone() {
-		return new Menu(this);
 	}
 
 	@Override

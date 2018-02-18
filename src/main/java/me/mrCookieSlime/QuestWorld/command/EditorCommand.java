@@ -14,6 +14,7 @@ import me.mrCookieSlime.QuestWorld.util.PlayerTools;
 import me.mrCookieSlime.QuestWorld.util.Text;
 
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
@@ -56,7 +57,7 @@ public class EditorCommand implements CommandExecutor {
 		else
 			p = null;
 		
-		String param = args[0].toLowerCase();
+		String param = args[0].toLowerCase(Locale.US);
 		
 		if (param.equals("import")) {
 			if(args.length < 2) {
@@ -97,7 +98,7 @@ public class EditorCommand implements CommandExecutor {
 				recipient = PlayerTools.getPlayer(args[1]);
 			
 			if(recipient != null) {
-				recipient.getInventory().addItem(GuideBook.get());
+				recipient.getInventory().addItem(GuideBook.instance().item());
 				if(p != recipient)
 					p.sendMessage(Text.colorize("&3Given QuestBook to &b" + recipient.getName()));
 				recipient.sendMessage(Text.colorize("&3Recieved QuestBook"));

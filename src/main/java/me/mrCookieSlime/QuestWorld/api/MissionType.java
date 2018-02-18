@@ -123,4 +123,9 @@ public abstract class MissionType {
 	public int hashCode() {
 		return name.hashCode();
 	}
+	
+	@Override
+	public boolean equals(Object o) {
+		return o instanceof MissionType && name.equals(((MissionType)o).name);
+	}
 }

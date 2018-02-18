@@ -118,19 +118,20 @@ public enum Translation implements Translator {
 	
 	@Override
 	public String[] placeholders() {
-		return placeholders;
+		return placeholders.clone();
 	}
 	
 	@Override
 	public String toString() {
-		String result = path;
+		StringBuilder result = new StringBuilder(path);
 		if(placeholders.length > 0) {
-			result += "[";
+			result.append('[');
 			for(String s : placeholders)
-				result += s + ", ";
-			result = result.substring(0, result.length()-2) + "]";
+				result.append(s).append(", ");
+			result.delete(result.length() - 2, result.length());
+			result.append(']');
 		}
 		
-		return result;
+		return result.toString();
 	}
 }

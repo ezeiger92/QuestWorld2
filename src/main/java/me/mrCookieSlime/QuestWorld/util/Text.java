@@ -1,6 +1,7 @@
 package me.mrCookieSlime.QuestWorld.util;
 
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -108,13 +109,13 @@ public class Text {
 	static Pattern firstLetter = Pattern.compile("\\b\\S");
 	
 	public static String niceName(String input) {
-		input = input.replace('_', ' ').trim().toLowerCase();
+		input = input.replace('_', ' ').trim().toLowerCase(Locale.getDefault());
 
 		StringBuffer sb = new StringBuffer(input.length());
 		
 		Matcher m = firstLetter.matcher(input);
 		while (m.find())
-			m.appendReplacement(sb, m.group().toUpperCase());
+			m.appendReplacement(sb, m.group().toUpperCase(Locale.US));
 		
 		m.appendTail(sb);
 		

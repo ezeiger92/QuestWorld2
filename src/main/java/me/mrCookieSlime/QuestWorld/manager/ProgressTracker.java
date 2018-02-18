@@ -1,11 +1,13 @@
 package me.mrCookieSlime.QuestWorld.manager;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -22,7 +24,7 @@ import me.mrCookieSlime.QuestWorld.util.Reloadable;
 import me.mrCookieSlime.QuestWorld.util.Text;
 
 public class ProgressTracker implements Reloadable {
-	private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm");
+	private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm");
 	private final File configFile;
 	private final YamlConfiguration config;
 	
@@ -150,7 +152,7 @@ public class ProgressTracker implements Reloadable {
 		String status = config.getString(path(quest) + ".status", null);
 		if(status != null)
 			try {
-				result = QuestStatus.valueOf(status.toUpperCase());
+				result = QuestStatus.valueOf(status.toUpperCase(Locale.US));
 			}
 			catch(IllegalArgumentException e) {
 				e.printStackTrace();
@@ -200,7 +202,12 @@ public class ProgressTracker implements Reloadable {
 		File file = dialogueFile(mission);
 		
 		if(mission.getDialogue().isEmpty()) {
-			file.delete();
+			try {
+				Files.deleteIfExists(file.toPath());
+			}
+			catch(IOException e) {
+				e.printStackTrace();
+			}
 			return;
 		}
 		
