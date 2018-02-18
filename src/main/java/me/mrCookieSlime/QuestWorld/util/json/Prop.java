@@ -60,28 +60,4 @@ public interface Prop {
 	static String pre(String action, String value) {
 		return "{\"action\":\"" + action + "\",\"value\":" + value + "}";
 	}
-	
-	/*public static final class HOVER {
-		@Deprecated
-		public static Prop ITEM(ItemStack item) {
-			return null;
-		}
-		
-		@Deprecated
-		public static Prop ENTITY(EntityType type, UUID uuid, String name, Prop... props) {
-			return null;
-		}
-		
-		@Deprecated
-		public static Prop ACHIEVE() {
-			return null;
-		}
-	}
-	
-	public static final class CLICK {
-		@Deprecated
-		public static Prop PAGE() {
-			return null;
-		}
-	}*/
 }
