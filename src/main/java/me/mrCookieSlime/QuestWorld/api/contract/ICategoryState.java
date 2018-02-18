@@ -22,7 +22,7 @@ public interface ICategoryState extends ICategory {
 
 	
 	ICategory getSource();
-	public enum Member implements BitString {
+	enum Member implements BitString {
 		QUESTS,
 		ID,
 		NAME,

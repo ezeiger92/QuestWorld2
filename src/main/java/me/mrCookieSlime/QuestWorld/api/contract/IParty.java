@@ -6,7 +6,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 public interface IParty extends IStateful {
-	public enum LeaveReason {
+	enum LeaveReason {
 		ABANDON,
 		DISCONNECT,
 		KICKED,

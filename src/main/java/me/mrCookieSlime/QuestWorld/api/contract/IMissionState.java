@@ -33,7 +33,7 @@ public interface IMissionState extends IMission {
 	boolean  hasChange(Member field);
 	IMission getSource();
 	
-	public enum Member implements BitString {
+	enum Member implements BitString {
 		QUEST,
 		AMOUNT,
 		CUSTOM_STRING,

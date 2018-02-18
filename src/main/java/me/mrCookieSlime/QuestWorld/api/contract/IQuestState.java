@@ -33,7 +33,7 @@ public interface IQuestState extends IQuest {
 	
 	void refreshParent();
 	
-	public enum Member implements BitString {
+	enum Member implements BitString {
 		CATEGORY,
 		ID,
 		COOLDOWN,
