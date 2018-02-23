@@ -29,7 +29,7 @@ public class ProgressTracker implements Reloadable {
 	private final YamlConfiguration config;
 	
 	private static File fileFor(UUID uuid) {
-		return new File(QuestWorldPlugin.getPath("data.player"), uuid.toString() + ".yml");
+		return new File(QuestWorldPlugin.instance().getDataFolders().playerdata, uuid.toString() + ".yml");
 	}
 	
 	public static boolean exists(UUID uuid) {
@@ -189,12 +189,12 @@ public class ProgressTracker implements Reloadable {
 	}
 	
 	public static File dialogueFile(IMission mission) {
-		return new File(QuestWorldPlugin.getPath("data.dialogue"),
+		return new File(QuestWorldPlugin.instance().getDataFolders().dialogue,
 				mission.getUniqueId().toString() + ".dialogue");
 	}
 	
 	public static File oldDialogueFile(IMission mission) {
-		return new File(QuestWorldPlugin.getPath("data.dialogue"), mission.getQuest().getCategory().getID()
+		return new File(QuestWorldPlugin.instance().getDataFolders().dialogue, mission.getQuest().getCategory().getID()
 				+ "+" + mission.getQuest().getID() + "+" + mission.getIndex() + ".txt");
 	}
 	

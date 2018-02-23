@@ -115,7 +115,7 @@ public class Text {
 		
 		Matcher m = firstLetter.matcher(input);
 		while (m.find())
-			m.appendReplacement(sb, m.group().toUpperCase(Locale.US));
+			m.appendReplacement(sb, m.group().toUpperCase(Locale.getDefault()));
 		
 		m.appendTail(sb);
 		

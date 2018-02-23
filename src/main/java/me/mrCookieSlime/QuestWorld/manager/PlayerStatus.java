@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
 
+import me.mrCookieSlime.QuestWorld.Directories;
 import me.mrCookieSlime.QuestWorld.QuestWorldPlugin;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.QuestStatus;
@@ -402,7 +403,7 @@ public class PlayerStatus implements IPlayerStatus {
 		
 		Bukkit.getScheduler().runTaskAsynchronously(QuestWorld.getPlugin(), () -> {
 			// First: clear all the quest data on a new thread
-			for (File file:QuestWorldPlugin.getFiles("data.player", (file, name) -> name.endsWith(".yml"))) {
+			for (File file: Directories.listFiles(QuestWorldPlugin.instance().getDataFolders().playerdata, (file, name) -> name.endsWith(".yml"))) {
 				String uuid = file.getName().substring(0, file.getName().length() - 4);
 				try {
 					ProgressTracker t = new ProgressTracker(UUID.fromString(uuid));

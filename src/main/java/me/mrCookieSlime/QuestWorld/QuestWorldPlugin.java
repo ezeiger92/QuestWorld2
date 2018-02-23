@@ -3,7 +3,6 @@ package me.mrCookieSlime.QuestWorld;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -50,14 +49,15 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener {
 	private int questCheckHandle = -1;
 	private int autosaveHandle = -1;
 	
+	private Directories dataFolders;
+	
 	public QuestWorldPlugin() {
 		setInstance(this);
 
 		saveDefaultConfig();
-		getPath("data.extensions");
-		getPath("data.presets");
+		dataFolders = new Directories(api.getResources());
 		
-		extLoader = new ExtensionLoader(getClassLoader(), getPath("data.extensions"));
+		extLoader = new ExtensionLoader(getClassLoader(), dataFolders.extensions);
 		getServer().getServicesManager().register(QuestingAPI.class, api, this, ServicePriority.Normal);
 	}
 	
@@ -114,6 +114,8 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener {
 	
 	public void loadConfigs() {
 		reloadConfig();
+		
+		dataFolders = new Directories(api.getResources());
 		
 		if(questCheckHandle != -1)
 			getServer().getScheduler().cancelTask(questCheckHandle);
@@ -195,7 +197,7 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener {
 	}
 	
 	public boolean importPreset(String fileName) {
-		File file = new File(getPath("data.presets"), fileName);
+		File file = new File(dataFolders.presets, fileName);
 		byte[] buffer = new byte[1024];
 		if (!file.exists())
 			return false;
@@ -204,18 +206,18 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener {
 		try(ZipInputStream input = new ZipInputStream(new FileInputStream(file))) {
 			ZipEntry entry = input.getNextEntry();
 			
-			for (File f: getFiles("data.questing"))
+			for (File f: Directories.listFiles(dataFolders.questing))
 				Files.delete(f.toPath());
 			
-			for (File f: getFiles("data.dialogue"))
+			for (File f: Directories.listFiles(dataFolders.dialogue))
 				Files.delete(f.toPath());
 			
 			while (entry != null) {
 				File target;
 				if(entry.getName().startsWith("dialogue/"))
-					target = new File(getPath("data.dialogue"), entry.getName().substring(9));
+					target = new File(dataFolders.dialogue, entry.getName().substring(9));
 				else
-					target = new File(getPath("data.questing"), entry.getName());
+					target = new File(dataFolders.questing, entry.getName());
 				
 				try (FileOutputStream output = new FileOutputStream(target)) {
 					int length;
@@ -238,22 +240,19 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener {
 	}
 	
 	public boolean exportPreset(String fileName) {
-		File file = new File(getPath("data.presets"), fileName);
+		File file = new File(dataFolders.presets, fileName);
 		
 		onSave(true); // Why unload and load in a try/catch block when you can just use a save function?
 		
 		try {
 			Files.deleteIfExists(file.toPath());
-			
 			Files.createFile(file.toPath());
-			//if(!file.createNewFile())
-			//	throw new IOException("Failed to create file: "+file.getName());
 			
 			ArrayList<File> files = new ArrayList<>();
-			File dialogueDir = getPath("data.dialogue");
+			File dialogueDir = dataFolders.dialogue;
 			
-			files.addAll(Arrays.asList(getFiles("data.questing")));
-			files.addAll(Arrays.asList(getFiles("data.dialogue")));
+			files.addAll(Arrays.asList(Directories.listFiles(dataFolders.questing)));
+			files.addAll(Arrays.asList(Directories.listFiles(dataFolders.dialogue)));
 			
 			try(ZipOutputStream output = new ZipOutputStream(new FileOutputStream(file))) {
 				byte[] buffer = new byte[1024];
@@ -297,36 +296,18 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener {
 		}
 	}
 	
-	public static File getPath(String key) {
-		File result = new File(instance.getDataFolder(), getString(key));
-		if(!result.exists() && !result.mkdirs())
-			throw new IllegalArgumentException("Failed to create path for: "+key+" (file:"+result.getName()+")");
-		
-		return result;
+	public Directories getDataFolders() {
+		return dataFolders;
 	}
 	
-	public static File[] getFiles(String key) {
-		File[] result = getPath(key).listFiles();
-		
-		if(result != null)
-			return result;
-		
-		return new File[0];
+	public static QuestWorldPlugin instance() {
+		return instance;
 	}
 	
-	public static File[] getFiles(String key, FilenameFilter filter) {
-		File[] result = getPath(key).listFiles(filter);
-		
-		if(result != null)
-			return result;
-		
-		return new File[0];
-	}
-	
-	public static String getString(String key) {
-		String result = instance.getConfig().getString(key,null);
+	public String iGetString(String key) {
+		String result = getConfig().getString(key,null);
 		if(result == null) {
-			String fallback = instance.api.getResources().loadJarConfig("config.yml").getString(key, null);
+			String fallback = api.getResources().loadJarConfig("config.yml").getString(key, null);
 			if(fallback == null) {
 				Log.severe("No setting for \""+key+"\" found in config.yml, defaulting to \"\"");
 				result = "";
@@ -334,11 +315,15 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener {
 			else {
 				Log.warning("Missing config.yml setting \""+key+"\", did you just update? Saving default \""+fallback+"\" from jar");
 				result = fallback;
-				instance.getConfig().set(key, fallback);
-				instance.saveConfig();
+				getConfig().set(key, fallback);
+				saveConfig();
 			}
 		}
 		return result;
+	}
+	
+	public static String getString(String key) {
+		return instance.iGetString(key);
 	}
 	
 	public static QuestingImpl getImpl() {

@@ -89,7 +89,7 @@ public final class QuestingImpl implements QuestingAPI, Reloadable {
 			language.setLang(lang);
 		
 		if(Bukkit.getPluginManager().getPlugin("Vault") != null)
-			econ = Optional.ofNullable(BukkitService.get(Economy.class));
+			econ = BukkitService.find(Economy.class);
 	}
 	
 	@Override

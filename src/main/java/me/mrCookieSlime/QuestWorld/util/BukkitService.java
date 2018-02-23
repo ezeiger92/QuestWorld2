@@ -1,28 +1,26 @@
 package me.mrCookieSlime.QuestWorld.util;
 
+import java.util.Optional;
+
 import org.bukkit.Bukkit;
-import org.bukkit.plugin.RegisteredServiceProvider;
 
 /**
  * Single purpose class for quickly accessing services registered with Bukkit.
  * 
- * @see BukkitService#get
+ * @see BukkitService#find
  * 
  * @author Erik Zeiger
  */
 public final class BukkitService {
 	/**
 	 * Retrieves a service provider from Bukkit given the interface it
-	 * implements. If no provider exists, <tt>null</tt> is returned.
+	 * implements.
 	 * 
 	 * @param clazz The service class that is desired
-	 * @return The service provider, if found. Otherwise <tt>null</tt>
+	 * @return The service provider
 	 */
-	public static <T> T get(Class<T> clazz) {
-		RegisteredServiceProvider<T> service = Bukkit.getServer().getServicesManager().getRegistration(clazz);
-		if(service != null)
-			return service.getProvider();
-		
-		return null;
+	public static <T> Optional<T> find(Class<T> clazz) {
+		return Optional.ofNullable(Bukkit.getServer().getServicesManager().getRegistration(clazz))
+				.map(service -> service.getProvider());
 	}
 }
