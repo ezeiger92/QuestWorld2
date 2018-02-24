@@ -30,19 +30,19 @@ public class SerializeTest {
 			{"Normal", "Normal"},
 			{"Colored&c", "Colored" + S + "c"},
 			{"Newline\\n", "Newline\n"},
-			{"Escaped\\&c", "Escaped&c"},
+			//{"Escaped\\&c", "Escaped&c"}, // No longer supported
 			{"DoubleColored\\\\&c", "DoubleColored\\" + S + "c"},
-			{"TripleEscaped\\\\\\&c", "TripleEscaped\\&c"},
+			//{"TripleEscaped\\\\\\&c", "TripleEscaped\\&c"}, // No longer supported
 		});
 	}
 	
 	@Test
 	public void deserialize() {
-		assertEquals(deserialized, Text.deserializeColor(serialized));
+		assertEquals(deserialized, Text.deserializeNewline(Text.colorize(serialized)));
 	}
 	
 	@Test
 	public void serialize() {
-		assertEquals(serialized, Text.serializeColor(deserialized));
+		assertEquals(serialized, Text.serializeNewline(Text.escapeColor(deserialized)));
 	}
 }

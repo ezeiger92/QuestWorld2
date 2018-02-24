@@ -38,7 +38,7 @@ public class Buttons {
 			PlayerTools.promptInput(p, new SinglePrompt(
 					PlayerTools.makeTranslation(true, Translation.CATEGORY_NAME_EDIT, defaultCategoryName),
 					(c,s) -> {
-						s = Text.colorize(s);
+						s = Text.deserializeNewline(Text.colorize(s));
 						QuestWorld.getFacade().createCategory(s, id);
 						PlayerTools.sendTranslation(p, true, Translation.CATEGORY_CREATED, s);
 						QuestBook.openCategoryList(p);
@@ -74,7 +74,7 @@ public class Buttons {
 					PlayerTools.makeTranslation(true, Translation.QUEST_NAME_EDIT, defaultQuestName),
 					(c,s) -> {
 						ICategoryState state = category.getState();
-						s = Text.colorize(s);
+						s = Text.deserializeNewline(Text.colorize(s));
 						state.addQuest(s, id);
 						if(state.apply()) {
 							PlayerTools.sendTranslation(p, true, Translation.QUEST_CREATED, s);

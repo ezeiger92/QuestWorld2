@@ -103,7 +103,7 @@ public class ResourceLoader {
 		finally { close(); }
 		
 		if(!file.exists()) {
-			if(!file.getParentFile().mkdirs())
+			if(!file.getParentFile().exists() && !file.getParentFile().mkdirs())
 				throw new IOException("Could not create directories for: "+file.getName());
 			
 			try {

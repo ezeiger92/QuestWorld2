@@ -344,7 +344,7 @@ public class PlayerStatus implements IPlayerStatus {
 			Bukkit.dispatchCommand(Bukkit.getConsoleSender(), line.substring(1));
 
 		else {
-			line = Text.deserializeColor(QuestWorld.getPlugin().getConfig().getString("dialogue.prefix")) + line;
+			line = Text.deserializeNewline(Text.colorize(QuestWorld.getPlugin().getConfig().getString("dialogue.prefix"))) + line;
 			
 			player.sendMessage(line);
 		}

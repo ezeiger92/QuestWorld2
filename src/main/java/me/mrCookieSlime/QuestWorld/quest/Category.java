@@ -56,11 +56,14 @@ class Category extends UniqueObject implements ICategoryState {
 		
 		setUniqueId(config.getString("uniqueId", null));
 		
-		name = Text.deserializeColor(config.getString("name"));
-		item = config.getItemStack("item", item);
+		name = Text.colorize(config.getString("name"));
+		ItemStack i2 = config.getItemStack("item", item);
 		hidden = config.getBoolean("hidden");
 		permission = config.getString("permission", "");
 		world_blacklist = config.getStringList("world-blacklist");
+		
+		if(i2.getType() != Material.AIR)
+			item = i2;
 	}
 	
 	//// ICategory Impl
@@ -166,7 +169,7 @@ class Category extends UniqueObject implements ICategoryState {
 	public void save() {
 		config.set("uniqueId", getUniqueId().toString());
 		config.set("id", id);
-		config.set("name", Text.serializeColor(name));
+		config.set("name", Text.escapeColor(name));
 		config.set("item", item);
 		config.set("permission", permission);
 		config.set("hidden", this.hidden);

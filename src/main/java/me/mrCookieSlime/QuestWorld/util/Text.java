@@ -29,6 +29,10 @@ public class Text {
 		return ChatColor.translateAlternateColorCodes(dummyChar, input);
 	}
 	
+	public static String escapeColor(String input) {
+		return input.replace(colorChar, dummyChar);
+	}
+	
 	public static String colorize(String... inputs) {
 		StringBuilder sb = new StringBuilder(inputs.length);
 		
@@ -72,19 +76,18 @@ public class Text {
 		return output;
 	}
 	
-	public static String serializeColor(@Nullable("Returns null") String input) {
+	public static String serializeNewline(@Nullable("Returns null") String input) {
 		if(input == null)
 			return null;
 		
-		return input.replace("\\", "\\\\").replace("\n", "\\n").replace("&", "\\&").replace(colorChar, dummyChar);
+		return input.replace("\\", "\\\\").replace("\n", "\\n");
 	}
 	
-	public static String deserializeColor(@Nullable("Returns null") String input) {
+	public static String deserializeNewline(@Nullable("Returns null") String input) {
 		if(input == null)
 			return null;
 		
-		input = input.replaceAll("(?i)(?<!\\\\)((?:\\\\\\\\)*)&([0-9A-FK-OR])", "$1"+colorChar+"$2");
-		return input.replace("\\&", "&").replace("\\n", "\n").replace("\\\\", "\\");
+		return input.replaceAll("(?i)(?<!\\\\)((?:\\\\\\\\)*)\\\\n", "$1\n").replace("\\\\", "\\");
 	}
 	
 	public static String stringOf(Location location) {
@@ -187,7 +190,7 @@ public class Text {
 				continue;
 			}
 			
-			for(String s : s1.split("\\\\n")) {
+			for(String s : s1.split("\n")) {
 				int begin = 0;
 				int end = -1;
 				int seq_begin = 0;

@@ -214,7 +214,7 @@ public class ProgressTracker implements Reloadable {
 		try {
 			// The only downside to this is system-specific newlines
 			Files.write(file.toPath(), mission.getDialogue().stream()
-					.map(Text::serializeColor).collect(Collectors.toList()), StandardCharsets.UTF_8);
+					.map(Text::serializeNewline).map(Text::escapeColor).collect(Collectors.toList()), StandardCharsets.UTF_8);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -265,7 +265,7 @@ public class ProgressTracker implements Reloadable {
 		
 		try {
 			mission.setDialogue(readAllLines(file).stream()
-					.map(Text::deserializeColor).collect(Collectors.toList()));
+					.map(Text::deserializeNewline).map(Text::colorize).collect(Collectors.toList()));
 		} catch (Exception e) {
 			e.printStackTrace();
 			return;

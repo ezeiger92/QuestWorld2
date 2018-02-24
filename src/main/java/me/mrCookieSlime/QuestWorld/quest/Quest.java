@@ -104,8 +104,8 @@ class Quest extends UniqueObject implements IQuestState {
 		partySupport = !config.getBoolean("disable-parties");
 		ordered      = config.getBoolean("in-order");
 		autoclaim    = config.getBoolean("auto-claim");
-		name         = Text.deserializeColor(config.getString("name"));
-		item         = config.getItemStack("item", item);
+		name         = Text.colorize(config.getString("name"));
+		ItemStack i2 = config.getItemStack("item", item);
 		
 		rewards = loadRewards();
 		money   = config.getInt("rewards.money");
@@ -116,6 +116,9 @@ class Quest extends UniqueObject implements IQuestState {
 		
 		partySize  = config.getInt("min-party-size", 1);
 		permission = config.getString("permission", "");
+		
+		if(i2.getType() != Material.AIR)
+			item = i2;
 		
 		loadMissions();
 	}
@@ -189,7 +192,7 @@ class Quest extends UniqueObject implements IQuestState {
 		config.set("id", id);
 		config.set("category", getCategory().getID());
 		config.set("cooldown", cooldown);
-		config.set("name", Text.serializeColor(name));
+		config.set("name", Text.escapeColor(name));
 		config.set("item", new ItemStack(item));
 		config.set("rewards.items", null);
 		config.set("rewards.money", money);

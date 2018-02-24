@@ -99,7 +99,7 @@ public class MissionButton {
 					PlayerTools.promptInput(p, new SinglePrompt(
 							PlayerTools.makeTranslation(true, Translation.KILLMISSION_NAME_EDIT),
 							(c,s) -> {
-								changes.setCustomString(Text.colorize(s));
+								changes.setCustomString(Text.deserializeNewline(Text.colorize(s)));
 								if(changes.apply()) {
 									PlayerTools.sendTranslation(p, true, Translation.KILLMISSION_NAME_SET);
 								}
@@ -130,7 +130,7 @@ public class MissionButton {
 						PlayerTools.promptInput(p, new SinglePrompt(
 								PlayerTools.makeTranslation(true, Translation.MISSION_NAME_EDIT),
 								(c,s) -> {
-									changes.setDisplayName(s);
+									changes.setDisplayName(Text.deserializeNewline(Text.colorize(s)));
 									if(changes.apply()) {
 										PlayerTools.sendTranslation(p, true, Translation.MISSION_NAME_SET);
 										QuestBook.openQuestMissionEditor(p, changes.getSource());
@@ -230,7 +230,7 @@ public class MissionButton {
 								}
 								
 								Translation translator = s.startsWith("/") ? Translation.MISSION_COMMAND_ADDED : Translation.MISSION_DIALOG_ADDED;
-								dialogue.add(Text.colorize(s));
+								dialogue.add(Text.deserializeNewline(Text.colorize(s)));
 								
 								SinglePrompt.setNextDisplay(c, PlayerTools.makeTranslation(true, translator, s));
 								QuestWorld.getSounds().DIALOG_ADD.playTo(p);
