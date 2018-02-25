@@ -1,8 +1,7 @@
 package me.mrCookieSlime.QuestWorld.manager;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -28,7 +27,7 @@ public class Party implements IPartyState {
 
 	public Party(UUID leader) {
 		this.leader = leader;
-		tracker = QuestWorldPlugin.getImpl().getPlayerStatus(leader).getTracker();
+		tracker = QuestWorldPlugin.instance().getImpl().getPlayerStatus(leader).getTracker();
 		
 		if(tracker.getPartyLeader() == null)
 			tracker.setPartyLeader(leader);
@@ -115,7 +114,7 @@ public class Party implements IPartyState {
 		
 		members.add(p.getUniqueId());
 		PlayerTools.sendTranslation(p, true, Translation.PARTY_GROUP_JOIN, p.getName(), Bukkit.getOfflinePlayer(leader).getName());
-		QuestWorldPlugin.getImpl().getPlayerStatus(p).getTracker().setPartyLeader(leader);
+		QuestWorldPlugin.instance().getImpl().getPlayerStatus(p).getTracker().setPartyLeader(leader);
 		pending.remove(p.getUniqueId());
 		save();
 	}
@@ -150,14 +149,14 @@ public class Party implements IPartyState {
 		}
 		
 		members.remove(traitor.getUniqueId());
-		QuestWorldPlugin.getImpl().getPlayerStatus(traitor.getUniqueId()).getTracker().setPartyLeader(null);
+		QuestWorldPlugin.instance().getImpl().getPlayerStatus(traitor.getUniqueId()).getTracker().setPartyLeader(null);
 		save();
 	}
 	
 	public void disband() {
 		for (UUID member: members) {
 			Player player = Bukkit.getPlayer(member);
-			QuestWorldPlugin.getImpl().getPlayerStatus(member).getTracker().setPartyLeader(null);
+			QuestWorldPlugin.instance().getImpl().getPlayerStatus(member).getTracker().setPartyLeader(null);
 			
 			if(player != null)
 				PlayerTools.sendTranslation(player, true, Translation.PARTY_GROUP_DISBAND);
@@ -168,8 +167,8 @@ public class Party implements IPartyState {
 		save();
 	}
 	
-	public List<UUID> getPending() {
-		return new ArrayList<>(pending);
+	public Set<UUID> getPending() {
+		return Collections.unmodifiableSet(pending);
 	}
 
 	@Override

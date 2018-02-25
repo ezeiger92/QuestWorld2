@@ -7,6 +7,9 @@ import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 
 public final class Reflect {
+	private Reflect() {
+	}
+	
 	private static final Class<?> serverClass = Bukkit.getServer().getClass();
 	private static final String CBS = serverClass.getName().replaceFirst("[^.]+$", "");
 	private static final String NMS;

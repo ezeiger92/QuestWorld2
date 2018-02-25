@@ -12,11 +12,12 @@ import me.mrCookieSlime.QuestWorld.api.MissionViewer;
 import me.mrCookieSlime.QuestWorld.api.Translator;
 import me.mrCookieSlime.QuestWorld.api.annotation.NoImpl;
 import me.mrCookieSlime.QuestWorld.api.annotation.Nullable;
+import me.mrCookieSlime.QuestWorld.util.Reloadable;
 import me.mrCookieSlime.QuestWorld.util.Sounds;
 import net.milkbowl.vault.economy.Economy;
 
 @NoImpl
-public interface QuestingAPI {
+public interface QuestingAPI extends Reloadable {
 	/**
 	 * Gets the MissionType instance represented by this String. The owning
 	 * extension must already be loaded, otherwise <tt>null</tt> will be

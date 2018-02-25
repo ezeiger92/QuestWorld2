@@ -12,6 +12,10 @@ import org.bukkit.Bukkit;
  * @author Erik Zeiger
  */
 public final class BukkitService {
+	
+	private BukkitService() {
+	}
+
 	/**
 	 * Retrieves a service provider from Bukkit given the interface it
 	 * implements.

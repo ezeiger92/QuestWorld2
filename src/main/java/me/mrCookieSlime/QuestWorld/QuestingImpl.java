@@ -14,11 +14,14 @@ import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.MissionViewer;
 import me.mrCookieSlime.QuestWorld.api.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.Translator;
+import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IParty;
 import me.mrCookieSlime.QuestWorld.api.contract.MissionEntry;
 import me.mrCookieSlime.QuestWorld.api.contract.QuestingAPI;
 import me.mrCookieSlime.QuestWorld.api.menu.Menu;
+import me.mrCookieSlime.QuestWorld.extension.builtin.Builtin;
+import me.mrCookieSlime.QuestWorld.listener.ExtensionInstaller;
 import me.mrCookieSlime.QuestWorld.manager.MissionSet;
 import me.mrCookieSlime.QuestWorld.manager.Party;
 import me.mrCookieSlime.QuestWorld.manager.PlayerStatus;
@@ -27,31 +30,65 @@ import me.mrCookieSlime.QuestWorld.quest.Facade;
 import me.mrCookieSlime.QuestWorld.util.BukkitService;
 import me.mrCookieSlime.QuestWorld.util.Lang;
 import me.mrCookieSlime.QuestWorld.util.Log;
-import me.mrCookieSlime.QuestWorld.util.Reloadable;
 import me.mrCookieSlime.QuestWorld.util.ResourceLoader;
 import me.mrCookieSlime.QuestWorld.util.Sounds;
 import net.milkbowl.vault.economy.Economy;
 
-public final class QuestingImpl implements QuestingAPI, Reloadable {
-	private Map<String, MissionType> types = new HashMap<>();
+public final class QuestingImpl implements QuestingAPI {
+	private final Facade facade = new Facade();
+	private final HashMap<UUID, Party> parties = new HashMap<>();
+	private final HashMap<UUID, PlayerStatus> statuses = new HashMap<>();
+	private final Map<String, MissionType> types = new HashMap<>();
+	private final MissionViewer viewer = new MissionViewer();
 	
-	private MissionViewer viewer = new MissionViewer();
-	private Optional<Economy> econ = Optional.ofNullable(null);
-	private Facade facade = new Facade();
+	private final ExtensionInstaller extensions;
+	private final Lang language;
+	private final PresetLoader presets;
+	private final QuestWorldPlugin plugin;
+	private final ResourceLoader resources;
+
+	private Directories dataFolders;
+	private Optional<Economy> econ = Optional.empty();
 	private Sounds eventSounds;
-	private ResourceLoader resources;
-	private Lang language;
-	private QuestWorldPlugin questWorld;
-	
-	private HashMap<UUID, PlayerStatus> statuses = new HashMap<>();
-	private HashMap<UUID, Party> parties = new HashMap<>();
 	
 	public QuestingImpl(QuestWorldPlugin questWorld) {
-		Log.setLogger(questWorld.getLogger());
-		this.questWorld = questWorld;
+		plugin = questWorld;
+		extensions = new ExtensionInstaller(questWorld);
 		resources = new ResourceLoader(questWorld);
+		
+		dataFolders = new Directories(resources);
 		language = new Lang(resources);
+		
+		presets = new PresetLoader(this, dataFolders);
+		
+		String lang = plugin.getConfig().getString("options.language");
+		if(lang != null)
+			language.setLang(lang);
+		
+		if(Bukkit.getPluginManager().getPlugin("Vault") != null)
+			econ = BukkitService.find(Economy.class);
+		
+		if(!econ.isPresent())
+			Log.info("No economy (vault) found, money rewards disabled");
+		
 		QuestWorld.setAPI(this);
+		
+		ExtensionLoader extLoader = new ExtensionLoader(resources.getClassLoader(), dataFolders.extensions);
+		extensions.add(new Builtin());
+		extensions.addAll(extLoader.loadLocal());
+
+		Log.fine("Retrieving Quest Configuration...");
+		facade.load();
+		int categories = facade.getCategories().size(), quests = 0;
+		for (ICategory category: facade.getCategories())
+			quests += category.getQuests().size();
+
+		Log.fine("Successfully loaded " + categories + " Categories");
+		Log.fine("Successfully loaded " + quests + " Quests");
+	}
+	
+	public Directories getDataFolders() {
+		return dataFolders;
 	}
 	
 	public ResourceLoader getResources() {
@@ -82,14 +119,8 @@ public final class QuestingImpl implements QuestingAPI, Reloadable {
 		return viewer;
 	}
 	
-	public void onEnable() {
-		
-		String lang = getPlugin().getConfig().getString("options.language");
-		if(lang != null)
-			language.setLang(lang);
-		
-		if(Bukkit.getPluginManager().getPlugin("Vault") != null)
-			econ = BukkitService.find(Economy.class);
+	public ExtensionInstaller getExtensions() {
+		return extensions;
 	}
 	
 	@Override
@@ -124,7 +155,7 @@ public final class QuestingImpl implements QuestingAPI, Reloadable {
 	
 	@Override
 	public QuestWorldPlugin getPlugin() {
-		return questWorld;
+		return plugin;
 	}
 	
 	@Override
@@ -188,14 +219,23 @@ public final class QuestingImpl implements QuestingAPI, Reloadable {
 	
 	@Override
 	public void onSave() {
+		facade.save(false);
 		
+		plugin.getServer().getOnlinePlayers().stream()
+			.map(p -> statuses.get(p.getUniqueId()))
+			.forEach(status -> status.getTracker().onSave());
+		
+		extensions.onSave();
 	}
 	
 	@Override
 	public void onReload() {
-		facade.onReload();
+		dataFolders = new Directories(resources);
 		eventSounds = new Sounds(resources.loadConfigNoexpect("sounds.yml", true));
+		facade.onReload();
 		language.onReload();
+		
+		extensions.onReload();
 	}
 	
 	@Override
@@ -211,11 +251,17 @@ public final class QuestingImpl implements QuestingAPI, Reloadable {
 		for(Player p : Bukkit.getOnlinePlayers())
 			if(p.getOpenInventory().getTopInventory().getHolder() instanceof Menu)
 				p.closeInventory();
+		
+		extensions.onDiscard();
 	}
 	
 	public void unloadPlayerStatus(OfflinePlayer player) {
 		PlayerStatus status = statuses.remove(player.getUniqueId());
 		if(status != null)
 			status.unload();
+	}
+	
+	public PresetLoader presets() {
+		return presets;
 	}
 }

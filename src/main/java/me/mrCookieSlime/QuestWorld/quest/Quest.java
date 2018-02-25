@@ -360,7 +360,7 @@ class Quest extends UniqueObject implements IQuestState {
 	public boolean completeFor(Player p) {
 		if(CancellableEvent.send(new QuestCompleteEvent(getSource(), p))) {
 			handoutReward(p);
-			QuestWorldPlugin.getImpl().getPlayerStatus(p).completeQuest(this);
+			QuestWorldPlugin.instance().getImpl().getPlayerStatus(p).completeQuest(this);
 			return true;
 		}
 		

@@ -2,6 +2,7 @@ package me.mrCookieSlime.QuestWorld.quest;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -82,8 +83,8 @@ class Mission extends UniqueObject implements IMissionState {
 	}
 	
 	@Override
-	public ArrayList<String> getDialogue() {
-		return new ArrayList<>(dialogue);
+	public List<String> getDialogue() {
+		return Collections.unmodifiableList(dialogue);
 	}
 	
 	@Override
@@ -284,7 +285,7 @@ class Mission extends UniqueObject implements IMissionState {
 		customString = source.customString;
 		deathReset = source.deathReset;
 		description = source.description;
-		dialogue = source.getDialogue();
+		setDialogue(source.dialogue);
 		displayName = source.displayName;
 		entity = source.entity;
 		item = source.item.clone();

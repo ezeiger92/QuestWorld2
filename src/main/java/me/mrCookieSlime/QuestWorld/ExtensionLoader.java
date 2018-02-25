@@ -6,6 +6,7 @@ import java.net.URLClassLoader;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -16,7 +17,7 @@ import java.util.jar.JarFile;
 import me.mrCookieSlime.QuestWorld.api.QuestExtension;
 import me.mrCookieSlime.QuestWorld.util.Log;
 
-public class ExtensionLoader {
+public final class ExtensionLoader {
 	private ClassLoader loader;
 	private File folder;
 	private Map<ClassLoader, List<QuestExtension>> classLoaders = new HashMap<>();
@@ -35,17 +36,20 @@ public class ExtensionLoader {
 		this.folder = folder;
 	}
 	
-	public void loadLocal() {
+	public List<QuestExtension> loadLocal() {
 		// This is as much as bukkit checks, good enough for me!
-		File[] extensions = folder.listFiles((file, name) -> name.endsWith(".jar"));
+		File[] extensionFiles = folder.listFiles((file, name) -> name.endsWith(".jar"));
 		
+		List<QuestExtension> extensions = new ArrayList<>();
 		// Not a directory or unable to list files for some reason
-		if(extensions != null)
-			for(File f : extensions)
-				load(f);
+		if(extensionFiles != null)
+			for(File f : extensionFiles)
+				extensions.addAll(load(f));
+		
+		return extensions;
 	}
 	
-	public void load(File extensionFile) {
+	public List<QuestExtension> load(File extensionFile) {
 		Log.fine("Loader - Reading file: " + extensionFile.getName());
 		
 		JarFile jar;
@@ -53,7 +57,7 @@ public class ExtensionLoader {
 		catch (Exception e) {
 			Log.severe("Failed to load \""+extensionFile+"\": is it a valid jar file?");
 			e.printStackTrace();
-			return;
+			return Collections.emptyList();
 		}
 		
 		URL[] jarURLs = { urlOf(extensionFile) };
@@ -106,13 +110,14 @@ public class ExtensionLoader {
 			}
 			
 			extensions.add(extension);
-			QuestWorldPlugin.getImpl().getPlugin().attach(extension);
 		}
 		
 		classLoaders.put(newLoader, extensions);
 		
 		try { jar.close(); }
 		catch (Exception e) { e.printStackTrace(); }
+		
+		return extensions;
 	}
 	
 	void unload() {

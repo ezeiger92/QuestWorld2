@@ -13,21 +13,22 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 
 import me.mrCookieSlime.QuestWorld.QuestWorldPlugin;
+import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.QuestExtension;
 import me.mrCookieSlime.QuestWorld.util.Log;
+import me.mrCookieSlime.QuestWorld.util.Reloadable;
 
-public class ExtensionInstaller implements Listener {
-	private List<QuestExtension> extensions = new ArrayList<>();
-	private List<QuestExtension> active = new ArrayList<>();
-	private Plugin parent;
+public final class ExtensionInstaller implements Listener, Reloadable {
+	private final List<QuestExtension> extensions = new ArrayList<>();
+	private final List<QuestExtension> active = new ArrayList<>();
+	private final Plugin plugin;
 
 	public ExtensionInstaller(Plugin parent) {
-		this.parent = parent;
-		PluginManager manager = parent.getServer().getPluginManager();
-		manager.registerEvents(this, parent);
+		plugin = parent;
 	}
 	
-	public void save() {
+	@Override
+	public void onSave() {
 		for(QuestExtension extension : active) {
 			String name = extensionName(extension);
 			try {
@@ -40,6 +41,7 @@ public class ExtensionInstaller implements Listener {
 		}
 	}
 	
+	@Override
 	public void onReload() {
 		for(QuestExtension extension : active) {
 			String name = extensionName(extension);
@@ -48,6 +50,20 @@ public class ExtensionInstaller implements Listener {
 			}
 			catch(Throwable e) {
 				Log.warning("Error reloading extension: " + name);
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	@Override
+	public void onDiscard() {
+		for(QuestExtension extension : active) {
+			String name = extensionName(extension);
+			try {
+				extension.onDiscard();
+			}
+			catch(Throwable e) {
+				Log.warning("Error discarding extension: " + name);
 				e.printStackTrace();
 			}
 		}
@@ -62,7 +78,7 @@ public class ExtensionInstaller implements Listener {
 	}
 	
 	public void add(QuestExtension extension) {
-		PluginManager manager = parent.getServer().getPluginManager();
+		PluginManager manager = plugin.getServer().getPluginManager();
 		
 		String name = extensionName(extension);
 		
@@ -102,15 +118,25 @@ public class ExtensionInstaller implements Listener {
 		Log.fine("Installer - Initializing extension: " + name);
 		
 		try {
-			extension.init(parent);
+			extension.init(plugin);
 		}
 		catch(Throwable e) {
 			Log.warning("Error initializing extension: " + name);
 			e.printStackTrace();
 			return;
 		}
+		
+		PluginManager pm = plugin.getServer().getPluginManager();
 
-		QuestWorldPlugin.getImpl().getPlugin().enable(extension);
+		for(MissionType type : extension.getMissionTypes()) {
+			Log.fine("Installer - Storing mission: " + type.getName());
+			QuestWorldPlugin.instance().getImpl().registerType(type);
+			
+			if(type instanceof Listener) {
+				Log.fine("Installer - Registering events: " + type.getName());
+				pm.registerEvents((Listener)type, plugin);
+			}
+		}
 	}
 	
 	private String extensionName(QuestExtension extension) {

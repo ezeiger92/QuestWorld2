@@ -65,7 +65,7 @@ public class EditorCommand implements CommandExecutor {
 				return true;
 			}
 			args[1] += ".zip";
-			if(plugin.importPreset(args[1]))
+			if(plugin.getImpl().presets().load(args[1]))
 				sender.sendMessage(Text.colorize("&7Successfully installed the Preset &a", args[1]));
 			else
 				sender.sendMessage(Text.colorize("&cThe Preset &4", args[1], " &ccould not be installed"));
@@ -76,7 +76,7 @@ public class EditorCommand implements CommandExecutor {
 				return true;
 			}
 			args[1] += ".zip";
-			if(plugin.exportPreset(args[1]))
+			if(plugin.getImpl().presets().save(args[1]))
 				sender.sendMessage(Text.colorize("&7Successfully saved the Preset &a", args[1]));
 			else
 				sender.sendMessage(Text.colorize("&cCould not save Preset &a", args[1]));
@@ -107,24 +107,30 @@ public class EditorCommand implements CommandExecutor {
 				p.sendMessage(Text.colorize("&cCould not find player &e" + args[1]));
 		}
 		else if(param.equals("discard")) {
-			plugin.onDiscard();
+			plugin.getImpl().onDiscard();
+			plugin.getImpl().getFacade().load();
 			sender.sendMessage(Text.colorize("&7Reloaded all quests from disk"));
 		}
 		else if(param.equals("save")) {
-			// Command, force save, this is probably desired over an incremental save
-			plugin.onSave(true);
+			plugin.getImpl().onSave();
 			sender.sendMessage(Text.colorize("&7Saved all quests to disk"));
 		}
 		else if(param.equals("reload")) {
 			if(args.length > 1 && args[1].equalsIgnoreCase("quests")) {
 				sender.sendMessage(Text.colorize("&cThis usage is deprecated! Use /qe discard instead"));
-				plugin.onDiscard();
+
+				plugin.getImpl().onDiscard();
+				plugin.getImpl().getFacade().load();
+				
 				sender.sendMessage(Text.colorize("&7Reloaded all quests from disk"));
 			}
 			else if(args.length > 1 && args[1].equalsIgnoreCase("all")) {
 				sender.sendMessage(Text.colorize("&cThis usage is deprecated! Use /qe reload and /qe discard instead"));
 				plugin.onReload();
-				plugin.onDiscard();
+				
+				plugin.getImpl().onDiscard();
+				plugin.getImpl().getFacade().load();
+				
 				sender.sendMessage(Text.colorize("&7Reloaded config and all quests from disk"));
 			}
 			else {
@@ -153,7 +159,7 @@ public class EditorCommand implements CommandExecutor {
 				}
 				
 				if(uuid != null) {
-					PlayerStatus status = QuestWorldPlugin.getImpl().getPlayerStatus(uuid);
+					PlayerStatus status = QuestWorldPlugin.instance().getImpl().getPlayerStatus(uuid);
 					int c_id = -1;
 					int q_id = -1;
 					if(args.length <= 2) {

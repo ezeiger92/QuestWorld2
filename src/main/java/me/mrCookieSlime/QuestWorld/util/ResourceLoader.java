@@ -38,6 +38,10 @@ public class ResourceLoader {
 		return dataPath;
 	}
 	
+	public ClassLoader getClassLoader() {
+		return classLoader;
+	}
+	
 	public Set<String> filesInResourceDir(String path) {
 		Set<String> result = new HashSet<>();
 		URL dirUrl = classLoader.getResource(path);

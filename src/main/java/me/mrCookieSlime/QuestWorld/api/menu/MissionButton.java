@@ -1,5 +1,6 @@
 package me.mrCookieSlime.QuestWorld.api.menu;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -187,7 +188,7 @@ public class MissionButton {
 	
 	private static void dialogueThing(Player p, IMission mission) {
 		
-		List<String> dialogue = mission.getDialogue();
+		List<String> dialogue = new ArrayList<>(mission.getDialogue());
 		
 		p.sendMessage(Text.colorize("&7&m----------------------------"));
 		int size = dialogue.size();

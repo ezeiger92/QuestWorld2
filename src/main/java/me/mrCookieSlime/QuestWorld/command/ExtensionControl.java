@@ -11,7 +11,9 @@ import me.mrCookieSlime.QuestWorld.QuestWorldPlugin;
 import me.mrCookieSlime.QuestWorld.listener.ExtensionInstaller;
 import me.mrCookieSlime.QuestWorld.util.Text;
 
-public class ExtensionControl {
+public final class ExtensionControl {
+	private ExtensionControl() {
+	}
 	
 	private static void help(CommandSender sender, String label) {
 		sender.sendMessage(Text.colorize("&3== &b/", label, " extension &3== "));
@@ -26,18 +28,18 @@ public class ExtensionControl {
 			return;
 		}
 		
-		ExtensionInstaller installer = QuestWorldPlugin.getImpl().getPlugin().getInstaller();
+		ExtensionInstaller extensions = QuestWorldPlugin.instance().getImpl().getExtensions();
 		
 		String arg1 = args[0].toLowerCase(Locale.US);
 		
 		if(arg1.equals("list")) {
 			sender.sendMessage(Text.colorize("&3== &bExtensions &3== "));
-			for(String ext : installer.getActiveExtensions().stream()
+			for(String ext : extensions.getActiveExtensions().stream()
 					.map(e -> e.getName())
 					.sorted((s1, s2) -> s1.compareToIgnoreCase(s2))
 					.collect(Collectors.toList()))
 				sender.sendMessage(Text.colorize("  &b", ext));
-			for(String ext : installer.getInactiveExtensions().stream()
+			for(String ext : extensions.getInactiveExtensions().stream()
 					.map(e -> e.getName())
 					.sorted((s1, s2) -> s1.compareToIgnoreCase(s2))
 					.collect(Collectors.toList()))
