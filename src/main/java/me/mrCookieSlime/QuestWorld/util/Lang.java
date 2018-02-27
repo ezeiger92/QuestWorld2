@@ -13,24 +13,39 @@ public final class Lang implements Reloadable {
 	private static String langPath(String langCode) {
 		return "lang/" + langCode.toLowerCase(Locale.US) + ".yml";
 	}
+	private static final String fallbackLangCode = "en_us";
 	
-	private final String fallbackLang = langPath("en_us");
+	private final String fallbackLang;
 	private final ResourceLoader loader;
 	private final HashMap<String, YamlConfiguration> languages = new HashMap<>();
 	private String currentLang;
 	
-	public Lang(ResourceLoader loader) throws IllegalArgumentException {
-		
+	public Lang(ResourceLoader loader, String langCode) throws IllegalArgumentException {
 		this.loader = loader;
-		loadLang(fallbackLang);
-		currentLang = fallbackLang;
+		currentLang = langPath(langCode);
+		
+		String fallback = langPath(fallbackLangCode);
 		
 		for(String langPath : loader.filesInResourceDir("lang/"))
-			if(!langPath.equals(currentLang))
-				try{
-					loadLang(langPath);
+			try {
+				loadLang(langPath);
+			}
+			catch(IllegalArgumentException e) {
+				if(fallback.equals(langPath)) {
+					Log.warning("Could not find fallback language \""+fallback+"\"");
+					fallback = currentLang;
 				}
-				catch(IllegalArgumentException e) {}
+				else if(currentLang.equals(langPath)) {
+					Log.severe("Could not find language \""+currentLang+"\"");
+					throw e;
+				}
+			}
+		
+		fallbackLang = fallback;
+	}
+	
+	public Lang(ResourceLoader loader) throws IllegalArgumentException {
+		this(loader, fallbackLangCode);
 	}
 	
 	private void loadLang(String langPath) throws IllegalArgumentException {

@@ -3,7 +3,6 @@ package me.mrCookieSlime.QuestWorld.listener;
 import me.mrCookieSlime.QuestWorld.GuideBook;
 import me.mrCookieSlime.QuestWorld.QuestingImpl;
 import me.mrCookieSlime.QuestWorld.api.Decaying;
-import me.mrCookieSlime.QuestWorld.api.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IParty;
 import me.mrCookieSlime.QuestWorld.api.contract.IParty.LeaveReason;
@@ -12,6 +11,7 @@ import me.mrCookieSlime.QuestWorld.api.event.CancellableEvent;
 import me.mrCookieSlime.QuestWorld.api.event.GenericPlayerLeaveEvent;
 import me.mrCookieSlime.QuestWorld.api.menu.QuestBook;
 import me.mrCookieSlime.QuestWorld.manager.ProgressTracker;
+import me.mrCookieSlime.QuestWorld.util.AutoListener;
 
 import java.util.HashMap;
 import java.util.UUID;
@@ -21,7 +21,6 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
@@ -31,7 +30,13 @@ import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 
-public class PlayerListener implements Listener {
+public class PlayerListener extends AutoListener {
+	private QuestingImpl api;
+	
+	public PlayerListener(QuestingImpl api) {
+		this.api = api;
+		register(api.getPlugin());
+	}
 	
 	@EventHandler
 	public void onQuestBook(PlayerInteractEvent event) {
@@ -44,11 +49,11 @@ public class PlayerListener implements Listener {
 	@EventHandler
 	public void onDie(PlayerDeathEvent event) {
 		Player p = event.getEntity();
-		IPlayerStatus playerStatus = QuestWorld.getPlayerStatus(p);
+		IPlayerStatus playerStatus = api.getPlayerStatus(p);
 		
-		for(IMission mission : QuestWorld.getViewer().getDecayingMissions())
+		for(IMission mission : api.getViewer().getDecayingMissions())
 			if(playerStatus.hasDeathEvent(mission))
-				((Decaying) mission.getType()).onDeath(event, QuestWorld.getMissionEntry(mission, p));
+				((Decaying) mission.getType()).onDeath(event, api.getMissionEntry(mission, p));
 	}
 	
 	HashMap<UUID, Integer> partyKick = new HashMap<>();
@@ -61,7 +66,7 @@ public class PlayerListener implements Listener {
 		if(task_id != null)
 			Bukkit.getScheduler().cancelTask(task_id);
 		
-		if (QuestWorld.getPlugin().getConfig().getBoolean("book.on-first-join") &&
+		if (api.getPlugin().getConfig().getBoolean("book.on-first-join") &&
 				!ProgressTracker.exists(p.getUniqueId()))
 			p.getInventory().addItem(GuideBook.instance().item());
 	}
@@ -79,21 +84,21 @@ public class PlayerListener implements Listener {
 	@EventHandler
 	public void onLeave(GenericPlayerLeaveEvent event) {
 		Player player = event.getPlayer();
-		IParty party = QuestWorld.getParty(player);
+		IParty party = api.getParty(player);
 		
 		if(party != null) {
-			int autokick = QuestWorld.getPlugin().getConfig().getInt("party.auto-kick", -1);
+			int autokick = api.getPlugin().getConfig().getInt("party.auto-kick", -1);
 			
 			if(autokick == 0) {
 				if(party.isLeader(player))
-					QuestWorld.disbandParty(party);
+					api.disbandParty(party);
 				else
 					party.playerLeave(player, LeaveReason.DISCONNECT);
 			}
 			else if(autokick > 0) {
-				int task_id = Bukkit.getScheduler().runTaskLater(QuestWorld.getPlugin(), () -> {
+				int task_id = Bukkit.getScheduler().runTaskLater(api.getPlugin(), () -> {
 					if(party.isLeader(player))
-						QuestWorld.disbandParty(party);
+						api.disbandParty(party);
 					else
 						party.playerLeave(player, LeaveReason.DISCONNECT);
 					partyKick.remove(player.getUniqueId());
@@ -103,7 +108,7 @@ public class PlayerListener implements Listener {
 			}
 		}
 		
-		((QuestingImpl)QuestWorld.getAPI()).unloadPlayerStatus(player);
+		api.unloadPlayerStatus(player);
 	}
 	
 	// Since we can't (yet) randomly update recipes at runtime, replace result with latest lore

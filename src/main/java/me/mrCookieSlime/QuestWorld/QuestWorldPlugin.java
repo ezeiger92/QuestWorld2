@@ -11,7 +11,6 @@ import me.mrCookieSlime.QuestWorld.util.Log;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
-import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -41,23 +40,23 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener {
 	@Override
 	public void onEnable() {
 		api = new QuestingImpl(this);
+		api.load();
 		
-		onReload();
+		loadConfigs();
 		
 		getCommand("quests").setExecutor(new QuestsCommand());
 		getCommand("questeditor").setExecutor(new EditorCommand(this));
 		
 		getServer().getServicesManager().register(QuestingAPI.class, api, this, ServicePriority.Normal);
 
-		PluginManager pm = getServer().getPluginManager();
-		pm.registerEvents(new PlayerListener(), this);
-		pm.registerEvents(api.getViewer(), this);
-		pm.registerEvents(new MenuListener(), this);
-		pm.registerEvents(new SpawnerListener(), this);
-		pm.registerEvents(new ClickCommand(), this);
-		pm.registerEvents(api.getExtensions(), this);
+		new PlayerListener(api);
+		new MenuListener(this);
+		new SpawnerListener(this);
+		new ClickCommand(this);
 
-		getServer().addRecipe(GuideBook.instance().recipe());
+		GuideBook guide = GuideBook.instance();
+		if(guide.recipe() != null)
+			getServer().addRecipe(guide.recipe());
 	}
 	
 	public void loadConfigs() {

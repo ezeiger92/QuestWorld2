@@ -7,13 +7,19 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.plugin.Plugin;
 
-public class ClickCommand implements Listener {
+import me.mrCookieSlime.QuestWorld.util.AutoListener;
+
+public final class ClickCommand extends AutoListener {
 	private static Map<UUID, Runnable> callbacks = new HashMap<>();
 	
 	private static Map<UUID, Set<UUID>> linked_callbacks = new HashMap<>();
+	
+	public ClickCommand(Plugin plugin) {
+		register(plugin);
+	}
 
 	public static UUID add(Runnable callback) {
 		UUID key = UUID.randomUUID();

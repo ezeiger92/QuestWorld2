@@ -11,6 +11,7 @@ import me.mrCookieSlime.QuestWorld.util.Log;
 
 public class UnknownMission extends MissionType {
 	private static HashMap<String, UnknownMission> unknown = new HashMap<>();
+	
 	public static UnknownMission get(String name) {
 		UnknownMission mission = unknown.get(name);
 		

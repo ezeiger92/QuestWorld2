@@ -9,6 +9,7 @@ party:
   auto-kick: 5
 book:
   on-first-join: true
+  disable-recipe: false
 dialogue:
   prefix: '&f'
 data:

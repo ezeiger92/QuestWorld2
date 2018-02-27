@@ -11,13 +11,14 @@ import org.bukkit.inventory.ShapelessRecipe;
 import me.mrCookieSlime.QuestWorld.api.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.Translation;
 import me.mrCookieSlime.QuestWorld.util.ItemBuilder;
+import me.mrCookieSlime.QuestWorld.util.Log;
 
 public class GuideBook {
 	private static HashSet<Integer> pastBooks = new HashSet<>();
 	private static volatile GuideBook instance = null;
 	
-	private ItemStack guide;
-	private NamespacedKey key = new NamespacedKey(QuestWorld.getPlugin(), "GuideBook");
+	private final ItemStack guide;
+	private final ShapelessRecipe recipe;
 	
 	public static GuideBook instance() {
 		if(instance == null)
@@ -39,13 +40,29 @@ public class GuideBook {
 	}
 	
 	public ShapelessRecipe recipe() {
-		 return new ShapelessRecipe(key, guide)
-				 .addIngredient(Material.WORKBENCH);
+		 return recipe;
 	}
 	
 	private GuideBook() {
 		guide = new ItemBuilder(Material.ENCHANTED_BOOK).wrapText(
 				QuestWorld.translate(Translation.GUIDE_BOOK).split("\n")).get();
+
+		ShapelessRecipe r = null;
+		
+
+		if(!QuestWorld.getPlugin().getConfig().getBoolean("book.disable-recipe", false))
+			try {
+				Class.forName("org.bukkit.NamespacedKey");
+				r = new ShapelessRecipe(new NamespacedKey(QuestWorld.getPlugin(), "GuideBook"), guide)
+						 .addIngredient(Material.WORKBENCH);
+			}
+			catch(ClassNotFoundException e) {
+				Log.warning("Cannot register recipe: Are you using an old server version?");
+				e.printStackTrace();
+			}
+		
+		recipe = r;
+		
 		pastBooks.add(guide.hashCode());
 	}
 }

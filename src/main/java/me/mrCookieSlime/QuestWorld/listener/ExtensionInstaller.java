@@ -12,19 +12,21 @@ import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 
-import me.mrCookieSlime.QuestWorld.QuestWorldPlugin;
+import me.mrCookieSlime.QuestWorld.QuestingImpl;
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.QuestExtension;
+import me.mrCookieSlime.QuestWorld.util.AutoListener;
 import me.mrCookieSlime.QuestWorld.util.Log;
 import me.mrCookieSlime.QuestWorld.util.Reloadable;
 
-public final class ExtensionInstaller implements Listener, Reloadable {
+public final class ExtensionInstaller extends AutoListener implements Reloadable {
 	private final List<QuestExtension> extensions = new ArrayList<>();
 	private final List<QuestExtension> active = new ArrayList<>();
-	private final Plugin plugin;
+	private final QuestingImpl api;
 
-	public ExtensionInstaller(Plugin parent) {
-		plugin = parent;
+	public ExtensionInstaller(QuestingImpl api) {
+		this.api = api;
+		register(api.getPlugin());
 	}
 	
 	@Override
@@ -78,7 +80,7 @@ public final class ExtensionInstaller implements Listener, Reloadable {
 	}
 	
 	public void add(QuestExtension extension) {
-		PluginManager manager = plugin.getServer().getPluginManager();
+		PluginManager manager = api.getPlugin().getServer().getPluginManager();
 		
 		String name = extensionName(extension);
 		
@@ -118,7 +120,7 @@ public final class ExtensionInstaller implements Listener, Reloadable {
 		Log.fine("Installer - Initializing extension: " + name);
 		
 		try {
-			extension.init(plugin);
+			extension.init(api.getPlugin());
 		}
 		catch(Throwable e) {
 			Log.warning("Error initializing extension: " + name);
@@ -126,15 +128,15 @@ public final class ExtensionInstaller implements Listener, Reloadable {
 			return;
 		}
 		
-		PluginManager pm = plugin.getServer().getPluginManager();
+		PluginManager pm = api.getPlugin().getServer().getPluginManager();
 
 		for(MissionType type : extension.getMissionTypes()) {
 			Log.fine("Installer - Storing mission: " + type.getName());
-			QuestWorldPlugin.instance().getImpl().registerType(type);
+			api.registerType(type);
 			
 			if(type instanceof Listener) {
 				Log.fine("Installer - Registering events: " + type.getName());
-				pm.registerEvents((Listener)type, plugin);
+				pm.registerEvents((Listener)type, api.getPlugin());
 			}
 		}
 	}

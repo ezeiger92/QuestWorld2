@@ -9,6 +9,7 @@ import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 
 import me.mrCookieSlime.QuestWorld.api.MissionType;
 import me.mrCookieSlime.QuestWorld.api.MissionViewer;
@@ -36,30 +37,30 @@ import net.milkbowl.vault.economy.Economy;
 
 public final class QuestingImpl implements QuestingAPI {
 	private final Facade facade = new Facade();
-	private final HashMap<UUID, Party> parties = new HashMap<>();
-	private final HashMap<UUID, PlayerStatus> statuses = new HashMap<>();
+	private final Map<UUID, Party> parties = new HashMap<>();
+	private final Map<UUID, PlayerStatus> statuses = new HashMap<>();
 	private final Map<String, MissionType> types = new HashMap<>();
-	private final MissionViewer viewer = new MissionViewer();
 	
 	private final ExtensionInstaller extensions;
 	private final Lang language;
+	private final Plugin plugin;
 	private final PresetLoader presets;
-	private final QuestWorldPlugin plugin;
 	private final ResourceLoader resources;
+	private final MissionViewer viewer;
 
 	private Directories dataFolders;
 	private Optional<Economy> econ = Optional.empty();
 	private Sounds eventSounds;
 	
-	public QuestingImpl(QuestWorldPlugin questWorld) {
+	public QuestingImpl(Plugin questWorld) {
+		extensions = new ExtensionInstaller(this);
 		plugin = questWorld;
-		extensions = new ExtensionInstaller(questWorld);
+		presets = new PresetLoader(this);
 		resources = new ResourceLoader(questWorld);
+		viewer = new MissionViewer(questWorld);
 		
 		dataFolders = new Directories(resources);
 		language = new Lang(resources);
-		
-		presets = new PresetLoader(this, dataFolders);
 		
 		String lang = plugin.getConfig().getString("options.language");
 		if(lang != null)
@@ -68,11 +69,15 @@ public final class QuestingImpl implements QuestingAPI {
 		if(Bukkit.getPluginManager().getPlugin("Vault") != null)
 			econ = BukkitService.find(Economy.class);
 		
+		eventSounds = new Sounds(resources.loadConfigNoexpect("sounds.yml", true));
+		
 		if(!econ.isPresent())
 			Log.info("No economy (vault) found, money rewards disabled");
 		
 		QuestWorld.setAPI(this);
-		
+	}
+	
+	public void load() {
 		ExtensionLoader extLoader = new ExtensionLoader(resources.getClassLoader(), dataFolders.extensions);
 		extensions.add(new Builtin());
 		extensions.addAll(extLoader.loadLocal());
@@ -154,7 +159,7 @@ public final class QuestingImpl implements QuestingAPI {
 	}
 	
 	@Override
-	public QuestWorldPlugin getPlugin() {
+	public Plugin getPlugin() {
 		return plugin;
 	}
 	

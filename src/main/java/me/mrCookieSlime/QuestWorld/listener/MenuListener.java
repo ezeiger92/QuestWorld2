@@ -4,9 +4,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.plugin.Plugin;
 
 import me.mrCookieSlime.QuestWorld.api.contract.IStateful;
 import me.mrCookieSlime.QuestWorld.api.event.CategoryDeleteEvent;
@@ -14,8 +14,13 @@ import me.mrCookieSlime.QuestWorld.api.event.MissionDeleteEvent;
 import me.mrCookieSlime.QuestWorld.api.event.QuestDeleteEvent;
 import me.mrCookieSlime.QuestWorld.api.menu.Menu;
 import me.mrCookieSlime.QuestWorld.api.menu.QuestBook;
+import me.mrCookieSlime.QuestWorld.util.AutoListener;
 
-public class MenuListener implements Listener {
+public class MenuListener extends AutoListener {
+	
+	public MenuListener(Plugin plugin) {
+		register(plugin);
+	}
 
 	@EventHandler(ignoreCancelled=true)
 	public void onInventoryClick(InventoryClickEvent event) {
@@ -26,8 +31,8 @@ public class MenuListener implements Listener {
 				val = openMenu.click(event);
 			}
 			catch(Throwable e) {
-				e.printStackTrace();
 				event.getWhoClicked().sendMessage(ChatColor.RED + "An internal error occurred, please contact an admin!");
+				e.printStackTrace();
 			}
 			event.setCancelled(val);
 		}

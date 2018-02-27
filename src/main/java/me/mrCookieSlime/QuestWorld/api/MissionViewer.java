@@ -8,7 +8,7 @@ import java.util.Set;
 
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
+import org.bukkit.plugin.Plugin;
 
 import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
 import me.mrCookieSlime.QuestWorld.api.contract.IMission;
@@ -20,6 +20,7 @@ import me.mrCookieSlime.QuestWorld.api.event.MissionChangeEvent;
 import me.mrCookieSlime.QuestWorld.api.event.MissionDeleteEvent;
 import me.mrCookieSlime.QuestWorld.api.event.QuestChangeEvent;
 import me.mrCookieSlime.QuestWorld.api.event.QuestDeleteEvent;
+import me.mrCookieSlime.QuestWorld.util.AutoListener;
 
 /**
  * Provides access to missions based on type, {@link Decaying} status, and
@@ -27,10 +28,14 @@ import me.mrCookieSlime.QuestWorld.api.event.QuestDeleteEvent;
  * 
  * @author Erik Zeiger
  */
-public class MissionViewer implements Listener {
+public class MissionViewer extends AutoListener {
 	private Map<MissionType, Set<IMission>> missions = new HashMap<>();
 	private Set<IMission> ticking_missions = new HashSet<>();
 	private Set<IMission> decaying_missions = new HashSet<>();
+	
+	public MissionViewer(Plugin plugin) {
+		register(plugin);
+	}
 	
 	/**
 	 * Provides all missions of a desired type. The returned Set is immutable,

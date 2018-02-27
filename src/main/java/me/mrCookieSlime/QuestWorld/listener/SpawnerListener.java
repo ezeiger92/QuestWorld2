@@ -2,14 +2,20 @@ package me.mrCookieSlime.QuestWorld.listener;
 
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.plugin.Plugin;
 
 import me.mrCookieSlime.QuestWorld.api.QuestWorld;
+import me.mrCookieSlime.QuestWorld.util.AutoListener;
 
-public class SpawnerListener implements Listener {
+public class SpawnerListener extends AutoListener {
+	
+	public SpawnerListener(Plugin plugin) {
+		register(plugin);
+	}
+	
 	@EventHandler(priority=EventPriority.MONITOR,ignoreCancelled=true)
 	public void onCreatureSpawn(CreatureSpawnEvent e) {
 		if (e.getSpawnReason().equals(SpawnReason.SPAWNER))
