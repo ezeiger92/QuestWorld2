@@ -210,7 +210,7 @@ public class Facade implements IFacade {
 		PlayerStatus.clearAllCategoryData(category);
 		
 		try{
-			Files.delete(fileFor(category).toPath());
+			Files.deleteIfExists(fileFor(category).toPath());
 		}
 		catch(IOException e) {
 			e.printStackTrace();
@@ -227,7 +227,7 @@ public class Facade implements IFacade {
 		PlayerStatus.clearAllQuestData(quest);
 		
 		try{
-			Files.delete(fileFor(quest).toPath());
+			Files.deleteIfExists(fileFor(quest).toPath());
 		}
 		catch(IOException e) {
 			e.printStackTrace();

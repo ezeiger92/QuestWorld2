@@ -53,7 +53,7 @@ public final class QuestingImpl implements QuestingAPI {
 	private Sounds eventSounds;
 	
 	public QuestingImpl(Plugin questWorld) {
-		extensions = new ExtensionInstaller(this);
+		extensions = new ExtensionInstaller(questWorld, this);
 		plugin = questWorld;
 		presets = new PresetLoader(this);
 		resources = new ResourceLoader(questWorld);

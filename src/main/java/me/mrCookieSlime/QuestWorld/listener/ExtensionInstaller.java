@@ -22,11 +22,13 @@ import me.mrCookieSlime.QuestWorld.util.Reloadable;
 public final class ExtensionInstaller extends AutoListener implements Reloadable {
 	private final List<QuestExtension> extensions = new ArrayList<>();
 	private final List<QuestExtension> active = new ArrayList<>();
+	private final Plugin plugin;
 	private final QuestingImpl api;
 
-	public ExtensionInstaller(QuestingImpl api) {
+	public ExtensionInstaller(Plugin plugin, QuestingImpl api) {
+		this.plugin = plugin;
 		this.api = api;
-		register(api.getPlugin());
+		register(plugin);
 	}
 	
 	@Override
@@ -80,7 +82,7 @@ public final class ExtensionInstaller extends AutoListener implements Reloadable
 	}
 	
 	public void add(QuestExtension extension) {
-		PluginManager manager = api.getPlugin().getServer().getPluginManager();
+		PluginManager manager = plugin.getServer().getPluginManager();
 		
 		String name = extensionName(extension);
 		
@@ -120,7 +122,7 @@ public final class ExtensionInstaller extends AutoListener implements Reloadable
 		Log.fine("Installer - Initializing extension: " + name);
 		
 		try {
-			extension.init(api.getPlugin());
+			extension.init(plugin);
 		}
 		catch(Throwable e) {
 			Log.warning("Error initializing extension: " + name);
@@ -128,7 +130,7 @@ public final class ExtensionInstaller extends AutoListener implements Reloadable
 			return;
 		}
 		
-		PluginManager pm = api.getPlugin().getServer().getPluginManager();
+		PluginManager pm = plugin.getServer().getPluginManager();
 
 		for(MissionType type : extension.getMissionTypes()) {
 			Log.fine("Installer - Storing mission: " + type.getName());
@@ -136,7 +138,7 @@ public final class ExtensionInstaller extends AutoListener implements Reloadable
 			
 			if(type instanceof Listener) {
 				Log.fine("Installer - Registering events: " + type.getName());
-				pm.registerEvents((Listener)type, api.getPlugin());
+				pm.registerEvents((Listener)type, plugin);
 			}
 		}
 	}
