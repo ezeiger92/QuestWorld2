@@ -22,6 +22,7 @@ public interface IQuestState extends IQuest {
 	void setParent(IQuest object);
 	void removeCommand(int i);
 	void addCommand(String command);
+	void addCommand(int index, String command);
 	void setPermission(String permission);
 	void setPartySupport(boolean supportsParties);
 	void setOrdered(boolean ordered);

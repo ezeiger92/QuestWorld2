@@ -186,6 +186,34 @@ public class MissionButton {
 		);
 	}
 	
+	private static void dialogueThing2(Player p, IMission mission, int index, List<String> dialogue) {
+		int endoff = dialogue.size() - index;
+		
+		PlayerTools.promptInputOrCommand(p, new SinglePrompt(
+				PlayerTools.makeTranslation(true, Translation.MISSION_DIALOG_ADD),
+				null,
+				(c,s) -> {
+					if (s.equalsIgnoreCase("exit()") || s.equalsIgnoreCase("/exit")) {
+						IMissionState state = mission.getState();
+						state.setDialogue(dialogue);
+						if(state.apply()) {
+							String filename = ProgressTracker.dialogueFile(state.getSource()).getName();
+							PlayerTools.sendTranslation(p, true, Translation.MISSION_DIALOG_SET, filename);
+							dialogueThing(p, mission);
+						}
+						return true;
+					}
+					
+					Translation translator = s.startsWith("/") ? Translation.MISSION_COMMAND_ADDED : Translation.MISSION_DIALOG_ADDED;
+					dialogue.add(dialogue.size() - endoff, Text.deserializeNewline(Text.colorize(s)));
+					SinglePrompt.setNextDisplay(c, PlayerTools.makeTranslation(true, translator, s));
+					QuestWorld.getSounds().DIALOG_ADD.playTo(p);
+					
+					return false;
+				}
+		));
+	}
+	
 	private static void dialogueThing(Player p, IMission mission) {
 		
 		List<String> dialogue = new ArrayList<>(mission.getDialogue());
@@ -206,42 +234,22 @@ public class MissionButton {
 							dialogueThing(p, mission);
 					}));
 			
+			Prop above = FUSE(
+					HOVER_TEXT("Click to insert above", GRAY),
+					CLICK_RUN(p, () -> {
+						dialogueThing2(p, mission, index, dialogue);
+					}));
+			
 			PlayerTools.tellraw(p,
-					new JsonBlob("X ", DARK_RED, remove)
+					new JsonBlob("^ ", DARK_GREEN, above)
+					.add("X ", DARK_RED, remove)
 					.addLegacy(s, WHITE, remove).toString());
 		}
 		
 		Prop add = FUSE(
 				HOVER_TEXT("Click to add dialogue", GRAY),
 				CLICK_RUN(p, () -> {
-					
-					PlayerTools.promptInputOrCommand(p, new SinglePrompt(
-							PlayerTools.makeTranslation(true, Translation.MISSION_DIALOG_ADD),
-							null,
-							(c,s) -> {
-								if (s.equalsIgnoreCase("exit()") || s.equalsIgnoreCase("/exit")) {
-									IMissionState state = mission.getState();
-									state.setDialogue(dialogue);
-									if(state.apply()) {
-										String filename = ProgressTracker.dialogueFile(state.getSource()).getName();
-										PlayerTools.sendTranslation(p, true, Translation.MISSION_DIALOG_SET, filename);
-										dialogueThing(p, mission);
-									}
-									return true;
-								}
-								
-								Translation translator = s.startsWith("/") ? Translation.MISSION_COMMAND_ADDED : Translation.MISSION_DIALOG_ADDED;
-								dialogue.add(Text.deserializeNewline(Text.colorize(s)));
-								
-								SinglePrompt.setNextDisplay(c, PlayerTools.makeTranslation(true, translator, s));
-								QuestWorld.getSounds().DIALOG_ADD.playTo(p);
-								
-								return false;
-							}
-					));
-					
-					p.sendMessage(Text.colorize("&7Usable Variables: @p (Username)"));
-					
+					dialogueThing2(p, mission, dialogue.size(), dialogue);
 				}));
 		
 		PlayerTools.tellraw(p, new JsonBlob("+ ", DARK_GREEN, add)

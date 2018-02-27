@@ -414,6 +414,10 @@ class Quest extends UniqueObject implements IQuestState {
 		commands.add(command);
 	}
 
+	public void addCommand(int index, String command) {
+		commands.add(index, command);
+	}
+
 	@Override
 	public String getPermission() {
 		return permission;

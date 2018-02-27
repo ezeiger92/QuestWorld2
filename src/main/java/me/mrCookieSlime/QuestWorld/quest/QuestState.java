@@ -107,6 +107,12 @@ class QuestState extends Quest {
 		super.addCommand(command);
 		changeBits |= BitFlag.getBits(Member.COMMANDS);
 	}
+
+	@Override
+	public void addCommand(int index, String command) {
+		super.addCommand(index, command);
+		changeBits |= BitFlag.getBits(Member.COMMANDS);
+	}
 	
 	@Override
 	public void setPermission(String permission) {

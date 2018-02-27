@@ -166,7 +166,27 @@ public class QBDialogue {
 							QBDialogue.openCommandEditor(p, quest);
 					}));
 			
-			PlayerTools.tellraw(p, new JsonBlob("X ", DARK_RED, remove)
+			Prop above = FUSE(
+					HOVER_TEXT("Click to insert above", GRAY),
+					CLICK_RUN(p, () -> {
+						PlayerTools.promptCommand(p, new SinglePrompt(
+								"&7Type in your desired Command:",
+								(c,s) -> {
+									IQuestState changes = quest.getState();
+									changes.addCommand(index, s.substring(1));
+									if(changes.apply())
+										QBDialogue.openCommandEditor(p, quest);
+									
+									return true;
+								}
+						));
+						p.sendMessage(Text.colorize("&7Usable Variables: @p (Username)"));
+						
+					}));
+			
+			PlayerTools.tellraw(p,
+					new JsonBlob("^ ", DARK_GREEN, above)
+					.add("X ", DARK_RED, remove)
 					.add(command, GRAY, remove).toString());
 		}
 		
