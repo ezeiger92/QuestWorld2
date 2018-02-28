@@ -4,6 +4,7 @@ import me.mrCookieSlime.QuestWorld.GuideBook;
 import me.mrCookieSlime.QuestWorld.QuestWorldPlugin;
 import me.mrCookieSlime.QuestWorld.api.QuestWorld;
 import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
+import me.mrCookieSlime.QuestWorld.api.contract.IMission;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuest;
 import me.mrCookieSlime.QuestWorld.api.contract.IQuestState;
 import me.mrCookieSlime.QuestWorld.api.menu.PagedMapping;
@@ -13,7 +14,10 @@ import me.mrCookieSlime.QuestWorld.util.Log;
 import me.mrCookieSlime.QuestWorld.util.PlayerTools;
 import me.mrCookieSlime.QuestWorld.util.Text;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -25,8 +29,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 public class EditorCommand implements CommandExecutor {
-	
+	private static final int PER_PAGE = 7;
 	private final QuestWorldPlugin plugin;
+	
 	public EditorCommand(QuestWorldPlugin plugin) {
 		this.plugin = plugin;
 	}
@@ -42,7 +47,7 @@ public class EditorCommand implements CommandExecutor {
 		sender.sendMessage(Text.colorize("  &bexport <file> &7- Save all quests to a preset"));
 		sender.sendMessage(Text.colorize("  &bimport <file> &4&l*&7 - Overwrite all quests with a preset"));
 		sender.sendMessage(Text.colorize("  &bdiscard &4&l*&7 - Reloads quest data from disk, losing changes"));
-		sender.sendMessage(Text.colorize("  &bupgrade &4&l*&7 - Replaces all cooldowns of 0 with -1"));
+		//sender.sendMessage(Text.colorize("  &bupgrade &4&l*&7 - Replaces all cooldowns of 0 with -1"));
 	}
 
 	@Override
@@ -204,6 +209,123 @@ public class EditorCommand implements CommandExecutor {
 			}
 			else
 				sender.sendMessage(Text.colorize("&c/"+label+" reset <player|uuid> [category_id [quest_id]]"));
+		}
+		else if(param.equals("progress")) {
+			int index = 1;
+			
+			UUID uuid = p.getUniqueId();
+			boolean reset = false;
+			ICategory category = null;
+			IQuest quest = null;
+			int page = 0;
+			
+			if(args.length > index) {
+				UUID u2 = PlayerTools.findUUID(args[index]).orElse(null);
+				if(u2 != null) {
+					++index;
+					uuid = u2;
+				}
+			}
+			
+			if(args.length > index) {
+				try {
+					category = QuestWorld.getFacade().getCategory(Integer.parseInt(args[index]));
+				}
+				catch(NumberFormatException e) {
+				}
+				
+				if(category != null) {
+					++index;
+					
+					if(args.length > index) {
+						try {
+							quest = category.getQuest(Integer.parseInt(args[index]));
+						}
+						catch(NumberFormatException e) {
+						}
+						
+						if(quest != null)
+							++index;
+					}
+				}
+			}
+			
+			if(args.length > index) {
+				String tail = args[index].toLowerCase(Locale.US);
+				
+				if(tail.equals("reset"))
+					reset = true;
+					
+				else if(tail.equals("page")) {
+					page = -1;
+					if(args.length > index + 1) {
+						try {
+							page = Integer.parseInt(args[index + 1]) - 1;
+						}
+						catch(NumberFormatException e) {
+						}
+					}
+					
+					if(page < 0) {
+						//error
+						return true;
+					}
+				}
+				else {
+					// Errors here
+					return true;
+				}
+			}
+			
+			PlayerStatus status = QuestWorldPlugin.instance().getImpl().getPlayerStatus(uuid);
+			
+			if(category != null) {
+				if(quest != null) {
+					if(reset)
+						status.getTracker().clearQuest(quest);
+					
+					else {
+						List<? extends IMission> missions = quest.getOrderedMissions();
+						int end = Math.min(PER_PAGE * (page + 1), missions.size());
+						
+						sender.sendMessage(Text.colorize("&3Missions - page "+ (page + 1) + "/" + (missions.size() / PER_PAGE + 1)));
+						for(int i = PER_PAGE * page; i < end; ++i) {
+							IMission m = missions.get(i);
+							sender.sendMessage(Text.colorize(m.getText(), " &7- &a" + status.getProgress(m) + "/" + m.getAmount()));
+						}
+					}
+				}
+				else if(reset)
+					status.getTracker().clearCategory(category);
+
+				else {
+					ArrayList<? extends IQuest> quests = new ArrayList<>(category.getQuests());
+					Collections.sort(quests, (l, r) -> l.getID() - r.getID());
+					int end = Math.min(PER_PAGE * (page + 1), quests.size());
+					
+					sender.sendMessage(Text.colorize("&3Quests - page "+ (page + 1) + "/" + (quests.size() / PER_PAGE + 1)));
+					for(int i = PER_PAGE * page; i < end; ++i) {
+						IQuest q = quests.get(i);
+						sender.sendMessage(Text.colorize(q.getID() + ": " + q.getName() + " &7- &a" + status.getProgress(q) + "/" + q.getMissions().size()));
+					}
+				}
+			}
+			else if(reset)
+				for(ICategory cat : QuestWorld.getFacade().getCategories())
+					status.getTracker().clearCategory(cat);
+			else {
+				ArrayList<? extends ICategory> categories = new ArrayList<>(QuestWorld.getFacade().getCategories());
+				Collections.sort(categories, (l, r) -> l.getID() - r.getID());
+				int end = Math.min(PER_PAGE * (page + 1), categories.size());
+				
+				sender.sendMessage(Text.colorize("&3Categories - page "+ (page + 1) + "/" + (categories.size() / PER_PAGE + 1)));
+				
+				for(int i = PER_PAGE * page; i < end; ++i) {
+					ICategory c = categories.get(i);
+					sender.sendMessage(Text.colorize(c.getID() + ": " + c.getName() + " &7- &a" + status.getProgress(c) + "/" + c.getQuests().size()));
+				}
+			}
+			
 		}
 		else if(param.equals("upgrade")) {
 			if(args.length > 1 && args[1].equalsIgnoreCase("confirm")) {

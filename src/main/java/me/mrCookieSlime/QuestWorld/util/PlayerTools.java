@@ -1,10 +1,13 @@
 package me.mrCookieSlime.QuestWorld.util;
 
+import java.util.Optional;
+import java.util.UUID;
 import java.util.function.BiConsumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.conversations.Conversation;
@@ -251,6 +254,32 @@ public class PlayerTools {
 	
 	public static Player getPlayer(String name) {
 		return Bukkit.getPlayerExact(name);
+	}
+	
+	@SuppressWarnings("deprecation")
+	public static Optional<UUID> findUUID(String nameOrUUID) {
+		Player p = getPlayer(nameOrUUID);
+		if(p != null)
+			return Optional.of(p.getUniqueId());
+		
+		try {
+			return Optional.of(UUID.fromString(nameOrUUID));
+		}
+		catch(IllegalArgumentException e) {
+			return Optional.of(nameOrUUID)
+					.filter(s -> {
+						try {
+							Integer.parseInt(nameOrUUID);
+							return false;
+						}
+						catch(NumberFormatException e2) {
+							return !s.equals("reset") && !s.equals("page");
+						}
+					})
+					.map(Bukkit::getOfflinePlayer)
+					.filter(OfflinePlayer::hasPlayedBefore)
+					.map(OfflinePlayer::getUniqueId);
+		}
 	}
 
 	private static boolean noexceptPick = true;
