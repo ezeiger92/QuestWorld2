@@ -619,7 +619,7 @@ public class QuestBook {
 				String[] lore = {
 						category.getName(),
 						"",
-						"&rLeft click: &eOpen quests",
+						"&rLeft click: &eOpen quest list",
 						"&rShift left click: &eOpen category editor",
 						"&rRight click: &eRemove category"
 				};
@@ -671,9 +671,9 @@ public class QuestBook {
 			openCategoryList((Player) event.getWhoClicked());
 		});
 		
-		/*view.addFrameButton(4, new ItemBuilder(Material.BARRIER).get(), event -> {
+		view.addFrameButton(4, new ItemBuilder(Material.BOOK_AND_QUILL).display("&3Category editor").get(), event -> {
 			openCategoryEditor(p, category);
-		}, true);*/
+		}, true);
 
 		for (int i = 0; i < view.getCapacity(); ++i) {
 			IQuest quest = category.getQuest(i);
@@ -727,6 +727,10 @@ public class QuestBook {
 		
 		menu.put(0,  Proto.MAP_BACK.get().wrapLore(" &3Categories").get(), event -> {
 			openCategoryList((Player) event.getWhoClicked());
+		});
+		
+		menu.put(4, new ItemBuilder(Material.BOOK_AND_QUILL).display("&3Quest list").get(), event -> {
+			openQuestList(p, category);
 		});
 		
 		menu.put(9,
