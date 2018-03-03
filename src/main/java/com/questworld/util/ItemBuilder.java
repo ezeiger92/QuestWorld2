@@ -3,20 +3,16 @@ package com.questworld.util;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Color;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.SkullType;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.inventory.meta.SpawnEggMeta;
 
@@ -161,41 +157,6 @@ public class ItemBuilder {
 	}
 	
 	/**
-     * Constructs an ItemBuilder.
-     *
-     * @param type Material of item
-     * @param amount Amount of material
-     */
-	public ItemBuilder(Material type, int amount) {
-		this(type);
-		amount(amount);
-	}
-	
-	/**
-     * Constructs an ItemBuilder.
-     *
-     * @param type Material of item
-     * @param amount Amount of material
-     * @param durability Stack durability
-     */
-	public ItemBuilder(Material type, int amount, short durability) {
-		this(type, amount);
-		durability(durability);
-	}
-	
-	/**
-     * Constructs an ItemBuilder. Takes an int for durability to "play nice"
-     * with integral types, but will truncate to a short internally.
-     *
-     * @param type Material of item
-     * @param amount Amount of material
-     * @param durability Stack durability as an int
-     */
-	public ItemBuilder(Material type, int amount, int durability) {
-		this(type, amount, (short)durability);
-	}
-	
-	/**
 	 * Constructs an ItemBuilder of a skull. The resulting builder will have the
 	 * material <tt>SKULL_ITEM</tt> and use the desired skull type.
 	 * 
@@ -225,44 +186,6 @@ public class ItemBuilder {
 	}
 	
 	/**
-     * Adds an enchantment
-     *
-     * @param ench Enchantment type
-     * @param level Level of enchantment
-     * 
-     * @return this, for chaining
-     */
-	public @Mutable ItemBuilder enchant(Enchantment ench, int level) {
-		resultStack.addEnchantment(ench, level);
-		return this;
-	}
-	
-	/**
-     * Adds an unsafe enchantment
-     *
-     * @param ench Enchantment type
-     * @param level Level of enchantment
-     * 
-     * @return this, for chaining
-     */
-	public @Mutable ItemBuilder forceEnchant(Enchantment ench, int level) {
-		resultStack.addUnsafeEnchantment(ench, level);
-		return this;
-	}
-	
-	/**
-     * Removes an enchantment
-     *
-     * @param ench Enchantment type
-     * 
-     * @return this, for chaining
-     */
-	public @Mutable ItemBuilder disenchant(Enchantment ench) {
-		resultStack.removeEnchantment(ench);
-		return this;
-	}
-	
-	/**
      * Sets stack amount
      *
      * @param amount Target size of stack
@@ -284,10 +207,6 @@ public class ItemBuilder {
 	public @Mutable ItemBuilder durability(short durability) {
 		resultStack.setDurability(durability);
 		return this;
-	}
-	
-	public @Mutable ItemBuilder durability(int durability) {
-		return durability((short)durability);
 	}
 	
 	/**
@@ -328,7 +247,7 @@ public class ItemBuilder {
 	 */
 	public @Mutable ItemBuilder skull(SkullType type) {
 		if(resultStack.getType() == Material.SKULL_ITEM)
-			durability(type.ordinal());
+			durability((short) type.ordinal());
 		
 		return this;
 	}
@@ -339,13 +258,9 @@ public class ItemBuilder {
 	 * plain player skull, use
 	 * {@link ItemBuilder#skull(SkullType) skull(SkullType.PLAYER)}.
 	 * 
-	 * @param playerName The player whose face will be displayed on the head
+	 * @param player The player whose face will be displayed on the head
 	 * @return this, for chaining
 	 */
-	public @Mutable ItemBuilder skull(UUID playerUUID) {
-		return skull(Bukkit.getOfflinePlayer(playerUUID));
-	}
-	
 	public @Mutable ItemBuilder skull(OfflinePlayer player) {
 		skull(SkullType.PLAYER);
 		
@@ -371,22 +286,6 @@ public class ItemBuilder {
 			resultStack.setItemMeta(meta);
 		}
 		
-		return this;
-	}
-	
-	/**
-     * Sets leather armor color
-     *
-     * @param color Color of leather armor
-     * 
-     * @return this, for chaining
-     */
-	public @Mutable ItemBuilder leather(Color color) {
-		if(resultStack.getItemMeta() instanceof LeatherArmorMeta) {
-			LeatherArmorMeta meta = (LeatherArmorMeta)resultStack.getItemMeta();
-			meta.setColor(color);
-			resultStack.setItemMeta(meta);
-		}
 		return this;
 	}
 
@@ -426,13 +325,7 @@ public class ItemBuilder {
 	 * @return this, for chaining
 	 */
 	public @Mutable ItemBuilder flagAll() {
-		return flag(
-				ItemFlag.HIDE_ATTRIBUTES,
-				ItemFlag.HIDE_DESTROYS,
-				ItemFlag.HIDE_ENCHANTS,
-				ItemFlag.HIDE_PLACED_ON,
-				ItemFlag.HIDE_POTION_EFFECTS,
-				ItemFlag.HIDE_UNBREAKABLE);
+		return flag(ItemFlag.values());
 	}
 	
 	/**
@@ -443,13 +336,7 @@ public class ItemBuilder {
 	 * @return this, for chaining
 	 */
 	public @Mutable ItemBuilder unflagAll() {
-		return unflag(
-				ItemFlag.HIDE_ATTRIBUTES,
-				ItemFlag.HIDE_DESTROYS,
-				ItemFlag.HIDE_ENCHANTS,
-				ItemFlag.HIDE_PLACED_ON,
-				ItemFlag.HIDE_POTION_EFFECTS,
-				ItemFlag.HIDE_UNBREAKABLE);
+		return unflag(ItemFlag.values());
 	}
 	
 	/**

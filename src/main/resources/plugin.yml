@@ -4,7 +4,7 @@ author: mrCookieSlime
 authors: [ezeiger92, erik1988]
 website: https://github.com/ezeiger92/QuestWorld2
 
-main: me.mrCookieSlime.QuestWorld.QuestWorldPlugin
+main: com.questworld.QuestWorldPlugin
 softdepend: [Vault]
 
 commands:

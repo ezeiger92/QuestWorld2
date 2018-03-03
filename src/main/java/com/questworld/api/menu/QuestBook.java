@@ -739,7 +739,7 @@ public class QuestBook {
 						"&e> Click to set the display item").get(),
 				event -> {
 					Player p2 = (Player) event.getWhoClicked();
-					ItemStack hand = PlayerTools.getActiveHandItem(p2);
+					ItemStack hand = PlayerTools.getMainHandItem(p2);
 					if (hand != null) {
 						changes.setItem(hand);
 						changes.apply();
@@ -874,7 +874,7 @@ public class QuestBook {
 						"&e> Click to set the display item").get(),
 				event -> {
 					Player p2 = (Player) event.getWhoClicked();
-					ItemStack mainItem = p2.getInventory().getItemInMainHand();
+					ItemStack mainItem = PlayerTools.getMainHandItem(p2);
 					if (mainItem != null) {
 						changes.setItem(mainItem);
 						changes.apply();

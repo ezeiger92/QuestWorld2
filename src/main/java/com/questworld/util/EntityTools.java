@@ -18,6 +18,7 @@ public class EntityTools {
 		// Alive entities
 		ArrayList<EntityType> entities = new ArrayList<>();
 		entities.add(EntityType.COMPLEX_PART);
+		
 		for(EntityType ent : EntityType.values())
 			if(ent.isAlive())
 				entities.add(ent);

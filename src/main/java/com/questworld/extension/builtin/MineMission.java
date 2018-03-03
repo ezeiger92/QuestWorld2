@@ -51,7 +51,7 @@ public class MineMission extends MissionType implements Listener, Decaying {
 						"&e> Click to set the block type").get(),
 				event -> {
 					Player p = (Player)event.getWhoClicked();
-					ItemStack mainItem = p.getInventory().getItemInMainHand();
+					ItemStack mainItem = PlayerTools.getMainHandItem(p);
 					if(mainItem != null && mainItem.getType().isBlock()) {
 						mainItem = mainItem.clone();
 						mainItem.setAmount(1);

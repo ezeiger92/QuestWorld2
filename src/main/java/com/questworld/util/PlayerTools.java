@@ -32,15 +32,6 @@ import com.questworld.api.event.GenericPlayerLeaveEvent;
 import com.questworld.util.json.JsonBlob;
 
 public class PlayerTools {
-	public static ItemStack getActiveHandItem(Player p) {
-		org.bukkit.inventory.PlayerInventory pi = p.getInventory();
-		
-		ItemStack result = pi.getItemInMainHand();
-		if(result == null)
-			result = pi.getItemInOffHand();
-		
-		return result;
-	}
 	
 	public static ItemStack getMainHandItem(Player p) {
 		return p.getInventory().getItemInMainHand();
@@ -73,15 +64,6 @@ public class PlayerTools {
 		return result;
 	}
 	
-	public static void setActiveHandItem(Player p, ItemStack is) {
-		org.bukkit.inventory.PlayerInventory pi = p.getInventory();
-		
-		if(pi.getItemInMainHand() == null && pi.getItemInOffHand() != null)
-			pi.setItemInOffHand(is);
-		else
-			pi.setItemInMainHand(is);
-	}
-	
 	private static Pattern keywordPattern = Pattern.compile("\\s*%(tellraw|title|subtitle|actionbar)%\\s*((?:(?!%(?:tellraw|title|subtitle|actionbar)%).)*)");
 	public static void sendTranslation(CommandSender p, boolean prefixed, Translator key, String... replacements) {
 		String text = makeTranslation(prefixed, key, replacements);
@@ -98,8 +80,8 @@ public class PlayerTools {
 			return;
 		}
 		
-		// negative bit
-		int nb = ~(1 << 31);
+		// negative bit zero'd
+		int nb = -1 >>> 1;
 		
 		// index of first match, need to exclude non-matches (-1)
 		int matchStart = Math.min(Math.min(tellrawPos & nb, titlePos & nb), Math.min(subtitlePos & nb, actionbarPos & nb));
