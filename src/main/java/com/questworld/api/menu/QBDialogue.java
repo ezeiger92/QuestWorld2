@@ -18,7 +18,7 @@ import com.questworld.api.contract.IMission;
 import com.questworld.api.contract.IMissionState;
 import com.questworld.api.contract.IQuest;
 import com.questworld.api.contract.IQuestState;
-import com.questworld.api.contract.IStateful;
+import com.questworld.api.contract.DataObject;
 import com.questworld.api.event.CancellableEvent;
 import com.questworld.api.event.CategoryDeleteEvent;
 import com.questworld.api.event.MissionDeleteEvent;
@@ -31,7 +31,7 @@ import com.questworld.util.json.JsonBlob;
 import com.questworld.util.json.Prop;
 
 public class QBDialogue {
-	public static void openDeletionConfirmation(Player p, final IStateful q) {
+	public static void openDeletionConfirmation(Player p, final DataObject q) {
 		QuestWorld.getSounds().DESTRUCTIVE_WARN.playTo(p);
 		
 		Menu menu = new Menu(1, "&4&lAre you Sure?");
@@ -221,7 +221,7 @@ public class QBDialogue {
 		p.sendMessage(Text.colorize("&7&m----------------------------"));
 	}
 	
-	private static boolean test(ArrayDeque<IQuest> backlog, HashSet<IQuest> collision, IStateful changing) {
+	private static boolean test(ArrayDeque<IQuest> backlog, HashSet<IQuest> collision, DataObject changing) {
 		
 		HashSet<ICategory> cats = new HashSet<>();
 		
@@ -252,7 +252,7 @@ public class QBDialogue {
 		return false;
 	}
 	
-	private static boolean cycleDetection(IStateful changing, IStateful peek) {
+	private static boolean cycleDetection(DataObject changing, DataObject peek) {
 		if(changing == peek)
 			return true;
 		
@@ -273,7 +273,7 @@ public class QBDialogue {
 		return test(backlog, collision, changing);
 	}
 
-	public static void openRequirementCategories(Player p, final IStateful quest) {
+	public static void openRequirementCategories(Player p, final DataObject quest) {
 		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
 		
 		Menu menu = new Menu(1, "&3Categories");
@@ -312,7 +312,7 @@ public class QBDialogue {
 		menu.openFor(p);
 	}
 
-	private static void openRequirementQuests(Player p, final IStateful q, ICategory category) {
+	private static void openRequirementQuests(Player p, final DataObject q, ICategory category) {
 		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
 		
 		Menu menu = new Menu(1, "&3Quests");

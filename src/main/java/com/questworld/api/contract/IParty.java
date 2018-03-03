@@ -5,7 +5,7 @@ import java.util.Set;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
-public interface IParty extends IStateful {
+public interface IParty extends DataObject {
 	enum LeaveReason {
 		ABANDON,
 		DISCONNECT,

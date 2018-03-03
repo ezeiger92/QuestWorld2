@@ -101,8 +101,10 @@ public class PlayerListener extends AutoListener {
 						api.disbandParty(party);
 					else
 						party.playerLeave(player, LeaveReason.DISCONNECT);
+					
 					partyKick.remove(player.getUniqueId());
-				}, autokick).getTaskId();
+				},
+				autokick).getTaskId();
 				
 				partyKick.put(player.getUniqueId(), task_id);
 			}

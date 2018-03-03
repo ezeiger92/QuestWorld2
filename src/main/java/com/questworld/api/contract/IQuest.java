@@ -9,7 +9,7 @@ import org.bukkit.inventory.ItemStack;
 import com.questworld.api.annotation.NoImpl;
 
 @NoImpl
-public interface IQuest extends IStateful {
+public interface IQuest extends DataObject {
 	public static final long COOLDOWN_SCALE = 60 * 1000;
 	
 	int getID();
@@ -37,6 +37,5 @@ public interface IQuest extends IStateful {
 	
 	boolean completeFor(Player p);
 	
-	@Override
 	IQuestState getState();
 }

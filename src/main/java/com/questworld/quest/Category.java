@@ -256,6 +256,16 @@ class Category extends UniqueObject implements ICategoryState {
 	public boolean equals(Object o) {
 		return super.equals(o);
 	}
+
+	@Override
+	public boolean apply() {
+		return true;
+	}
+
+	@Override
+	public boolean discard() {
+		return false;
+	}
 	
 	/*@Deprecated
 	WeakReference<Quest> fancyParentResolveFunction(Integer id) {

@@ -8,7 +8,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.plugin.Plugin;
 
-import com.questworld.api.contract.IStateful;
+import com.questworld.api.contract.DataObject;
 import com.questworld.api.event.CategoryDeleteEvent;
 import com.questworld.api.event.MissionDeleteEvent;
 import com.questworld.api.event.QuestDeleteEvent;
@@ -53,7 +53,7 @@ public class MenuListener extends AutoListener {
 	@EventHandler(ignoreCancelled = true)
 	public void onCategoryDelete(CategoryDeleteEvent event) {
 		for(Player p : Bukkit.getOnlinePlayers()) {
-			IStateful object = QuestBook.getLastViewed(p);
+			DataObject object = QuestBook.getLastViewed(p);
 			if(event.getCategory() == object ||
 					event.getCategory().getQuests().contains(object))
 				QuestBook.setLastViewed(p, null);
@@ -63,7 +63,7 @@ public class MenuListener extends AutoListener {
 	@EventHandler(ignoreCancelled = true)
 	public void onQuestDelete(QuestDeleteEvent event) {
 		for(Player p : Bukkit.getOnlinePlayers()) {
-			IStateful object = QuestBook.getLastViewed(p);
+			DataObject object = QuestBook.getLastViewed(p);
 			if(event.getQuest() == object)
 				QuestBook.setLastViewed(p, null);
 		}

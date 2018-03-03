@@ -71,7 +71,7 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener {
 		
 		if(autosave > 0)
 			autosaveHandle = getServer().getScheduler().scheduleSyncRepeatingTask(this,
-					() -> api.onSave(),
+					api::onSave,
 					autosave,
 					autosave
 			);

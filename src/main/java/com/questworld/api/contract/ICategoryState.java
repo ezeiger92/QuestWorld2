@@ -20,8 +20,11 @@ public interface ICategoryState extends ICategory {
 	void removeQuest(IQuest quest);
 	void toggleWorld(String world);
 
-	
+
+	boolean apply();
+	boolean discard();
 	ICategory getSource();
+	
 	enum Member implements BitString {
 		QUESTS,
 		ID,

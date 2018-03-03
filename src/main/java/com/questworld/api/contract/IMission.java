@@ -11,7 +11,7 @@ import com.questworld.api.MissionType;
 import com.questworld.api.annotation.NoImpl;
 
 @NoImpl
-public interface IMission extends IStateful {
+public interface IMission extends DataObject {
 	int          getAmount();
 	int          getCustomInt();
 	String       getCustomString();
@@ -32,7 +32,6 @@ public interface IMission extends IStateful {
 	
 	UUID getUniqueId();
 	
-	@Override
 	IMissionState getState();
 	String        getText();
 }

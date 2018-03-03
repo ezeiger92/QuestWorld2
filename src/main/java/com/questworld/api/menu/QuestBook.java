@@ -27,7 +27,7 @@ import com.questworld.api.contract.IParty;
 import com.questworld.api.contract.IPlayerStatus;
 import com.questworld.api.contract.IQuest;
 import com.questworld.api.contract.IQuestState;
-import com.questworld.api.contract.IStateful;
+import com.questworld.api.contract.DataObject;
 import com.questworld.api.contract.IParty.LeaveReason;
 import com.questworld.util.ItemBuilder;
 import com.questworld.util.PlayerTools;
@@ -35,10 +35,10 @@ import com.questworld.util.Text;
 import com.questworld.util.ItemBuilder.Proto;
 
 public class QuestBook {
-	public static IStateful getLastViewed(Player p) {
+	public static DataObject getLastViewed(Player p) {
 		return p.getMetadata("questworld.last-object")
 				.stream().findFirst()
-				.map(metadata -> (IStateful)metadata.value())
+				.map(metadata -> (DataObject)metadata.value())
 				.orElse(null);
 	}
 	
@@ -61,7 +61,7 @@ public class QuestBook {
 				|| status == QuestStatus.FINISHED;
 	}
 	
-	public static void setLastViewed(Player p, IStateful object) {
+	public static void setLastViewed(Player p, DataObject object) {
 		p.setMetadata("questworld.last-object", new FixedMetadataValue(QuestWorld.getPlugin(), object));
 	}
 	
@@ -135,7 +135,7 @@ public class QuestBook {
 	}
 	
 	public static void openLastMenu(Player p) {
-		IStateful last = getLastViewed(p);
+		DataObject last = getLastViewed(p);
 		
 		if(last instanceof IQuest)
 			QuestBook.openQuest(p, (IQuest)last, true, true);
@@ -226,7 +226,7 @@ public class QuestBook {
 				QuestWorld.translate(Translation.button_back_quests)).get(),
 				event -> {
 
-					IStateful s = QuestBook.getLastViewed(p);
+					DataObject s = QuestBook.getLastViewed(p);
 					if(s instanceof IQuest) {
 						openQuest((Player) event.getWhoClicked(), (IQuest)s, true, true);
 					}

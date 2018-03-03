@@ -30,11 +30,11 @@ import com.questworld.util.Text;
 
 public class PlayerStatus implements IPlayerStatus {
 	private static PlayerStatus of(OfflinePlayer player) {
-		return (PlayerStatus)QuestWorld.getAPI().getPlayerStatus(player);
+		return (PlayerStatus) QuestWorld.getAPI().getPlayerStatus(player);
 	}
 	
 	private static PlayerStatus of(UUID uuid) {
-		return (PlayerStatus)QuestWorld.getAPI().getPlayerStatus(uuid);
+		return (PlayerStatus) QuestWorld.getAPI().getPlayerStatus(uuid);
 	}
 	
 	private final UUID playerUUID;
@@ -401,9 +401,11 @@ public class PlayerStatus implements IPlayerStatus {
 			throw new IllegalArgumentException("clearData called with: " + object.getClass().getSimpleName());
 		}
 		
-		Bukkit.getScheduler().runTaskAsynchronously(QuestWorld.getPlugin(), () -> {
+		QuestingImpl api = (QuestingImpl) QuestWorld.getAPI();
+		
+		Bukkit.getScheduler().runTaskAsynchronously(api.getPlugin(), () -> {
 			// First: clear all the quest data on a new thread
-			for (File file: Directories.listFiles(((QuestingImpl) QuestWorld.getAPI()).getDataFolders().playerdata, (file, name) -> name.endsWith(".yml"))) {
+			for (File file: Directories.listFiles(api.getDataFolders().playerdata, (file, name) -> name.endsWith(".yml"))) {
 				String uuid = file.getName().substring(0, file.getName().length() - 4);
 				try {
 					ProgressTracker t = new ProgressTracker(UUID.fromString(uuid));
@@ -415,7 +417,7 @@ public class PlayerStatus implements IPlayerStatus {
 			}
 
 			// Second: go back to the main thread and make sure all player managers know what happened
-			Bukkit.getScheduler().callSyncMethod(QuestWorld.getPlugin(), () -> {
+			Bukkit.getScheduler().callSyncMethod(api.getPlugin(), () -> {
 				for(Player player : Bukkit.getOnlinePlayers())
 					callback.accept(of(player).getTracker());
 				

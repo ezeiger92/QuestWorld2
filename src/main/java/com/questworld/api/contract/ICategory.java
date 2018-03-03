@@ -8,7 +8,7 @@ import com.questworld.api.annotation.NoImpl;
 import com.questworld.api.annotation.Nullable;
 
 @NoImpl
-public interface ICategory extends IStateful {
+public interface ICategory extends DataObject {
 	int getID();
 	boolean isHidden();
 	String getName();
@@ -22,6 +22,5 @@ public interface ICategory extends IStateful {
 	@Nullable("No quest at index") IQuest getQuest(int index);
 	boolean isWorldEnabled(String world);
 
-	@Override
 	ICategoryState getState();
 }
