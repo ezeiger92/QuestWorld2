@@ -6,8 +6,8 @@ Extensions at [QuestWorld-Extensions](https://github.com/ezeiger92/QuestWorld-Ex
 Supported server versions:
 - Craftbukkit 1.12.2
 - Spigot 1.12.2
-Any other versions may recieve limited support. Versions earlier than 1.12 are known to not work.
 
+Any other versions may recieve limited support. Versions earlier than 1.12 are known to not work.
 
 Built using:
 - Java 8
