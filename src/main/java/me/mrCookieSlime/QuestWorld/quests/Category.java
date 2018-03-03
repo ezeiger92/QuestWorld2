@@ -5,8 +5,8 @@ import java.util.Set;
 
 import org.bukkit.entity.Player;
 
-import me.mrCookieSlime.QuestWorld.api.QuestWorld;
-import me.mrCookieSlime.QuestWorld.api.contract.ICategory;
+import com.questworld.api.QuestWorld;
+import com.questworld.api.contract.ICategory;
 
 @Deprecated
 public class Category {
