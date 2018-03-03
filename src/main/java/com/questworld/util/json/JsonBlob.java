@@ -1,13 +1,12 @@
 package com.questworld.util.json;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 import com.questworld.util.Text;
 
 public class JsonBlob {
-	ArrayList<HashMap<String, String>> message = new ArrayList<>();
+	StringBuilder builder = new StringBuilder();
 	
 	public JsonBlob() {
 	}
@@ -21,35 +20,24 @@ public class JsonBlob {
 		properties.put("\"text\"", '"'+text.replace("\\", "\\\\").replace("\"", "\\\"")+'"');
 		for(Prop p : props)
 			p.apply(properties);
+
+		if(builder.length() > 0)
+			builder.append(',');
 		
-		message.add(properties);
+		char prefix = '{';
+		for(Map.Entry<String, String> entry : properties.entrySet()) {
+			builder.append(prefix).append(entry.getKey()).append(':').append(entry.getValue());
+			prefix = ',';
+		}
+		
+		builder.append('}');
 		
 		return this;
 	}
 	
-	private static void appendMap(HashMap<String, String> map, StringBuilder builder) {
-		builder.append('{');
-		
-		String prefix = "";
-		for(Map.Entry<String, String> entry : map.entrySet()) {
-			builder.append(prefix).append(entry.getKey()).append(':').append(entry.getValue());
-			prefix = ",";
-		}
-		
-		builder.append('}');
-	}
-	
 	@Override
 	public String toString() {
-		StringBuilder builder = new StringBuilder().append('[');
-		
-		String prefix = "";
-		for(HashMap<String,String> map : message) {
-			appendMap(map, builder.append(prefix));
-			prefix = ",";
-		}
-		
-		return builder.append(']').toString();
+		return '[' + builder.toString() + ']';
 	}
 	
 	private static Prop ofChar(char in, Prop normal) {
@@ -83,7 +71,10 @@ public class JsonBlob {
 	}
 	
 	public JsonBlob addLegacy(String legacy, Prop... defaults) {
-		message.addAll(fromLegacy(legacy, defaults).message);
+		if(builder.length() > 0)
+			builder.append(',');
+		
+		builder.append(fromLegacy(legacy, defaults).builder);
 		return this;
 	}
 	

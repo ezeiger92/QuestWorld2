@@ -16,8 +16,9 @@ public class Category {
 	}
 	
 	public Set<Quest> getFinishedQuests(Player p) {
-		Set<Quest> dummy = new HashSet<>();
 		int len = QuestWorld.getPlayerStatus(p).getProgress(source);
+		HashSet<Quest> dummy = new HashSet<>(len);
+		
 		for(int i = 0; i < len; ++i)
 			dummy.add(new Quest());
 		
