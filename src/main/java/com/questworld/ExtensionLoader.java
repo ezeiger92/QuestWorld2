@@ -62,8 +62,6 @@ public final class ExtensionLoader {
 		
 		URL[] jarURLs = { urlOf(extensionFile) };
 		
-		//URLClassLoader newLoader = URLClassLoader.newInstance(jarURLs, loader);
-		
 		URLClassLoader newLoader = AccessController.doPrivileged(new PrivilegedAction<URLClassLoader>() {
 			@Override
 			public URLClassLoader run() {

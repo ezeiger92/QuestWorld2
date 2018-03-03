@@ -1,13 +1,13 @@
 package com.questworld.command;
 
-
 import java.util.Locale;
 import java.util.stream.Collectors;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
-import com.questworld.QuestWorldPlugin;
+import com.questworld.QuestingImpl;
+import com.questworld.api.QuestWorld;
 import com.questworld.listener.ExtensionInstaller;
 import com.questworld.util.Text;
 
@@ -28,7 +28,7 @@ public final class ExtensionControl {
 			return;
 		}
 		
-		ExtensionInstaller extensions = QuestWorldPlugin.instance().getImpl().getExtensions();
+		ExtensionInstaller extensions = ((QuestingImpl) QuestWorld.getAPI()).getExtensions();
 		
 		String arg1 = args[0].toLowerCase(Locale.US);
 		

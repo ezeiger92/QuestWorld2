@@ -13,7 +13,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 import com.questworld.Directories;
-import com.questworld.QuestWorldPlugin;
+import com.questworld.QuestingImpl;
 import com.questworld.api.MissionType;
 import com.questworld.api.QuestStatus;
 import com.questworld.api.QuestWorld;
@@ -403,7 +403,7 @@ public class PlayerStatus implements IPlayerStatus {
 		
 		Bukkit.getScheduler().runTaskAsynchronously(QuestWorld.getPlugin(), () -> {
 			// First: clear all the quest data on a new thread
-			for (File file: Directories.listFiles(QuestWorldPlugin.instance().getImpl().getDataFolders().playerdata, (file, name) -> name.endsWith(".yml"))) {
+			for (File file: Directories.listFiles(((QuestingImpl) QuestWorld.getAPI()).getDataFolders().playerdata, (file, name) -> name.endsWith(".yml"))) {
 				String uuid = file.getName().substring(0, file.getName().length() - 4);
 				try {
 					ProgressTracker t = new ProgressTracker(UUID.fromString(uuid));

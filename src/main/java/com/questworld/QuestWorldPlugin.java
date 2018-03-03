@@ -15,26 +15,14 @@ import com.questworld.listener.SpawnerListener;
 import com.questworld.util.Log;
 
 public class QuestWorldPlugin extends JavaPlugin implements Listener {
-	private static volatile QuestWorldPlugin instance = null;
-	
-	private static void setInstance(QuestWorldPlugin plugin) {
-		if(instance != null && plugin != null)
-			throw new IllegalStateException("Cannot redefine singleton");
-		
-		instance = plugin;
-	}
-
 	private QuestingImpl api;
-	
-	private int questCheckHandle = -1;
 	private int autosaveHandle = -1;
+	private int questCheckHandle = -1;
 	
 	@Override
 	public void onLoad() {
 		saveDefaultConfig();
-		
 		Log.setLogger(getLogger());
-		setInstance(this);
 	}
 	
 	@Override
@@ -45,7 +33,7 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener {
 		loadConfigs();
 		
 		getCommand("quests").setExecutor(new QuestsCommand());
-		getCommand("questeditor").setExecutor(new EditorCommand(this));
+		getCommand("questeditor").setExecutor(new EditorCommand(api));
 		
 		getServer().getServicesManager().register(QuestingAPI.class, api, this, ServicePriority.Normal);
 
@@ -89,51 +77,17 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener {
 			);
 	}
 	
-	public void onReload() {
-		loadConfigs();
-		api.onReload();
-		GuideBook.reset();
-	}
-	
 	@Override
 	public void onDisable() {
 		api.onSave();
 		api.onDiscard();
 		
+		autosaveHandle = -1;
+		questCheckHandle = -1;
+		
 		Log.setLogger(null);
-		setInstance(null);
 		
 		getServer().getServicesManager().unregisterAll(this);
 		getServer().getScheduler().cancelTasks(this);
-	}
-	
-	public static QuestWorldPlugin instance() {
-		return instance;
-	}
-	
-	public String iGetString(String key) {
-		String result = getConfig().getString(key,null);
-		if(result == null) {
-			String fallback = api.getResources().loadJarConfig("config.yml").getString(key, null);
-			if(fallback == null) {
-				Log.severe("No setting for \""+key+"\" found in config.yml, defaulting to \"\"");
-				result = "";
-			}
-			else {
-				Log.warning("Missing config.yml setting \""+key+"\", did you just update? Saving default \""+fallback+"\" from jar");
-				result = fallback;
-				getConfig().set(key, fallback);
-				saveConfig();
-			}
-		}
-		return result;
-	}
-	
-	public static String getString(String key) {
-		return instance.iGetString(key);
-	}
-	
-	public QuestingImpl getImpl() {
-		return api;
 	}
 }

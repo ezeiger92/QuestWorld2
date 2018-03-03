@@ -12,7 +12,7 @@ import java.util.UUID;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import com.questworld.Directories;
-import com.questworld.QuestWorldPlugin;
+import com.questworld.QuestingImpl;
 import com.questworld.api.QuestWorld;
 import com.questworld.api.contract.ICategory;
 import com.questworld.api.contract.IFacade;
@@ -59,11 +59,11 @@ public class Facade implements IFacade {
 	}
 	
 	static File fileFor(ICategory category) {
-		return new File(QuestWorldPlugin.instance().getImpl().getDataFolders().questing, category.getID() + ".category");
+		return new File(((QuestingImpl) QuestWorld.getAPI()).getDataFolders().questing, category.getID() + ".category");
 	}
 	
 	static File fileFor(IQuest quest) {
-		return new File(QuestWorldPlugin.instance().getImpl().getDataFolders().questing, stringOfQuest(quest) + ".quest");
+		return new File(((QuestingImpl) QuestWorld.getAPI()).getDataFolders().questing, stringOfQuest(quest) + ".quest");
 	}
 	
 	private static int[] splitQuestString(String in) {
@@ -111,7 +111,7 @@ public class Facade implements IFacade {
 		ArrayList<ParseData> categoryData = new ArrayList<>();
 		HashMap<Integer, ArrayList<ParseData>> questData = new HashMap<>();
 		
-		for (File file: Directories.listFiles(QuestWorldPlugin.instance().getImpl().getDataFolders().questing)) {
+		for (File file: Directories.listFiles(((QuestingImpl) QuestWorld.getAPI()).getDataFolders().questing)) {
 			String fileName = file.getName();
 			
 			if (fileName.endsWith(".quest")) {

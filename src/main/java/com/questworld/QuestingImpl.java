@@ -9,7 +9,6 @@ import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 
 import com.questworld.api.MissionType;
 import com.questworld.api.MissionViewer;
@@ -44,7 +43,7 @@ public final class QuestingImpl implements QuestingAPI {
 	
 	private final ExtensionInstaller extensions;
 	private final Lang language;
-	private final Plugin plugin;
+	private final QuestWorldPlugin plugin;
 	private final PresetLoader presets;
 	private final ResourceLoader resources;
 	private final MissionViewer viewer;
@@ -53,7 +52,7 @@ public final class QuestingImpl implements QuestingAPI {
 	private Optional<Economy> econ = Optional.empty();
 	private Sounds eventSounds;
 	
-	public QuestingImpl(Plugin questWorld) {
+	public QuestingImpl(QuestWorldPlugin questWorld) {
 		extensions = new ExtensionInstaller(questWorld, this);
 		plugin = questWorld;
 		presets = new PresetLoader(this);
@@ -160,7 +159,7 @@ public final class QuestingImpl implements QuestingAPI {
 	}
 	
 	@Override
-	public Plugin getPlugin() {
+	public QuestWorldPlugin getPlugin() {
 		return plugin;
 	}
 	
@@ -236,12 +235,15 @@ public final class QuestingImpl implements QuestingAPI {
 	
 	@Override
 	public void onReload() {
+		plugin.loadConfigs();
 		dataFolders = new Directories(resources);
 		eventSounds = new Sounds(resources.loadConfigNoexpect("sounds.yml", true));
 		facade.onReload();
 		language.onReload();
 		
 		extensions.onReload();
+		
+		GuideBook.reset();
 	}
 	
 	@Override

@@ -15,7 +15,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import com.questworld.GuideBook;
-import com.questworld.QuestWorldPlugin;
+import com.questworld.QuestingImpl;
 import com.questworld.api.QuestWorld;
 import com.questworld.api.contract.ICategory;
 import com.questworld.api.contract.IMission;
@@ -30,14 +30,14 @@ import com.questworld.util.Text;
 
 public class EditorCommand implements CommandExecutor {
 	private static final int PER_PAGE = 7;
-	private final QuestWorldPlugin plugin;
+	private final QuestingImpl api;
 	
-	public EditorCommand(QuestWorldPlugin plugin) {
-		this.plugin = plugin;
+	public EditorCommand(QuestingImpl api) {
+		this.api = api;
 	}
 	
 	private void help(String label, CommandSender sender) {
-		String version = plugin.getDescription().getVersion();
+		String version = api.getPlugin().getDescription().getVersion();
 		sender.sendMessage(Text.colorize("&3== &b/", label, " help &3: &bv"+version+" &3== "));
 		sender.sendMessage(Text.colorize("  &bgui &7- Open the editor gui"));
 		sender.sendMessage(Text.colorize("  &bbook [player] &7- Give yourself (or player) a questbook"));
@@ -70,7 +70,7 @@ public class EditorCommand implements CommandExecutor {
 				return true;
 			}
 			args[1] += ".zip";
-			if(plugin.getImpl().presets().load(args[1]))
+			if(api.presets().load(args[1]))
 				sender.sendMessage(Text.colorize("&7Successfully installed the Preset &a", args[1]));
 			else
 				sender.sendMessage(Text.colorize("&cThe Preset &4", args[1], " &ccould not be installed"));
@@ -81,7 +81,7 @@ public class EditorCommand implements CommandExecutor {
 				return true;
 			}
 			args[1] += ".zip";
-			if(plugin.getImpl().presets().save(args[1]))
+			if(api.presets().save(args[1]))
 				sender.sendMessage(Text.colorize("&7Successfully saved the Preset &a", args[1]));
 			else
 				sender.sendMessage(Text.colorize("&cCould not save Preset &a", args[1]));
@@ -112,34 +112,34 @@ public class EditorCommand implements CommandExecutor {
 				p.sendMessage(Text.colorize("&cCould not find player &e" + args[1]));
 		}
 		else if(param.equals("discard")) {
-			plugin.getImpl().onDiscard();
-			plugin.getImpl().getFacade().load();
+			api.onDiscard();
+			api.getFacade().load();
 			sender.sendMessage(Text.colorize("&7Reloaded all quests from disk"));
 		}
 		else if(param.equals("save")) {
-			plugin.getImpl().onSave();
+			api.onSave();
 			sender.sendMessage(Text.colorize("&7Saved all quests to disk"));
 		}
 		else if(param.equals("reload")) {
 			if(args.length > 1 && args[1].equalsIgnoreCase("quests")) {
 				sender.sendMessage(Text.colorize("&cThis usage is deprecated! Use /qe discard instead"));
 
-				plugin.getImpl().onDiscard();
-				plugin.getImpl().getFacade().load();
+				api.onDiscard();
+				api.getFacade().load();
 				
 				sender.sendMessage(Text.colorize("&7Reloaded all quests from disk"));
 			}
 			else if(args.length > 1 && args[1].equalsIgnoreCase("all")) {
 				sender.sendMessage(Text.colorize("&cThis usage is deprecated! Use /qe reload and /qe discard instead"));
-				plugin.onReload();
+				api.onReload();
 				
-				plugin.getImpl().onDiscard();
-				plugin.getImpl().getFacade().load();
+				api.onDiscard();
+				api.getFacade().load();
 				
 				sender.sendMessage(Text.colorize("&7Reloaded config and all quests from disk"));
 			}
 			else {
-				plugin.onReload();
+				api.onReload();
 				sender.sendMessage(Text.colorize("&7Reloaded config from disk"));
 			}
 		}
@@ -164,7 +164,7 @@ public class EditorCommand implements CommandExecutor {
 				}
 				
 				if(uuid != null) {
-					PlayerStatus status = QuestWorldPlugin.instance().getImpl().getPlayerStatus(uuid);
+					PlayerStatus status = (PlayerStatus)QuestWorld.getPlayerStatus(uuid);
 					int c_id = -1;
 					int q_id = -1;
 					if(args.length <= 2) {
@@ -277,7 +277,7 @@ public class EditorCommand implements CommandExecutor {
 				}
 			}
 			
-			PlayerStatus status = QuestWorldPlugin.instance().getImpl().getPlayerStatus(uuid);
+			PlayerStatus status = (PlayerStatus)QuestWorld.getPlayerStatus(uuid);
 			
 			if(category != null) {
 				if(quest != null) {

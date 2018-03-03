@@ -12,7 +12,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
-import com.questworld.QuestWorldPlugin;
+import com.questworld.QuestingImpl;
 import com.questworld.api.QuestWorld;
 import com.questworld.api.Translation;
 import com.questworld.api.contract.IPartyState;
@@ -27,7 +27,7 @@ public class Party implements IPartyState {
 
 	public Party(UUID leader) {
 		this.leader = leader;
-		tracker = QuestWorldPlugin.instance().getImpl().getPlayerStatus(leader).getTracker();
+		tracker = ((QuestingImpl) QuestWorld.getAPI()).getPlayerStatus(leader).getTracker();
 		
 		if(tracker.getPartyLeader() == null)
 			tracker.setPartyLeader(leader);
@@ -114,7 +114,7 @@ public class Party implements IPartyState {
 		
 		members.add(p.getUniqueId());
 		PlayerTools.sendTranslation(p, true, Translation.PARTY_GROUP_JOIN, p.getName(), Bukkit.getOfflinePlayer(leader).getName());
-		QuestWorldPlugin.instance().getImpl().getPlayerStatus(p).getTracker().setPartyLeader(leader);
+		((QuestingImpl) QuestWorld.getAPI()).getPlayerStatus(p).getTracker().setPartyLeader(leader);
 		pending.remove(p.getUniqueId());
 		save();
 	}
@@ -149,14 +149,14 @@ public class Party implements IPartyState {
 		}
 		
 		members.remove(traitor.getUniqueId());
-		QuestWorldPlugin.instance().getImpl().getPlayerStatus(traitor.getUniqueId()).getTracker().setPartyLeader(null);
+		((QuestingImpl) QuestWorld.getAPI()).getPlayerStatus(traitor.getUniqueId()).getTracker().setPartyLeader(null);
 		save();
 	}
 	
 	public void disband() {
 		for (UUID member: members) {
 			Player player = Bukkit.getPlayer(member);
-			QuestWorldPlugin.instance().getImpl().getPlayerStatus(member).getTracker().setPartyLeader(null);
+			((QuestingImpl) QuestWorld.getAPI()).getPlayerStatus(member).getTracker().setPartyLeader(null);
 			
 			if(player != null)
 				PlayerTools.sendTranslation(player, true, Translation.PARTY_GROUP_DISBAND);

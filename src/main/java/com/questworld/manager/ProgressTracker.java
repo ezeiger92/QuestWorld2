@@ -14,8 +14,9 @@ import java.util.stream.Collectors;
 
 import org.bukkit.configuration.file.YamlConfiguration;
 
-import com.questworld.QuestWorldPlugin;
+import com.questworld.QuestingImpl;
 import com.questworld.api.QuestStatus;
+import com.questworld.api.QuestWorld;
 import com.questworld.api.contract.ICategory;
 import com.questworld.api.contract.IMission;
 import com.questworld.api.contract.IMissionState;
@@ -29,7 +30,7 @@ public class ProgressTracker implements Reloadable {
 	private final YamlConfiguration config;
 	
 	private static File fileFor(UUID uuid) {
-		return new File(QuestWorldPlugin.instance().getImpl().getDataFolders().playerdata, uuid.toString() + ".yml");
+		return new File(((QuestingImpl) QuestWorld.getAPI()).getDataFolders().playerdata, uuid.toString() + ".yml");
 	}
 	
 	public static boolean exists(UUID uuid) {
@@ -189,12 +190,12 @@ public class ProgressTracker implements Reloadable {
 	}
 	
 	public static File dialogueFile(IMission mission) {
-		return new File(QuestWorldPlugin.instance().getImpl().getDataFolders().dialogue,
+		return new File(((QuestingImpl) QuestWorld.getAPI()).getDataFolders().dialogue,
 				mission.getUniqueId().toString() + ".dialogue");
 	}
 	
 	public static File oldDialogueFile(IMission mission) {
-		return new File(QuestWorldPlugin.instance().getImpl().getDataFolders().dialogue, mission.getQuest().getCategory().getID()
+		return new File(((QuestingImpl) QuestWorld.getAPI()).getDataFolders().dialogue, mission.getQuest().getCategory().getID()
 				+ "+" + mission.getQuest().getID() + "+" + mission.getIndex() + ".txt");
 	}
 	

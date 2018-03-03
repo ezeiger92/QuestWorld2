@@ -17,7 +17,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import com.questworld.QuestWorldPlugin;
+import com.questworld.QuestingImpl;
 import com.questworld.api.QuestWorld;
 import com.questworld.api.contract.IMission;
 import com.questworld.api.contract.IQuest;
@@ -360,7 +360,7 @@ class Quest extends UniqueObject implements IQuestState {
 	public boolean completeFor(Player p) {
 		if(CancellableEvent.send(new QuestCompleteEvent(getSource(), p))) {
 			handoutReward(p);
-			QuestWorldPlugin.instance().getImpl().getPlayerStatus(p).completeQuest(this);
+			((QuestingImpl) QuestWorld.getAPI()).getPlayerStatus(p).completeQuest(this);
 			return true;
 		}
 		
