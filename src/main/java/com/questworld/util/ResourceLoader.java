@@ -9,9 +9,9 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -42,8 +42,8 @@ public class ResourceLoader {
 		return classLoader;
 	}
 	
-	public Set<String> filesInResourceDir(String path) {
-		Set<String> result = new HashSet<>();
+	public List<String> filesInResourceDir(String path) {
+		ArrayList<String> result = new ArrayList<>();
 		URL dirUrl = classLoader.getResource(path);
 		if(dirUrl != null) {
 			String jarPath = dirUrl.getPath();
@@ -75,19 +75,12 @@ public class ResourceLoader {
 		return result;
 	}
 	
-	private InputStream activeStream;
-	private InputStreamReader activeReader;
 	private InputStreamReader readerOf(String resource) {
-		activeStream = classLoader.getResourceAsStream(resource);
-		activeReader = activeStream != null ? new InputStreamReader(activeStream, StandardCharsets.UTF_8) : null;
-		return activeReader;
-	}
-	
-	private void close() {
-		try { activeReader.close(); } catch (IOException e) { e.printStackTrace(); }
-		try { activeStream.close(); } catch (IOException e) { e.printStackTrace(); }
-		activeReader = null;
-		activeStream = null;
+		InputStream stream = classLoader.getResourceAsStream(resource);
+		if(stream == null)
+			throw new IllegalArgumentException("Resource \"" + resource + "\" could not be found");
+		
+		return new InputStreamReader(stream, StandardCharsets.UTF_8);
 	}
 	
 	public YamlConfiguration loadFileConfig(String resource) {
@@ -95,31 +88,29 @@ public class ResourceLoader {
 	}
 	
 	public YamlConfiguration loadJarConfig(String resource) {
-		try { return YamlConfiguration.loadConfiguration(readerOf(resource)); }
-		finally { close(); }
+		return YamlConfiguration.loadConfiguration(readerOf(resource));
 	}
 	
 	public YamlConfiguration loadConfig(String resource) throws FileNotFoundException, IOException, InvalidConfigurationException {
 		YamlConfiguration result = new YamlConfiguration();
 		File file = new File(dataPath, resource);
 		
-		try { result.setDefaults(YamlConfiguration.loadConfiguration(readerOf(resource))); }
-		finally { close(); }
+		result.setDefaults(YamlConfiguration.loadConfiguration(readerOf(resource)));
 		
 		if(!file.exists()) {
 			if(!file.getParentFile().exists() && !file.getParentFile().mkdirs())
 				throw new IOException("Could not create directories for: "+file.getName());
 			
-			try {
-				readerOf(resource);
+			// stream will not be null unless some other thread destroys the jar file
+			// readerOf above would have thrown an exception had it been null
+			try(InputStream stream = classLoader.getResourceAsStream(resource)) {
 				try(FileOutputStream fos = new FileOutputStream(file)) {
 					byte[] buffer = new byte[BUFFER_SIZE];
 					int len;
-					while((len = activeStream.read(buffer)) != -1)
+					while((len = stream.read(buffer)) != -1)
 						fos.write(buffer, 0, len);
 				}
 			}
-			finally { close(); }
 		}
 		
 		result.load(file);

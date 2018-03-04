@@ -7,6 +7,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
@@ -134,6 +135,55 @@ public class PlayerTools {
 			text = QuestWorld.translate(Translation.DEFAULT_PREFIX) + text;
 
 		return Text.colorize(text);
+	}
+	
+	@SuppressWarnings("deprecation")
+	public static void sendBookView(Player player, String... jsonPages) {
+		int length = jsonPages.length;
+		if(length == 0)
+			return;
+		
+		StringBuilder pages = new StringBuilder("{pages:[");
+		
+		for(int i = 0; i < length; ++i) {
+			if(i > 0)
+				pages.append(',');
+			
+			pages.append('"')
+			.append(jsonPages[i].replace("\\", "\\\\").replace("\"", "\\\""))
+			.append('"');
+		}
+		
+		pages.append("]}");
+		
+		try {
+			Reflect.playerAddChannel(player, "MC|BOpen");
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+			return;
+		}
+		
+		int slot = player.getInventory().getHeldItemSlot();
+		ItemStack old = player.getInventory().getItem(slot);
+		
+		ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
+		Bukkit.getUnsafe().modifyItemStack(book, pages.toString());
+		
+		player.getInventory().setItem(slot, book);
+
+		byte[] payload = { 0 };
+		player.sendPluginMessage(QuestWorld.getPlugin(), "MC|BOpen", payload);
+		
+		player.getInventory().setItem(slot, old);
+		
+		try {
+			Reflect.playerRemoveChannel(player, "MC|BOpen");
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+		
 	}
 	
 	private static volatile ConversationFactory factory;

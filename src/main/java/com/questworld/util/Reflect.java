@@ -4,6 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 public final class Reflect {
@@ -26,6 +27,18 @@ public final class Reflect {
 		}
 		
 		NMS = nms;
+	}
+	
+	public static void playerAddChannel(Player p, String s) throws Exception {
+		Class.forName(CBS + "entity.CraftPlayer")
+		.getMethod("addChannel", String.class)
+		.invoke(p, s);
+	}
+	
+	public static void playerRemoveChannel(Player p, String s) throws Exception {
+		Class.forName(CBS + "entity.CraftPlayer")
+		.getMethod("removeChannel", String.class)
+		.invoke(p, s);
 	}
 	
 	public static ItemStack nmsPickBlock(Block block) throws Exception {

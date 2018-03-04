@@ -36,11 +36,13 @@ public interface Prop {
 	static Prop FUSE(Prop... props) { return new FuseProp(props); }
 	
 	static Prop HOVER_TEXT(String text, Prop... props) {
-		return new DefaultProp("\"hoverEvent\"", pre("show_text", new JsonBlob(text, props).toString()));
+		return new DefaultProp("\"hoverEvent\"",
+				"{\"action\":\"show_text\",\"value\":" + new JsonBlob(text, props).toString() + "}");
 	}
 	
 	static Prop CLICK_RUN(String command) {
-		return new DefaultProp("\"clickEvent\"", pre("run_command", '"' + command + '"'));
+		return new DefaultProp("\"clickEvent\"",
+				"{\"action\":\"run_command\",\"value\":\"" + command + "\"}");
 	}
 	
 	static Prop CLICK_RUN(Player p, Runnable callback) {
@@ -48,16 +50,12 @@ public interface Prop {
 	}
 	
 	static Prop CLICK_SUGGEST(String command) {
-		return new DefaultProp("\"clickEvent\"", pre("suggest_command", '"' + command + '"'));
+		return new DefaultProp("\"clickEvent\"",
+				"{\"action\":\"suggest_command\",\"value\":\"" + command + "\"}");
 	}
 	
 	static Prop CLICK_URL(String url) {
-		return new DefaultProp("\"clickEvent\"", pre("open_url", '"' + url + '"'));
-	}
-	
-	////
-	
-	static String pre(String action, String value) {
-		return "{\"action\":\"" + action + "\",\"value\":" + value + "}";
+		return new DefaultProp("\"clickEvent\"",
+				"{\"action\":\"open_url\",\"value\":\"" + url + "\"}");
 	}
 }

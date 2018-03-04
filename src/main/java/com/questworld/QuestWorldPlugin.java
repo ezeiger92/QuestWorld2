@@ -45,6 +45,8 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener {
 		GuideBook guide = GuideBook.instance();
 		if(guide.recipe() != null)
 			getServer().addRecipe(guide.recipe());
+		
+		getServer().getMessenger().registerOutgoingPluginChannel(this, "MC|BOpen");
 	}
 	
 	public void loadConfigs() {
@@ -89,5 +91,6 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener {
 		
 		getServer().getServicesManager().unregisterAll(this);
 		getServer().getScheduler().cancelTasks(this);
+		getServer().getMessenger().unregisterOutgoingPluginChannel(this, "MC|BOpen");
 	}
 }
