@@ -97,6 +97,13 @@ public class PagedMapping {
 		return panels.get(index);
 	}
 	
+	public boolean hasButton(int index) {
+		if(index >= panels.size() || index < 0)
+			return false;
+		
+		return findPanel(index).getItem(index) == null;
+	}
+	
 	public void addButton(int index, ItemStack item, Consumer<InventoryClickEvent> button, boolean isNavButton) {
 		findPanel(index).addButton(index % pageSize, item, isNavButton ? event -> {
 			putPage(event.getWhoClicked(), currentPage);

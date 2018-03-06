@@ -24,9 +24,15 @@ import com.questworld.util.WeakValueMap;
 
 public class Facade implements IFacade {
 	private long lastSave = 0;
-	private HashMap<Integer, Category> categoryMap = new HashMap<>();
+	private HashMap<UUID, Category> categoryMap = new HashMap<>();
+	private WeakValueMap<Integer, Category> categoryPosition = new WeakValueMap<>();
 	private WeakValueMap<UUID, Quest> questMap = new WeakValueMap<>();
 	private WeakValueMap<UUID, Mission> missionMap = new WeakValueMap<>();
+	
+	@Override
+	public Category getCategory(UUID uniqueId) {
+		return categoryMap.get(uniqueId);
+	}
 	
 	@Override
 	public Quest getQuest(UUID uniqueId) {
@@ -41,7 +47,8 @@ public class Facade implements IFacade {
 	@Override
 	public Category createCategory(String name, int id) {
 		Category c = new Category(name, id, this);
-		categoryMap.put(id, c);
+		categoryMap.put(c.getUniqueId(), c);
+		categoryPosition.putWeak(id, c);
 		return c;
 	}
 	
@@ -76,18 +83,6 @@ public class Facade implements IFacade {
 		result[1] = Integer.parseInt(in.substring(mid + 1, len));
 
 		return result;
-	}
-	
-	static Quest questOfString(String in) {
-		if(in == null)
-			return null;
-		
-		int[] parts = splitQuestString(in);
-		ICategory c = QuestWorld.getFacade().getCategory(parts[1]);
-		if (c != null)
-			return (Quest)c.getQuest(parts[0]);
-		
-		return null;
 	}
 	
 	static String stringOfQuest(IQuest quest) {
@@ -144,7 +139,8 @@ public class Facade implements IFacade {
 					questMap.putWeak(q.getUniqueId(), q);
 				}
 			
-			categoryMap.put(category.getID(), category);
+			categoryMap.put(category.getUniqueId(), category);
+			categoryPosition.putWeak(category.getID(), category);
 		}
 		
 		for (Category category: categories) {
@@ -197,9 +193,10 @@ public class Facade implements IFacade {
 		return categoryMap.values();
 	}
 	
+	@Deprecated
 	@Override
 	public Category getCategory(int id) {
-		return categoryMap.get(id);
+		return categoryPosition.getOrNull(id);
 	}
 
 	@Override
@@ -216,7 +213,7 @@ public class Facade implements IFacade {
 			e.printStackTrace();
 		}
 		
-		categoryMap.remove(category.getID());
+		categoryMap.remove(category.getUniqueId());
 	}
 	
 	@Override

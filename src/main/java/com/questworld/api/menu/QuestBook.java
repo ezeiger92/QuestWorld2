@@ -612,45 +612,44 @@ public class QuestBook {
 		PagedMapping view = new PagedMapping(45);
 		view.reserve(1);
 		
-		for(int i = 0; i < view.getCapacity(); ++i) {
-			ICategory category = QuestWorld.getFacade().getCategory(i);
-			if(category != null) {
-				String[] lore = {
-						category.getName(),
-						"",
-						"&rLeft click: &eOpen quest list",
-						"&rShift left click: &eOpen category editor",
-						"&rRight click: &eRemove category"
-				};
-				int quests = category.getQuests().size();
-				if(quests > 0) {
-					String[] lines = new String[lore.length + Math.min(quests, 6)];
-					lines[0] = category.getName();
-					
-					int j = 1;
-					for(IQuest q : category.getQuests()) {
-						if(j > 5) {
-							lines[j++] = "&7&oand " + (quests - 5) + " more...";
-							break;
-						}
-						lines[j++] = "&7- " + q.getName();	
+		for(ICategory category : QuestWorld.getFacade().getCategories()) {
+			String[] lore = {
+					category.getName(),
+					"",
+					"&rLeft click: &eOpen quest list",
+					"&rShift left click: &eOpen category editor",
+					"&rRight click: &eRemove category"
+			};
+			int quests = category.getQuests().size();
+			if(quests > 0) {
+				String[] lines = new String[lore.length + Math.min(quests, 6)];
+				lines[0] = category.getName();
+				
+				int j = 1;
+				for(IQuest q : category.getQuests()) {
+					if(j > 5) {
+						lines[j++] = "&7&oand " + (quests - 5) + " more...";
+						break;
 					}
-					
-					for(int k = 0; k < 4; ++k)
-						lines[k + j] = lore[k + 1];
-					
-					lore = lines;
+					lines[j++] = "&7- " + q.getName();	
 				}
 				
-				view.addButton(i,
-						new ItemBuilder(category.getItem()).wrapText(lore).get(),
-						Buttons.onCategory(category), true);
-
-				view.reserve(1);
+				for(int k = 0; k < 4; ++k)
+					lines[k + j] = lore[k + 1];
+				
+				lore = lines;
 			}
-			else
-				view.addButton(i, defaultItem.get(), Buttons.newCategory(i), true);
+			
+			view.addButton(category.getID(),
+					new ItemBuilder(category.getItem()).wrapText(lore).get(),
+					Buttons.onCategory(category), true);
+
+			view.reserve(1);
 		}
+		
+		for(int i = 0; i < view.getCapacity(); ++i)
+			if(!view.hasButton(i))
+				view.addButton(i, defaultItem.get(), Buttons.newCategory(i), true);
 
 		view.build(menu, p);
 		menu.openFor(p);
@@ -673,11 +672,9 @@ public class QuestBook {
 		view.addFrameButton(4, new ItemBuilder(Material.BOOK_AND_QUILL).display("&3Category editor").get(), event -> {
 			openCategoryEditor(p, category);
 		}, true);
-
-		for (int i = 0; i < view.getCapacity(); ++i) {
-			IQuest quest = category.getQuest(i);
-			if (quest != null) {
-				String[] lore = {
+		
+		for(IQuest quest : category.getQuests()) {
+			String[] lore = {
 					quest.getName(),
 					"",
 					"&rLeft click: &eOpen quest editor",
@@ -705,15 +702,17 @@ public class QuestBook {
 					lore = lines;
 				}
 				
-				view.addButton(i,
+				view.addButton(quest.getID(),
 						new ItemBuilder(quest.getItem()).wrapText(lore).get(),
 						Buttons.onQuest(quest), true);
 				
 				view.reserve(1);
-			}
-			else
-				view.addButton(i, defaultItem.getNew(), Buttons.newQuest(category, i), true);
 		}
+
+		for (int i = 0; i < view.getCapacity(); ++i)
+			if(!view.hasButton(i))
+				view.addButton(i, defaultItem.getNew(), Buttons.newQuest(category, i), true);
+			
 		view.build(menu, p);
 		menu.openFor(p);
 	}

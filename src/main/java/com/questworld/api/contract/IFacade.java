@@ -21,6 +21,8 @@ public interface IFacade {
 	ICategory createCategory(String name, int id);
 	
 	Collection<? extends ICategory> getCategories();
+	
+	@Deprecated
 	ICategory getCategory(int id);
 	
 	long getLastSave();
@@ -32,6 +34,7 @@ public interface IFacade {
 	void clearAllUserData(ICategory category);
 	void clearAllUserData(IQuest quest);
 
+	ICategory getCategory(UUID uniqueId);
 	IQuest getQuest(UUID uniqueId);
 	IMission getMission(UUID uniqueId);
 }

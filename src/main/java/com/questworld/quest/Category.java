@@ -142,10 +142,6 @@ class Category extends UniqueObject implements ICategoryState {
 		String parentId = config.getString("parentId", null);
 		if(parentId != null)
 			parent = new WeakReference<>(facade.getQuest(UUID.fromString(parentId)));
-		else
-			// Old way
-			parent = new WeakReference<>(
-					Facade.questOfString(config.getString("parent", null)));
 	}
 	
 	@Override
