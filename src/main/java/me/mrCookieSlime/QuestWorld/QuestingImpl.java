@@ -157,7 +157,7 @@ public final class QuestingImpl implements QuestingAPI, Reloadable {
 			if(p == null)
 				p = createParty(leader);
 
-			if(p.getPending().contains(uuid))
+			if(!p.getPending().contains(uuid))
 				return p;
 			
 			// Party did not contain the player, something unusual must have happened
