@@ -281,7 +281,7 @@ public class QuestBook {
 
 											Player player = PlayerTools.getPlayer(name);
 											if (player != null) {
-												if (QuestWorld.getParty(p) == null) {
+												if (QuestWorld.getParty(player) == null) {
 													PlayerTools.sendTranslation(p2, true, Translation.PARTY_LEADER_INVITED, name);
 													party.invitePlayer(player);
 													openPartyMenu(p);
