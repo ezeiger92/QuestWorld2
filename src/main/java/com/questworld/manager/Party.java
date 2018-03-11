@@ -64,7 +64,7 @@ public class Party implements IPartyState {
 	}
 	
 	@Override
-	public Set<OfflinePlayer> getGroup() {
+	public Set<OfflinePlayer> getFullGroup() {
 		return getGroupUUIDs().stream().map(Bukkit::getOfflinePlayer).collect(Collectors.toSet());
 	}
 	
@@ -108,7 +108,7 @@ public class Party implements IPartyState {
 	
 	@Override
 	public void playerJoin(Player p) {
-		for (OfflinePlayer member : getGroup())
+		for (OfflinePlayer member : getFullGroup())
 			if (member.isOnline()) 
 				PlayerTools.sendTranslation((Player)member, true, Translation.PARTY_PLAYER_JOINED, p.getName());
 		

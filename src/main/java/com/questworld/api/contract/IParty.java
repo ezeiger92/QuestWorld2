@@ -12,7 +12,7 @@ public interface IParty {
 		KICKED,
 	}
 	
-	Set<OfflinePlayer> getGroup();
+	Set<OfflinePlayer> getFullGroup();
 	Set<OfflinePlayer> getMembers();
 	OfflinePlayer getLeader();
 	boolean isLeader(OfflinePlayer player);

@@ -182,7 +182,7 @@ public class QuestBook {
 		final IParty party = QuestWorld.getParty(p);
 		if (party != null) {
 			int i = 0;
-			for(OfflinePlayer member : party.getGroup()) {
+			for(OfflinePlayer member : party.getFullGroup()) {
 				if (!party.isLeader(p)) {
 					menu.put(i + 9,
 							skull.skull(member).wrapText(
