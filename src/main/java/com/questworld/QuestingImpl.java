@@ -50,6 +50,7 @@ public final class QuestingImpl implements QuestingAPI {
 
 	private Directories dataFolders;
 	private Optional<Economy> econ = Optional.empty();
+	private boolean hasPapi;
 	private Sounds eventSounds;
 	
 	public QuestingImpl(QuestWorldPlugin questWorld) {
@@ -66,8 +67,10 @@ public final class QuestingImpl implements QuestingAPI {
 		if(lang != null)
 			language.setLang(lang);
 		
-		if(Bukkit.getPluginManager().getPlugin("Vault") != null)
+		if(Bukkit.getPluginManager().isPluginEnabled("Vault"))
 			econ = BukkitService.find(Economy.class);
+		
+		hasPapi = Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI");
 		
 		eventSounds = new Sounds(resources.loadConfigNoexpect("sounds.yml", true));
 		
@@ -145,7 +148,17 @@ public final class QuestingImpl implements QuestingAPI {
 	
 	@Override
 	public String translate(Translator key, String... replacements) {
-		return language.translate(key, replacements);
+		return translate(null, key, replacements);
+	}
+	
+	@Override
+	public String translate(Player player, Translator key, String... replacements) {
+		String translation = language.translate(key, replacements);
+
+		if(hasPapi)
+			translation = me.clip.placeholderapi.PlaceholderAPI.setPlaceholders(null, translation);
+
+		return translation;
 	}
 	
 	@Override

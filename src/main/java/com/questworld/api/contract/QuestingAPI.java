@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
 import com.questworld.api.MissionType;
@@ -38,6 +39,7 @@ public interface QuestingAPI extends Reloadable {
 	IFacade getFacade();
 	Sounds getSounds();
 	String translate(Translator key, String... replacements);
+	String translate(Player player, Translator key, String... replacements);
 	Iterable<MissionEntry> getMissionEntries(MissionType type, OfflinePlayer player);
 	MissionEntry getMissionEntry(IMission mission, OfflinePlayer player);
 	Plugin getPlugin();

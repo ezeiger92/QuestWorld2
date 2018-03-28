@@ -67,7 +67,9 @@ public class PlayerTools {
 	
 	private static Pattern keywordPattern = Pattern.compile("\\s*%(tellraw|title|subtitle|actionbar)%\\s*((?:(?!%(?:tellraw|title|subtitle|actionbar)%).)*)");
 	public static void sendTranslation(CommandSender p, boolean prefixed, Translator key, String... replacements) {
-		String text = makeTranslation(prefixed, key, replacements);
+		Player player = p instanceof Player ? (Player)p : null;
+		
+		String text = makeTranslation(prefixed, player, key, replacements);
 		if(text.isEmpty())
 			return;
 		
@@ -89,9 +91,7 @@ public class PlayerTools {
 		if(matchStart > 0)
 			p.sendMessage(text.substring(0, matchStart));
 		
-		if(p instanceof Player) {
-			Player player = (Player) p;
-	
+		if(player != null) {
 			StringBuilder tellrawBuilder = new StringBuilder();
 			StringBuilder titleBuilder = new StringBuilder();
 			StringBuilder subtitleBuilder = new StringBuilder();
@@ -130,7 +130,11 @@ public class PlayerTools {
 	}
 	
 	public static String makeTranslation(boolean prefixed, Translator key, String... replacements) {
-		String text = QuestWorld.translate(key, replacements);
+		return makeTranslation(prefixed, null, key, replacements);
+	}
+	
+	public static String makeTranslation(boolean prefixed, Player p, Translator key, String... replacements) {
+		String text = QuestWorld.translate(p, key, replacements);
 		if(!text.isEmpty() && prefixed)
 			text = QuestWorld.translate(Translation.DEFAULT_PREFIX) + text;
 

@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
 import com.questworld.api.contract.IFacade;
@@ -80,6 +81,10 @@ public final class QuestWorld {
 	
 	public static String translate(Translator key, String... replacements) {
 		return api.translate(key, replacements);
+	}
+	
+	public static String translate(Player player, Translator key, String... replacements) {
+		return api.translate(player, key, replacements);
 	}
 	
 	public static Iterable<MissionEntry> getMissionEntries(MissionType type, OfflinePlayer player) {

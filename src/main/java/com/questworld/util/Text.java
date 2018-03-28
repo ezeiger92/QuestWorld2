@@ -2,6 +2,7 @@ package com.questworld.util;
 
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -11,7 +12,10 @@ import org.bukkit.inventory.ItemStack;
 
 import com.questworld.api.annotation.Nullable;
 
-public class Text {
+public final class Text {
+	private Text() {
+	}
+	
 	// TODO: Probably make all of this better and then comment
 	public final static char dummyChar = '&';
 	public final static char colorChar = ChatColor.COLOR_CHAR;
@@ -107,6 +111,17 @@ public class Text {
 					", World: " + location.getWorld().getName() +
 					", Range: " + radius;
 		return "Unknown world";
+	}
+	
+	public static UUID toUniqueId(String uuidString) {
+		if(uuidString != null)
+			try {
+				return UUID.fromString(uuidString);
+			}
+			catch(IllegalArgumentException e) {
+			}
+		
+		return null;
 	}
 	
 	static Pattern firstLetter = Pattern.compile("\\b\\S");

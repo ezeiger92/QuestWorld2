@@ -5,7 +5,7 @@ authors: [ezeiger92, erik1988]
 website: https://github.com/ezeiger92/QuestWorld2
 
 main: com.questworld.QuestWorldPlugin
-softdepend: [Vault]
+softdepend: [Vault, PlaceholderAPI]
 
 commands:
   quests:

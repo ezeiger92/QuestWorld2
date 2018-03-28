@@ -55,7 +55,7 @@ public final class Lang implements Reloadable {
 				config = loader.loadConfig(langPath);
 			}
 			catch(Exception e) {
-				throw new IllegalArgumentException("Failed read language \"" + langPath +"\"", e);
+				throw new IllegalArgumentException("Failed read language \"" + langPath + "\"", e);
 			}
 			
 			languages.put(langPath, config);

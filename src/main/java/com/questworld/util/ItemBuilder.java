@@ -230,6 +230,7 @@ public class ItemBuilder {
      * @return this, for chaining
      */
 	@SuppressWarnings("deprecation")
+	// TODO: 1.13
 	public @Mutable ItemBuilder color(DyeColor color) {
 		if(resultStack.getType() == Material.INK_SACK)
 			durability(color.getDyeData());
@@ -245,6 +246,7 @@ public class ItemBuilder {
 	 * @param type Desired type of skull
 	 * @return this, for chaining
 	 */
+	// TODO: 1.13
 	public @Mutable ItemBuilder skull(SkullType type) {
 		if(resultStack.getType() == Material.SKULL_ITEM)
 			durability((short) type.ordinal());
@@ -279,6 +281,7 @@ public class ItemBuilder {
 	 * @param entity The type of entity
 	 * @return this, for chaining
 	 */
+	// TODO: 1.13
 	public @Mutable ItemBuilder mob(EntityType entity) {
 		if(resultStack.getItemMeta() instanceof SpawnEggMeta) {
 			SpawnEggMeta meta = (SpawnEggMeta) resultStack.getItemMeta();

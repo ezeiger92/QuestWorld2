@@ -64,24 +64,13 @@ public class ProgressTracker implements Reloadable {
 		}
 	}
 	
-	private static UUID tryUUID(String uuid) {
-		if(uuid != null)
-			try {
-				return UUID.fromString(uuid);
-			}
-			catch(IllegalArgumentException e) {
-			}
-		
-		return null;
-	}
-	
 	public YamlConfiguration config() {
 		return config;
 	}
 	
 	//// PARTY
 	public UUID getPartyLeader() {
-		return tryUUID(config.getString("party.associated", null));
+		return Text.toUniqueId(config.getString("party.associated", null));
 	}
 	
 	public void setPartyLeader(UUID uuid) {
@@ -93,7 +82,7 @@ public class ProgressTracker implements Reloadable {
 	
 	public Set<UUID> getPartyMembers() {
 		return config.getStringList("party.members").stream()
-				.map(ProgressTracker::tryUUID)
+				.map(Text::toUniqueId)
 				.filter(uuid -> uuid != null)
 				.collect(Collectors.toSet());
 	}
@@ -106,7 +95,7 @@ public class ProgressTracker implements Reloadable {
 	
 	public Set<UUID> getPartyPending() {
 		return config.getStringList("party.pending-requests").stream()
-				.map(ProgressTracker::tryUUID)
+				.map(Text::toUniqueId)
 				.filter(uuid -> uuid != null)
 				.collect(Collectors.toSet());
 	}
@@ -266,7 +255,9 @@ public class ProgressTracker implements Reloadable {
 		
 		try {
 			mission.setDialogue(readAllLines(file).stream()
-					.map(Text::deserializeNewline).map(Text::colorize).collect(Collectors.toList()));
+					.map(Text::deserializeNewline)
+					.map(Text::colorize)
+					.collect(Collectors.toList()));
 		} catch (Exception e) {
 			e.printStackTrace();
 			return;
