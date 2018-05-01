@@ -34,8 +34,9 @@ public class FishMission extends MissionType implements Listener, Decaying {
 	
 	@EventHandler
 	public void onFish(PlayerFishEvent e) {
-		if (!(e.getCaught() instanceof Item))
+		if (e.getState() != PlayerFishEvent.State.CAUGHT_FISH)
 			return;
+		
 		ItemStack caught = ((Item)e.getCaught()).getItemStack();
 
 		for(MissionEntry r : QuestWorld.getMissionEntries(this, e.getPlayer()))

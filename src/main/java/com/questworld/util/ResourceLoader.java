@@ -60,7 +60,7 @@ public class ResourceLoader {
 							continue;
 						
 						if (name.startsWith(path))
-							result.add(path);
+							result.add(name);
 					}
 				}
 				catch (RuntimeException e) {
