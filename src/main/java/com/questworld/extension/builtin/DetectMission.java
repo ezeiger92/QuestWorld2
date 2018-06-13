@@ -14,8 +14,18 @@ import com.questworld.util.ItemBuilder;
 import com.questworld.util.Text;
 
 public class DetectMission extends MissionType implements Ticking {
+	
+	private static final Material material() {
+		Material result = Material.matchMaterial("OBSERVER");
+		
+		if(result != null)
+			return result;
+		
+		return Material.WOOD_PLATE;
+	}
+	
 	public DetectMission() {
-		super("DETECT", false, new ItemStack(Material.OBSERVER));
+		super("DETECT", false, new ItemStack(DetectMission.material()));
 	}
 	
 	@Override

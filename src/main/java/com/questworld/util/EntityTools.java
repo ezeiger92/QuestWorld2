@@ -45,11 +45,22 @@ public class EntityTools {
 	 */
 	public static ItemBuilder getEntityDisplay(EntityType type) {
 		ItemBuilder ib = new ItemBuilder(Material.SKULL_ITEM);
+		
+		
 
 		switch(type) {
 			case PLAYER:       ib.skull(SkullType.PLAYER); break;
 			case GIANT:        ib.skull(SkullType.ZOMBIE); break;
-			case ENDER_DRAGON: ib.skull(SkullType.DRAGON); break;
+			// 1.8.x had no dragon head
+			case ENDER_DRAGON:
+				try {
+					ib.skull(SkullType.valueOf("DRAGON"));
+				}
+				catch(IllegalArgumentException e) {
+					ib.type(Material.DRAGON_EGG);
+				}
+				break;
+				
 			case WITHER:       ib.skull(SkullType.WITHER); break;
 			case ARMOR_STAND:  ib.type(Material.ARMOR_STAND); break;
 			case SNOWMAN:      ib.type(Material.SNOW_BALL); break;

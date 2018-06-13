@@ -22,8 +22,7 @@ public interface IFacade {
 	
 	Collection<? extends ICategory> getCategories();
 	
-	@Deprecated
-	ICategory getCategory(int id);
+	ICategory getCategory(int index);
 	
 	long getLastSave();
 	

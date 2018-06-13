@@ -8,11 +8,14 @@ import java.util.Locale;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 import com.questworld.GuideBook;
 import com.questworld.QuestingImpl;
@@ -26,7 +29,9 @@ import com.questworld.api.menu.QuestBook;
 import com.questworld.manager.PlayerStatus;
 import com.questworld.util.Log;
 import com.questworld.util.PlayerTools;
+import com.questworld.util.Reflect;
 import com.questworld.util.Text;
+import com.questworld.util.VersionAdapter;
 
 public class EditorCommand implements CommandExecutor {
 	private static final int PER_PAGE = 7;
@@ -358,6 +363,16 @@ public class EditorCommand implements CommandExecutor {
 			sender.sendMessage(Text.colorize("  &7If you wish to continue, type /", label, " upgrade confirm"));
 			
 			return true;
+		}
+		else if(param.equals("adapter")) {
+			VersionAdapter adapter = Reflect.getAdapter();
+			
+			sender.sendMessage("Verison(s) " + adapter.toString());
+			
+			adapter.makePlayerHead(new ItemStack(Material.STONE), p);
+			adapter.makeSpawnEgg(new ItemStack(Material.MONSTER_EGG), EntityType.PIG);
+			adapter.sendActionbar(p, "test");
+			adapter.shapelessRecipe("testing", new ItemStack(Material.STONE));
 		}
 		else {
 			help(label, sender);

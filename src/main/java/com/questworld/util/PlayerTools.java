@@ -2,7 +2,6 @@ package com.questworld.util;
 
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.BiConsumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -30,12 +29,12 @@ import com.questworld.api.QuestWorld;
 import com.questworld.api.Translation;
 import com.questworld.api.Translator;
 import com.questworld.api.event.GenericPlayerLeaveEvent;
-import com.questworld.util.json.JsonBlob;
 
 public class PlayerTools {
 	
-	public static ItemStack getMainHandItem(Player p) {
-		return p.getInventory().getItemInMainHand();
+	public static ItemStack getMainHandItem(Player player) {
+		int hand = player.getInventory().getHeldItemSlot();
+		return player.getInventory().getItem(hand);
 	}
 	
 	public static int getMaxCraftAmount(CraftingInventory inv) {
@@ -53,7 +52,7 @@ public class PlayerTools {
 	}
 	
 	public static int fits(ItemStack stack, Inventory inv) {
-		ItemStack[] contents = inv.getStorageContents();
+		ItemStack[] contents = inv.getContents();
 		int result = 0;
 		
 		for(ItemStack is : contents)
@@ -121,8 +120,18 @@ public class PlayerTools {
 			if(!tellrawMessage.isEmpty())
 				tellraw(player, tellrawMessage);
 			
-			if(!titleMessage.isEmpty() || !subtitleMessage.isEmpty())
-				player.sendTitle(titleMessage, subtitleMessage, 10, 70, 20);
+			if(!titleMessage.isEmpty() || !subtitleMessage.isEmpty()) {
+				try {
+					Player.class.getMethod("sendTitle", String.class, String.class, int.class, int.class, int.class).invoke(player, titleMessage, subtitleMessage, 10, 70, 20);
+				}
+				catch(Exception e) {
+					try {
+						Player.class.getMethod("sendTitle", String.class, String.class).invoke(player, titleMessage, subtitleMessage);
+					}
+					catch(Exception e2) {
+					}
+				}
+			}
 			
 			if(!actionbarMessage.isEmpty())
 				actionbar(player, actionbarMessage);
@@ -265,7 +274,7 @@ public class PlayerTools {
 		Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "minecraft:tellraw "+p.getName()+" "+json);
 	}
 	
-	private static final BiConsumer<Player, String> actionbarMethod;
+	/*private static final BiConsumer<Player, String> actionbarMethod;
 	static {
 		@SuppressWarnings("unused")
 		Class<?> clazz;
@@ -282,10 +291,10 @@ public class PlayerTools {
 					"minecraft:title "+p.getName()+" actionbar "+JsonBlob.fromLegacy(m).toString());
 		}
 		actionbarMethod = abMethod;
-	}
+	}*/
 	
 	public static void actionbar(Player player, String message) {
-		actionbarMethod.accept(player, message);
+		Reflect.getAdapter().sendActionbar(player, message);
 	}
 	
 	public static Player getPlayer(String name) {

@@ -3,15 +3,13 @@ package com.questworld;
 import java.util.HashSet;
 
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
-//import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapelessRecipe;
 
 import com.questworld.api.QuestWorld;
 import com.questworld.api.Translation;
 import com.questworld.util.ItemBuilder;
-import com.questworld.util.Log;
+import com.questworld.util.Reflect;
 
 public class GuideBook {
 	private static HashSet<Integer> pastBooks = new HashSet<>();
@@ -48,10 +46,11 @@ public class GuideBook {
 				QuestWorld.translate(Translation.GUIDE_BOOK).split("\n")).get();
 
 		ShapelessRecipe r = null;
-		
 
-		if(!QuestWorld.getPlugin().getConfig().getBoolean("book.disable-recipe", false))
-			try {
+		if(!QuestWorld.getPlugin().getConfig().getBoolean("book.disable-recipe", false)) {
+			r = Reflect.getAdapter().shapelessRecipe("GuideBook", guide).addIngredient(Material.WORKBENCH);
+		}
+			/*try {
 				Class.forName("org.bukkit.NamespacedKey");
 				r = new ShapelessRecipe(new NamespacedKey(QuestWorld.getPlugin(), "GuideBook"), guide)
 						 .addIngredient(Material.WORKBENCH);
@@ -59,7 +58,7 @@ public class GuideBook {
 			catch(ClassNotFoundException e) {
 				Log.warning("Cannot register recipe: Are you using an old server version?");
 				e.printStackTrace();
-			}
+			}*/
 		
 		recipe = r;
 		

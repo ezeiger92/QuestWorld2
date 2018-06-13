@@ -15,8 +15,13 @@ public final class Reflect {
 	private static final String CBS = serverClass.getName().replaceFirst("[^.]+$", "");
 	private static final String NMS;
 	
+	private static final MultiAdapter adapter;
+	
 	static {
 		String nms = null;
+		
+		adapter = new MultiAdapter();
+		
 		try {
 			nms = serverClass.getMethod("getServer").getReturnType().getName().replaceFirst("[^.]+$", "");
 		}
@@ -27,6 +32,14 @@ public final class Reflect {
 		}
 		
 		NMS = nms;
+	}
+	
+	public static void addAdapter(VersionAdapter child) {
+		adapter.addAdapter(child);
+	}
+	
+	public static VersionAdapter getAdapter() {
+		return adapter;
 	}
 	
 	public static void playerAddChannel(Player p, String s) throws Exception {

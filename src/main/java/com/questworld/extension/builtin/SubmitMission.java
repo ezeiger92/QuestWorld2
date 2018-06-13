@@ -36,7 +36,7 @@ public class SubmitMission extends MissionType implements Manual {
 		
 		ItemStack search = mission.getItem();
 		search.setAmount(needed);
-		for(ItemStack stack : p.getInventory().getStorageContents()) {
+		for(ItemStack stack : p.getInventory().getContents()) {
 			if(ItemBuilder.compareItems(mission.getItem(), stack)) {
 				int sa = search.getAmount();
 				int sub = Math.min(stack.getAmount(), sa);

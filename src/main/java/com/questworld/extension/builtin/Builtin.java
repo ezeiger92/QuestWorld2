@@ -1,6 +1,9 @@
 package com.questworld.extension.builtin;
 
+import com.questworld.adapter.CurrentAdapter;
+import com.questworld.adapter.CurrentSpigotAdapter;
 import com.questworld.api.QuestExtension;
+import com.questworld.util.Reflect;
 
 public class Builtin extends QuestExtension {
 	public Builtin() {
@@ -16,5 +19,9 @@ public class Builtin extends QuestExtension {
 			new PlayMission(),
 			new MineMission(),
 			new LevelMission());
+		
+		Reflect.addAdapter(new CurrentAdapter());
+		try { Reflect.addAdapter(new CurrentSpigotAdapter()); }
+		catch(ClassNotFoundException e) {}
 	}
 }

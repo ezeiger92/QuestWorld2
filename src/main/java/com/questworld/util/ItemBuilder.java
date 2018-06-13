@@ -13,8 +13,6 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.SkullMeta;
-import org.bukkit.inventory.meta.SpawnEggMeta;
 
 import com.questworld.api.QuestWorld;
 import com.questworld.api.Translation;
@@ -265,13 +263,7 @@ public class ItemBuilder {
 	 */
 	public @Mutable ItemBuilder skull(OfflinePlayer player) {
 		skull(SkullType.PLAYER);
-		
-		if(resultStack.getItemMeta() instanceof SkullMeta) {
-			SkullMeta smHolder = (SkullMeta)resultStack.getItemMeta();
-			smHolder.setOwningPlayer(player);
-			resultStack.setItemMeta(smHolder);
-		}
-		
+		Reflect.getAdapter().makePlayerHead(resultStack, player);
 		return this;
 	}
 	
@@ -283,12 +275,8 @@ public class ItemBuilder {
 	 */
 	// TODO: 1.13
 	public @Mutable ItemBuilder mob(EntityType entity) {
-		if(resultStack.getItemMeta() instanceof SpawnEggMeta) {
-			SpawnEggMeta meta = (SpawnEggMeta) resultStack.getItemMeta();
-			meta.setSpawnedType(entity);
-			resultStack.setItemMeta(meta);
-		}
-		
+		type(Material.MONSTER_EGGS);
+		Reflect.getAdapter().makeSpawnEgg(resultStack, entity);
 		return this;
 	}
 
