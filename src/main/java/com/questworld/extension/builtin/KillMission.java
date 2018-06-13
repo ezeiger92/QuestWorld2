@@ -21,34 +21,35 @@ public class KillMission extends MissionType implements Listener, Decaying {
 	public KillMission() {
 		super("KILL", true, new ItemStack(Material.IRON_SWORD));
 	}
-	
+
 	@Override
 	public ItemStack userDisplayItem(IMission instance) {
 		EntityType entity = instance.getEntity();
 		return EntityTools.getEntityDisplay(entity).get();
 	}
-	
+
 	@Override
 	protected String userInstanceDescription(IMission instance) {
 		String type = EntityTools.nameOf(instance.getEntity());
-		return "&7Kill " + instance.getAmount() + "x " + (!instance.getSpawnerSupport() ? "naturally spawned " : "") + type;
+		return "&7Kill " + instance.getAmount() + "x " + (!instance.getSpawnerSupport() ? "naturally spawned " : "")
+				+ type;
 	}
-	
+
 	@EventHandler
 	public void onKill(EntityDeathEvent e) {
 		Player killer = e.getEntity().getKiller();
-		if(killer == null)
+		if (killer == null)
 			return;
-		
-		for(MissionEntry r : QuestWorld.getMissionEntries(this, killer)) {
+
+		for (MissionEntry r : QuestWorld.getMissionEntries(this, killer)) {
 			IMission mission = r.getMission();
 			EntityType type = mission.getEntity();
-			if((type == e.getEntityType() || type == EntityType.COMPLEX_PART)
-				&& (mission.getSpawnerSupport() || !EntityTools.isFromSpawner(e.getEntity())))
+			if ((type == e.getEntityType() || type == EntityType.COMPLEX_PART)
+					&& (mission.getSpawnerSupport() || !EntityTools.isFromSpawner(e.getEntity())))
 				r.addProgress(1);
 		}
 	}
-	
+
 	@Override
 	protected void layoutMenu(IMissionState changes) {
 		putButton(10, MissionButton.entity(changes));

@@ -21,29 +21,29 @@ public class FishMission extends MissionType implements Listener, Decaying {
 	public FishMission() {
 		super("FISH", true, new ItemStack(Material.FISHING_ROD));
 	}
-	
+
 	@Override
 	public ItemStack userDisplayItem(IMission instance) {
 		return instance.getItem();
 	}
-	
+
 	@Override
 	protected String userInstanceDescription(IMission instance) {
 		return "&7Reel in " + instance.getAmount() + "x " + Text.itemName(instance.getDisplayItem());
 	}
-	
+
 	@EventHandler
 	public void onFish(PlayerFishEvent e) {
 		if (e.getState() != PlayerFishEvent.State.CAUGHT_FISH)
 			return;
-		
-		ItemStack caught = ((Item)e.getCaught()).getItemStack();
 
-		for(MissionEntry r : QuestWorld.getMissionEntries(this, e.getPlayer()))
-			if(ItemBuilder.compareItems(caught, r.getMission().getItem()))
+		ItemStack caught = ((Item) e.getCaught()).getItemStack();
+
+		for (MissionEntry r : QuestWorld.getMissionEntries(this, e.getPlayer()))
+			if (ItemBuilder.compareItems(caught, r.getMission().getItem()))
 				r.addProgress(caught.getAmount());
 	}
-	
+
 	@Override
 	protected void layoutMenu(IMissionState changes) {
 		putButton(10, MissionButton.item(changes));

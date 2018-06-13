@@ -11,13 +11,13 @@ import com.questworld.util.Log;
 
 public class UnknownMission extends MissionType {
 	private static HashMap<String, UnknownMission> unknown = new HashMap<>();
-	
+
 	public static UnknownMission get(String name) {
 		UnknownMission mission = unknown.get(name);
-		
-		if(mission != null)
+
+		if (mission != null)
 			return mission;
-		
+
 		Log.warning("Tried to fetch unknown mission type: " + name + ". Did an extension fail to load?");
 		Log.warning("Supplying dummy mission for " + name);
 		mission = new UnknownMission(name);

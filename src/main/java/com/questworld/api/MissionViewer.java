@@ -32,14 +32,14 @@ public class MissionViewer extends AutoListener {
 	private Map<MissionType, Set<IMission>> missions = new HashMap<>();
 	private Set<IMission> ticking_missions = new HashSet<>();
 	private Set<IMission> decaying_missions = new HashSet<>();
-	
+
 	public MissionViewer(Plugin plugin) {
 		register(plugin);
 	}
-	
+
 	/**
-	 * Provides all missions of a desired type. The returned Set is immutable,
-	 * do not attempt to modify it.
+	 * Provides all missions of a desired type. The returned Set is immutable, do
+	 * not attempt to modify it.
 	 * 
 	 * @param type The target mission type
 	 * @return A set containing all missions of type <tt>type</tt>
@@ -47,65 +47,65 @@ public class MissionViewer extends AutoListener {
 	public Set<IMission> getMissionsOf(MissionType type) {
 		return Collections.unmodifiableSet(rawGetMissionsOf(type));
 	}
-	
+
 	/**
-	 * Provides all Ticking missions. The returned Set is immutable, do not
-	 * attempt to modify it.
+	 * Provides all Ticking missions. The returned Set is immutable, do not attempt
+	 * to modify it.
 	 * 
 	 * @return A set containing all Ticking missions
 	 */
 	public Set<IMission> getTickingMissions() {
 		return ticking_missions;
 	}
-	
+
 	/**
-	 * Provides all Decaying missions. The returned Set is immutable, do not
-	 * attempt to modify it.
+	 * Provides all Decaying missions. The returned Set is immutable, do not attempt
+	 * to modify it.
 	 * 
 	 * @return A set containing all Decaying missions
 	 */
 	public Set<IMission> getDecayingMissions() {
 		return decaying_missions;
 	}
-	
+
 	public void clear() {
 		missions.clear();
 		ticking_missions.clear();
 		decaying_missions.clear();
 	}
-	
+
 	/**
-	 * Updates mission sets based on event data. This is an event method and
-	 * should not be called directly.
+	 * Updates mission sets based on event data. This is an event method and should
+	 * not be called directly.
 	 * 
 	 * @param event The event
 	 */
 	@Deprecated
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onCreateMission(QuestChangeEvent event) {
-		if(event.hasChange(IQuestState.Member.TASKS)) {
-			for(IMission m : event.getNextState().getMissions())
+		if (event.hasChange(IQuestState.Member.TASKS)) {
+			for (IMission m : event.getNextState().getMissions())
 				add(m, m.getType());
 		}
 	}
-	
+
 	/**
-	 * Updates mission sets based on event data. This is an event method and
-	 * should not be called directly.
+	 * Updates mission sets based on event data. This is an event method and should
+	 * not be called directly.
 	 * 
 	 * @param event The event
 	 */
 	@Deprecated
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onUpdateMission(MissionChangeEvent event) {
-		if(event.hasChange(IMissionState.Member.TYPE))
+		if (event.hasChange(IMissionState.Member.TYPE))
 			remove(event.getMission());
-			add(event.getMission(), event.getNextState().getType());
+		add(event.getMission(), event.getNextState().getType());
 	}
 
 	/**
-	 * Updates mission sets based on event data. This is an event method and
-	 * should not be called directly.
+	 * Updates mission sets based on event data. This is an event method and should
+	 * not be called directly.
 	 * 
 	 * @param event The event
 	 */
@@ -116,8 +116,8 @@ public class MissionViewer extends AutoListener {
 	}
 
 	/**
-	 * Updates mission sets based on event data. This is an event method and
-	 * should not be called directly.
+	 * Updates mission sets based on event data. This is an event method and should
+	 * not be called directly.
 	 * 
 	 * @param event The event
 	 */
@@ -128,8 +128,8 @@ public class MissionViewer extends AutoListener {
 	}
 
 	/**
-	 * Updates mission sets based on event data. This is an event method and
-	 * should not be called directly.
+	 * Updates mission sets based on event data. This is an event method and should
+	 * not be called directly.
 	 * 
 	 * @param event The event
 	 */
@@ -138,7 +138,7 @@ public class MissionViewer extends AutoListener {
 	public void onDeleteMission(MissionDeleteEvent event) {
 		remove(event.getMission());
 	}
-	
+
 	/**
 	 * Adds a mission to relevant Sets based on its type.
 	 * 
@@ -147,34 +147,34 @@ public class MissionViewer extends AutoListener {
 	 */
 	private void add(IMission mission, MissionType type) {
 		rawGetMissionsOf(type).add(mission);
-		
-		if(type instanceof Ticking)
+
+		if (type instanceof Ticking)
 			ticking_missions.add(mission);
-		
-		if(type instanceof Decaying)
+
+		if (type instanceof Decaying)
 			decaying_missions.add(mission);
 	}
-	
+
 	/**
 	 * Removes all missions in a category from their Sets.
 	 * 
 	 * @param category The category
 	 */
 	private void removeAll(ICategory category) {
-		for(IQuest q : category.getQuests())
+		for (IQuest q : category.getQuests())
 			removeAll(q);
 	}
-	
+
 	/**
 	 * Removes all missions in a quest from their Sets.
 	 * 
 	 * @param quest The quest
 	 */
 	private void removeAll(IQuest quest) {
-		for(IMission m : quest.getMissions())
+		for (IMission m : quest.getMissions())
 			remove(m);
 	}
-	
+
 	/**
 	 * Removes a mission from all Sets.
 	 * 
@@ -182,21 +182,21 @@ public class MissionViewer extends AutoListener {
 	 */
 	private void remove(IMission mission) {
 		rawGetMissionsOf(mission.getType()).remove(mission);
-		
-		if(mission.getType() instanceof Ticking)
+
+		if (mission.getType() instanceof Ticking)
 			ticking_missions.remove(mission);
-		
-		if(mission.getType() instanceof Decaying)
+
+		if (mission.getType() instanceof Decaying)
 			decaying_missions.remove(mission);
 	}
-	
+
 	private Set<IMission> rawGetMissionsOf(MissionType type) {
 		Set<IMission> result = missions.get(type);
-		if(result == null) {
+		if (result == null) {
 			result = new HashSet<>();
 			missions.put(type, result);
 		}
-		
+
 		return result;
 	}
 }

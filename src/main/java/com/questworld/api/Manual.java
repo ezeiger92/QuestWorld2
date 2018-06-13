@@ -20,12 +20,14 @@ public interface Manual {
 	 * @param entry A MissionEntry that provides direct progress manipulation
 	 */
 	void onManual(Player player, MissionEntry entry);
-	
+
 	/**
 	 * Sets the button label inside the quest book for this type of mission.
-	 * <p> The default is <tt>"&r> Click for manual check"</tt>. This will be
-	 * moved into a translation in the future.
-	 * @return 
+	 * <p>
+	 * The default is <tt>"&r> Click for manual check"</tt>. This will be moved into
+	 * a translation in the future.
+	 * 
+	 * @return
 	 */
 	// TODO: Move to translation, along with all overrides
 	default String getLabel() {

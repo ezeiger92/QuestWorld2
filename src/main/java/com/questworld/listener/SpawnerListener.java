@@ -11,14 +11,15 @@ import com.questworld.api.QuestWorld;
 import com.questworld.util.AutoListener;
 
 public class SpawnerListener extends AutoListener {
-	
+
 	public SpawnerListener(Plugin plugin) {
 		register(plugin);
 	}
-	
-	@EventHandler(priority=EventPriority.MONITOR,ignoreCancelled=true)
+
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onCreatureSpawn(CreatureSpawnEvent e) {
 		if (e.getSpawnReason().equals(SpawnReason.SPAWNER))
-			e.getEntity().setMetadata("spawned_by_spawner", new FixedMetadataValue(QuestWorld.getPlugin(), "QuestWorld"));
+			e.getEntity().setMetadata("spawned_by_spawner",
+					new FixedMetadataValue(QuestWorld.getPlugin(), "QuestWorld"));
 	}
 }

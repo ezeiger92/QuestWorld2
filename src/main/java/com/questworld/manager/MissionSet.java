@@ -15,51 +15,51 @@ public class MissionSet implements Iterable<MissionEntry> {
 		this.manager = manager;
 		this.type = type;
 	}
-	
+
 	public static class Result implements MissionEntry {
 		private final IMission mission;
 		private final PlayerStatus manager;
-		
+
 		public Result(IMission mission, PlayerStatus manager) {
 			this.mission = mission;
 			this.manager = manager;
 		}
-		
+
 		public IMission getMission() {
 			return mission;
 		}
-		
+
 		public int getProgress() {
 			return manager.getProgress(mission);
 		}
-		
+
 		public void setProgress(int progress) {
 			manager.setProgress(mission, progress);
 		}
-		
+
 		public void addProgress(int progress) {
 			manager.addProgress(mission, progress);
 		}
-		
+
 		public int getRemaining() {
 			return mission.getAmount() - getProgress();
 		}
 	}
-	
+
 	public static class MissionEntryIterator implements Iterator<MissionEntry> {
 		private final Iterator<IMission> missionIter;
 		private final PlayerStatus playerStatus;
-		
+
 		private MissionEntry nextEntry;
 		private boolean hadNext;
-		
+
 		public MissionEntryIterator(Iterator<IMission> missionIter, PlayerStatus playerStatus) {
 			this.missionIter = missionIter;
 			this.playerStatus = playerStatus;
-			
+
 			next();
 		}
-		
+
 		@Override
 		public boolean hasNext() {
 			return hadNext;
@@ -68,17 +68,17 @@ public class MissionSet implements Iterable<MissionEntry> {
 		@Override
 		public MissionEntry next() {
 			MissionEntry result = nextEntry;
-			
+
 			hadNext = false;
-			while(missionIter.hasNext()) {
+			while (missionIter.hasNext()) {
 				IMission mission = missionIter.next();
-				if(playerStatus.isMissionActive(mission)) {
+				if (playerStatus.isMissionActive(mission)) {
 					hadNext = true;
 					nextEntry = new Result(mission, playerStatus);
 					break;
 				}
 			}
-			
+
 			return result;
 		}
 	}

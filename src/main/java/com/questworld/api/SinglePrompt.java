@@ -19,7 +19,7 @@ public class SinglePrompt extends StringPrompt {
 	private String effectiveQuestion;
 	private final String question;
 	private final String additional;
-	
+
 	/**
 	 * Returning <tt>true</tt> indicates the input was accepted.
 	 * <p>
@@ -37,17 +37,18 @@ public class SinglePrompt extends StringPrompt {
 	 * 
 	 * @see SinglePrompt#callback callback
 	 */
-	public SinglePrompt(String request, String requestMoreInput, BiPredicate<ConversationContext, String> inputHandler) {
+	public SinglePrompt(String request, String requestMoreInput,
+			BiPredicate<ConversationContext, String> inputHandler) {
 		question = request;
 		additional = requestMoreInput;
 		callback = inputHandler;
 		effectiveQuestion = question;
 	}
-	
+
 	/**
 	 * Creates a new prompt. Assumes that <tt>false</tt> is an error and sends
-	 * <tt>"Input not valid"</tt>. Use a custom message for clarity when
-	 * accepting multiple lines of input.
+	 * <tt>"Input not valid"</tt>. Use a custom message for clarity when accepting
+	 * multiple lines of input.
 	 * 
 	 * @param request The text prompt given to the player requesting their input
 	 * @param inputHandler The callback when input is provided
@@ -57,7 +58,7 @@ public class SinglePrompt extends StringPrompt {
 	public SinglePrompt(String request, BiPredicate<ConversationContext, String> inputHandler) {
 		this(request, "&cInput not valid", inputHandler);
 	}
-	
+
 	@Override
 	public String getPromptText(ConversationContext context) {
 		return Text.colorize(effectiveQuestion);
@@ -65,16 +66,16 @@ public class SinglePrompt extends StringPrompt {
 
 	@Override
 	public Prompt acceptInput(ConversationContext context, String input) {
-		if(callback.test(context, input))
+		if (callback.test(context, input))
 			return END_OF_CONVERSATION;
 
 		effectiveQuestion = additional;
-		String display = (String)context.getSessionData("display");
-		if(display != null) {
+		String display = (String) context.getSessionData("display");
+		if (display != null) {
 			effectiveQuestion = display;
 			context.setSessionData("display", null);
 		}
-		
+
 		return this;
 	}
 

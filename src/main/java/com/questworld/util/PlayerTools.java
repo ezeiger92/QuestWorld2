@@ -31,144 +31,156 @@ import com.questworld.api.Translator;
 import com.questworld.api.event.GenericPlayerLeaveEvent;
 
 public class PlayerTools {
-	
+
 	public static ItemStack getMainHandItem(Player player) {
 		int hand = player.getInventory().getHeldItemSlot();
 		return player.getInventory().getItem(hand);
 	}
-	
+
 	public static int getMaxCraftAmount(CraftingInventory inv) {
-		if(inv.getResult() == null)
+		if (inv.getResult() == null)
 			return 0;
-		
+
 		int resultCount = inv.getResult().getAmount();
 		int materialCount = Integer.MAX_VALUE;
-		
-		for(ItemStack is : inv.getMatrix())
-			if(is != null && is.getAmount() < materialCount)
+
+		for (ItemStack is : inv.getMatrix())
+			if (is != null && is.getAmount() < materialCount)
 				materialCount = is.getAmount();
 
 		return resultCount * materialCount;
 	}
-	
+
 	public static int fits(ItemStack stack, Inventory inv) {
 		ItemStack[] contents = inv.getContents();
 		int result = 0;
-		
-		for(ItemStack is : contents)
-			if(is == null)
+
+		for (ItemStack is : contents)
+			if (is == null)
 				result += stack.getMaxStackSize();
-			else if(is.isSimilar(stack))
+			else if (is.isSimilar(stack))
 				result += Math.max(stack.getMaxStackSize() - is.getAmount(), 0);
-		
+
 		return result;
 	}
-	
-	private static Pattern keywordPattern = Pattern.compile("\\s*%(tellraw|title|subtitle|actionbar)%\\s*((?:(?!%(?:tellraw|title|subtitle|actionbar)%).)*)");
+
+	private static Pattern keywordPattern = Pattern
+			.compile("\\s*%(tellraw|title|subtitle|actionbar)%\\s*((?:(?!%(?:tellraw|title|subtitle|actionbar)%).)*)");
+
 	public static void sendTranslation(CommandSender p, boolean prefixed, Translator key, String... replacements) {
-		Player player = p instanceof Player ? (Player)p : null;
-		
+		Player player = p instanceof Player ? (Player) p : null;
+
 		String text = makeTranslation(prefixed, player, key, replacements);
-		if(text.isEmpty())
+		if (text.isEmpty())
 			return;
-		
+
 		int tellrawPos = text.indexOf("%tellraw%");
 		int titlePos = text.indexOf("%title%");
 		int subtitlePos = text.indexOf("%subtitle%");
 		int actionbarPos = text.indexOf("%actionbar%");
-		
-		if((tellrawPos & titlePos & subtitlePos & actionbarPos) == -1) {
+
+		if ((tellrawPos & titlePos & subtitlePos & actionbarPos) == -1) {
 			p.sendMessage(text);
 			return;
 		}
-		
+
 		// negative bit zero'd
 		int nb = -1 >>> 1;
-		
+
 		// index of first match, need to exclude non-matches (-1)
-		int matchStart = Math.min(Math.min(tellrawPos & nb, titlePos & nb), Math.min(subtitlePos & nb, actionbarPos & nb));
-		if(matchStart > 0)
+		int matchStart = Math.min(Math.min(tellrawPos & nb, titlePos & nb),
+				Math.min(subtitlePos & nb, actionbarPos & nb));
+		if (matchStart > 0)
 			p.sendMessage(text.substring(0, matchStart));
-		
-		if(player != null) {
+
+		if (player != null) {
 			StringBuilder tellrawBuilder = new StringBuilder();
 			StringBuilder titleBuilder = new StringBuilder();
 			StringBuilder subtitleBuilder = new StringBuilder();
 			StringBuilder actionbarBuilder = new StringBuilder();
-			
+
 			Matcher matcher = keywordPattern.matcher(text.substring(matchStart));
-			
-			while(matcher.find()) {
+
+			while (matcher.find()) {
 				String type = matcher.group(1);
 				String message = matcher.group(2);
-				switch(type) {
-				case "tellraw":   tellrawBuilder.append(message); break;
-				case "title":     titleBuilder.append(message); break;
-				case "subtitle":  subtitleBuilder.append(message); break;
-				case "actionbar": actionbarBuilder.append(message); break;
-				
-				// Won't happen unless keywordPattern changes
-				default: break;
+				switch (type) {
+					case "tellraw":
+						tellrawBuilder.append(message);
+						break;
+					case "title":
+						titleBuilder.append(message);
+						break;
+					case "subtitle":
+						subtitleBuilder.append(message);
+						break;
+					case "actionbar":
+						actionbarBuilder.append(message);
+						break;
+
+					// Won't happen unless keywordPattern changes
+					default:
+						break;
 				}
 			}
-			
+
 			String tellrawMessage = tellrawBuilder.toString();
 			String titleMessage = titleBuilder.toString();
 			String subtitleMessage = subtitleBuilder.toString();
 			String actionbarMessage = actionbarBuilder.toString();
-			
-			if(!tellrawMessage.isEmpty())
+
+			if (!tellrawMessage.isEmpty())
 				tellraw(player, tellrawMessage);
-			
-			if(!titleMessage.isEmpty() || !subtitleMessage.isEmpty()) {
+
+			if (!titleMessage.isEmpty() || !subtitleMessage.isEmpty()) {
 				try {
-					Player.class.getMethod("sendTitle", String.class, String.class, int.class, int.class, int.class).invoke(player, titleMessage, subtitleMessage, 10, 70, 20);
+					Player.class.getMethod("sendTitle", String.class, String.class, int.class, int.class, int.class)
+							.invoke(player, titleMessage, subtitleMessage, 10, 70, 20);
 				}
-				catch(Exception e) {
+				catch (Exception e) {
 					try {
-						Player.class.getMethod("sendTitle", String.class, String.class).invoke(player, titleMessage, subtitleMessage);
+						Player.class.getMethod("sendTitle", String.class, String.class).invoke(player, titleMessage,
+								subtitleMessage);
 					}
-					catch(Exception e2) {
+					catch (Exception e2) {
 					}
 				}
 			}
-			
-			if(!actionbarMessage.isEmpty())
+
+			if (!actionbarMessage.isEmpty())
 				actionbar(player, actionbarMessage);
 		}
 	}
-	
+
 	public static String makeTranslation(boolean prefixed, Translator key, String... replacements) {
 		return makeTranslation(prefixed, null, key, replacements);
 	}
-	
+
 	public static String makeTranslation(boolean prefixed, Player p, Translator key, String... replacements) {
 		String text = QuestWorld.translate(p, key, replacements);
-		if(!text.isEmpty() && prefixed)
+		if (!text.isEmpty() && prefixed)
 			text = QuestWorld.translate(Translation.DEFAULT_PREFIX) + text;
 
 		return Text.colorize(text);
 	}
-	
+
 	@SuppressWarnings("deprecation")
 	public static void sendBookView(Player player, String... jsonPages) {
 		int length = jsonPages.length;
-		if(length == 0)
+		if (length == 0)
 			return;
-		
+
 		StringBuilder pages = new StringBuilder("{pages:[");
-		
-		for(int i = 0; i < length; ++i) {
-			if(i > 0)
+
+		for (int i = 0; i < length; ++i) {
+			if (i > 0)
 				pages.append(',');
-			
-			pages.append('"')
-			.append(jsonPages[i].replace("\\", "\\\\").replace("\"", "\\\""))
-			.append('"');
+
+			pages.append('"').append(jsonPages[i].replace("\\", "\\\\").replace("\"", "\\\"")).append('"');
 		}
-		
+
 		pages.append("]}");
-		
+
 		try {
 			Reflect.playerAddChannel(player, "MC|BOpen");
 		}
@@ -176,167 +188,148 @@ public class PlayerTools {
 			e.printStackTrace();
 			return;
 		}
-		
+
 		int slot = player.getInventory().getHeldItemSlot();
 		ItemStack old = player.getInventory().getItem(slot);
-		
+
 		ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
 		Bukkit.getUnsafe().modifyItemStack(book, pages.toString());
-		
+
 		player.getInventory().setItem(slot, book);
 
 		byte[] payload = { 0 };
 		player.sendPluginMessage(QuestWorld.getPlugin(), "MC|BOpen", payload);
-		
+
 		player.getInventory().setItem(slot, old);
-		
+
 		try {
 			Reflect.playerRemoveChannel(player, "MC|BOpen");
 		}
 		catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 	}
-	
+
 	private static volatile ConversationFactory factory;
+
 	public static ConversationFactory getConversationFactory() {
-		if(factory == null)
+		if (factory == null)
 			factory = new ConversationFactory(QuestWorld.getPlugin());
 		return factory;
 	}
+
 	public static void promptInput(Player p, Prompt prompt) {
 		prepareConversation(p, prompt).begin();
 	}
-	
+
 	public static void promptCommand(Player p, Prompt prompt) {
 		Conversation con = prepareConversation(p, prompt);
 		p.sendMessage(prompt.getPromptText(con.getContext()));
-		
+
 		Bukkit.getPluginManager().registerEvents(commandListener(con, prompt), QuestWorld.getPlugin());
 	}
-	
+
 	public static void promptInputOrCommand(Player p, Prompt prompt) {
 		Conversation con = prepareConversation(p, prompt);
-		
+
 		Bukkit.getPluginManager().registerEvents(commandListener(con, prompt), QuestWorld.getPlugin());
 		con.begin();
 	}
-	
+
 	private static class ConversationListener implements Listener, ConversationAbandonedListener {
 		private Conversation con;
 		private Prompt prompt;
-		
+
 		private ConversationListener(Conversation con, Prompt prompt) {
 			this.con = con;
 			this.prompt = prompt;
 		}
-		
-		@EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled=true)
+
+		@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 		public void onCommand(PlayerCommandPreprocessEvent event) {
-			if(event.getPlayer() == con.getForWhom()) {
+			if (event.getPlayer() == con.getForWhom()) {
 				event.setCancelled(true);
-				if(prompt.acceptInput(con.getContext(), event.getMessage()) != Prompt.END_OF_CONVERSATION)
+				if (prompt.acceptInput(con.getContext(), event.getMessage()) != Prompt.END_OF_CONVERSATION)
 					con.getForWhom().sendRawMessage(prompt.getPromptText(con.getContext()));
 				else
 					con.abandon();
 			}
 		}
-		
+
 		@EventHandler
 		public void onLeave(GenericPlayerLeaveEvent event) {
 			con.abandon();
 		}
-		
+
 		@Override
 		public void conversationAbandoned(ConversationAbandonedEvent abandonedEvent) {
 			HandlerList.unregisterAll(this);
 		}
 	}
-	
+
 	private static Listener commandListener(Conversation con, Prompt prompt) {
 		ConversationListener listener = new ConversationListener(con, prompt);
 		con.addConversationAbandonedListener(listener);
 		return listener;
 	}
-	
+
 	private static Conversation prepareConversation(Player p, Prompt prompt) {
-		return getConversationFactory()
-				.withLocalEcho(false).withModality(false)
-				.withFirstPrompt(prompt).buildConversation(p);
+		return getConversationFactory().withLocalEcho(false).withModality(false).withFirstPrompt(prompt)
+				.buildConversation(p);
 	}
-	
+
 	public static boolean checkPermission(Player p, String permission) {
 		return permission == null || permission.length() == 0 || p.hasPermission(permission.split(" ", 2)[0]);
 	}
-	
+
 	public static void tellraw(Player p, String json) {
-		Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "minecraft:tellraw "+p.getName()+" "+json);
+		Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "minecraft:tellraw " + p.getName() + " " + json);
 	}
-	
-	/*private static final BiConsumer<Player, String> actionbarMethod;
-	static {
-		@SuppressWarnings("unused")
-		Class<?> clazz;
-		
-		BiConsumer<Player, String> abMethod;
-		try {
-			Class.forName("org.bukkit.entity.Player$Spigot");
-			abMethod = (p, m) -> p.spigot().sendMessage(
-						net.md_5.bungee.api.ChatMessageType.ACTION_BAR,
-						net.md_5.bungee.api.chat.TextComponent.fromLegacyText(m));
-		} catch (ClassNotFoundException e) {
-			abMethod = (p, m) -> Bukkit.dispatchCommand(
-					Bukkit.getConsoleSender(), 
-					"minecraft:title "+p.getName()+" actionbar "+JsonBlob.fromLegacy(m).toString());
-		}
-		actionbarMethod = abMethod;
-	}*/
-	
+
 	public static void actionbar(Player player, String message) {
 		Reflect.getAdapter().sendActionbar(player, message);
 	}
-	
+
 	public static Player getPlayer(String name) {
 		return Bukkit.getPlayerExact(name);
 	}
-	
+
 	@SuppressWarnings("deprecation")
 	public static Optional<UUID> findUUID(String nameOrUUID) {
 		Player p = getPlayer(nameOrUUID);
-		if(p != null)
+		if (p != null)
 			return Optional.of(p.getUniqueId());
-		
+
 		try {
 			return Optional.of(UUID.fromString(nameOrUUID));
 		}
-		catch(IllegalArgumentException e) {
-			return Optional.of(nameOrUUID)
-					.filter(s -> {
-						try {
-							Integer.parseInt(nameOrUUID);
-							return false;
-						}
-						catch(NumberFormatException e2) {
-							return !s.equals("reset") && !s.equals("page");
-						}
-					})
-					.map(Bukkit::getOfflinePlayer)
-					.filter(OfflinePlayer::hasPlayedBefore)
-					.map(OfflinePlayer::getUniqueId);
+		catch (IllegalArgumentException e) {
+			return Optional.of(nameOrUUID).filter(s -> {
+				try {
+					Integer.parseInt(nameOrUUID);
+					return false;
+				}
+				catch (NumberFormatException e2) {
+					return !s.equals("reset") && !s.equals("page");
+				}
+			}).map(Bukkit::getOfflinePlayer).filter(OfflinePlayer::hasPlayedBefore).map(OfflinePlayer::getUniqueId);
 		}
 	}
 
 	private static boolean noexceptPick = true;
+
 	public static ItemStack getStackOf(Block block) {
-		if(noexceptPick)
+		if (noexceptPick)
 			try {
 				return Reflect.nmsPickBlock(block);
 			}
-			catch(Exception e) {
+			catch (Exception e) {
 				noexceptPick = false;
-				Log.warning("Failed to reflect \"pickBlock\" method, QuestWorld was not fully prepared for your minecraft version");
-				Log.warning("Falling back to MaterialData comparison for all future checks. Mining quests may not detect blocks as accurately");
+				Log.warning(
+						"Failed to reflect \"pickBlock\" method, QuestWorld was not fully prepared for your minecraft version");
+				Log.warning(
+						"Falling back to MaterialData comparison for all future checks. Mining quests may not detect blocks as accurately");
 			}
 		return block.getState().getData().toItemStack(1);
 	}

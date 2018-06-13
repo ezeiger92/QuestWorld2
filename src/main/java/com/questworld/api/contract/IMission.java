@@ -12,26 +12,41 @@ import com.questworld.api.annotation.NoImpl;
 
 @NoImpl
 public interface IMission extends DataObject {
-	int          getAmount();
-	int          getCustomInt();
-	String       getCustomString();
-	boolean      getDeathReset();
-	String       getDescription();
-	List<String> getDialogue();
-	String       getDisplayName();
-	EntityType   getEntity();
-	ItemStack    getItem();
-	Location     getLocation();
-	boolean      getSpawnerSupport();
-	int          getTimeframe();
-	MissionType  getType();
+	int getAmount();
 
-	ItemStack    getDisplayItem();
-	int          getIndex();
-	IQuest       getQuest();
-	
+	int getCustomInt();
+
+	String getCustomString();
+
+	boolean getDeathReset();
+
+	String getDescription();
+
+	List<String> getDialogue();
+
+	String getDisplayName();
+
+	EntityType getEntity();
+
+	ItemStack getItem();
+
+	Location getLocation();
+
+	boolean getSpawnerSupport();
+
+	int getTimeframe();
+
+	MissionType getType();
+
+	ItemStack getDisplayItem();
+
+	int getIndex();
+
+	IQuest getQuest();
+
 	UUID getUniqueId();
-	
+
 	IMissionState getState();
-	String        getText();
+
+	String getText();
 }

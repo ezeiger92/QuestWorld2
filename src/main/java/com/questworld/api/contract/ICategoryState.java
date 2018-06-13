@@ -9,22 +9,29 @@ import com.questworld.util.BitFlag.BitString;
 public interface ICategoryState extends ICategory {
 	// setID
 	void setHidden(boolean hidden);
+
 	void setName(String name);
+
 	void setPermission(String permission);
+
 	void setItem(ItemStack item);
+
 	void setParent(IQuest object);
 	// setQuests
 	// setWorlds
-	
+
 	void addQuest(String name, int id);
+
 	void removeQuest(IQuest quest);
+
 	void toggleWorld(String world);
 
-
 	boolean apply();
+
 	boolean discard();
+
 	ICategory getSource();
-	
+
 	enum Member implements BitString {
 		QUESTS,
 		ID,
@@ -35,5 +42,6 @@ public interface ICategoryState extends ICategory {
 		HIDDEN,
 		WORLD_BLACKLIST,
 	}
+
 	boolean hasChange(Member field);
 }

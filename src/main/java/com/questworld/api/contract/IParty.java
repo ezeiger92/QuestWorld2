@@ -11,14 +11,22 @@ public interface IParty {
 		DISCONNECT,
 		KICKED,
 	}
-	
+
 	Set<OfflinePlayer> getFullGroup();
+
 	Set<OfflinePlayer> getMembers();
+
 	OfflinePlayer getLeader();
+
 	boolean isLeader(OfflinePlayer player);
+
 	int getSize();
+
 	boolean hasInvited(OfflinePlayer player);
+
 	void playerLeave(OfflinePlayer traitor, LeaveReason reason);
+
 	void invitePlayer(Player p);
+
 	void playerJoin(Player p);
 }

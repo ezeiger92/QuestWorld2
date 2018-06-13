@@ -30,74 +30,74 @@ public final class ExtensionInstaller extends AutoListener implements Reloadable
 		this.api = api;
 		register(plugin);
 	}
-	
+
 	@Override
 	public void onSave() {
-		for(QuestExtension extension : active) {
+		for (QuestExtension extension : active) {
 			String name = extensionName(extension);
 			try {
 				extension.onSave();
 			}
-			catch(Throwable e) {
+			catch (Throwable e) {
 				Log.warning("Error saving extension: " + name);
 				e.printStackTrace();
 			}
 		}
 	}
-	
+
 	@Override
 	public void onReload() {
-		for(QuestExtension extension : active) {
+		for (QuestExtension extension : active) {
 			String name = extensionName(extension);
 			try {
 				extension.onReload();
 			}
-			catch(Throwable e) {
+			catch (Throwable e) {
 				Log.warning("Error reloading extension: " + name);
 				e.printStackTrace();
 			}
 		}
 	}
-	
+
 	@Override
 	public void onDiscard() {
-		for(QuestExtension extension : active) {
+		for (QuestExtension extension : active) {
 			String name = extensionName(extension);
 			try {
 				extension.onDiscard();
 			}
-			catch(Throwable e) {
+			catch (Throwable e) {
 				Log.warning("Error discarding extension: " + name);
 				e.printStackTrace();
 			}
 		}
 	}
-	
+
 	public List<QuestExtension> getActiveExtensions() {
 		return Collections.unmodifiableList(active);
 	}
-	
+
 	public List<QuestExtension> getInactiveExtensions() {
 		return Collections.unmodifiableList(extensions);
 	}
-	
+
 	public void add(QuestExtension extension) {
 		PluginManager manager = plugin.getServer().getPluginManager();
-		
+
 		String name = extensionName(extension);
-		
+
 		Log.fine("Installer - Adding extension: " + name);
-		
+
 		String[] reqs = extension.getDepends();
 
-		for(int i = 0; i < reqs.length; ++i) {
+		for (int i = 0; i < reqs.length; ++i) {
 			Plugin p = manager.getPlugin(reqs[i]);
-			if(p != null && p.isEnabled()) {
+			if (p != null && p.isEnabled()) {
 				extension.directEnablePlugin(p, i);
 			}
 		}
-		
-		if(extension.isReady()) {
+
+		if (extension.isReady()) {
 			Log.fine("Installer - Dependencies found: " + name);
 			initialize(extension, name);
 			active.add(extension);
@@ -107,65 +107,65 @@ public final class ExtensionInstaller extends AutoListener implements Reloadable
 			extensions.add(extension);
 		}
 	}
-	
+
 	public void addAll(Collection<QuestExtension> extensions) {
-		for(QuestExtension extension : extensions)
+		for (QuestExtension extension : extensions)
 			add(extension);
 	}
-	
+
 	private void initialize(QuestExtension extension, String name) {
-		if(extension.isInitialized()) {
+		if (extension.isInitialized()) {
 			Log.warning("Error initializing extension: " + name + ": Double initializationS!");
 			return;
 		}
-		
+
 		Log.fine("Installer - Initializing extension: " + name);
-		
+
 		try {
 			extension.init(plugin);
 		}
-		catch(Throwable e) {
+		catch (Throwable e) {
 			Log.warning("Error initializing extension: " + name);
 			e.printStackTrace();
 			return;
 		}
-		
+
 		PluginManager pm = plugin.getServer().getPluginManager();
 
-		for(MissionType type : extension.getMissionTypes()) {
+		for (MissionType type : extension.getMissionTypes()) {
 			Log.fine("Installer - Storing mission: " + type.getName());
 			api.registerType(type);
-			
-			if(type instanceof Listener) {
+
+			if (type instanceof Listener) {
 				Log.fine("Installer - Registering events: " + type.getName());
-				pm.registerEvents((Listener)type, plugin);
+				pm.registerEvents((Listener) type, plugin);
 			}
 		}
 	}
-	
+
 	private String extensionName(QuestExtension extension) {
 		String name;
 		try {
 			name = extension.getName();
 		}
-		catch(Throwable e) {
+		catch (Throwable e) {
 			name = extension.getClass().getSimpleName();
 			Log.warning("Error getting extension name for class " + name);
 			e.printStackTrace();
 		}
-		
+
 		return name;
 	}
-	
+
 	@EventHandler
 	public void onPluginEnable(PluginEnableEvent event) {
 		Iterator<QuestExtension> iterator = extensions.iterator();
-		
-		while(iterator.hasNext()) {
+
+		while (iterator.hasNext()) {
 			QuestExtension extension = iterator.next();
 			extension.enablePlugin(event.getPlugin());
-			
-			if(extension.isReady()) {
+
+			if (extension.isReady()) {
 				String name = extensionName(extension);
 				Log.fine("Installer - Dependencies loaded: " + name);
 				initialize(extension, name);

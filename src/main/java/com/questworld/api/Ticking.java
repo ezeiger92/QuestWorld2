@@ -15,8 +15,9 @@ import com.questworld.api.contract.MissionEntry;
 public interface Ticking extends Manual {
 	/**
 	 * Modifies mission progress on player request.
-	 * <p> The default behavior is to call the code provided for
-	 * {@link Manual#onManual onManual}.
+	 * <p>
+	 * The default behavior is to call the code provided for {@link Manual#onManual
+	 * onManual}.
 	 * 
 	 * @param player The player sending the request
 	 * @param entry A MissionEntry that provides direct progress manipulation

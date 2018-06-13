@@ -15,7 +15,8 @@ import com.questworld.api.contract.MissionEntry;
 public interface Decaying {
 	/**
 	 * Modifies a missions progress on player death.
-	 * <p> The default behavior simply sets progress to <tt>0</tt>.
+	 * <p>
+	 * The default behavior simply sets progress to <tt>0</tt>.
 	 * 
 	 * @param event The player death
 	 * @param entry A MissionEntry that provides direct progress manipulation

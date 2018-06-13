@@ -19,64 +19,64 @@ public class QuestsCommand implements CommandExecutor {
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 		if (sender instanceof Player) {
-			
-			Player p = (Player)sender;
+
+			Player p = (Player) sender;
 			ICategory category = null;
 			IQuest quest = null;
 			int page = -1;
-			
+
 			int index = 0;
-			
-			if(args.length > index) {
+
+			if (args.length > index) {
 				try {
 					category = QuestWorld.getFacade().getCategory(Integer.parseInt(args[index]));
 				}
-				catch(NumberFormatException e) {
+				catch (NumberFormatException e) {
 				}
-				
-				if(category != null) {
+
+				if (category != null) {
 					++index;
-					
-					if(args.length > index) {
+
+					if (args.length > index) {
 						try {
 							quest = category.getQuest(Integer.parseInt(args[index]));
 						}
-						catch(NumberFormatException e) {
+						catch (NumberFormatException e) {
 						}
-						
-						if(quest != null)
+
+						if (quest != null)
 							++index;
 					}
 				}
 			}
-			
-			if(args.length > index) {
+
+			if (args.length > index) {
 				String tail = args[index].toLowerCase(Locale.US);
-				
-				if(tail.equals("page")) {
-					if(args.length > index + 1) {
+
+				if (tail.equals("page")) {
+					if (args.length > index + 1) {
 						try {
 							page = Integer.parseInt(args[index + 1]) - 1;
 						}
-						catch(NumberFormatException e) {
+						catch (NumberFormatException e) {
 						}
 					}
-					
-					if(page < 0) {
-						//error
+
+					if (page < 0) {
+						// error
 						return true;
 					}
 				}
 				else {
-					//error
+					// error
 					return true;
 				}
 			}
-			
-			if(category != null) {
-				if(QuestBook.testCategory(p, category)) {
-					if(quest != null) {
-						if(QuestBook.testQuest(p, quest)) {
+
+			if (category != null) {
+				if (QuestBook.testCategory(p, category)) {
+					if (quest != null) {
+						if (QuestBook.testQuest(p, quest)) {
 							QuestBook.openQuest(p, quest, false, false);
 						}
 						else
@@ -93,7 +93,7 @@ public class QuestsCommand implements CommandExecutor {
 					sender.sendMessage(Text.colorize("&cCategory unavailable"));
 			}
 			else {
-				if(page >= 0) {
+				if (page >= 0) {
 					PagedMapping.clearPages(p);
 					PagedMapping.putPage(p, page);
 					QuestBook.openMainMenu(p);
@@ -104,7 +104,7 @@ public class QuestsCommand implements CommandExecutor {
 		}
 		else
 			sender.sendMessage(Text.colorize("&4You are not a Player"));
-		
+
 		return true;
 	}
 

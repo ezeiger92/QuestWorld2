@@ -9,7 +9,7 @@ import org.bukkit.event.Event;
  */
 public abstract class CancellableEvent extends Event implements Cancellable {
 	private boolean cancelled;
-	
+
 	@Override
 	public boolean isCancelled() {
 		return cancelled;
@@ -19,23 +19,23 @@ public abstract class CancellableEvent extends Event implements Cancellable {
 	public void setCancelled(boolean cancel) {
 		cancelled = cancel;
 	}
-	
+
 	public static boolean send(Event event) {
 		Bukkit.getPluginManager().callEvent(event);
-		
-		if(event instanceof Cancellable)
-			return !((Cancellable)event).isCancelled();
-		
+
+		if (event instanceof Cancellable)
+			return !((Cancellable) event).isCancelled();
+
 		return true;
 	}
-	
-/*
-	COPY PASTE ME INTO DERIVED EVENTS :D
 
-	// Boilerplate copy/paste from CancellableEvent
-	@Override
-	public HandlerList getHandlers() { return handlers;	}
-	public static HandlerList getHandlerList() { return handlers; }
-	private static final HandlerList handlers = new HandlerList();
-*/
+	/*
+	 * COPY PASTE ME INTO DERIVED EVENTS :D
+	 * 
+	 * // Boilerplate copy/paste from CancellableEvent
+	 * 
+	 * @Override public HandlerList getHandlers() { return handlers; } public static
+	 * HandlerList getHandlerList() { return handlers; } private static final
+	 * HandlerList handlers = new HandlerList();
+	 */
 }

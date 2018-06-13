@@ -16,13 +16,13 @@ public class PartialAdapter extends VersionAdapter {
 	@Override
 	public void makeSpawnEgg(ItemStack result, EntityType mob) {
 		throw new UnsupportedOperationException("Adaptor does not supply \"makeSpawnEgg\"");
-		
+
 	}
 
 	@Override
 	public void makePlayerHead(ItemStack result, OfflinePlayer player) {
 		throw new UnsupportedOperationException("Adaptor does not supply \"makePlayerHead\"");
-		
+
 	}
 
 	@Override

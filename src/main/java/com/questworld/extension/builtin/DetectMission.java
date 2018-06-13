@@ -14,25 +14,25 @@ import com.questworld.util.ItemBuilder;
 import com.questworld.util.Text;
 
 public class DetectMission extends MissionType implements Ticking {
-	
+
 	private static final Material material() {
 		Material result = Material.matchMaterial("OBSERVER");
-		
-		if(result != null)
+
+		if (result != null)
 			return result;
-		
+
 		return Material.WOOD_PLATE;
 	}
-	
+
 	public DetectMission() {
 		super("DETECT", false, new ItemStack(DetectMission.material()));
 	}
-	
+
 	@Override
 	public ItemStack userDisplayItem(IMission instance) {
 		return instance.getItem();
 	}
-	
+
 	@Override
 	protected String userInstanceDescription(IMission instance) {
 		return "&7Own " + instance.getAmount() + "x " + Text.itemName(instance.getDisplayItem());
@@ -47,7 +47,7 @@ public class DetectMission extends MissionType implements Ticking {
 			if (ItemBuilder.compareItems(current, mission.getItem()))
 				amount = amount + current.getAmount();
 		}
-		
+
 		if (amount >= mission.getAmount())
 			result.setProgress(mission.getAmount());
 	}
@@ -56,7 +56,7 @@ public class DetectMission extends MissionType implements Ticking {
 	public String getLabel() {
 		return "&r> Click to check for items";
 	}
-	
+
 	@Override
 	protected void layoutMenu(IMissionState changes) {
 		putButton(10, MissionButton.item(changes));

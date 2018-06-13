@@ -22,14 +22,20 @@ public class QuestChangeEvent extends CancellableEvent {
 	public IQuestState getNextState() {
 		return nextState;
 	}
-	
+
 	public boolean hasChange(IQuestState.Member field) {
 		return nextState.hasChange(field);
 	}
-	
+
 	// Boilerplate copy/paste from CancellableEvent
 	@Override
-	public HandlerList getHandlers() { return handlers;	}
-	public static HandlerList getHandlerList() { return handlers; }
+	public HandlerList getHandlers() {
+		return handlers;
+	}
+
+	public static HandlerList getHandlerList() {
+		return handlers;
+	}
+
 	private static final HandlerList handlers = new HandlerList();
 }

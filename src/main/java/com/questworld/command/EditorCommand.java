@@ -36,14 +36,14 @@ import com.questworld.util.VersionAdapter;
 public class EditorCommand implements CommandExecutor {
 	private static final int PER_PAGE = 7;
 	private final QuestingImpl api;
-	
+
 	public EditorCommand(QuestingImpl api) {
 		this.api = api;
 	}
-	
+
 	private void help(String label, CommandSender sender) {
 		String version = api.getPlugin().getDescription().getVersion();
-		sender.sendMessage(Text.colorize("&3== &b/", label, " help &3: &bv"+version+" &3== "));
+		sender.sendMessage(Text.colorize("&3== &b/", label, " help &3: &bv" + version + " &3== "));
 		sender.sendMessage(Text.colorize("  &bgui &7- Open the editor gui"));
 		sender.sendMessage(Text.colorize("  &bbook [player] &7- Give yourself (or player) a questbook"));
 		sender.sendMessage(Text.colorize("  &breload &7- Reloads config files from disk"));
@@ -52,41 +52,42 @@ public class EditorCommand implements CommandExecutor {
 		sender.sendMessage(Text.colorize("  &bexport <file> &7- Save all quests to a preset"));
 		sender.sendMessage(Text.colorize("  &bimport <file> &4&l*&7 - Overwrite all quests with a preset"));
 		sender.sendMessage(Text.colorize("  &bdiscard &4&l*&7 - Reloads quest data from disk, losing changes"));
-		//sender.sendMessage(Text.colorize("  &bupgrade &4&l*&7 - Replaces all cooldowns of 0 with -1"));
+		// sender.sendMessage(Text.colorize(" &bupgrade &4&l*&7 - Replaces all cooldowns
+		// of 0 with -1"));
 	}
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-		if(args.length == 0) {
+		if (args.length == 0) {
 			help(label, sender);
 			return true;
 		}
 		Player p;
-		if(sender instanceof Player)
-			p = (Player)sender;
+		if (sender instanceof Player)
+			p = (Player) sender;
 		else
 			p = null;
-		
+
 		String param = args[0].toLowerCase(Locale.US);
-		
+
 		if (param.equals("import")) {
-			if(args.length < 2) {
+			if (args.length < 2) {
 				sender.sendMessage(Text.colorize("&cMissing argument: /", label, " import &6<File>"));
 				return true;
 			}
 			args[1] += ".zip";
-			if(api.presets().load(args[1]))
+			if (api.presets().load(args[1]))
 				sender.sendMessage(Text.colorize("&7Successfully installed the Preset &a", args[1]));
 			else
 				sender.sendMessage(Text.colorize("&cThe Preset &4", args[1], " &ccould not be installed"));
 		}
 		else if (param.equals("export")) {
-			if(args.length < 2) {
+			if (args.length < 2) {
 				sender.sendMessage(Text.colorize("&cMissing argument: /", label, " export &6<File>"));
 				return true;
 			}
 			args[1] += ".zip";
-			if(api.presets().save(args[1]))
+			if (api.presets().save(args[1]))
 				sender.sendMessage(Text.colorize("&7Successfully saved the Preset &a", args[1]));
 			else
 				sender.sendMessage(Text.colorize("&cCould not save Preset &a", args[1]));
@@ -104,43 +105,43 @@ public class EditorCommand implements CommandExecutor {
 		}
 		else if (param.equals("book")) {
 			Player recipient = p;
-			if(args.length > 1)
+			if (args.length > 1)
 				recipient = PlayerTools.getPlayer(args[1]);
-			
-			if(recipient != null) {
+
+			if (recipient != null) {
 				recipient.getInventory().addItem(GuideBook.instance().item());
-				if(p != recipient)
+				if (p != recipient)
 					p.sendMessage(Text.colorize("&3Given QuestBook to &b" + recipient.getName()));
 				recipient.sendMessage(Text.colorize("&3Recieved QuestBook"));
 			}
 			else
 				p.sendMessage(Text.colorize("&cCould not find player &e" + args[1]));
 		}
-		else if(param.equals("discard")) {
+		else if (param.equals("discard")) {
 			api.onDiscard();
 			api.getFacade().load();
 			sender.sendMessage(Text.colorize("&7Reloaded all quests from disk"));
 		}
-		else if(param.equals("save")) {
+		else if (param.equals("save")) {
 			api.onSave();
 			sender.sendMessage(Text.colorize("&7Saved all quests to disk"));
 		}
-		else if(param.equals("reload")) {
-			if(args.length > 1 && args[1].equalsIgnoreCase("quests")) {
+		else if (param.equals("reload")) {
+			if (args.length > 1 && args[1].equalsIgnoreCase("quests")) {
 				sender.sendMessage(Text.colorize("&cThis usage is deprecated! Use /qe discard instead"));
 
 				api.onDiscard();
 				api.getFacade().load();
-				
+
 				sender.sendMessage(Text.colorize("&7Reloaded all quests from disk"));
 			}
-			else if(args.length > 1 && args[1].equalsIgnoreCase("all")) {
+			else if (args.length > 1 && args[1].equalsIgnoreCase("all")) {
 				sender.sendMessage(Text.colorize("&cThis usage is deprecated! Use /qe reload and /qe discard instead"));
 				api.onReload();
-				
+
 				api.onDiscard();
 				api.getFacade().load();
-				
+
 				sender.sendMessage(Text.colorize("&7Reloaded config and all quests from disk"));
 			}
 			else {
@@ -148,60 +149,63 @@ public class EditorCommand implements CommandExecutor {
 				sender.sendMessage(Text.colorize("&7Reloaded config from disk"));
 			}
 		}
-		else if(param.equals("reset")) {
-			if(args.length > 1) {
+		else if (param.equals("reset")) {
+			if (args.length > 1) {
 				String targetName = args[1];
 				UUID uuid = null;
 				OfflinePlayer target = PlayerTools.getPlayer(targetName);
-				
-				if(target != null)
+
+				if (target != null)
 					uuid = target.getUniqueId();
 				else {
 					try {
 						uuid = UUID.fromString(targetName);
 					}
-					catch(IllegalArgumentException e) {
+					catch (IllegalArgumentException e) {
 						@SuppressWarnings("deprecation")
 						OfflinePlayer t = Bukkit.getOfflinePlayer(targetName);
-						if(t.hasPlayedBefore())
+						if (t.hasPlayedBefore())
 							uuid = t.getUniqueId();
 					}
 				}
-				
-				if(uuid != null) {
-					PlayerStatus status = (PlayerStatus)QuestWorld.getPlayerStatus(uuid);
+
+				if (uuid != null) {
+					PlayerStatus status = (PlayerStatus) QuestWorld.getPlayerStatus(uuid);
 					int c_id = -1;
 					int q_id = -1;
-					if(args.length <= 2) {
-						for(ICategory cat : QuestWorld.getFacade().getCategories())
+					if (args.length <= 2) {
+						for (ICategory cat : QuestWorld.getFacade().getCategories())
 							status.getTracker().clearCategory(cat);
-						
+
 						return true;
 					}
-					else try {
-						c_id = Integer.parseInt(args[2]);
-					}
-					catch(NumberFormatException exception) {
-						sender.sendMessage(Text.colorize("&cError: invalid number for category (", args[2], ")"));
-						return true;
-					}
-					
-					if(args.length > 3) try {
-						q_id = Integer.parseInt(args[3]);
-					}
-					catch(NumberFormatException exception) {
-						sender.sendMessage(Text.colorize("&cError: invalid number for quest (", args[3], ")"));
-						return true;
-					}
-					
+					else
+						try {
+							c_id = Integer.parseInt(args[2]);
+						}
+						catch (NumberFormatException exception) {
+							sender.sendMessage(Text.colorize("&cError: invalid number for category (", args[2], ")"));
+							return true;
+						}
+
+					if (args.length > 3)
+						try {
+							q_id = Integer.parseInt(args[3]);
+						}
+						catch (NumberFormatException exception) {
+							sender.sendMessage(Text.colorize("&cError: invalid number for quest (", args[3], ")"));
+							return true;
+						}
+
 					ICategory category = QuestWorld.getFacade().getCategory(c_id);
-					if (category != null)  {
+					if (category != null) {
 						if (q_id >= 0) {
 							IQuest quest = category.getQuest(q_id);
-							if(quest != null)
+							if (quest != null)
 								status.getTracker().clearQuest(quest);
 							else
-								sender.sendMessage(Text.colorize("&cMissing quest for index ", args[3], " (in category ", args[2], ")"));
+								sender.sendMessage(Text.colorize("&cMissing quest for index ", args[3],
+										" (in category ", args[2], ")"));
 						}
 						else
 							status.getTracker().clearCategory(category);
@@ -210,69 +214,69 @@ public class EditorCommand implements CommandExecutor {
 						sender.sendMessage(Text.colorize("&cMissing category for index ", args[2]));
 				}
 				else
-					sender.sendMessage(Text.colorize("&cCould not find player \""+targetName+"\""));
+					sender.sendMessage(Text.colorize("&cCould not find player \"" + targetName + "\""));
 			}
 			else
-				sender.sendMessage(Text.colorize("&c/"+label+" reset <player|uuid> [category_id [quest_id]]"));
+				sender.sendMessage(Text.colorize("&c/" + label + " reset <player|uuid> [category_id [quest_id]]"));
 		}
-		else if(param.equals("progress")) {
+		else if (param.equals("progress")) {
 			int index = 1;
-			
+
 			UUID uuid = p.getUniqueId();
 			boolean reset = false;
 			ICategory category = null;
 			IQuest quest = null;
 			int page = 0;
-			
-			if(args.length > index) {
+
+			if (args.length > index) {
 				UUID u2 = PlayerTools.findUUID(args[index]).orElse(null);
-				if(u2 != null) {
+				if (u2 != null) {
 					++index;
 					uuid = u2;
 				}
 			}
-			
-			if(args.length > index) {
+
+			if (args.length > index) {
 				try {
 					category = QuestWorld.getFacade().getCategory(Integer.parseInt(args[index]));
 				}
-				catch(NumberFormatException e) {
+				catch (NumberFormatException e) {
 				}
-				
-				if(category != null) {
+
+				if (category != null) {
 					++index;
-					
-					if(args.length > index) {
+
+					if (args.length > index) {
 						try {
 							quest = category.getQuest(Integer.parseInt(args[index]));
 						}
-						catch(NumberFormatException e) {
+						catch (NumberFormatException e) {
 						}
-						
-						if(quest != null)
+
+						if (quest != null)
 							++index;
 					}
 				}
 			}
-			
-			if(args.length > index) {
+
+			if (args.length > index) {
 				String tail = args[index].toLowerCase(Locale.US);
-				
-				if(tail.equals("reset"))
+
+				if (tail.equals("reset"))
 					reset = true;
-					
-				else if(tail.equals("page")) {
+
+				else if (tail.equals("page")) {
 					page = -1;
-					if(args.length > index + 1) {
+					if (args.length > index + 1) {
 						try {
 							page = Integer.parseInt(args[index + 1]) - 1;
 						}
-						catch(NumberFormatException e) {
+						catch (NumberFormatException e) {
 						}
 					}
-					
-					if(page < 0) {
-						//error
+
+					if (page < 0) {
+						// error
 						return true;
 					}
 				}
@@ -281,94 +285,103 @@ public class EditorCommand implements CommandExecutor {
 					return true;
 				}
 			}
-			
-			PlayerStatus status = (PlayerStatus)QuestWorld.getPlayerStatus(uuid);
-			
-			if(category != null) {
-				if(quest != null) {
-					if(reset)
+
+			PlayerStatus status = (PlayerStatus) QuestWorld.getPlayerStatus(uuid);
+
+			if (category != null) {
+				if (quest != null) {
+					if (reset)
 						status.getTracker().clearQuest(quest);
-					
+
 					else {
 						List<? extends IMission> missions = quest.getOrderedMissions();
 						int end = Math.min(PER_PAGE * (page + 1), missions.size());
-						
-						sender.sendMessage(Text.colorize("&3Missions - page "+ (page + 1) + "/" + (missions.size() / PER_PAGE + 1)));
-						for(int i = PER_PAGE * page; i < end; ++i) {
+
+						sender.sendMessage(Text
+								.colorize("&3Missions - page " + (page + 1) + "/" + (missions.size() / PER_PAGE + 1)));
+						for (int i = PER_PAGE * page; i < end; ++i) {
 							IMission m = missions.get(i);
-							sender.sendMessage(Text.colorize(m.getText(), " &7- &a" + status.getProgress(m) + "/" + m.getAmount()));
+							sender.sendMessage(Text.colorize(m.getText(),
+									" &7- &a" + status.getProgress(m) + "/" + m.getAmount()));
 						}
 					}
 				}
-				else if(reset)
+				else if (reset)
 					status.getTracker().clearCategory(category);
 
 				else {
 					ArrayList<? extends IQuest> quests = new ArrayList<>(category.getQuests());
 					Collections.sort(quests, (l, r) -> l.getID() - r.getID());
 					int end = Math.min(PER_PAGE * (page + 1), quests.size());
-					
-					sender.sendMessage(Text.colorize("&3Quests - page "+ (page + 1) + "/" + (quests.size() / PER_PAGE + 1)));
-					for(int i = PER_PAGE * page; i < end; ++i) {
+
+					sender.sendMessage(
+							Text.colorize("&3Quests - page " + (page + 1) + "/" + (quests.size() / PER_PAGE + 1)));
+					for (int i = PER_PAGE * page; i < end; ++i) {
 						IQuest q = quests.get(i);
-						sender.sendMessage(Text.colorize(q.getID() + ": " + q.getName() + " &7- &a" + status.getProgress(q) + "/" + q.getMissions().size()));
+						sender.sendMessage(Text.colorize(q.getID() + ": " + q.getName() + " &7- &a"
+								+ status.getProgress(q) + "/" + q.getMissions().size()));
 					}
 				}
 			}
-			else if(reset)
-				for(ICategory cat : QuestWorld.getFacade().getCategories())
+			else if (reset)
+				for (ICategory cat : QuestWorld.getFacade().getCategories())
 					status.getTracker().clearCategory(cat);
 			else {
 				ArrayList<? extends ICategory> categories = new ArrayList<>(QuestWorld.getFacade().getCategories());
 				Collections.sort(categories, (l, r) -> l.getID() - r.getID());
 				int end = Math.min(PER_PAGE * (page + 1), categories.size());
-				
-				sender.sendMessage(Text.colorize("&3Categories - page "+ (page + 1) + "/" + (categories.size() / PER_PAGE + 1)));
-				
-				for(int i = PER_PAGE * page; i < end; ++i) {
+
+				sender.sendMessage(
+						Text.colorize("&3Categories - page " + (page + 1) + "/" + (categories.size() / PER_PAGE + 1)));
+
+				for (int i = PER_PAGE * page; i < end; ++i) {
 					ICategory c = categories.get(i);
-					sender.sendMessage(Text.colorize(c.getID() + ": " + c.getName() + " &7- &a" + status.getProgress(c) + "/" + c.getQuests().size()));
+					sender.sendMessage(Text.colorize(c.getID() + ": " + c.getName() + " &7- &a" + status.getProgress(c)
+							+ "/" + c.getQuests().size()));
 				}
 			}
-			
+
 		}
-		else if(param.equals("upgrade")) {
-			if(args.length > 1 && args[1].equalsIgnoreCase("confirm")) {
+		else if (param.equals("upgrade")) {
+			if (args.length > 1 && args[1].equalsIgnoreCase("confirm")) {
 				int changeCount = 0;
-				for(ICategory category : QuestWorld.getFacade().getCategories())
-					for(IQuest quest : category.getQuests())
-						if(quest.getCooldown() == 0) {
+				for (ICategory category : QuestWorld.getFacade().getCategories())
+					for (IQuest quest : category.getQuests())
+						if (quest.getCooldown() == 0) {
 							// Administrative process - bypass events and directly modify quest
 							// 99% of the time you should use .getState() and .apply()
-							IQuestState q = (IQuestState)quest;
+							IQuestState q = (IQuestState) quest;
 							q.setRawCooldown(-1);
 							++changeCount;
 							String questFile = quest.getID() + "-C" + category.getID();
-							Log.info("[Quest World 2] Upgrading "+category.getName()+"."+quest.getName()+" ("+questFile+".quest): Cooldown changed from 0 to -1");
+							Log.info("[Quest World 2] Upgrading " + category.getName() + "." + quest.getName() + " ("
+									+ questFile + ".quest): Cooldown changed from 0 to -1");
 						}
-				
+
 				String s = "s";
-				if(changeCount == 1)
+				if (changeCount == 1)
 					s = "";
-				
-				String message = "&7Upgrade complete, "+changeCount+" quest"+s+" were modified";
-				if(changeCount > 0)
+
+				String message = "&7Upgrade complete, " + changeCount + " quest" + s + " were modified";
+				if (changeCount > 0)
 					message += ", changes printed in console";
-				
+
 				sender.sendMessage(Text.colorize(message));
 				return true;
 			}
-			sender.sendMessage(Text.colorize("&cWarning! this will change all quests with 0 cooldown to -1 cooldown to match new behavior"));
-			sender.sendMessage(Text.colorize("&cIf you've made any 0 cooldown quests in 2.6.3 or later, they will be affected to!"));
+			sender.sendMessage(Text.colorize(
+					"&cWarning! this will change all quests with 0 cooldown to -1 cooldown to match new behavior"));
+			sender.sendMessage(Text
+					.colorize("&cIf you've made any 0 cooldown quests in 2.6.3 or later, they will be affected to!"));
 			sender.sendMessage(Text.colorize("  &7If you wish to continue, type /", label, " upgrade confirm"));
-			
+
 			return true;
 		}
-		else if(param.equals("adapter")) {
+		else if (param.equals("adapter")) {
 			VersionAdapter adapter = Reflect.getAdapter();
-			
+
 			sender.sendMessage("Verison(s) " + adapter.toString());
-			
+
 			adapter.makePlayerHead(new ItemStack(Material.STONE), p);
 			adapter.makeSpawnEgg(new ItemStack(Material.MONSTER_EGG), EntityType.PIG);
 			adapter.sendActionbar(p, "test");

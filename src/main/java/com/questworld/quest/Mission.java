@@ -23,21 +23,21 @@ import com.questworld.util.Text;
 
 class Mission extends UniqueObject implements IMissionState {
 	private WeakReference<Quest> quest;
-	private int     amount = 1;
-	private int     customInt = 0;
-	private String  customString = "";
+	private int amount = 1;
+	private int customInt = 0;
+	private String customString = "";
 	private boolean deathReset = false;
-	private String  description = "Hey there! Do this Quest.";
+	private String description = "Hey there! Do this Quest.";
 	private List<String> dialogue = new ArrayList<>();
-	private String      displayName = "";
-	private EntityType  entity = EntityType.PLAYER;
-	private ItemStack   item = new ItemStack(Material.STONE);
-	private int         index = -1;
-	private Location    location = Bukkit.getWorlds().get(0).getSpawnLocation();
-	private boolean     spawnerSupport = true;
-	private int         timeframe = 0;
+	private String displayName = "";
+	private EntityType entity = EntityType.PLAYER;
+	private ItemStack item = new ItemStack(Material.STONE);
+	private int index = -1;
+	private Location location = Bukkit.getWorlds().get(0).getSpawnLocation();
+	private boolean spawnerSupport = true;
+	private int timeframe = 0;
 	private MissionType type = QuestWorld.getMissionType("SUBMIT");
-	
+
 	@Deprecated
 	private String missingWorldName = location.getWorld().getName();
 	private static HashSet<String> missingWorlds = new HashSet<>();
@@ -51,12 +51,13 @@ class Mission extends UniqueObject implements IMissionState {
 		loadMap(data);
 		ProgressTracker.loadDialogue(this);
 	}
-	
+
 	protected Mission(Mission source) {
 		copy(source);
 	}
 
-	// Repair any quests that would have been broken by updates, namely location quests
+	// Repair any quests that would have been broken by updates, namely location
+	// quests
 	public void validate() {
 		type.validate(this.getState());
 	}
@@ -71,7 +72,7 @@ class Mission extends UniqueObject implements IMissionState {
 	public int getCustomInt() {
 		return customInt;
 	}
-	
+
 	@Override
 	public String getCustomString() {
 		return customString;
@@ -81,17 +82,17 @@ class Mission extends UniqueObject implements IMissionState {
 	public String getDescription() {
 		return description;
 	}
-	
+
 	@Override
 	public List<String> getDialogue() {
 		return Collections.unmodifiableList(dialogue);
 	}
-	
+
 	@Override
 	public String getDisplayName() {
 		return displayName;
 	}
-	
+
 	@Override
 	public EntityType getEntity() {
 		return entity;
@@ -106,22 +107,22 @@ class Mission extends UniqueObject implements IMissionState {
 	public Location getLocation() {
 		return location.clone();
 	}
-	
+
 	@Override
 	public ItemStack getItem() {
 		return item.clone();
 	}
-	
+
 	@Override
 	public Quest getQuest() {
 		return quest.get();
 	}
-	
+
 	@Override
 	public boolean getSpawnerSupport() {
 		return spawnerSupport;
 	}
-	
+
 	@Override
 	public int getTimeframe() {
 		return timeframe;
@@ -141,12 +142,12 @@ class Mission extends UniqueObject implements IMissionState {
 	public ItemStack getDisplayItem() {
 		return type.userDisplayItem(this).clone();
 	}
-	
+
 	@Override
 	public MissionState getState() {
 		return new MissionState(this);
 	}
-	
+
 	@Override
 	public String getText() {
 		if (getDisplayName().length() > 0)
@@ -159,23 +160,23 @@ class Mission extends UniqueObject implements IMissionState {
 		HashMap<String, Object> result = new HashMap<>(20);
 
 		result.put("uniqueId", getUniqueId().toString());
-		result.put("quest",    getQuest());
-		result.put("type",     type.toString());
-		result.put("item",     item);
-		result.put("amount",   amount);
-		result.put("entity",   entity.toString());
+		result.put("quest", getQuest());
+		result.put("type", type.toString());
+		result.put("item", item);
+		result.put("amount", amount);
+		result.put("entity", entity.toString());
 		result.put("location", locationHelper(location));
-		result.put("index",    index);
-		result.put("custom_string",  Text.escapeColor(customString));
-		result.put("display-name",   Text.escapeColor(displayName));
-		result.put("timeframe",      timeframe);
+		result.put("index", index);
+		result.put("custom_string", Text.escapeColor(customString));
+		result.put("display-name", Text.escapeColor(displayName));
+		result.put("timeframe", timeframe);
 		result.put("reset-on-death", deathReset);
-		result.put("lore",           Text.escapeColor(description));
-		result.put("custom_int",     customInt);
+		result.put("lore", Text.escapeColor(description));
+		result.put("custom_int", customInt);
 		result.put("exclude-spawners", !spawnerSupport);
-		
+
 		result.put("questId", getQuest().getUniqueId().toString());
-		
+
 		return result;
 	}
 
@@ -188,22 +189,22 @@ class Mission extends UniqueObject implements IMissionState {
 	public void setCustomInt(int val) {
 		customInt = val;
 	}
-	
+
 	@Override
 	public void setCustomString(String customString) {
 		this.customString = customString;
 	}
-	
+
 	@Override
 	public void setDeathReset(boolean deathReset) {
 		this.deathReset = deathReset;
 	}
-	
+
 	@Override
 	public void setDescription(String description) {
 		this.description = description;
 	}
-	
+
 	@Override
 	public void setDialogue(List<String> dialogue) {
 		this.dialogue.clear();
@@ -214,18 +215,18 @@ class Mission extends UniqueObject implements IMissionState {
 	public void setDisplayName(String name) {
 		displayName = name;
 	}
-	
+
 	@Override
 	public void setEntity(EntityType entity) {
 		this.entity = entity;
 	}
-	
+
 	@Override
 	public void setItem(ItemStack item) {
 		this.item = item.clone();
 		this.item.setAmount(1);
 	}
-	
+
 	@Override
 	public void setLocation(Location loc) {
 		this.location = loc.clone();
@@ -241,12 +242,12 @@ class Mission extends UniqueObject implements IMissionState {
 	public void setType(MissionType type) {
 		this.type = type;
 	}
-	
+
 	@Override
 	public void setIndex(int index) {
 		this.index = index;
 	}
-	
+
 	@Override
 	public void setTimeframe(int timeframe) {
 		this.timeframe = timeframe;
@@ -271,13 +272,13 @@ class Mission extends UniqueObject implements IMissionState {
 	public boolean hasChange(Member field) {
 		return true;
 	}
-	
+
 	@Override
 	protected void updateLastModified() {
 		// TODO Remove if/when quests get their own files
 		getQuest().updateLastModified();
 	}
-	
+
 	protected void copy(Mission source) {
 		quest = source.quest;
 		amount = source.amount;
@@ -296,91 +297,91 @@ class Mission extends UniqueObject implements IMissionState {
 		type = source.type;
 		missingWorldName = source.missingWorldName;
 	}
-	
+
 	protected void copyTo(Mission dest) {
 		dest.copy(this);
 	}
-	
+
 	protected void loadDefaults() {
 		copy(new Mission(index, getQuest()));
 	}
-	
+
 	private int fromMaybeString(Object o) {
-		if(o instanceof Integer)
-			return ((Integer)o).intValue();
-		if(o instanceof String)
-			return Integer.parseInt((String)o);
-		
+		if (o instanceof Integer)
+			return ((Integer) o).intValue();
+		if (o instanceof String)
+			return Integer.parseInt((String) o);
+
 		throw new IllegalArgumentException("Expected Integer or String, got " + o.getClass().getSimpleName());
 	}
 
 	@SuppressWarnings("unchecked")
 	private void loadMap(Map<String, Object> data) {
-		setUniqueId((String)data.get("uniqueId"));
-		
-		quest    = new WeakReference<>((Quest)data.get("quest"));
-		type     = QuestWorld.getMissionType((String)data.getOrDefault("type", type.toString()));
-		ItemStack i2 = (ItemStack)data.getOrDefault("item", item);
-		
-		if(i2.getType() != Material.AIR)
+		setUniqueId((String) data.get("uniqueId"));
+
+		quest = new WeakReference<>((Quest) data.get("quest"));
+		type = QuestWorld.getMissionType((String) data.getOrDefault("type", type.toString()));
+		ItemStack i2 = (ItemStack) data.getOrDefault("item", item);
+
+		if (i2.getType() != Material.AIR)
 			item = i2;
-		
-		amount   = (Integer)data.getOrDefault("amount", amount);
-		try { entity = EntityType.valueOf((String)data.get("entity")); }
-		catch(IllegalArgumentException | NullPointerException e) {}
-		location = locationHelper((Map<String, Object>)data.get("location"));
-		if(location.getWorld() == null && !missingWorlds.contains(missingWorldName)) {
+
+		amount = (Integer) data.getOrDefault("amount", amount);
+		try {
+			entity = EntityType.valueOf((String) data.get("entity"));
+		}
+		catch (IllegalArgumentException | NullPointerException e) {
+		}
+		location = locationHelper((Map<String, Object>) data.get("location"));
+		if (location.getWorld() == null && !missingWorlds.contains(missingWorldName)) {
 			Log.warning("Mission location exists in missing world \"" + missingWorldName + "\". Was it deleted?");
 			missingWorlds.add(missingWorldName);
 		}
-		index    = (Integer)data.getOrDefault("index", index);
+		index = (Integer) data.getOrDefault("index", index);
 		// Chain to handle old name
-		customString = (String)data.getOrDefault("name", customString);
-		customString = Text.colorize((String)data.getOrDefault("custom_string", customString));
-		displayName  = Text.colorize((String)data.getOrDefault("display-name", displayName));
-		
-		timeframe    = fromMaybeString(data.getOrDefault("timeframe", timeframe));
-		
-		deathReset   = (Boolean)data.getOrDefault("reset-on-death", deathReset);
-		description  = Text.colorize((String)data.getOrDefault("lore", description));
+		customString = (String) data.getOrDefault("name", customString);
+		customString = Text.colorize((String) data.getOrDefault("custom_string", customString));
+		displayName = Text.colorize((String) data.getOrDefault("display-name", displayName));
+
+		timeframe = fromMaybeString(data.getOrDefault("timeframe", timeframe));
+
+		deathReset = (Boolean) data.getOrDefault("reset-on-death", deathReset);
+		description = Text.colorize((String) data.getOrDefault("lore", description));
 		// Chain to handle old name
-		customInt    = (Integer)data.getOrDefault("citizen", customInt);
-		customInt    = (Integer)data.getOrDefault("custom_int", customInt);
-		spawnerSupport = !(Boolean)data.getOrDefault("exclude-spawners", !spawnerSupport);
+		customInt = (Integer) data.getOrDefault("citizen", customInt);
+		customInt = (Integer) data.getOrDefault("custom_int", customInt);
+		spawnerSupport = !(Boolean) data.getOrDefault("exclude-spawners", !spawnerSupport);
 	}
-	
+
 	private Location locationHelper(Map<String, Object> data) {
-		missingWorldName = (String)data.getOrDefault("world", missingWorldName);
-		return new Location(
-				Bukkit.getWorld(missingWorldName),
-				(Double)data.getOrDefault("x", 0.0),
-				(Double)data.getOrDefault("y", 64.0),
-				(Double)data.getOrDefault("z", 0.0),
-				((Double)data.getOrDefault("yaw", 0.0)).floatValue(),
-				((Double)data.getOrDefault("pitch", 0.0)).floatValue());
+		missingWorldName = (String) data.getOrDefault("world", missingWorldName);
+		return new Location(Bukkit.getWorld(missingWorldName), (Double) data.getOrDefault("x", 0.0),
+				(Double) data.getOrDefault("y", 64.0), (Double) data.getOrDefault("z", 0.0),
+				((Double) data.getOrDefault("yaw", 0.0)).floatValue(),
+				((Double) data.getOrDefault("pitch", 0.0)).floatValue());
 	}
-	
+
 	private HashMap<String, Object> locationHelper(Location location) {
 		HashMap<String, Object> result = new HashMap<>();
 		String worldName = missingWorldName;
-		if(location.getWorld() != null)
+		if (location.getWorld() != null)
 			worldName = location.getWorld().getName();
-		
+
 		result.put("world", worldName);
 		result.put("x", location.getX());
 		result.put("y", location.getY());
 		result.put("z", location.getZ());
-		result.put("yaw", (double)location.getYaw());
-		result.put("pitch", (double)location.getPitch());
-		
+		result.put("yaw", (double) location.getYaw());
+		result.put("pitch", (double) location.getPitch());
+
 		return result;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		return super.hashCode();
 	}
-	
+
 	@Override
 	public boolean equals(Object o) {
 		return super.equals(o);

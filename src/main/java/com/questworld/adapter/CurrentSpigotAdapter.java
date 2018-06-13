@@ -10,16 +10,15 @@ public class CurrentSpigotAdapter extends PartialAdapter {
 		// Ensure we're running spigot
 		Class.forName("org.spigotmc.SpigotConfig");
 	}
-	
+
 	@Override
 	protected String forVersion() {
 		return "v1_12_r1_SPIGOT";
 	}
-	
+
 	@Override
 	public void sendActionbar(Player player, String message) {
-		 player.spigot().sendMessage(
-				net.md_5.bungee.api.ChatMessageType.ACTION_BAR,
+		player.spigot().sendMessage(net.md_5.bungee.api.ChatMessageType.ACTION_BAR,
 				net.md_5.bungee.api.chat.TextComponent.fromLegacyText(message));
 	}
 }
