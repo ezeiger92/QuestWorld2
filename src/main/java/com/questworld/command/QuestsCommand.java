@@ -73,34 +73,7 @@ public class QuestsCommand implements CommandExecutor {
 				}
 			}
 
-			if (category != null) {
-				if (QuestBook.testCategory(p, category)) {
-					if (quest != null) {
-						if (QuestBook.testQuest(p, quest)) {
-							QuestBook.openQuest(p, quest, false, false);
-						}
-						else
-							sender.sendMessage(Text.colorize("&cQuest unavailable"));
-					}
-					else {
-						PagedMapping.clearPages(p);
-						PagedMapping.putPage(p, category.getID() / 45);
-						PagedMapping.putPage(p, page);
-						QuestBook.openCategory(p, category, true);
-					}
-				}
-				else
-					sender.sendMessage(Text.colorize("&cCategory unavailable"));
-			}
-			else {
-				if (page >= 0) {
-					PagedMapping.clearPages(p);
-					PagedMapping.putPage(p, page);
-					QuestBook.openMainMenu(p);
-				}
-				else
-					QuestBook.openLastMenu(p);
-			}
+			open(p, category, quest, page, false);
 		}
 		else
 			sender.sendMessage(Text.colorize("&4You are not a Player"));
@@ -108,4 +81,34 @@ public class QuestsCommand implements CommandExecutor {
 		return true;
 	}
 
+	public static void open(Player p, ICategory category, IQuest quest, int page, boolean force) {
+		if (category != null) {
+			if (force || QuestBook.testCategory(p, category)) {
+				if (quest != null) {
+					if (force || QuestBook.testQuest(p, quest)) {
+						QuestBook.openQuest(p, quest, false, false);
+					}
+					else
+						p.sendMessage(Text.colorize("&cQuest unavailable"));
+				}
+				else {
+					PagedMapping.clearPages(p);
+					PagedMapping.putPage(p, category.getID() / 45);
+					PagedMapping.putPage(p, page);
+					QuestBook.openCategory(p, category, true);
+				}
+			}
+			else
+				p.sendMessage(Text.colorize("&cCategory unavailable"));
+		}
+		else {
+			if (page >= 0) {
+				PagedMapping.clearPages(p);
+				PagedMapping.putPage(p, page);
+				QuestBook.openMainMenu(p);
+			}
+			else
+				QuestBook.openLastMenu(p);
+		}
+	}
 }

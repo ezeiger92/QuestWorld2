@@ -118,6 +118,40 @@ public class EditorCommand implements CommandExecutor {
 					}
 					
 					break;
+					
+				case "forceopen":
+					if(args.length >= 3) {
+						Player target = PlayerTools.getPlayer(args[1]);
+						
+						if(target != null) {
+							int c_id;
+							int q_id = -1;
+							
+							try {
+								c_id = Integer.parseInt(args[2]);
+							}
+							catch (NumberFormatException exception) {
+								sender.sendMessage(Text.colorize("&cError: invalid number for category (", args[2], ")"));
+								break;
+							}
+
+							if (args.length > 3)
+								try {
+									q_id = Integer.parseInt(args[3]);
+								}
+								catch (NumberFormatException exception) {
+									sender.sendMessage(Text.colorize("&cError: invalid number for quest (", args[3], ")"));
+									break;
+								}
+							
+							ICategory c =  QuestWorld.getFacade().getCategory(c_id);
+							IQuest q = c != null ? c.getQuest(q_id) : null;
+							
+							QuestsCommand.open(target,c, q, 0, true);
+						}
+					}
+					
+					break;
 				
 				case "help":
 				default:
