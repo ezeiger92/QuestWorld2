@@ -56,7 +56,7 @@ public class SinglePrompt extends StringPrompt {
 	 * @see SinglePrompt#callback callback
 	 */
 	public SinglePrompt(String request, BiPredicate<ConversationContext, String> inputHandler) {
-		this(request, "&cInput not valid", inputHandler);
+		this(request, QuestWorld.translate(Translation.INVALID_INPUT), inputHandler);
 	}
 
 	@Override

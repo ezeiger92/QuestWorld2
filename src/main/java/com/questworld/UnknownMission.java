@@ -6,6 +6,8 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
 import com.questworld.api.MissionType;
+import com.questworld.api.QuestWorld;
+import com.questworld.api.Translation;
 import com.questworld.api.contract.IMission;
 import com.questworld.util.Log;
 
@@ -31,7 +33,8 @@ public class UnknownMission extends MissionType {
 
 	@Override
 	protected String userInstanceDescription(IMission instance) {
-		return "&rUnknown mission type: " + getName() + "! Contact an admin!";
+		
+		return QuestWorld.translate(Translation.TYPE_UNKNOWN, getName());
 	}
 
 	@Override

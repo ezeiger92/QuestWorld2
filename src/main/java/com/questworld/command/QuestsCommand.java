@@ -8,6 +8,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import com.questworld.api.QuestWorld;
+import com.questworld.api.Translation;
 import com.questworld.api.contract.ICategory;
 import com.questworld.api.contract.IQuest;
 import com.questworld.api.menu.PagedMapping;
@@ -76,7 +77,7 @@ public class QuestsCommand implements CommandExecutor {
 			open(p, category, quest, page, false);
 		}
 		else
-			sender.sendMessage(Text.colorize("&4You are not a Player"));
+			sender.sendMessage(Text.colorize(QuestWorld.translate(Translation.NOT_PLAYER)));
 
 		return true;
 	}
@@ -89,7 +90,7 @@ public class QuestsCommand implements CommandExecutor {
 						QuestBook.openQuest(p, quest, false, false);
 					}
 					else
-						p.sendMessage(Text.colorize("&cQuest unavailable"));
+						p.sendMessage(Text.colorize(QuestWorld.translate(Translation.QUEST_UNAVAIL)));
 				}
 				else {
 					PagedMapping.clearPages(p);
@@ -99,7 +100,7 @@ public class QuestsCommand implements CommandExecutor {
 				}
 			}
 			else
-				p.sendMessage(Text.colorize("&cCategory unavailable"));
+				p.sendMessage(Text.colorize(QuestWorld.translate(Translation.CAT_UNAVAIL)));
 		}
 		else {
 			if (page >= 0) {

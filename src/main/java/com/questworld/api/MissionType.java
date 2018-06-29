@@ -41,14 +41,14 @@ public abstract class MissionType {
 			return "";
 		long duration = instance.getTimeframe();
 
-		return " &7within " + Text.timeFromNum(duration);
+		return QuestWorld.translate(Translation.TIMEFRAME_LABEL, Text.timeFromNum(duration));
 	}
 
 	private final String formatDeathReset(IMission instance) {
 		if (!instance.getDeathReset() || !supportsDeathReset())
 			return "";
 
-		return " &7without dying";
+		return QuestWorld.translate(Translation.DEATH_LABEL);
 	}
 
 	public final ItemStack getSelectorItem() {

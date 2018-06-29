@@ -39,8 +39,12 @@ public interface Prop {
 	}
 
 	static Prop HOVER_TEXT(String text, Prop... props) {
+		return HOVER_TEXT(new JsonBlob(text, props));
+	}
+	
+	static Prop HOVER_TEXT(JsonBlob blob) {
 		return new DefaultProp("\"hoverEvent\"",
-				"{\"action\":\"show_text\",\"value\":" + new JsonBlob(text, props).toString() + "}");
+				"{\"action\":\"show_text\",\"value\":" + blob.toString() + "}");
 	}
 
 	static Prop CLICK_RUN(String command) {

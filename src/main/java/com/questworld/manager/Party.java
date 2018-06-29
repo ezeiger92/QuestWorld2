@@ -89,8 +89,9 @@ public class Party implements IPartyState {
 
 		PlayerTools.sendTranslation(p, true, Translation.PARTY_PLAYER_INVITED,
 				Bukkit.getOfflinePlayer(leader).getName());
-
-		PlayerTools.tellraw(p, new JsonBlob("ACCEPT", GREEN, BOLD, HOVER_TEXT("Click to accept this Invitation", GRAY),
+		
+		PlayerTools.tellraw(p, JsonBlob.fromLegacy(QuestWorld.translate(Translation.PARTY_ACCEPT_TEXT), GREEN, BOLD,
+				HOVER_TEXT(JsonBlob.fromLegacy(QuestWorld.translate(Translation.PARTY_ACCEPT_HOVER), GRAY)),
 				CLICK_RUN(p, () -> {
 					if (hasInvited(p)) {
 						int maxParty = QuestWorld.getPlugin().getConfig().getInt("party.max-members");
@@ -101,7 +102,8 @@ public class Party implements IPartyState {
 						else
 							playerJoin(p);
 					}
-				})).add(" ").add("DENY", DARK_RED, BOLD, HOVER_TEXT("Click to deny this Invitation", GRAY),
+				})).add(" ").addLegacy(QuestWorld.translate(Translation.PARTY_DENY_TEXT), DARK_RED, BOLD,
+						HOVER_TEXT(JsonBlob.fromLegacy(QuestWorld.translate(Translation.PARTY_DENY_HOVER), GRAY)), 
 						CLICK_RUN(p, () -> {
 							pending.remove(p.getUniqueId());
 						})).toString());

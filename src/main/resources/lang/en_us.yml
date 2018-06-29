@@ -4,6 +4,11 @@ defaults:
   quest.name:    'New Quest'
   mission.name:  'New Mission'
   prefix:        '&4Quest World &7> '
+  invalid-prompt-input: '&cInput not valid'
+  time-format: '<hours>h <minutes>m'
+  world-format: 'X: <x>, Y: <y>, Z: <z>, World: <world>'
+  range-format: 'X: <x>, Y: <y>, Z: <z>, World: <world>, Range <range>'
+  unknown-world-name: 'Unknown world'
 
 guide-book: |
   &eQuest Book &7(Right Click)
@@ -78,6 +83,13 @@ party:
   joined:     '&7You are now a member of &e%name%''s &7Party!'
 
 party:
+  display:
+    accept:
+      text: '&a&lACCEPT'
+      hover: '&7Click to accept this Invitation'
+    reject:
+      text: '&4&lDENY'
+      hover: '&7Click to deny this Invitation'
   error:
     full:    '&4You cannot have more than &c%max% &4Party Members!'
     member:  '&4%name% &cis already a Member of a Party'
@@ -106,6 +118,7 @@ notifications:
 gui:
   title: '&e&lQuest Book'
   party: '&eParty Menu'
+  fatal-error: '&cAn internal error occurred, please contact an admin!'
 button:
   open: '&7> Click to open'
   back:
@@ -129,3 +142,11 @@ quests:
     rewards: '&rRewards'
 task:
   locked: '&4&lLOCKED'
+  unknown-warning: '&rUnknown mission type: %type%! Contact an admin!'
+  manual-check-label: '&r> Click for manual check'
+  timeframe-label: '&7within <time>'
+  death-reset-label: '&7without dying'
+quests-command:
+  quest-unavailable: '&cQuest unavailable'
+  category-unavailable: '&cCategory unavailable'
+  error-not-player: '&4You are not a Player'

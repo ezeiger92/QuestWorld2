@@ -78,6 +78,30 @@ public enum Translation implements Translator {
 	LOCKED_PARENT("quests.locked-parent", "name"),
 	LOCKED_NO_PERM("quests.locked-no-perm", "node", "desc"),
 	LOCKED_WORLD("quests.locked-in-world", "world"),
+	
+	TYPE_UNKNOWN("task.unknown-warning", "type"),
+	MANUAL_LABEL("task.manual-check-label"),
+	TIMEFRAME_LABEL("task.timeframe-label", "time"),
+	DEATH_LABEL("task.death-reset-label"),
+	
+	INVALID_INPUT("defaults.invalid-prompt-input"),
+	
+	QUEST_UNAVAIL("quests-command.quest-unavailable"),
+	CAT_UNAVAIL("quests-command.category-unavailable"),
+	NOT_PLAYER("quests-command.error-not-player"),
+	
+	GUI_FATAL("gui.fatal-error"),
+	
+
+	PARTY_ACCEPT_TEXT("party.display.accept.text"),
+	PARTY_ACCEPT_HOVER("party.display.accept.hover"),
+	PARTY_DENY_TEXT("party.display.reject.text"),
+	PARTY_DENY_HOVER("party.display.reject.hover"),
+
+	TIME_FMT("defaults.time-format", "hours", "minutes"),
+	WORLD_FMT("defaults.world-format", "x", "y", "z", "world"),
+	RANGE_FMT("defaults.range-format", "x", "y", "z", "world", "range"),
+	UNKNOWN_WORLD("defaults.unknown-world-name"),
 
 	// TODO This is hacky, look again when less tired
 	gui_title,

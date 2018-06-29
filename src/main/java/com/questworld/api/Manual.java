@@ -31,6 +31,6 @@ public interface Manual {
 	 */
 	// TODO: Move to translation, along with all overrides
 	default String getLabel() {
-		return "&r> Click for manual check";
+		return QuestWorld.translate(Translation.MANUAL_LABEL);
 	};
 }
