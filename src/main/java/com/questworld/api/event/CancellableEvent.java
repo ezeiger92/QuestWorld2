@@ -29,13 +29,9 @@ public abstract class CancellableEvent extends Event implements Cancellable {
 		return true;
 	}
 
-	/*
-	 * COPY PASTE ME INTO DERIVED EVENTS :D
-	 * 
-	 * // Boilerplate copy/paste from CancellableEvent
-	 * 
-	 * @Override public HandlerList getHandlers() { return handlers; } public static
-	 * HandlerList getHandlerList() { return handlers; } private static final
-	 * HandlerList handlers = new HandlerList();
-	 */
+	// // COPY PASTE ME INTO DERIVED EVENTS :D
+	// // Boilerplate copy/paste from CancellableEvent
+	// @Override public HandlerList getHandlers() { return handlers; }
+	// public static HandlerList getHandlerList() { return handlers; }
+	// private static final HandlerList handlers = new HandlerList();
 }

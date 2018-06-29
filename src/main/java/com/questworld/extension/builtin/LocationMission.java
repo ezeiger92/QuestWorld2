@@ -11,6 +11,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.util.Vector;
 
 import com.questworld.api.MissionType;
 import com.questworld.api.QuestWorld;
@@ -103,6 +104,9 @@ public class LocationMission extends MissionType implements Ticking {
 
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onPlayerMove(PlayerMoveEvent event) {
+		if(worldDistance(event.getFrom(), event.getTo(), 0) < Vector.getEpsilon())
+			return;
+		
 		Player p = event.getPlayer();
 		HashSet<UUID> closeMissions = close.get(p.getUniqueId());
 
