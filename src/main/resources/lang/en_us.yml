@@ -70,17 +70,6 @@ editor:
   # TODO: These are part of the citizens extension... Why are they here?
   link-citizen:          '&7Please right click the NPC you want to link with this Quest'
   link-citizen-finished: '&aSuccessfully linked this NPC'
-  
-party:
-  full:       '&4You cannot have more than &c%max% &4Party Members!'
-  not-online: '&cPlayer &4%name% &cis not online'
-  already:    '&4%name% &cis already a Member of a Party'
-  invite:     '&7Please type in the Name of the Player you want to invite'
-  invited:    '&7Successfully invited &e%name% &7to your Party'
-  join:       '&e%name% has accepted your Invitation and joined your Party'
-  kicked:     '&e%name% &7has been kicked from the Party'
-  invitation: '&e%name% &7has invited you to join their Party'
-  joined:     '&7You are now a member of &e%name%''s &7Party!'
 
 party:
   display:
@@ -107,6 +96,15 @@ party:
     invited: '&e%leader% &7has invited you to join their Party'
     joined:  '&7You are now a member of &e%leader%''s &7Party!'
     kicked:  '&cYou have been kicked from &e%leader%''s &cParty'
+
+  gui:
+    title: '&eParty Menu'
+    
+  invite:
+    accept-text:  '&a&lACCEPT'
+    accept-hover: '&7Click to accept this Invitation'
+    reject-text:  '&4&lDENY'
+    reject-hover: '&7Click to deny this Invitation'
 
 notifications:
   task-completed: |

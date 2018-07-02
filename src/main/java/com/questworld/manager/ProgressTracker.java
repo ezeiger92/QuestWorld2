@@ -164,10 +164,14 @@ public class ProgressTracker implements Reloadable {
 
 	//// MISSION
 	private static String path(IMission mission) {
+		return "missions." + mission.getUniqueId();
+	}
+	 
+	private static String oldPath(IMission mission) {
 		return path(mission.getQuest()) + ".mission." + mission.getUniqueId();
 	}
 
-	private static String oldPath(IMission mission) {
+	private static String reallyOldPath(IMission mission) {
 		return path(mission.getQuest()) + ".mission." + mission.getIndex();
 	}
 
@@ -259,19 +263,21 @@ public class ProgressTracker implements Reloadable {
 	}
 
 	public int getMissionProgress(IMission mission) {
-		int progress = config.getInt(path(mission) + ".progress", -1);
-
-		if (progress == -1) {
-			progress = config.getInt(oldPath(mission) + ".progress", -1);
-
-			if (progress != -1) {
+		int progress;
+		
+		if((progress = config.getInt(path(mission) + ".progress", -1)) == -1) {
+			if((progress = config.getInt(oldPath(mission) + ".progress", -1)) != -1) {
 				config.set(oldPath(mission), null);
 				setMissionProgress(mission, progress);
 			}
+			else if((progress = config.getInt(reallyOldPath(mission) + ".progress", -1)) != -1) {
+				config.set(reallyOldPath(mission), null);
+				setMissionProgress(mission, progress);
+			}
 			else
-				progress = 0;
+				setMissionProgress(mission, progress = 0);
 		}
-
+		
 		return progress;
 	}
 
@@ -280,19 +286,21 @@ public class ProgressTracker implements Reloadable {
 	}
 
 	public long getMissionEnd(IMission mission) {
-		long completeUntil = config.getLong(path(mission) + ".complete-until", -1);
-
-		if (completeUntil == -1) {
-			completeUntil = config.getInt(oldPath(mission) + ".complete-until", -1);
-
-			if (completeUntil != -1) {
+		long completeUntil;
+		
+		if((completeUntil = config.getLong(path(mission) + ".complete-until", -1)) == -1) {
+			if((completeUntil = config.getLong(oldPath(mission) + ".complete-until", -1)) != -1) {
 				config.set(oldPath(mission), null);
 				setMissionEnd(mission, completeUntil);
 			}
+			else if((completeUntil = config.getLong(reallyOldPath(mission) + ".complete-until", -1)) != -1) {
+				config.set(reallyOldPath(mission), null);
+				setMissionEnd(mission, completeUntil);
+			}
 			else
-				completeUntil = 0;
+				setMissionEnd(mission, completeUntil = 0);
 		}
-
+		
 		return completeUntil;
 	}
 
