@@ -12,6 +12,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import com.questworld.QuestingImpl;
@@ -261,51 +262,40 @@ public class ProgressTracker implements Reloadable {
 			return;
 		}
 	}
-
-	public int getMissionProgress(IMission mission) {
-		int progress;
+	
+	private ConfigurationSection getMissionPath(IMission mission) {
+		ConfigurationSection result = config.getConfigurationSection(path(mission));
 		
-		if((progress = config.getInt(path(mission) + ".progress", -1)) == -1) {
-			if((progress = config.getInt(oldPath(mission) + ".progress", -1)) != -1) {
-				config.set(oldPath(mission), null);
-				setMissionProgress(mission, progress);
-			}
-			else if((progress = config.getInt(reallyOldPath(mission) + ".progress", -1)) != -1) {
+		if(result == null) {
+			ConfigurationSection old;
+			
+			if((old = config.getConfigurationSection(oldPath(mission))) != null) {
+				result = config.createSection(path(mission), old.getValues(true));
 				config.set(reallyOldPath(mission), null);
-				setMissionProgress(mission, progress);
 			}
-			else
-				setMissionProgress(mission, progress = 0);
+			else if((old = config.getConfigurationSection(reallyOldPath(mission))) != null) {
+				result = config.createSection(path(mission), old.getValues(true));
+				config.set(reallyOldPath(mission), null);
+			}
 		}
 		
-		return progress;
+		return result;
+	}
+
+	public int getMissionProgress(IMission mission) {
+		return getMissionPath(mission).getInt("progress", 0);
 	}
 
 	public void setMissionProgress(IMission mission, int progress) {
-		config.set(path(mission) + ".progress", progress);
+		getMissionPath(mission).set("progress", progress);
 	}
 
 	public long getMissionEnd(IMission mission) {
-		long completeUntil;
-		
-		if((completeUntil = config.getLong(path(mission) + ".complete-until", -1)) == -1) {
-			if((completeUntil = config.getLong(oldPath(mission) + ".complete-until", -1)) != -1) {
-				config.set(oldPath(mission), null);
-				setMissionEnd(mission, completeUntil);
-			}
-			else if((completeUntil = config.getLong(reallyOldPath(mission) + ".complete-until", -1)) != -1) {
-				config.set(reallyOldPath(mission), null);
-				setMissionEnd(mission, completeUntil);
-			}
-			else
-				setMissionEnd(mission, completeUntil = 0);
-		}
-		
-		return completeUntil;
+		return getMissionPath(mission).getLong("complete-until", 0);
 	}
 
 	public void setMissionEnd(IMission mission, Long time) {
-		config.set(path(mission) + ".complete-until", time);
+		getMissionPath(mission).set("complete-until", time);
 	}
 
 	public void clearMission(IMission mission) {
