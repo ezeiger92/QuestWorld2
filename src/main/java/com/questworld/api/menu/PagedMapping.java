@@ -142,6 +142,9 @@ public class PagedMapping {
 			int delta = (event.isRightClick() ? -1 : 1) * (event.isShiftClick() ? panels.size() : 1);
 			int nextPage = Math.min(Math.max(0, page + delta), panels.size() - 1);
 			Player p = (Player) event.getWhoClicked();
+			
+			popPage(p);
+			putPage(p, nextPage);
 
 			QuestWorld.getSounds().EDITOR_CLICK.playTo(p); // TODO This is not entirely right - not all PagedMappings
 															// are editor menus!
