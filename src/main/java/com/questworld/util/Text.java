@@ -98,7 +98,7 @@ public final class Text {
 
 	public static String stringOf(Location location) {
 		if (location.getWorld() != null)
-			return QuestWorld.translate(Translation.RANGE_FMT, String.valueOf(location.getBlockX()),
+			return QuestWorld.translate(Translation.WORLD_FMT, String.valueOf(location.getBlockX()),
 					String.valueOf(location.getBlockY()), String.valueOf(location.getBlockZ()),
 					location.getWorld().getName());
 		

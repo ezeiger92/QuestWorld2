@@ -275,7 +275,7 @@ public class ItemBuilder {
 	 */
 	// TODO: 1.13
 	public @Mutable ItemBuilder mob(EntityType entity) {
-		type(Material.MONSTER_EGGS);
+		type(Material.MONSTER_EGG);
 		Reflect.getAdapter().makeSpawnEgg(resultStack, entity);
 		return this;
 	}

@@ -5,9 +5,9 @@ defaults:
   mission.name:  'New Mission'
   prefix:        '&4Quest World &7> '
   invalid-prompt-input: '&cInput not valid'
-  time-format: '<hours>h <minutes>m'
-  world-format: 'X: <x>, Y: <y>, Z: <z>, World: <world>'
-  range-format: 'X: <x>, Y: <y>, Z: <z>, World: <world>, Range <range>'
+  time-format: '%hours%h %minutes%m'
+  world-format: 'X: %x%, Y: %y%, Z: %z%, World: %world%'
+  range-format: 'X: %x%, Y: %y%, Z: %z%, World: %world%, Range %range%'
   unknown-world-name: 'Unknown world'
 
 guide-book: |

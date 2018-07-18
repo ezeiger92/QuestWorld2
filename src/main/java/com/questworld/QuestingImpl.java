@@ -13,7 +13,6 @@ import org.bukkit.entity.Player;
 import com.questworld.api.MissionType;
 import com.questworld.api.MissionViewer;
 import com.questworld.api.QuestWorld;
-import com.questworld.api.Translation;
 import com.questworld.api.Translator;
 import com.questworld.api.contract.ICategory;
 import com.questworld.api.contract.IMission;
