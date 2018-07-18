@@ -58,8 +58,8 @@ editor:
   set-dialogue: |
     &7Successfully set a Dialogue!
     &7If you want to change something you can edit the Dialogue at any time at: &e%path%
-  edit-mission-name:   '&aSuccessfully edited the Mission''s Display Name'
   await-mission-name:  '&7Please type in a Custom Name for this Mission'
+  edit-mission-name:   '&aSuccessfully edited the Mission''s Display Name'
   rename-kill-mission: '&7Please type in the Name of the Mob/Player you want to be killed &8(Color Code supported)'
   renamed-kill-type:   '&aSuccessfully specified a Name for your Mob/Player'
   rename-location: |

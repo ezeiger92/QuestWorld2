@@ -101,79 +101,124 @@ public class ProgressTracker implements Reloadable {
 		config.set("party.pending-requests", pending.stream().map(UUID::toString).collect(Collectors.toList()));
 	}
 
-	//// CATEGORY
-	private static String path(ICategory category) {
+	//// CATEGORY	
+	@Deprecated
+	private static String oldPath(ICategory category) {
 		return String.valueOf(category.getID());
 	}
 
 	public void clearCategory(ICategory category) {
-		config.set(path(category), null);
+		for(IQuest q : category.getQuests())
+			clearQuest(q);
 	}
 
 	//// QUEST
+	private ConfigurationSection getQuestPath(IQuest quest, boolean create) {
+		ConfigurationSection result = config.getConfigurationSection(path(quest));
+		
+		if(result == null) {
+			ConfigurationSection old;
+			
+			if((old = config.getConfigurationSection(oldPath(quest))) != null) {
+				result = config.createSection(path(quest), old.getValues(true));
+				config.set(oldPath(quest), null);
+			}
+			else if(create) {
+				result = config.createSection(path(quest));
+			}
+		}
+		
+		return result;
+	}
+	
 	private static String path(IQuest quest) {
-		return path(quest.getCategory()) + "." + quest.getID();
+		return "quests." + quest.getUniqueId();
+	}
+	
+	@Deprecated
+	private static String oldPath(IQuest quest) {
+		return oldPath(quest.getCategory()) + "." + quest.getID();
 	}
 
 	public long getQuestRefresh(IQuest quest) {
 		long result = -1;
-		String end = config.getString(path(quest) + ".cooldown", null);
-		if (end != null)
-			try {
-				result = dateFormat.parse(end).getTime();
-			}
-			catch (ParseException e) {
-				e.printStackTrace();
-			}
+		ConfigurationSection section = getQuestPath(quest, false);
+		
+		if(section != null) {
+			String end = section.getString("cooldown", null);
+			if (end != null)
+				try {
+					result = dateFormat.parse(end).getTime();
+				}
+				catch (ParseException e) {
+					e.printStackTrace();
+				}
+		}
 
 		return result;
 	}
 
 	public void setQuestRefresh(IQuest quest, long until) {
-		config.set(path(quest) + ".cooldown", dateFormat.format(until));
+		getQuestPath(quest, true).set("cooldown", dateFormat.format(until));
 	}
 
 	public QuestStatus getQuestStatus(IQuest quest) {
 		QuestStatus result = QuestStatus.AVAILABLE;
-		String status = config.getString(path(quest) + ".status", null);
-		if (status != null)
-			try {
-				result = QuestStatus.valueOf(status.toUpperCase(Locale.US));
-			}
-			catch (IllegalArgumentException e) {
-				e.printStackTrace();
-			}
-
+		ConfigurationSection section = getQuestPath(quest, false);
+		
+		if(section != null) {
+			String status = section.getString("status", null);
+			if (status != null)
+				try {
+					result = QuestStatus.valueOf(status.toUpperCase(Locale.US));
+				}
+				catch (IllegalArgumentException e) {
+					e.printStackTrace();
+				}
+		}
+		
 		return result;
 	}
 
 	public void setQuestStatus(IQuest quest, QuestStatus state) {
-		config.set(path(quest) + ".status", state.toString());
+		getQuestPath(quest, true).set("status", state.toString());
 	}
 
 	public boolean isQuestFinished(IQuest quest) {
-		return config.getBoolean(path(quest) + ".finished", false);
+		ConfigurationSection section = getQuestPath(quest, false);
+		
+		if(section != null) {
+			return section.getBoolean("finished", false);
+		}
+		
+		return false;
 	}
 
 	public void setQuestFinished(IQuest quest, boolean state) {
-		config.set(path(quest) + ".finished", state);
+		getQuestPath(quest, true).set("finished", state);
 	}
 
 	public void clearQuest(IQuest quest) {
 		config.set(path(quest), null);
+		
+		for(IMission m : quest.getMissions()) {
+			clearMission(m);
+		}
 	}
 
 	//// MISSION
 	private static String path(IMission mission) {
 		return "missions." + mission.getUniqueId();
 	}
-	 
+
+	@Deprecated
 	private static String oldPath(IMission mission) {
-		return path(mission.getQuest()) + ".mission." + mission.getUniqueId();
+		return oldPath(mission.getQuest()) + ".mission." + mission.getUniqueId();
 	}
 
+	@Deprecated
 	private static String reallyOldPath(IMission mission) {
-		return path(mission.getQuest()) + ".mission." + mission.getIndex();
+		return oldPath(mission.getQuest()) + ".mission." + mission.getIndex();
 	}
 
 	public static File dialogueFile(IMission mission) {
@@ -181,6 +226,7 @@ public class ProgressTracker implements Reloadable {
 				mission.getUniqueId().toString() + ".dialogue");
 	}
 
+	@Deprecated
 	public static File oldDialogueFile(IMission mission) {
 		return new File(((QuestingImpl) QuestWorld.getAPI()).getDataFolders().dialogue,
 				mission.getQuest().getCategory().getID() + "+" + mission.getQuest().getID() + "+" + mission.getIndex()
@@ -263,7 +309,7 @@ public class ProgressTracker implements Reloadable {
 		}
 	}
 	
-	private ConfigurationSection getMissionPath(IMission mission) {
+	private ConfigurationSection getMissionPath(IMission mission, boolean create) {
 		ConfigurationSection result = config.getConfigurationSection(path(mission));
 		
 		if(result == null) {
@@ -271,11 +317,14 @@ public class ProgressTracker implements Reloadable {
 			
 			if((old = config.getConfigurationSection(oldPath(mission))) != null) {
 				result = config.createSection(path(mission), old.getValues(true));
-				config.set(reallyOldPath(mission), null);
+				config.set(oldPath(mission), null);
 			}
 			else if((old = config.getConfigurationSection(reallyOldPath(mission))) != null) {
 				result = config.createSection(path(mission), old.getValues(true));
 				config.set(reallyOldPath(mission), null);
+			}
+			else if(create) {
+				result = config.createSection(path(mission));
 			}
 		}
 		
@@ -283,19 +332,31 @@ public class ProgressTracker implements Reloadable {
 	}
 
 	public int getMissionProgress(IMission mission) {
-		return getMissionPath(mission).getInt("progress", 0);
+		ConfigurationSection section = getMissionPath(mission, false);
+		
+		if(section != null) {
+			return section.getInt("progress", 0);
+		}
+		
+		return 0;
 	}
 
 	public void setMissionProgress(IMission mission, int progress) {
-		getMissionPath(mission).set("progress", progress);
+		getMissionPath(mission, true).set("progress", progress);
 	}
 
 	public long getMissionEnd(IMission mission) {
-		return getMissionPath(mission).getLong("complete-until", 0);
+		ConfigurationSection section = getMissionPath(mission, false);
+		
+		if(section != null) {
+			return section.getLong("complete-until", 0);
+		}
+		
+		return 0;
 	}
 
 	public void setMissionEnd(IMission mission, Long time) {
-		getMissionPath(mission).set("complete-until", time);
+		getMissionPath(mission, true).set("complete-until", time);
 	}
 
 	public void clearMission(IMission mission) {
