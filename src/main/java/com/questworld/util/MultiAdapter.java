@@ -10,6 +10,13 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapelessRecipe;
 
+/**
+ * 
+ * 
+ * @see VersionAdapter
+ * 
+ * @author ezeiger92
+ */
 class MultiAdapter extends VersionAdapter {
 	private ArrayList<VersionAdapter> adapters = new ArrayList<>();
 

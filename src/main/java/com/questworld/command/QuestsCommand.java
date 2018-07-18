@@ -90,7 +90,7 @@ public class QuestsCommand implements CommandExecutor {
 						QuestBook.openQuest(p, quest, false, false);
 					}
 					else
-						p.sendMessage(Text.colorize(QuestWorld.translate(Translation.QUEST_UNAVAIL)));
+						p.sendMessage(Text.colorize(QuestWorld.translate(p, Translation.QUEST_UNAVAIL)));
 				}
 				else {
 					PagedMapping.clearPages(p);
@@ -100,7 +100,7 @@ public class QuestsCommand implements CommandExecutor {
 				}
 			}
 			else
-				p.sendMessage(Text.colorize(QuestWorld.translate(Translation.CAT_UNAVAIL)));
+				p.sendMessage(Text.colorize(QuestWorld.translate(p, Translation.CAT_UNAVAIL)));
 		}
 		else {
 			if (page >= 0) {

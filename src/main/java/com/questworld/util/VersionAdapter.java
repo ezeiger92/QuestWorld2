@@ -10,8 +10,21 @@ import org.bukkit.inventory.ShapelessRecipe;
 
 import com.questworld.api.annotation.Mutable;
 
+/**
+ * Provides an interface for common operations that require different code in
+ * different server versions. Please note: This interface may expand at any
+ * time. New methods will be marked deprecated and given a safe, dummy
+ * implementation. The next minor API version will change them into abstract
+ * methods.<br/>
+ * <br/>
+ * Originally created to handle Spigot's method of sending actionbar messages,
+ * this can be used to support legacy server versions to a degree.
+ * 
+ * @see PartialAdapter
+ * 
+ * @author ezeiger92
+ */
 public abstract class VersionAdapter implements Comparable<VersionAdapter> {
-	// "V1_12_2_R1_SPIGOT", for example
 	protected abstract String forVersion();
 
 	public abstract void makeSpawnEgg(@Mutable ItemStack result, EntityType mob);
@@ -22,7 +35,7 @@ public abstract class VersionAdapter implements Comparable<VersionAdapter> {
 
 	public abstract void sendActionbar(Player player, String message);
 
-	private static String processVersion(String in) {
+	private static final String processVersion(String in) {
 		in = in.toUpperCase(Locale.ENGLISH).replace('.', '_');
 
 		if (in.startsWith("V"))
@@ -31,7 +44,7 @@ public abstract class VersionAdapter implements Comparable<VersionAdapter> {
 		return in;
 	}
 
-	private static int pseudoVersion(String serverKind) {
+	private static final int apiLevel(String serverKind) {
 		switch (serverKind) {
 			case "TACO":
 			case "TACOSPIGOT":
@@ -70,32 +83,26 @@ public abstract class VersionAdapter implements Comparable<VersionAdapter> {
 				theirSubver = -1;
 			}
 
-			// Given strings:
-			// V1_12_2
-			// V1_12_R1
-			if (ourSubver != theirSubver)
-				// Flipped compare because we want 0, -1
+			if (ourSubver != theirSubver) {
 				return Integer.compare(theirSubver, ourSubver);
+			}
 
 			try {
 				ourSubver = Integer.parseInt(ourParts[i]);
 			}
-			catch (NumberFormatException e) {
-			}
+			catch (NumberFormatException e) {}
 
 			try {
 				theirSubver = Integer.parseInt(theirParts[i]);
 			}
-			catch (NumberFormatException e) {
-			}
+			catch (NumberFormatException e) {}
 
-			if (ourSubver != theirSubver)
-				// Flipped compare because we want 3, 2, 1
+			if (ourSubver != theirSubver) {
 				return Integer.compare(theirSubver, ourSubver);
-			else if (ourSubver <= 0) {
-				return Integer.compare(pseudoVersion(theirParts[i]), pseudoVersion(ourParts[i]));
 			}
-			// Else equal parts, continue
+			else if (ourSubver <= 0) {
+				return Integer.compare(apiLevel(theirParts[i]), apiLevel(ourParts[i]));
+			}
 		}
 
 		return Integer.compare(theirParts.length, ourParts.length);

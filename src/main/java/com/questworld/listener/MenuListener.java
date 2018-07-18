@@ -34,7 +34,7 @@ public class MenuListener extends AutoListener {
 			}
 			catch (Throwable e) {
 				event.getWhoClicked()
-						.sendMessage(Text.colorize(QuestWorld.translate(Translation.GUI_FATAL)));
+						.sendMessage(Text.colorize(QuestWorld.translate((Player)event.getWhoClicked(), Translation.GUI_FATAL)));
 				e.printStackTrace();
 			}
 			event.setCancelled(val);

@@ -156,7 +156,7 @@ public final class QuestingImpl implements QuestingAPI {
 		String translation = language.translate(key, replacements);
 
 		if (hasPapi)
-			translation = me.clip.placeholderapi.PlaceholderAPI.setPlaceholders(null, translation);
+			translation = me.clip.placeholderapi.PlaceholderAPI.setPlaceholders(player, translation);
 
 		return translation;
 	}

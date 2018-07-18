@@ -159,7 +159,7 @@ public class PlayerTools {
 	public static String makeTranslation(boolean prefixed, Player p, Translator key, String... replacements) {
 		String text = QuestWorld.translate(p, key, replacements);
 		if (!text.isEmpty() && prefixed)
-			text = QuestWorld.translate(Translation.DEFAULT_PREFIX) + text;
+			text = QuestWorld.translate(p, Translation.DEFAULT_PREFIX) + text;
 
 		return Text.colorize(text);
 	}

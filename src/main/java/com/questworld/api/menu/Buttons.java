@@ -32,7 +32,7 @@ public class Buttons {
 	public static Consumer<InventoryClickEvent> newCategory(int id) {
 		return event -> {
 			Player p = (Player) event.getWhoClicked();
-			String defaultCategoryName = QuestWorld.translate(Translation.DEFAULT_CATEGORY);
+			String defaultCategoryName = QuestWorld.translate(p, Translation.DEFAULT_CATEGORY);
 
 			p.closeInventory();
 			PlayerTools.promptInput(p, new SinglePrompt(
@@ -65,7 +65,7 @@ public class Buttons {
 	public static Consumer<InventoryClickEvent> newQuest(ICategory category, int id) {
 		return event -> {
 			Player p = (Player) event.getWhoClicked();
-			String defaultQuestName = QuestWorld.translate(Translation.DEFAULT_QUEST);
+			String defaultQuestName = QuestWorld.translate(p, Translation.DEFAULT_QUEST);
 
 			p.closeInventory();
 			PlayerTools.promptInput(p, new SinglePrompt(
