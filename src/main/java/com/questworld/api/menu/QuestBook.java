@@ -2,6 +2,7 @@ package com.questworld.api.menu;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.DyeColor;
@@ -12,7 +13,9 @@ import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.metadata.MetadataValue;
 
+import com.questworld.Constants;
 import com.questworld.api.Manual;
 import com.questworld.api.MissionType;
 import com.questworld.api.QuestStatus;
@@ -36,8 +39,21 @@ import com.questworld.util.Text;
 
 public class QuestBook {
 	public static DataObject getLastViewed(Player p) {
-		return p.getMetadata("questworld.last-object").stream().findFirst()
-				.map(metadata -> (DataObject) metadata.value()).orElse(null);
+		List<MetadataValue> metadata = p.getMetadata(Constants.MD_LAST_MENU);
+		
+		if(metadata.isEmpty()) {
+			return null;
+		}
+		
+		Object value = metadata.get(0).value();
+		
+		// Every ticket involving /reload JUST STOP DOING IT GUYS GOOD LORD THIS ISN'T RELOAD SAFE
+		if(!(value instanceof DataObject)) {
+			p.removeMetadata(Constants.MD_LAST_MENU, QuestWorld.getPlugin());
+			return null;
+		}
+		
+		return (DataObject) value;
 	}
 
 	public static boolean testCategory(Player p, ICategory category) {
@@ -57,7 +73,7 @@ public class QuestBook {
 	}
 
 	public static void setLastViewed(Player p, DataObject object) {
-		p.setMetadata("questworld.last-object", new FixedMetadataValue(QuestWorld.getPlugin(), object));
+		p.setMetadata(Constants.MD_LAST_MENU, new FixedMetadataValue(QuestWorld.getPlugin(), object));
 	}
 
 	public static void openMainMenu(Player p) {
@@ -643,7 +659,7 @@ public class QuestBook {
 		menu.put(9, new ItemBuilder(category.getItem())
 				.wrapText(category.getName(), "", "&e> Click to set the display item").get(), event -> {
 					Player p2 = (Player) event.getWhoClicked();
-					ItemStack hand = PlayerTools.getMainHandItem(p2);
+					ItemStack hand = p2.getInventory().getItemInMainHand();
 					if (hand != null) {
 						changes.setItem(hand);
 						changes.apply();
@@ -754,7 +770,7 @@ public class QuestBook {
 		menu.put(9, new ItemBuilder(quest.getItem()).wrapText(quest.getName(), "", "&e> Click to set the display item")
 				.get(), event -> {
 					Player p2 = (Player) event.getWhoClicked();
-					ItemStack mainItem = PlayerTools.getMainHandItem(p2);
+					ItemStack mainItem = p2.getInventory().getItemInMainHand();
 					if (mainItem != null) {
 						changes.setItem(mainItem);
 						changes.apply();

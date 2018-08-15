@@ -153,12 +153,17 @@ public final class QuestingImpl implements QuestingAPI {
 
 	@Override
 	public String translate(Player player, Translator key, String... replacements) {
-		String translation = language.translate(key, replacements);
+		String translation = language.translateRaw(key, replacements);
 
 		if (hasPapi)
 			translation = me.clip.placeholderapi.PlaceholderAPI.setPlaceholders(player, translation);
 
 		return translation;
+	}
+	
+	@Override
+	public Lang getLang() {
+		return language;
 	}
 
 	@Override

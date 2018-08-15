@@ -101,6 +101,10 @@ public abstract class QuestExtension implements Reloadable {
 	@Control
 	protected void initialize(Plugin parent) {
 	}
+	
+	@Control
+	protected void disable() {
+	}
 
 	/**
 	 * Initializes the extension after all dependencies have been located. This is

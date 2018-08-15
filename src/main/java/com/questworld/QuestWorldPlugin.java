@@ -5,6 +5,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.questworld.api.QuestWorld;
 import com.questworld.api.contract.QuestingAPI;
 import com.questworld.command.ClickCommand;
 import com.questworld.command.EditorCommand;
@@ -18,6 +19,20 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener {
 	private QuestingImpl api;
 	private int autosaveHandle = -1;
 	private int questCheckHandle = -1;
+	
+	private SpawnerListener spawnListener;
+
+	public static QuestWorldPlugin get() {
+		return (QuestWorldPlugin) QuestWorld.getPlugin();
+	}
+	
+	public static QuestingImpl getAPI() {
+		return (QuestingImpl) QuestWorld.getAPI();
+	}
+	
+	public SpawnerListener getSpawnListener() {
+		return spawnListener;
+	}
 
 	@Override
 	public void onLoad() {
@@ -39,7 +54,7 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener {
 
 		new PlayerListener(api);
 		new MenuListener(this);
-		new SpawnerListener(this);
+		spawnListener = new SpawnerListener(this);
 		new ClickCommand(this);
 
 		GuideBook guide = GuideBook.instance();
@@ -76,6 +91,11 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener {
 	public void onDisable() {
 		api.onSave();
 		api.onDiscard();
+		
+		for(Player p : getServer().getOnlinePlayers()) {
+			p.removeMetadata(Constants.MD_LAST_MENU, this);
+			p.removeMetadata(Constants.MD_PAGES, this);
+		}
 
 		autosaveHandle = -1;
 		questCheckHandle = -1;

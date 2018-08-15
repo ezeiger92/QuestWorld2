@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
 
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import com.questworld.api.Translator;
@@ -29,7 +30,7 @@ public final class Lang implements Reloadable {
 
 		for (String langPath : loader.filesInResourceDir("lang/"))
 			try {
-				loadLang(langPath);
+				loadLang(langPath, loader);
 			}
 			catch (IllegalArgumentException e) {
 				if (fallback.equals(langPath)) {
@@ -49,7 +50,7 @@ public final class Lang implements Reloadable {
 		this(loader, fallbackLangCode);
 	}
 
-	private void loadLang(String langPath) throws IllegalArgumentException {
+	private void loadLang(String langPath, ResourceLoader loader) throws IllegalArgumentException {
 		if (langPath != null) {
 			YamlConfiguration config;
 			try {
@@ -59,17 +60,40 @@ public final class Lang implements Reloadable {
 				throw new IllegalArgumentException("Failed read language \"" + langPath + "\"", e);
 			}
 
-			languages.put(langPath, config);
+			YamlConfiguration old = languages.put(langPath, config);
+			
+			if(old != null) {
+				for(HashMap.Entry<String, Object> o : old.getValues(true).entrySet()) {
+					
+					if(!(o.getValue() instanceof ConfigurationSection)) {
+						config.set(o.getKey(), o.getValue());
+					}
+				}
+			}
 		}
 		else
 			throw new IllegalArgumentException("Language cannot be null");
 	}
-
+	
+	public void importLanguages(ResourceLoader loader) {
+		for (String langPath : loader.filesInResourceDir("lang/"))
+			try {
+				loadLang(langPath, loader);
+			}
+			catch (IllegalArgumentException e) {
+				Log.warning("Could not import language \"" + langPath + "\"");
+			}
+	}
+	
 	public boolean setLang(String langCode) {
+		return setLang(langCode, loader);
+	}
+
+	public boolean setLang(String langCode, ResourceLoader loader) {
 		String langPath = langPath(langCode);
 		if (!languages.containsKey(langPath))
 			try {
-				loadLang(langPath);
+				loadLang(langPath, loader);
 			}
 			catch (IllegalArgumentException e) {
 				e.printStackTrace();
@@ -88,7 +112,7 @@ public final class Lang implements Reloadable {
 		return translation;
 	}
 
-	public String translate(Translator key, String... replacements) {
+	public String translateRaw(Translator key, String... replacements) {
 		String translation = languages.get(currentLang).getString(key.path());
 		if (translation == null) {
 			translation = languages.get(fallbackLang).getString(key.path());
@@ -123,7 +147,7 @@ public final class Lang implements Reloadable {
 		for (String key : new ArrayList<>(languages.keySet())) {
 			languages.remove(key);
 			try {
-				loadLang(key);
+				loadLang(key, loader);
 			}
 			catch (IllegalArgumentException e) {
 				e.printStackTrace();

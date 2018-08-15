@@ -13,6 +13,7 @@ import com.questworld.api.MissionViewer;
 import com.questworld.api.Translator;
 import com.questworld.api.annotation.NoImpl;
 import com.questworld.api.annotation.Nullable;
+import com.questworld.util.Lang;
 import com.questworld.util.Reloadable;
 import com.questworld.util.Sounds;
 
@@ -46,6 +47,8 @@ public interface QuestingAPI extends Reloadable {
 	String translate(Translator key, String... replacements);
 
 	String translate(Player player, Translator key, String... replacements);
+	
+	Lang getLang();
 
 	Iterable<MissionEntry> getMissionEntries(MissionType type, OfflinePlayer player);
 

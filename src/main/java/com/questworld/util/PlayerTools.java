@@ -84,14 +84,17 @@ public class PlayerTools {
 			return;
 		}
 
-		// negative bit zero'd
+		// sign bit zero'd
 		int nb = -1 >>> 1;
 
-		// index of first match, need to exclude non-matches (-1)
+		// Clear sign bits, forcing -1 -> INT_MAX, so that minimum value is positive
+		// We found a match above, so this won't produce INT_MAX (unless the string is 2GB+ long)
 		int matchStart = Math.min(Math.min(tellrawPos & nb, titlePos & nb),
 				Math.min(subtitlePos & nb, actionbarPos & nb));
-		if (matchStart > 0)
+		
+		if (matchStart > 0) {
 			p.sendMessage(text.substring(0, matchStart));
+		}
 
 		if (player != null) {
 			StringBuilder tellrawBuilder = new StringBuilder();
@@ -133,22 +136,12 @@ public class PlayerTools {
 				tellraw(player, tellrawMessage);
 
 			if (!titleMessage.isEmpty() || !subtitleMessage.isEmpty()) {
-				try {
-					Player.class.getMethod("sendTitle", String.class, String.class, int.class, int.class, int.class)
-							.invoke(player, titleMessage, subtitleMessage, 10, 70, 20);
-				}
-				catch (Exception e) {
-					try {
-						Player.class.getMethod("sendTitle", String.class, String.class).invoke(player, titleMessage,
-								subtitleMessage);
-					}
-					catch (Exception e2) {
-					}
-				}
+				Reflect.getAdapter().sendTitle(player, titleMessage, subtitleMessage, 10, 70, 20);
 			}
 
-			if (!actionbarMessage.isEmpty())
-				actionbar(player, actionbarMessage);
+			if (!actionbarMessage.isEmpty()) {
+				Reflect.getAdapter().sendActionbar(player, actionbarMessage);
+			}
 		}
 	}
 
@@ -163,50 +156,70 @@ public class PlayerTools {
 
 		return Text.colorize(text);
 	}
+	
+	private static final String excape(String json) {
+		if(json != null) {
+			return json.replace("\\", "\\\\").replace("\"", "\\\"");
+		}
+		
+		return "";
+	}
+	
+	private static final String BOOK_CHANNEL = "MC|BOpen";
 
 	@SuppressWarnings("deprecation")
-	public static void sendBookView(Player player, String... jsonPages) {
-		int length = jsonPages.length;
-		if (length == 0)
-			return;
-
-		StringBuilder pages = new StringBuilder("{pages:[");
+	public static void sendBookView(Player player, String jsonPage, String... extra) {
+		StringBuilder pages = new StringBuilder("{pages:[\"")
+				.append(excape(jsonPage)).append('"');
+		
+		int length = extra.length;
 
 		for (int i = 0; i < length; ++i) {
-			if (i > 0)
-				pages.append(',');
-
-			pages.append('"').append(jsonPages[i].replace("\\", "\\\\").replace("\"", "\\\"")).append('"');
+			pages.append(",\"").append(excape(extra[i])).append('"');
 		}
 
 		pages.append("]}");
 
-		try {
-			Reflect.playerAddChannel(player, "MC|BOpen");
+		boolean listening = player.getListeningPluginChannels().contains(BOOK_CHANNEL);
+		
+		if(!listening) {
+			try {
+				Reflect.playerAddChannel(player, BOOK_CHANNEL);
+			}
+			catch (Exception e) {
+				Log.warning("Could not open book channel for player: " + player.getName());
+				e.printStackTrace();
+				return;
+			}
 		}
-		catch (Exception e) {
-			e.printStackTrace();
-			return;
-		}
-
+		
 		int slot = player.getInventory().getHeldItemSlot();
 		ItemStack old = player.getInventory().getItem(slot);
-
 		ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
+		
 		Bukkit.getUnsafe().modifyItemStack(book, pages.toString());
 
 		player.getInventory().setItem(slot, book);
 
-		byte[] payload = { 0 };
-		player.sendPluginMessage(QuestWorld.getPlugin(), "MC|BOpen", payload);
-
-		player.getInventory().setItem(slot, old);
-
 		try {
-			Reflect.playerRemoveChannel(player, "MC|BOpen");
+			player.sendPluginMessage(QuestWorld.getPlugin(), BOOK_CHANNEL, new byte[] {0});
 		}
-		catch (Exception e) {
+		catch(Exception e) {
+			Log.warning("Failed sending book to player: " + player.getName());
 			e.printStackTrace();
+		}
+		finally {
+			player.getInventory().setItem(slot, old);
+	
+			if(!listening) {
+				try {
+					Reflect.playerRemoveChannel(player, BOOK_CHANNEL);
+				}
+				catch (Exception e) {
+					Log.warning("Could not close book channel for player " + player.getName());
+					e.printStackTrace();
+				}
+			}
 		}
 
 	}
@@ -285,10 +298,6 @@ public class PlayerTools {
 
 	public static void tellraw(Player p, String json) {
 		Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "minecraft:tellraw " + p.getName() + " " + json);
-	}
-
-	public static void actionbar(Player player, String message) {
-		Reflect.getAdapter().sendActionbar(player, message);
 	}
 
 	public static Player getPlayer(String name) {

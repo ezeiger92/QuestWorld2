@@ -1,7 +1,5 @@
 package com.questworld.api;
 
-import com.questworld.util.Log;
-
 /**
  * The default translation mapping from <tt>lang/**_**.yml</tt>
  * 
@@ -155,15 +153,5 @@ public enum Translation implements Translator {
 		}
 
 		return result.toString();
-	}
-	
-	public static void test() {
-		String[] strings = {
-				"[first]", "[second]", "[third]", "[fourth]", "[fifth]", "[sixth]", "[seventh]", "[eighth]"
-		};
-		
-		for(Translation t : values()) {
-			Log.info(QuestWorld.translate(t, strings));
-		}
 	}
 }

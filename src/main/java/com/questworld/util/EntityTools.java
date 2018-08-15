@@ -5,7 +5,9 @@ import java.util.ArrayList;
 import org.bukkit.Material;
 import org.bukkit.SkullType;
 import org.bukkit.entity.EntityType;
-import org.bukkit.metadata.Metadatable;
+import org.bukkit.entity.LivingEntity;
+
+import com.questworld.QuestWorldPlugin;
 
 /**
  * A shared home for tools related to entities and entity manipulation.
@@ -116,7 +118,7 @@ public class EntityTools {
 	 * @param entity The target entity
 	 * @return Whether or not this entity was spawned by a mob spawner block
 	 */
-	public static boolean isFromSpawner(Metadatable entity) {
-		return entity.hasMetadata("spawned_by_spawner");
+	public static boolean isFromSpawner(LivingEntity entity) {
+		return QuestWorldPlugin.get().getSpawnListener().isFromSpawner(entity);
 	}
 }

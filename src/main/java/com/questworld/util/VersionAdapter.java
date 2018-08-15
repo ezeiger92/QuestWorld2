@@ -34,6 +34,8 @@ public abstract class VersionAdapter implements Comparable<VersionAdapter> {
 	public abstract ShapelessRecipe shapelessRecipe(String recipeName, ItemStack output);
 
 	public abstract void sendActionbar(Player player, String message);
+	
+	public abstract void sendTitle(Player player, String title, String subtitle, int fadeIn, int stay, int fadeOut);
 
 	private static final String processVersion(String in) {
 		in = in.toUpperCase(Locale.ENGLISH).replace('.', '_');

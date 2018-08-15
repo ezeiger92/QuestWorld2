@@ -12,6 +12,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.Metadatable;
 
+import com.questworld.Constants;
 import com.questworld.api.QuestWorld;
 import com.questworld.api.Translation;
 import com.questworld.util.ItemBuilder;
@@ -31,11 +32,11 @@ public class PagedMapping {
 	private static Stack<Integer> stackFor(Metadatable player) {
 		Stack<Integer> result;
 		try {
-			result = (Stack<Integer>) player.getMetadata("questworld.pages").get(0).value();
+			result = (Stack<Integer>) player.getMetadata(Constants.MD_PAGES).get(0).value();
 		}
 		catch (IndexOutOfBoundsException e) {
 			result = new Stack<Integer>();
-			player.setMetadata("questworld.pages", new FixedMetadataValue(QuestWorld.getPlugin(), result));
+			player.setMetadata(Constants.MD_PAGES, new FixedMetadataValue(QuestWorld.getPlugin(), result));
 		}
 		return result;
 	}

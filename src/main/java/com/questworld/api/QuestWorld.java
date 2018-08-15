@@ -14,6 +14,7 @@ import com.questworld.api.contract.IParty;
 import com.questworld.api.contract.IPlayerStatus;
 import com.questworld.api.contract.MissionEntry;
 import com.questworld.api.contract.QuestingAPI;
+import com.questworld.util.Lang;
 import com.questworld.util.Sounds;
 
 import net.milkbowl.vault.economy.Economy;
@@ -85,6 +86,10 @@ public final class QuestWorld {
 
 	public static String translate(Player player, Translator key, String... replacements) {
 		return api.translate(player, key, replacements);
+	}
+	
+	public static Lang getLang() {
+		return api.getLang();
 	}
 
 	public static Iterable<MissionEntry> getMissionEntries(MissionType type, OfflinePlayer player) {

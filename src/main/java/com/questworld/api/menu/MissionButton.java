@@ -38,7 +38,7 @@ public class MissionButton {
 		return simpleButton(changes, new ItemBuilder(changes.getItem()).display(Text.itemName(changes.getItem()))
 				.wrapLore("", "&e> Click to change the mission item").get(), event -> {
 					Player p = (Player) event.getWhoClicked();
-					ItemStack hand = PlayerTools.getMainHandItem(p);
+					ItemStack hand = p.getInventory().getItemInMainHand();
 					if (hand != null && hand.getType() != Material.AIR)
 						changes.setItem(hand.clone());
 				});

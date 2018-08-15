@@ -1,8 +1,10 @@
 package com.questworld.util;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.EntityType;
@@ -19,6 +21,18 @@ import org.bukkit.inventory.ShapelessRecipe;
  */
 class MultiAdapter extends VersionAdapter {
 	private ArrayList<VersionAdapter> adapters = new ArrayList<>();
+	
+	private static final HashMap<String, Method> methodCache;
+	
+	static {
+		methodCache = new HashMap<>();
+		
+		for (Method m : VersionAdapter.class.getMethods()) {
+			if(Modifier.isAbstract(m.getModifiers())) {
+				methodCache.put(m.getName(), m);
+			}
+		}
+	}
 
 	void addAdapter(VersionAdapter child) {
 		if (child == null)
@@ -97,6 +111,19 @@ class MultiAdapter extends VersionAdapter {
 		}
 	}
 
+	private int sendTitleIndex = -1;
+
+	@Override
+	public void sendTitle(Player player, String title, String subtitle, int fadeIn, int stay, int fadeOut) {
+		if (sendTitleIndex >= 0)
+			adapters.get(sendTitleIndex).sendTitle(player, title, subtitle, fadeIn, stay, fadeOut);
+
+		else {
+			dispatch(player, title, subtitle, fadeIn, stay, fadeOut);
+			sendTitleIndex = lastCacheIndex;
+		}
+	}
+
 	private int lastCacheIndex = -1;
 
 	private Object dispatch(Object... params) {
@@ -108,22 +135,22 @@ class MultiAdapter extends VersionAdapter {
 				break;
 
 		String methodName = trace[i + 1].getMethodName();
+		
+		Method m = methodCache.get(methodName);
+		
+		if(m != null) {
+			for (i = 0; i < adapters.size(); ++i) {
+				try {
+					VersionAdapter adapter = adapters.get(i);
+					Object result = m.invoke(adapter, params);
+					lastCacheIndex = i;
 
-		for (Method m : VersionAdapter.class.getMethods()) {
-			if (m.getName().equals(methodName)) {
-				for (i = 0; i < adapters.size(); ++i) {
-					try {
-						VersionAdapter adapter = adapters.get(i);
-						Object result = m.invoke(adapter, params);
-						lastCacheIndex = i;
+					Log.info("Caching " + adapter.getClass().getSimpleName() + " (" + adapter.toString()
+							+ ") for method " + methodName);
 
-						Log.info("Caching " + adapter.getClass().getSimpleName() + " (" + adapter.toString()
-								+ ") for method " + methodName);
-
-						return result;
-					}
-					catch (Throwable t) {
-					}
+					return result;
+				}
+				catch (Throwable t) {
 				}
 			}
 		}
