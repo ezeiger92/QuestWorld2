@@ -132,6 +132,11 @@ public class PlayerStatus implements IPlayerStatus {
 		return getStatus(mission.getQuest()).equals(QuestStatus.AVAILABLE) && !hasCompletedTask(mission)
 				&& hasUnlockedTask(mission);
 	}
+	
+	@Override
+	public OfflinePlayer getPlayer() {
+		return Bukkit.getOfflinePlayer(playerUUID);
+	}
 
 	@Override
 	public void update() {

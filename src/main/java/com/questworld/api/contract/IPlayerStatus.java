@@ -1,5 +1,7 @@
 package com.questworld.api.contract;
 
+import org.bukkit.OfflinePlayer;
+
 import com.questworld.api.QuestStatus;
 import com.questworld.api.annotation.NoImpl;
 import com.questworld.api.annotation.Nullable;
@@ -7,6 +9,8 @@ import com.questworld.api.annotation.Nullable;
 @NoImpl
 public interface IPlayerStatus {
 	boolean hasDeathEvent(IMission mission);
+	
+	public OfflinePlayer getPlayer();
 
 	int countQuests(@Nullable ICategory category, @Nullable QuestStatus status);
 

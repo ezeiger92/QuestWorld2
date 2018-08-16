@@ -82,6 +82,7 @@ public enum Translation implements Translator {
 	PARTY_PLAYER_KICKED("party.player.kicked", "leader"),
 
 	NOTIFY_COMPLETED("notifications.task-completed", "quest", "task"),
+	NOTIFY_PROGRESS("notifications.task-progress", "quest", "task"),
 	NOTIFY_TIME_FAIL("notifications.task-failed-timeframe", "quest", "task", "ratio"),
 	NOTIFY_TIME_START("notifications.task-timeframe-started", "task", "time"),
 
