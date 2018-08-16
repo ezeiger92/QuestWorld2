@@ -301,7 +301,21 @@ public class PlayerTools {
 	}
 
 	public static Player getPlayer(String name) {
-		return Bukkit.getPlayerExact(name);
+		Player online = Bukkit.getPlayerExact(name);
+		
+		if(online != null) {
+			return online;
+		}
+		
+		// nicknames?
+		for(Player p : Bukkit.getOnlinePlayers()) {
+			if(name.equals(Text.decolor(p.getDisplayName())) ||
+					name.equals(Text.decolor(p.getPlayerListName()))) {
+				return p;
+			}
+		}
+		
+		return null;
 	}
 
 	@SuppressWarnings("deprecation")
