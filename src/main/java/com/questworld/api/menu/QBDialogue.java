@@ -40,7 +40,7 @@ public class QBDialogue {
 	public static void openDeletionConfirmation(Player p, final DataObject q) {
 		QuestWorld.getSounds().DESTRUCTIVE_WARN.playTo(p);
 
-		Menu menu = new Menu(1, "&4&lAre you Sure?");
+		Menu menu = new LinkedMenu(1, "&4&lAre you Sure?", q, true);
 
 		menu.put(6, ItemBuilder.Proto.RED_WOOL.get().display("&cNo").get(), event -> {
 			Player p2 = (Player) event.getWhoClicked();
@@ -110,7 +110,7 @@ public class QBDialogue {
 	public static void openResetConfirmation(Player p, final IQuest q) {
 		QuestWorld.getSounds().DESTRUCTIVE_WARN.playTo(p);
 
-		Menu menu = new Menu(1, "&4&lAre you Sure?");
+		Menu menu = new LinkedMenu(1, "&4&lAre you Sure?", q, true);
 
 		menu.put(6, ItemBuilder.Proto.RED_WOOL.get().display("&cNo").get(), event -> {
 			QuestBook.openQuestEditor((Player) event.getWhoClicked(), q);
@@ -129,7 +129,7 @@ public class QBDialogue {
 		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
 
 		IMissionState changes = mission.getState();
-		final Menu menu = new Menu(6, "&3Entity selector");
+		final Menu menu = new LinkedMenu(6, "&3Entity selector", mission, true);
 
 		PagedMapping pager = new PagedMapping(45);
 
@@ -258,7 +258,7 @@ public class QBDialogue {
 	public static void openRequirementCategories(Player p, final DataObject quest) {
 		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
 
-		Menu menu = new Menu(1, "&3Categories");
+		Menu menu = new LinkedMenu(1, "&3Categories", quest, true);
 
 		PagedMapping pager = new PagedMapping(45, 9);
 		for (ICategory category : QuestWorld.getFacade().getCategories()) {
@@ -289,7 +289,7 @@ public class QBDialogue {
 	private static void openRequirementQuests(Player p, final DataObject q, ICategory category) {
 		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
 
-		Menu menu = new Menu(1, "&3Quests");
+		Menu menu = new LinkedMenu(1, "&3Quests", q, true);
 
 		boolean isQuest = q instanceof IQuest;
 		String name = isQuest ? ((IQuest) q).getName() : ((ICategory) q).getName();

@@ -11,6 +11,7 @@ import java.util.function.Consumer;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.InventoryHolder;
 
 import com.questworld.Directories;
 import com.questworld.QuestingImpl;
@@ -25,6 +26,7 @@ import com.questworld.api.contract.IMission;
 import com.questworld.api.contract.IPlayerStatus;
 import com.questworld.api.contract.IQuest;
 import com.questworld.api.event.MissionCompletedEvent;
+import com.questworld.api.menu.LinkedMenu;
 import com.questworld.util.PlayerTools;
 import com.questworld.util.Text;
 
@@ -129,8 +131,27 @@ public class PlayerStatus implements IPlayerStatus {
 
 	@Override
 	public boolean isMissionActive(IMission mission) {
-		return getStatus(mission.getQuest()).equals(QuestStatus.AVAILABLE) && !hasCompletedTask(mission)
-				&& hasUnlockedTask(mission);
+		boolean partial = getStatus(mission.getQuest()).equals(QuestStatus.AVAILABLE) &&
+				!hasCompletedTask(mission) && hasUnlockedTask(mission);
+
+		if(partial) {
+			for(Player player : Bukkit.getOnlinePlayers()) {
+				InventoryHolder holder = player.getOpenInventory().getTopInventory().getHolder();
+
+				if(holder instanceof LinkedMenu) {
+					LinkedMenu menu = (LinkedMenu) holder;
+
+					// Force missions pseudo-inactive
+					if(menu.isEditor() && (menu.isLinked(mission.getQuest()) || menu.isLinked(mission))) {
+						return false;
+					}
+				}
+			}
+
+			return true;
+		}
+
+		return false;
 	}
 	
 	@Override

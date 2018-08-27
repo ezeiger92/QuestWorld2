@@ -588,7 +588,7 @@ public class QuestBook {
 	public static void openQuestList(Player p, final ICategory category) {
 		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
 
-		final Menu menu = new Menu(6, "&3Quests");
+		final Menu menu = new LinkedMenu(6, "&3Quests", category, true);
 
 		ItemBuilder defaultItem = new ItemBuilder(Material.STAINED_GLASS_PANE).color(DyeColor.RED)
 				.display("&7> Create quest");
@@ -645,7 +645,7 @@ public class QuestBook {
 	public static void openCategoryEditor(Player p, final ICategory category) {
 		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
 
-		final Menu menu = new Menu(2, "&3Category editor");
+		final Menu menu = new LinkedMenu(2, "&3Category editor", category, true);
 		ICategoryState changes = category.getState();
 
 		menu.put(0, Proto.MAP_BACK.get().wrapLore(" &3Categories").get(), event -> {
@@ -760,7 +760,7 @@ public class QuestBook {
 	public static void openQuestEditor(Player p, final IQuest quest) {
 		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
 
-		final Menu menu = new Menu(6, "&3Quest editor");
+		final Menu menu = new LinkedMenu(6, "&3Quest editor", quest, true);
 		IQuestState changes = quest.getState();
 
 		menu.put(0, ItemBuilder.Proto.MAP_BACK.get().wrapLore(" &3Quests").get(), event -> {
@@ -1044,7 +1044,7 @@ public class QuestBook {
 	public static void openWorldSelector(Player p, final IQuest quest) {
 		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
 
-		final Menu menu = new Menu(2, "&3World selector");
+		final Menu menu = new LinkedMenu(2, "&3World selector", quest, true);
 
 		menu.put(0, ItemBuilder.Proto.MAP_BACK.get().wrapLore(" &3Quest editor").get(), event -> {
 			openQuestEditor((Player) event.getWhoClicked(), quest);
@@ -1070,7 +1070,7 @@ public class QuestBook {
 	public static void openWorldEditor(Player p, final ICategory category) {
 		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
 
-		final Menu menu = new Menu(2, "&3World selector");
+		final Menu menu = new LinkedMenu(2, "&3World selector", category, true);
 
 		menu.put(0, ItemBuilder.Proto.MAP_BACK.get().wrapLore(" &3Category editor").get(), event -> {
 			openCategoryEditor((Player) event.getWhoClicked(), category);
@@ -1098,7 +1098,7 @@ public class QuestBook {
 	public static void openQuestMissionEditor(Player p, final IMission mission) {
 		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
 
-		Menu menu = new Menu(2, "&3Mission editor");
+		Menu menu = new LinkedMenu(2, "&3Mission editor", mission, true);
 
 		menu.put(0, ItemBuilder.Proto.MAP_BACK.get().wrapLore(" &3Quest editor").get(), e -> {
 			openQuestEditor(p, mission.getQuest());
@@ -1121,7 +1121,7 @@ public class QuestBook {
 		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
 
 		IMissionState changes = mission.getState();
-		final Menu menu = new Menu(3, "&3Mission selector");
+		final Menu menu = new LinkedMenu(3, "&3Mission selector", mission, true);
 
 		PagedMapping.putPage(p, 0);
 
