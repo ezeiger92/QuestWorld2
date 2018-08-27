@@ -65,7 +65,7 @@ public class PlayerStatus implements IPlayerStatus {
 
 		int result = 0;
 		for (IQuest quest : category.getQuests())
-			if (getStatus(quest) == status)
+			if (quest.isEnabled() && getStatus(quest) == status)
 				++result;
 
 		return result;
@@ -131,7 +131,7 @@ public class PlayerStatus implements IPlayerStatus {
 
 	@Override
 	public boolean isMissionActive(IMission mission) {
-		boolean partial = getStatus(mission.getQuest()).equals(QuestStatus.AVAILABLE) &&
+		boolean partial = mission.getQuest().isEnabled() && getStatus(mission.getQuest()) == QuestStatus.AVAILABLE &&
 				!hasCompletedTask(mission) && hasUnlockedTask(mission);
 
 		if(partial) {
@@ -174,7 +174,7 @@ public class PlayerStatus implements IPlayerStatus {
 
 		for (ICategory category : QuestWorld.getFacade().getCategories()) {
 			for (IQuest quest : category.getQuests()) {
-				if (getStatus(quest).equals(QuestStatus.AVAILABLE)) {
+				if (quest.isEnabled() && getStatus(quest).equals(QuestStatus.AVAILABLE)) {
 					boolean finished = quest.getMissions().size() != 0;
 					for (IMission task : quest.getMissions()) {
 						updateTimeframe(task, 0);
@@ -265,7 +265,7 @@ public class PlayerStatus implements IPlayerStatus {
 	public int getProgress(ICategory category) {
 		int progress = 0;
 		for (IQuest quest : category.getQuests())
-			if (hasFinished(quest))
+			if (quest.isEnabled() && hasFinished(quest))
 				++progress;
 
 		return progress;

@@ -68,8 +68,8 @@ public class QuestBook {
 	public static boolean testQuest(Player p, IQuest quest) {
 		QuestStatus status = QuestWorld.getPlayerStatus(p).getStatus(quest);
 
-		return status == QuestStatus.AVAILABLE || status == QuestStatus.REWARD_CLAIMABLE
-				|| status == QuestStatus.ON_COOLDOWN || status == QuestStatus.FINISHED;
+		return quest.isEnabled() && (status == QuestStatus.AVAILABLE || status == QuestStatus.REWARD_CLAIMABLE
+				|| status == QuestStatus.ON_COOLDOWN || status == QuestStatus.FINISHED);
 	}
 
 	public static void setLastViewed(Player p, DataObject object) {
@@ -338,6 +338,10 @@ public class QuestBook {
 		view.addFrameButton(4, partyMenuItem(p), Buttons.partyMenu(), true);
 
 		for (final IQuest quest : category.getQuests()) {
+			if(!quest.isEnabled()) {
+				continue;
+			}
+
 			IQuest parent = quest.getParent();
 
 			QuestStatus questStatus = playerStatus.getStatus(quest);
