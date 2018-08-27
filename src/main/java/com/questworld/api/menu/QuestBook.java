@@ -340,46 +340,52 @@ public class QuestBook {
 		for (final IQuest quest : category.getQuests()) {
 			IQuest parent = quest.getParent();
 
-			if (playerStatus.getStatus(quest).equals(QuestStatus.LOCKED_WORLD)) {
-				view.addButton(quest.getID(),
-						glassPane
-								.wrapText(quest.getName(), "",
-										QuestWorld.translate(p, Translation.LOCKED_WORLD, p.getWorld().getName()))
-								.getNew(),
-						null, false);
+			QuestStatus questStatus = playerStatus.getStatus(quest);
+
+			Translation translation;
+			String[] keys;
+
+			switch(playerStatus.getStatus(quest)) {
+				case LOCKED_WORLD:
+					translation = Translation.LOCKED_WORLD;
+					keys = new String[]{ p.getWorld().getName() };
+					break;
+
+				case LOCKED_NO_PERM: {
+					String parts[] = quest.getPermission().split(" ", 2);
+					translation = Translation.LOCKED_NO_PERM;
+					keys = new String[]{ parts[0], parts[parts.length - 1] };
+					break;
+				}
+
+				case LOCKED_PARENT:
+					translation = Translation.LOCKED_PARENT;
+					keys = new String[]{ parent.getName() };
+					break;
+
+				case LOCKED_NO_PARTY:
+					translation = Translation.LOCKED_NO_PARTY;
+					keys = new String[0];
+					break;
+
+				case LOCKED_PARTY_SIZE:
+					translation = Translation.LOCKED_SMALL_PARTY;
+					keys = new String[]{ String.valueOf(quest.getPartySize()) };
+					break;
+
+				default:
+					translation = null;
+					keys = null;
+					break;
 			}
-			else if (playerStatus.getStatus(quest).equals(QuestStatus.LOCKED_NO_PERM)) {
-				String parts[] = quest.getPermission().split(" ", 2);
-				view.addButton(quest.getID(),
-						glassPane.wrapText(quest.getName(), "",
-								QuestWorld.translate(p, Translation.LOCKED_NO_PERM, parts[0], parts[parts.length - 1]))
-								.getNew(),
-						null, false);
-			}
-			else if (playerStatus.getStatus(quest).equals(QuestStatus.LOCKED_PARENT)) {
-				view.addButton(quest.getID(),
-						glassPane.wrapText(quest.getName(), "",
-								QuestWorld.translate(p, Translation.LOCKED_PARENT, parent.getName())).getNew(),
-						null, false);
-			}
-			else if (playerStatus.getStatus(quest).equals(QuestStatus.LOCKED_NO_PARTY)) {
-				view.addButton(quest.getID(),
-						glassPane.wrapText(quest.getName(), "", "&4You need to leave your current Party").getNew(),
-						null, false);
-			}
-			else if (playerStatus.getStatus(quest).equals(QuestStatus.LOCKED_PARTY_SIZE)) {
-				view.addButton(quest.getID(),
-						glassPane.wrapText(quest.getName(), "", "&4You can only do this Quest in a Party",
-								"&4with at least &c" + quest.getPartySize() + " &4Members").getNew(),
-						null, false);
-			}
-			else {
+
+			if(translation == null) {
 				String extra = null;
 
-				if (playerStatus.getStatus(quest).equals(QuestStatus.REWARD_CLAIMABLE)) {
+				if (questStatus == QuestStatus.REWARD_CLAIMABLE) {
 					extra = QuestWorld.translate(p, Translation.quests_state_reward_claimable);
 				}
-				else if (playerStatus.getStatus(quest).equals(QuestStatus.ON_COOLDOWN)) {
+				else if (questStatus == QuestStatus.ON_COOLDOWN) {
 					extra = QuestWorld.translate(p, Translation.quests_state_cooldown);
 				}
 				else if (playerStatus.hasFinished(quest)) {
@@ -396,6 +402,12 @@ public class QuestBook {
 						event -> {
 							openQuest((Player) event.getWhoClicked(), quest, back, true);
 						}, true);
+			}
+			else {
+				view.addButton(quest.getID(),
+						glassPane.wrapText(quest.getName(), "",
+								QuestWorld.translate(p, translation, keys)).getNew(),
+						null, false);
 			}
 		}
 		view.build(menu, p);

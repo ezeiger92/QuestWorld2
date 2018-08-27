@@ -122,6 +122,13 @@ quests:
   locked-parent: '&cRequires quest: &r%name%'
   locked-in-world: '&cNot available in: %world%'
   locked-no-perm: '&cNo permission: &r%desc%'
+  locked-no-party: '&4You need to leave your current Party'
+  locked-small-party: |
+    &4You can only do this Quest in a Party
+		&4with at least &c<size> &4Members
+  locked-large-party: |
+    &4You can only do this Quest in a Party
+		&4with at most &c<size> &4Members
   tasks_completed: ' Tasks completed'
   state:
     cooldown: '&e&lON COOLDOWN'

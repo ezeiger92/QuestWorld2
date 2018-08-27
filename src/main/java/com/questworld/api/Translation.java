@@ -89,6 +89,9 @@ public enum Translation implements Translator {
 	LOCKED_PARENT("quests.locked-parent", "name"),
 	LOCKED_NO_PERM("quests.locked-no-perm", "node", "desc"),
 	LOCKED_WORLD("quests.locked-in-world", "world"),
+	LOCKED_NO_PARTY("quests.locked-no-party"),
+	LOCKED_SMALL_PARTY("quests.locked-small-party", "size"),
+	LOCKED_LARGE_PARTY("quests.locked-large-party", "size"),
 
 	// TODO This is hacky, look again when less tired
 	gui_title,
