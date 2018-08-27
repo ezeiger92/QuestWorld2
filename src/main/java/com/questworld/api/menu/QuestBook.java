@@ -235,7 +235,8 @@ public class QuestBook {
 		if (party == null) {
 			menu.put(9,
 					wool.color(DyeColor.GREEN).wrapText("&a&lCreate a new Party", "",
-							"&rCreates a brand new Party for you", "&rto invite Friends and share your Progress")
+							"&rCreates a brand new Party for you",
+							"&rto invite Friends and share your Progress")
 							.getNew(),
 					event -> {
 						Player p2 = (Player) event.getWhoClicked();
