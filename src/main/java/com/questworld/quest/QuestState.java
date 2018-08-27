@@ -121,6 +121,12 @@ class QuestState extends Quest {
 	}
 
 	@Override
+	public void setEnabled(boolean enabled) {
+		super.setEnabled(enabled);
+		changeBits |= BitFlag.getBits(Member.ENABLED);
+	}
+
+	@Override
 	public void setPartySupport(boolean supportsParties) {
 		super.setPartySupport(supportsParties);
 		changeBits |= BitFlag.getBits(Member.DISABLEPARTIES);

@@ -31,6 +31,7 @@ class Quest extends UniqueObject implements IQuestState {
 	private YamlConfiguration config;
 
 	private boolean autoclaim = false;
+	private boolean enabled = true;
 	private List<String> commands = new ArrayList<>();
 	private long cooldown = -1;
 	private int id = -1;
@@ -75,6 +76,7 @@ class Quest extends UniqueObject implements IQuestState {
 		partySupport = source.partySupport;
 		ordered = source.ordered;
 		autoclaim = source.autoclaim;
+		enabled = source.enabled;
 		parent = source.parent;
 		permission = source.permission;
 	}
@@ -104,6 +106,7 @@ class Quest extends UniqueObject implements IQuestState {
 		partySupport = !config.getBoolean("disable-parties");
 		ordered = config.getBoolean("in-order");
 		autoclaim = config.getBoolean("auto-claim");
+		enabled = config.getBoolean("enabled", QuestWorld.getPlugin().getConfig().getBoolean("options.quests-default-enabled"));
 		name = Text.colorize(config.getString("name"));
 		ItemStack i2 = config.getItemStack("item", item);
 
@@ -200,6 +203,7 @@ class Quest extends UniqueObject implements IQuestState {
 		config.set("disable-parties", !partySupport);
 		config.set("in-order", ordered);
 		config.set("auto-claim", autoclaim);
+		config.set("enabled", enabled);
 		config.set("world-blacklist", world_blacklist);
 		config.set("min-party-size", partySize);
 
@@ -427,6 +431,16 @@ class Quest extends UniqueObject implements IQuestState {
 	@Override
 	public void setPermission(String permission) {
 		this.permission = permission;
+	}
+
+	@Override
+	public boolean isEnabled() {
+		return enabled;
+	}
+
+	@Override
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
 	}
 
 	public boolean supportsParties() {

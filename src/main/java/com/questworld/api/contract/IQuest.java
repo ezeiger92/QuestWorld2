@@ -36,6 +36,8 @@ public interface IQuest extends DataObject {
 
 	int getXP();
 
+	boolean isEnabled();
+
 	List<String> getCommands();
 
 	boolean supportsParties();

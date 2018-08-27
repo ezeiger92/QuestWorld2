@@ -30,6 +30,8 @@ public interface IQuestState extends IQuest {
 
 	void setXP(int xp);
 
+	void setEnabled(boolean enabled);
+
 	void setParent(IQuest object);
 
 	void removeCommand(int i);
@@ -66,6 +68,7 @@ public interface IQuestState extends IQuest {
 		REWARDS,
 		MONEY,
 		XP,
+		ENABLED,
 		PARTYSIZE,
 		DISABLEPARTIES,
 		ORDERED,
