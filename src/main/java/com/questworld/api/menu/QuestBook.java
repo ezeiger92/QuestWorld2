@@ -29,6 +29,7 @@ import com.questworld.api.contract.IMission;
 import com.questworld.api.contract.IMissionState;
 import com.questworld.api.contract.IParty;
 import com.questworld.api.contract.IParty.LeaveReason;
+import com.questworld.manager.MenuRegistry;
 import com.questworld.api.contract.IPlayerStatus;
 import com.questworld.api.contract.IQuest;
 import com.questworld.api.contract.IQuestState;
@@ -774,88 +775,37 @@ public class QuestBook {
 		menu.openFor(p);
 	}
 
+	private static MenuRegistry registry = new MenuSetup().getRegistry();
+
 	public static void openQuestEditor(Player p, final IQuest quest) {
 		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
 
 		final Menu menu = new LinkedMenu(6, "&3Quest editor", quest, true);
 		IQuestState changes = quest.getState();
 
-		menu.put(0, ItemBuilder.Proto.MAP_BACK.get().wrapLore(" &3Quests").get(), event -> {
-			openQuestList((Player) event.getWhoClicked(), quest.getCategory());
-		});
+		menu.put(0,
+			ItemBuilder.Proto.MAP_BACK.get().wrapLore(" &3Quests").get(),
+			registry.getConsumer("editor:quest:back", changes));
 
-		menu.put(9, new ItemBuilder(quest.getItem()).wrapText(quest.getName(), "", "&e> Click to set the display item")
-				.get(), event -> {
-					Player p2 = (Player) event.getWhoClicked();
-					ItemStack mainItem = p2.getInventory().getItemInMainHand();
-					if (mainItem != null) {
-						changes.setItem(mainItem);
-						changes.apply();
-
-						openQuestEditor(p2, quest);
-					}
-				});
+		menu.put(9,
+			new ItemBuilder(quest.getItem()).wrapText(quest.getName(), "", "&e> Click to set the display item").get(),
+			registry.getConsumer("editor:quest:set_display", changes));
 
 		menu.put(10,
-				new ItemBuilder(Material.NAME_TAG).wrapText(quest.getName(), "", "&e> Click to set quest name").get(),
-				event -> {
-					Player p2 = (Player) event.getWhoClicked();
-					p2.closeInventory();
-					PlayerTools.promptInput(p2, new SinglePrompt(
-							PlayerTools.makeTranslation(true, Translation.QUEST_NAME_EDIT, quest.getName()), (c, s) -> {
-								String oldName = quest.getName();
-								s = Text.deserializeNewline(Text.colorize(s));
-								changes.setName(s);
-								if (changes.apply())
-									PlayerTools.sendTranslation(p2, true, Translation.QUEST_NAME_SET, s, oldName);
-
-								openQuestEditor(p2, quest);
-								return true;
-							}));
-				});
+			new ItemBuilder(Material.NAME_TAG).wrapText(quest.getName(), "", "&e> Click to set quest name").get(),
+			registry.getConsumer("editor:quest:set_name", changes));
 
 		menu.put(11,
-				new ItemBuilder(Material.CHEST)
-						.wrapText("&7Item reward", "", "&e> Click to set the reward to the items in your hotbar").get(),
-				event -> {
-					Player p2 = (Player) event.getWhoClicked();
-					changes.setItemRewards(p2);
-					changes.apply();
-
-					openQuestEditor(p2, quest);
-				});
+			new ItemBuilder(Material.CHEST)
+					.wrapText("&7Item reward", "", "&e> Click to set the reward to the items in your hotbar").get(),
+			registry.getConsumer("editor:quest:reward:item", changes));
 
 		menu.put(12,
-				new ItemBuilder(Material.WATCH)
-						.wrapText("&7Cooldown: &b" + quest.getFormattedCooldown(), "", "&rLeft click: &e+1m",
-								"&rRight click: &e-1m", "&rShift left click: &e+1h", "&rShift right click: &e-1h")
-						.get(),
-				event -> {
-					// Work with raw cooldowns so -1 is actually -1
-					long cooldown = quest.getRawCooldown();
-					long delta = IQuest.COOLDOWN_SCALE;
-					if (event.isShiftClick())
-						delta *= 60;
-					if (event.isRightClick())
-						delta = -delta;
-
-					// Force a step at 0, so you can't jump from 59 -> -1 or -1 -> 59
-					if (cooldown + delta < 0) {
-						if (cooldown <= 0)
-							cooldown = -1;
-						else
-							cooldown = 0;
-					}
-					else if (cooldown == -1)
-						cooldown = 0;
-					else
-						cooldown += delta;
-
-					changes.setRawCooldown(cooldown);
-					changes.apply();
-
-					QuestBook.openQuestEditor((Player) event.getWhoClicked(), quest);
-				});
+			new ItemBuilder(Material.WATCH)
+					.wrapText("&7Cooldown: &b" + quest.getFormattedCooldown(), "", "&rLeft click: &e+1m",
+							"&rRight click: &e-1m", "&rShift left click: &e+1h", "&rShift right click: &e-1h")
+					.get(),
+			registry.getConsumer("editor:quest:set_cooldown", changes));
 
 		if (QuestWorld.getEconomy().isPresent())
 			menu.put(13,
@@ -863,28 +813,14 @@ public class QuestBook {
 							.wrapText("&7Monetary reward: &6$" + quest.getMoney(), "", "&rLeft click: &e+1",
 									"&rRight click: &e-1", "&rShift left click: &e+100", "&rShift right click: &e-100")
 							.get(),
-					event -> {
-						int money = MissionButton.clickNumber(quest.getMoney(), 100, event);
-						if (money < 0)
-							money = 0;
-						changes.setMoney(money);
-						changes.apply();
-						openQuestEditor((Player) event.getWhoClicked(), quest);
-					});
+					registry.getConsumer("editor:quest:reward:money", changes));
 
 		menu.put(14,
 				new ItemBuilder(Material.EXP_BOTTLE)
 						.wrapText("&7Level reward: &b" + quest.getXP(), "", "&rLeft click: &e+1", "&rRight click: &e-1",
 								"&rShift left click: &e+10", "&rShift right click: &e-10")
 						.get(),
-				event -> {
-					int xp = MissionButton.clickNumber(quest.getXP(), 10, event);
-					if (xp < 0)
-						xp = 0;
-					changes.setXP(xp);
-					changes.apply();
-					openQuestEditor((Player) event.getWhoClicked(), quest);
-				});
+						registry.getConsumer("editor:quest:reward:xp", changes));
 
 		IQuest parent = quest.getParent();
 		menu.put(15,
@@ -892,68 +828,32 @@ public class QuestBook {
 						.wrapText("&7Requirement: &r&o" + (parent != null ? parent.getName() : "-none-"), "",
 								"&rLeft click: &eOpen requirement selector", "&rRight click: &eRemove requirement")
 						.get(),
-				event -> {
-					Player p2 = (Player) event.getWhoClicked();
-					if (event.isRightClick()) {
-						changes.setParent(null);
-						changes.apply();
-						openQuestEditor(p2, quest);
-					}
-					else {
-						PagedMapping.putPage(p2, 0);
-						QBDialogue.openRequirementCategories(p2, quest);
-					}
-				});
+				registry.getConsumer("editor:quest:requirement:quest", changes));
 
-		menu.put(16, new ItemBuilder(Material.COMMAND)
-				.wrapText("&7Command rewards", "", "&e> Click to open command editor").get(), event -> {
-					Player p2 = (Player) event.getWhoClicked();
-					p2.closeInventory();
-					QBDialogue.openCommandEditor(p2, quest);
-				});
+		menu.put(16,
+			new ItemBuilder(Material.COMMAND)
+				.wrapText("&7Command rewards", "", "&e> Click to open command editor").get(),
+				registry.getConsumer("editor:quest:reward:command", changes));
 
 		menu.put(17,
 				new ItemBuilder(Material.NAME_TAG).wrapText(
 						"&7Permission: &r" + (quest.getPermission().equals("") ? "&o-none-" : quest.getPermission()),
 						"", "&e> Click to change the required permission").get(),
-				event -> {
-					Player p2 = (Player) event.getWhoClicked();
-					p2.closeInventory();
-					PlayerTools.promptInput(p2, new SinglePrompt(PlayerTools.makeTranslation(true,
-							Translation.QUEST_PERM_EDIT, quest.getName(), quest.getPermission()), (c, s) -> {
-								String permission = s.equalsIgnoreCase("none") ? "" : s;
-								String oldPerm = quest.getPermission();
-								changes.setPermission(permission);
-								if (changes.apply())
-									PlayerTools.sendTranslation(p2, true, Translation.QUEST_PERM_SET, quest.getName(),
-											s, oldPerm);
-
-								openQuestEditor(p2, quest);
-								return true;
-							}));
-				});
+				registry.getConsumer("editor:quest:requirement:permission", changes));
 
 		menu.put(18,
 				new ItemBuilder(Material.FIREWORK)
 						.wrapText("&7Party progress: " + (quest.supportsParties() ? "&2&l\u2714" : "&4&l\u2718"), "",
 								"&e> Toggle whether all party members get progress when a single member makes progress")
 						.get(),
-				event -> {
-					changes.setPartySupport(!quest.supportsParties());
-					changes.apply();
-					openQuestEditor((Player) event.getWhoClicked(), quest);
-				});
+				registry.getConsumer("editor:quest:set_party_progress", changes));
 
 		menu.put(19,
 				new ItemBuilder(Material.COMMAND)
 						.wrapText("&7Ordered completion: " + (quest.getOrdered() ? "&2&l\u2714" : "&4&l\u2718"), "",
 								"&e> Toggle whether tasks must be completed in order")
 						.get(),
-				event -> {
-					changes.setOrdered(!quest.getOrdered());
-					changes.apply();
-					openQuestEditor((Player) event.getWhoClicked(), quest);
-				});
+				registry.getConsumer("editor:quest:set_ordered", changes));
 
 		menu.put(20,
 				new ItemBuilder(Material.CHEST)
@@ -961,35 +861,21 @@ public class QuestBook {
 								"&e> Toggle whether this quest's rewards will be"
 										+ " automatically given or have to be claimed manually")
 						.get(),
-				event -> {
-					changes.setAutoClaim(!changes.getAutoClaimed());
-					changes.apply();
-					openQuestEditor((Player) event.getWhoClicked(), quest);
-				});
+				registry.getConsumer("editor:quest:set_autoclaim", changes));
 
 		menu.put(21, new ItemBuilder(Material.GRASS)
-				.wrapText("&7World blacklist", "", "&e> Click to open world selector").get(), event -> {
-					openWorldSelector((Player) event.getWhoClicked(), quest);
-				});
+				.wrapText("&7World blacklist", "", "&e> Click to open world selector").get(),
+				registry.getConsumer("editor:quest:requirement:world", changes));
 
 		String wtfString = "&7Party size: " + (quest.getPartySize() < 1 ? "&4Parties prohibited"
 				: (quest.getPartySize() == 1 ? ("&aAny size") : ("&e" + quest.getPartySize() + " members")));
 		menu.put(22, new ItemBuilder(Material.FIREWORK).wrapText(wtfString, "", "&e> Click to set minimum party size",
-				"", "&rLeft click: &e+1", "&rRight click: &e-1").get(), event -> {
-					int size = MissionButton.clickNumber(quest.getPartySize(), 1, event);
-					if (size < 0)
-						size = 0;
-					changes.setPartySize(size);
-					changes.apply();
-					openQuestEditor((Player) event.getWhoClicked(), quest);
-				});
+				"", "&rLeft click: &e+1", "&rRight click: &e-1").get(),
+				registry.getConsumer("editor:quest:requirement:party_size", changes));
 
 		menu.put(26, ItemBuilder.Proto.RED_WOOL.get()
 				.wrapText("&4Reset progress", "", "&e> Click to clear all player progress for this quest").get(),
-				event -> {
-					QuestWorld.getFacade().clearAllUserData(quest);
-					QuestWorld.getSounds().DESTRUCTIVE_CLICK.playTo((Player) event.getWhoClicked());
-				});
+				registry.getConsumer("editor:quest:reset", changes));
 
 		int index = 36;
 		for (ItemStack reward : quest.getRewards()) {
@@ -999,12 +885,8 @@ public class QuestBook {
 
 		for (int i = 0; i < 9; ++i)
 			menu.put(45 + i, new ItemBuilder(Material.STAINED_GLASS_PANE).color(DyeColor.RED)
-					.display("&7> Create mission").get(), event -> {
-						changes.addMission(event.getSlot() - 45);
-
-						changes.apply();
-						openQuestEditor((Player) event.getWhoClicked(), quest);
-					});
+					.display("&7> Create mission").get(),
+					registry.getConsumer("editor:quest:new_mission", changes));
 
 		// TODO: Mission move
 		for (IMission mission : quest.getMissions()) {
@@ -1017,15 +899,7 @@ public class QuestBook {
 																		 * , "&rShift right click: &eMove mission"
 																		 */)
 							.get(),
-					event -> {
-						Player p2 = (Player) event.getWhoClicked();
-						if (!event.isRightClick())
-							openQuestMissionEditor(p2, mission);
-						// else if(event.isShiftClick())
-						// openMissionMove(p, quest, mission);
-						else
-							QBDialogue.openDeletionConfirmation(p2, mission);
-					});
+					registry.getConsumer("editor:quest:open_mission", mission));
 		}
 
 		menu.openFor(p);
