@@ -14,5 +14,3 @@ Built using:
 - Java 8
 - spigot-api 1.12.2-R0.1-SNAPSHOT
 - VaultAPI 1.6
-
-(test)
