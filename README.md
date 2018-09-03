@@ -2,6 +2,7 @@
 GUI based questing plugin for Bukkit based Minecraft servers
 
 Extensions at [QuestWorld-Extensions](https://github.com/ezeiger92/QuestWorld-Extensions)
+Legacy adapter at [QuestWorld-Legacy](https://github.com/ezeiger92/QuestWorld-Legacy)
 
 Supported server versions:
 - Craftbukkit 1.12.2
