@@ -109,8 +109,8 @@ public class EditorCommand implements CommandExecutor {
 					sender.sendMessage("Verison(s) " + adapter.toString());
 					
 					if(sender instanceof Player) {
-						ItemStack head = new ItemStack(Material.SKULL_ITEM);
-						ItemStack egg = new ItemStack(Material.MONSTER_EGG);
+						ItemStack head = new ItemStack(Material.STONE);
+						ItemStack egg = new ItemStack(Material.STONE);
 						adapter.makePlayerHead(head, (Player)sender);
 						adapter.makeSpawnEgg(egg, EntityType.PIG);
 						adapter.sendActionbar((Player)sender, "test");

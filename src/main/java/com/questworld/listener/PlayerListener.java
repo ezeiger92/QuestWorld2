@@ -118,7 +118,7 @@ public class PlayerListener extends AutoListener {
 		boolean hasTable = false;
 		for (ItemStack is : e.getInventory().getMatrix())
 			if (is != null) {
-				if (is.getType() == Material.WORKBENCH && !hasTable)
+				if (is.getType() == Material.CRAFTING_TABLE && !hasTable)
 					hasTable = true;
 				else
 					return;

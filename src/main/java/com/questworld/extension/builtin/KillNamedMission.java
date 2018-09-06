@@ -21,7 +21,7 @@ public class KillNamedMission extends KillMission {
 
 	public KillNamedMission() {
 		setName("KILL_NAMED_MOB");
-		setSelectorItem(new ItemStack(Material.GOLD_SWORD));
+		setSelectorItem(new ItemStack(Material.GOLDEN_SWORD));
 	}
 
 	@Override

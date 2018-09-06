@@ -18,12 +18,12 @@ import com.questworld.api.menu.MissionButton;
 
 public class LevelMission extends MissionType implements Listener, Ticking {
 	public LevelMission() {
-		super("REACH_LEVEL", false, new ItemStack(Material.EXP_BOTTLE));
+		super("REACH_LEVEL", false, new ItemStack(Material.EXPERIENCE_BOTTLE));
 	}
 
 	@Override
 	public ItemStack userDisplayItem(IMission instance) {
-		return new ItemStack(Material.COMMAND);
+		return new ItemStack(Material.COMMAND_BLOCK);
 	}
 
 	@Override

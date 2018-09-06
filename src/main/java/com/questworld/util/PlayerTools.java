@@ -354,6 +354,6 @@ public class PlayerTools {
 				Log.warning(
 						"Falling back to MaterialData comparison for all future checks. Mining quests may not detect blocks as accurately");
 			}
-		return block.getState().getData().toItemStack(1);
+		return new ItemStack(block.getType());
 	}
 }

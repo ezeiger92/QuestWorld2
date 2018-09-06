@@ -20,7 +20,7 @@ public class JoinMission extends MissionType implements Listener {
 
 	@Override
 	public ItemStack userDisplayItem(IMission instance) {
-		return new ItemStack(Material.WATCH);
+		return new ItemStack(Material.CLOCK);
 	}
 
 	@Override

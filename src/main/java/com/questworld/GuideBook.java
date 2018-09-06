@@ -48,7 +48,7 @@ public class GuideBook {
 		ShapelessRecipe r = null;
 
 		if (!QuestWorld.getPlugin().getConfig().getBoolean("book.disable-recipe", false))
-			r = Reflect.getAdapter().shapelessRecipe("GuideBook", guide).addIngredient(Material.WORKBENCH);
+			r = Reflect.getAdapter().shapelessRecipe("GuideBook", guide).addIngredient(Material.CRAFTING_TABLE);
 
 		recipe = r;
 

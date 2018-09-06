@@ -1,6 +1,7 @@
 package com.questworld.adapter;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.EntityType;
@@ -8,7 +9,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.inventory.meta.SkullMeta;
-import org.bukkit.inventory.meta.SpawnEggMeta;
 
 import com.questworld.api.QuestWorld;
 import com.questworld.util.VersionAdapter;
@@ -22,15 +22,21 @@ public class CurrentAdapter extends VersionAdapter {
 
 	@Override
 	public void makeSpawnEgg(ItemStack result, EntityType mob) {
-		if (result.getItemMeta() instanceof SpawnEggMeta) {
-			SpawnEggMeta meta = (SpawnEggMeta) result.getItemMeta();
-			meta.setSpawnedType(mob);
-			result.setItemMeta(meta);
+		
+		Material m = Material.matchMaterial(mob.name() + "_SPAWN_EGG");
+		
+		if(m != null) {
+			result.setType(m);
+		}
+		else {
+			result.setType(Material.AIR);
 		}
 	}
 
 	@Override
 	public void makePlayerHead(ItemStack result, OfflinePlayer player) {
+		result.setType(Material.PLAYER_HEAD);
+		
 		if (result.getItemMeta() instanceof SkullMeta) {
 			SkullMeta meta = (SkullMeta) result.getItemMeta();
 			meta.setOwningPlayer(player);

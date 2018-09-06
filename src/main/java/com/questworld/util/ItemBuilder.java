@@ -5,13 +5,12 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.bukkit.Bukkit;
-import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.SkullType;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import com.questworld.api.QuestWorld;
@@ -34,10 +33,7 @@ public class ItemBuilder {
 	 * 
 	 * @author Erik Zeiger
 	 */
-	// TODO: Here's something that will probably need changing after 1.13
 	public static enum Proto {
-		RED_WOOL(new ItemBuilder(Material.WOOL).color(DyeColor.RED).get()),
-		LIME_WOOL(new ItemBuilder(Material.WOOL).color(DyeColor.LIME).get()),
 		MAP_BACK(new ItemBuilder(Material.MAP).flagAll().display(QuestWorld.translate(Translation.button_back_general))
 				.get()),;
 		private ItemStack item;
@@ -89,7 +85,7 @@ public class ItemBuilder {
 		if (left == null || right == null)
 			return left == right;
 
-		if (left.getType() != right.getType() || left.getDurability() != right.getDurability())
+		if (left.getType() != right.getType())
 			return false;
 
 		boolean hasMetaLeft = left.hasItemMeta();
@@ -155,17 +151,6 @@ public class ItemBuilder {
 	}
 
 	/**
-	 * Constructs an ItemBuilder of a skull. The resulting builder will have the
-	 * material <tt>SKULL_ITEM</tt> and use the desired skull type.
-	 * 
-	 * @param type Type of skull to create
-	 */
-	public ItemBuilder(SkullType type) {
-		this(Material.SKULL_ITEM);
-		skull(type);
-	}
-
-	/**
 	 * Returns a reference to our ItemStack so our builder can tweak later
 	 *
 	 * @return stack
@@ -196,14 +181,30 @@ public class ItemBuilder {
 	}
 
 	/**
-	 * Sets stack durability
+	 * Sets stack damage
 	 *
-	 * @param durability Target durability for stack
+	 * @param damage Target damage for stack
 	 * 
 	 * @return this, for chaining
 	 */
-	public @Mutable ItemBuilder durability(short durability) {
-		resultStack.setDurability(durability);
+	public @Mutable ItemBuilder damage(int damage) {
+		ItemMeta meta;
+		
+		if(resultStack.hasItemMeta()) {
+			meta = resultStack.getItemMeta();
+		}
+		else {
+			meta = Bukkit.getItemFactory().getItemMeta(resultStack.getType());
+		}
+		
+		if(meta instanceof Damageable) {
+			
+			Damageable d = (Damageable) meta;
+			d.setDamage(damage);
+			
+			resultStack.setItemMeta(meta);
+		}
+
 		return this;
 	}
 
@@ -220,39 +221,6 @@ public class ItemBuilder {
 	}
 
 	/**
-	 * Sets material color Use ItemBuilder.leather(org.bukkit.Color) for leather
-	 * armor color
-	 *
-	 * @param color Color of material
-	 * 
-	 * @return this, for chaining
-	 */
-	@SuppressWarnings("deprecation")
-	// TODO: 1.13
-	public @Mutable ItemBuilder color(DyeColor color) {
-		if (resultStack.getType() == Material.INK_SACK)
-			durability(color.getDyeData());
-		else
-			durability(color.getWoolData());
-
-		return this;
-	}
-
-	/**
-	 * Sets skull type, given that the current material accepts skull types.
-	 * 
-	 * @param type Desired type of skull
-	 * @return this, for chaining
-	 */
-	// TODO: 1.13
-	public @Mutable ItemBuilder skull(SkullType type) {
-		if (resultStack.getType() == Material.SKULL_ITEM)
-			durability((short) type.ordinal());
-
-		return this;
-	}
-
-	/**
 	 * Sets the skull type to a players head, given that the current material
 	 * accepts skull types. <tt>playerName</tt> must not be null. If you want a
 	 * plain player skull, use {@link ItemBuilder#skull(SkullType)
@@ -262,7 +230,6 @@ public class ItemBuilder {
 	 * @return this, for chaining
 	 */
 	public @Mutable ItemBuilder skull(OfflinePlayer player) {
-		skull(SkullType.PLAYER);
 		Reflect.getAdapter().makePlayerHead(resultStack, player);
 		return this;
 	}
@@ -275,7 +242,6 @@ public class ItemBuilder {
 	 */
 	// TODO: 1.13
 	public @Mutable ItemBuilder mob(EntityType entity) {
-		type(Material.MONSTER_EGG);
 		Reflect.getAdapter().makeSpawnEgg(resultStack, entity);
 		return this;
 	}

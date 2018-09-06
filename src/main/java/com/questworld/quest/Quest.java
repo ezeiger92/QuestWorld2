@@ -35,7 +35,7 @@ class Quest extends UniqueObject implements IQuestState {
 	private List<String> commands = new ArrayList<>();
 	private long cooldown = -1;
 	private int id = -1;
-	private ItemStack item = new ItemStack(Material.BOOK_AND_QUILL);
+	private ItemStack item = new ItemStack(Material.WRITABLE_BOOK);
 	private int money = 0;
 	private String name = "";
 	private boolean ordered = false;

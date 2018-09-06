@@ -17,7 +17,7 @@ import com.questworld.util.Text;
 
 public class PlayMission extends MissionType implements Ticking {
 	public PlayMission() {
-		super("PLAY_TIME", false, new ItemStack(Material.WATCH));
+		super("PLAY_TIME", false, new ItemStack(Material.CLOCK));
 	}
 
 	@Override
@@ -39,13 +39,13 @@ public class PlayMission extends MissionType implements Ticking {
 
 	@Override
 	public void onManual(Player player, MissionEntry result) {
-		result.setProgress(player.getStatistic(Statistic.PLAY_ONE_TICK) / 20 / 60);
+		result.setProgress(player.getStatistic(Statistic.PLAY_ONE_MINUTE) / 20 / 60);
 	}
 
 	@Override
 	protected void layoutMenu(IMissionState changes) {
 		putButton(17,
-				new MenuData(new ItemBuilder(Material.WATCH)
+				new MenuData(new ItemBuilder(Material.CLOCK)
 						.wrapText("&7Time: &b" + Text.timeFromNum(changes.getAmount()), "", "&rLeft click: &e+1m",
 								"&rRight click: &e-1m", "&rShift left click: &e+1h", "&rShift right click: &e-1h")
 						.get(), event -> {

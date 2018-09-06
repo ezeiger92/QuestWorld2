@@ -21,7 +21,7 @@ import com.questworld.util.Text;
 
 public class CraftMission extends MissionType implements Listener, Decaying {
 	public CraftMission() {
-		super("CRAFT", true, new ItemStack(Material.WORKBENCH));
+		super("CRAFT", true, new ItemStack(Material.CRAFTING_TABLE));
 	}
 
 	@Override

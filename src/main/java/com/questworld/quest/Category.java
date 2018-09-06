@@ -24,7 +24,7 @@ class Category extends UniqueObject implements ICategoryState {
 
 	private boolean hidden = false;
 	private int id = -1;
-	private ItemStack item = new ItemStack(Material.BOOK_AND_QUILL);
+	private ItemStack item = new ItemStack(Material.WRITABLE_BOOK);
 	private String name = "";
 	private WeakReference<Quest> parent = new WeakReference<>(null);
 	private String permission = "";

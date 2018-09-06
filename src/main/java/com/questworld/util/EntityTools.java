@@ -3,7 +3,6 @@ package com.questworld.util;
 import java.util.ArrayList;
 
 import org.bukkit.Material;
-import org.bukkit.SkullType;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 
@@ -46,51 +45,43 @@ public class EntityTools {
 	 *         <tt>type</tt>
 	 */
 	public static ItemBuilder getEntityDisplay(EntityType type) {
-		ItemBuilder ib = new ItemBuilder(Material.SKULL_ITEM);
-
 		switch (type) {
 			case PLAYER:
-				ib.skull(SkullType.PLAYER);
-				break;
+				return new ItemBuilder(Material.PLAYER_HEAD);
+				
 			case GIANT:
-				ib.skull(SkullType.ZOMBIE);
-				break;
-			// 1.8.x had no dragon head
+				return new ItemBuilder(Material.ZOMBIE_HEAD);
+				
 			case ENDER_DRAGON:
-				try {
-					ib.skull(SkullType.valueOf("DRAGON"));
-				}
-				catch (IllegalArgumentException e) {
-					ib.type(Material.DRAGON_EGG);
-				}
-				break;
+				return new ItemBuilder(Material.DRAGON_HEAD);
 
 			case WITHER:
-				ib.skull(SkullType.WITHER);
-				break;
+				return new ItemBuilder(Material.WITHER_SKELETON_SKULL);
+			
 			case ARMOR_STAND:
-				ib.type(Material.ARMOR_STAND);
-				break;
+				return new ItemBuilder(Material.ARMOR_STAND);
+
 			case SNOWMAN:
-				ib.type(Material.SNOW_BALL);
-				break;
+				return new ItemBuilder(Material.SNOWBALL);
+				
 			case IRON_GOLEM:
-				ib.type(Material.IRON_INGOT);
-				break;
+				return new ItemBuilder(Material.IRON_INGOT);
+				
 			case COMPLEX_PART:
-				ib.type(Material.NETHER_STAR);
-				break;
+				return new ItemBuilder(Material.NETHER_STAR);
 
 			default:
+				
 				try {
-					ib.type(Material.MONSTER_EGG).mob(type);
+					ItemBuilder ib = new ItemBuilder(Material.STONE);
+					Reflect.getAdapter().makeSpawnEgg(ib.get(), type);
+					
+					return ib;
 				}
 				catch (IllegalArgumentException e) {
-					ib.type(Material.BARRIER);
+					return new ItemBuilder(Material.BARRIER);
 				}
 		}
-
-		return ib;
 	}
 
 	/**
