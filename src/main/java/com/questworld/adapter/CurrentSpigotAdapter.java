@@ -13,7 +13,7 @@ public class CurrentSpigotAdapter extends PartialAdapter {
 
 	@Override
 	protected String forVersion() {
-		return "v1_12_r1_SPIGOT";
+		return "v1_13_r2_SPIGOT";
 	}
 
 	@Override

@@ -17,7 +17,7 @@ import com.questworld.util.json.JsonBlob;
 public class CurrentAdapter extends VersionAdapter {
 	@Override
 	protected String forVersion() {
-		return "v1_12_r1";
+		return "v1_13_r2";
 	}
 
 	@Override

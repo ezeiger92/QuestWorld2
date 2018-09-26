@@ -776,6 +776,63 @@ public class QuestBook {
 
 		menu.openFor(p);
 	}
+	
+	public static void openMissionList(Player p, final IQuest quest) {
+		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
+
+		final Menu menu = new LinkedMenu(6, "&3Quests", quest, true);
+
+		ItemStack defaultItem = new ItemBuilder(Material.RED_STAINED_GLASS_PANE)
+				.display("&7> Create mission").get();
+
+		PagedMapping view = new PagedMapping(45);
+		view.reserve(1);
+		view.setBackButton(" &3Quests", event -> {
+			openCategoryList((Player) event.getWhoClicked());
+		});
+
+		view.addFrameButton(4, new ItemBuilder(Material.WRITABLE_BOOK).display("&3Quest editor").get(), event -> {
+			openQuestEditor(p, quest);
+		}, true);
+		
+		///
+		IQuestState changes = quest.getState();
+
+		// TODO: Mission move
+		for (IMission mission : quest.getMissions()) {
+			// TODO: Hack to maybe deal with out of order quests
+			int missionIndex = (mission.getIndex() + 45) % 45;
+			view.addButton(missionIndex,
+					new ItemBuilder(mission.getType().getSelectorItem()).flagAll()
+							.wrapText(mission.getText(), "", "&rLeft click: &eOpen mission editor",
+									"&rRight click: &eRemove mission"/*
+																		 * , "&rShift right click: &eMove mission"
+																		 */)
+							.get(),
+					event -> {
+						Player p2 = (Player) event.getWhoClicked();
+						if (!event.isRightClick())
+							openQuestMissionEditor(p2, mission);
+						// else if(event.isShiftClick())
+						// openMissionMove(p, quest, mission);
+						else
+							QBDialogue.openDeletionConfirmation(p2, mission);
+					}, true);
+		}
+		
+		for (int i = 0; i < view.getCapacity(); ++i) {
+			if(!view.hasButton(i))
+				view.addButton(i, defaultItem, event -> {
+							changes.addMission(event.getSlot() - 45);
+	
+							changes.apply();
+							openQuestEditor((Player) event.getWhoClicked(), quest);
+						}, true);
+		}
+
+		view.build(menu, p);
+		menu.openFor(p);
+	}
 
 	public static void openQuestEditor(Player p, final IQuest quest) {
 		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
@@ -785,6 +842,10 @@ public class QuestBook {
 
 		menu.put(0, ItemBuilder.Proto.MAP_BACK.get().wrapLore(" &3Quests").get(), event -> {
 			openQuestList((Player) event.getWhoClicked(), quest.getCategory());
+		});
+
+		menu.put(4, new ItemBuilder(Material.WRITABLE_BOOK).display("&3Mission list").get(), event -> {
+			openMissionList(p, quest);
 		});
 
 		menu.put(9, new ItemBuilder(quest.getItem()).wrapText(quest.getName(), "", "&e> Click to set the display item")
@@ -998,37 +1059,6 @@ public class QuestBook {
 		for (ItemStack reward : quest.getRewards()) {
 			menu.put(index, reward, null);
 			index++;
-		}
-
-		for (int i = 0; i < 9; ++i)
-			menu.put(45 + i, new ItemBuilder(Material.RED_STAINED_GLASS_PANE)
-					.display("&7> Create mission").get(), event -> {
-						changes.addMission(event.getSlot() - 45);
-
-						changes.apply();
-						openQuestEditor((Player) event.getWhoClicked(), quest);
-					});
-
-		// TODO: Mission move
-		for (IMission mission : quest.getMissions()) {
-			// TODO: Hack to maybe deal with out of order quests
-			int missionIndex = (mission.getIndex() + 45) % 9;
-			menu.put(missionIndex + 45,
-					new ItemBuilder(mission.getType().getSelectorItem()).flagAll()
-							.wrapText(mission.getText(), "", "&rLeft click: &eOpen mission editor",
-									"&rRight click: &eRemove mission"/*
-																		 * , "&rShift right click: &eMove mission"
-																		 */)
-							.get(),
-					event -> {
-						Player p2 = (Player) event.getWhoClicked();
-						if (!event.isRightClick())
-							openQuestMissionEditor(p2, mission);
-						// else if(event.isShiftClick())
-						// openMissionMove(p, quest, mission);
-						else
-							QBDialogue.openDeletionConfirmation(p2, mission);
-					});
 		}
 
 		menu.openFor(p);

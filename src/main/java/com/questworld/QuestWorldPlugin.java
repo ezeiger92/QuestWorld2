@@ -14,6 +14,7 @@ import com.questworld.listener.MenuListener;
 import com.questworld.listener.PlayerListener;
 import com.questworld.listener.SpawnerListener;
 import com.questworld.util.Log;
+import com.questworld.util.Reflect;
 
 public class QuestWorldPlugin extends JavaPlugin implements Listener {
 	private QuestingImpl api;
@@ -60,8 +61,14 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener {
 		GuideBook guide = GuideBook.instance();
 		if (guide.recipe() != null)
 			getServer().addRecipe(guide.recipe());
-
-		getServer().getMessenger().registerOutgoingPluginChannel(this, "MC|BOpen");
+		
+		try {
+			Reflect.serverAddChannel(this, Constants.CH_BOOK);
+		}
+		catch(Exception e) {
+			Log.warning("could not register book channel");
+			e.printStackTrace();
+		}
 	}
 
 	public void loadConfigs() {
@@ -104,6 +111,13 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener {
 
 		getServer().getServicesManager().unregisterAll(this);
 		getServer().getScheduler().cancelTasks(this);
-		getServer().getMessenger().unregisterOutgoingPluginChannel(this, "MC|BOpen");
+		
+		try {
+			Reflect.serverRemoveChannel(this, Constants.CH_BOOK);
+		}
+		catch(Exception e) {
+			Log.warning("could not unregister book channel");
+			e.printStackTrace();
+		}
 	}
 }

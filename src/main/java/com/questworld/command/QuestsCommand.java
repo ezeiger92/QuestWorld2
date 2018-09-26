@@ -95,7 +95,7 @@ public class QuestsCommand implements CommandExecutor {
 				else {
 					PagedMapping.clearPages(p);
 					PagedMapping.putPage(p, category.getID() / 45);
-					PagedMapping.putPage(p, page);
+					PagedMapping.putPage(p, Math.max(page, 0));
 					QuestBook.openCategory(p, category, true);
 				}
 			}

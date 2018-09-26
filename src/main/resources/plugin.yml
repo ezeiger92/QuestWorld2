@@ -3,6 +3,7 @@ version: ${version}
 author: mrCookieSlime
 authors: [ezeiger92, erik1988]
 website: https://github.com/ezeiger92/QuestWorld2
+api-version: 1.13
 
 main: com.questworld.QuestWorldPlugin
 softdepend: [ASkyBlock, ChatReaction, Citizens, PlaceholderAPI, Vault, Votifier]
@@ -17,7 +18,7 @@ commands:
     usage: /questeditor <gui/import/export>
     aliases: [qe]
     permission: QuestWorld.editor
-    
+
 permissions:
   QuestWorld.editor:
     description: Allows you to use /questeditor

@@ -1,11 +1,14 @@
 package com.questworld.util;
 
+import java.lang.reflect.Method;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.Plugin;
 
 public final class Reflect {
 	private Reflect() {
@@ -56,6 +59,26 @@ public final class Reflect {
 
 	public static void playerRemoveChannel(Player p, String s) throws Exception {
 		CBS("entity.CraftPlayer").getMethod("removeChannel", String.class).invoke(p, s);
+	}
+
+	public static void serverAddChannel(Plugin plugin, String channel) throws Exception {
+		Object messenger = plugin.getServer().getMessenger();
+		Method m = messenger.getClass().getDeclaredMethod("addToOutgoing", Plugin.class, String.class);
+		boolean access = m.isAccessible();
+		
+		m.setAccessible(true);
+		m.invoke(messenger, plugin, channel);
+		m.setAccessible(access);
+	}
+	
+	public static void serverRemoveChannel(Plugin plugin, String channel) throws Exception {
+		Object messenger = plugin.getServer().getMessenger();
+		Method m = messenger.getClass().getDeclaredMethod("removeFromOutgoing", Plugin.class, String.class);
+		boolean access = m.isAccessible();
+		
+		m.setAccessible(true);
+		m.invoke(messenger, plugin, channel);
+		m.setAccessible(access);
 	}
 
 	public static ItemStack nmsPickBlock(Block block) throws Exception {

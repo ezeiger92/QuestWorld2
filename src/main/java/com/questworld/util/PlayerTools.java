@@ -25,6 +25,7 @@ import org.bukkit.inventory.CraftingInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
+import com.questworld.Constants;
 import com.questworld.api.QuestWorld;
 import com.questworld.api.Translation;
 import com.questworld.api.Translator;
@@ -164,8 +165,6 @@ public class PlayerTools {
 		
 		return "";
 	}
-	
-	private static final String BOOK_CHANNEL = "MC|BOpen";
 
 	@SuppressWarnings("deprecation")
 	public static void sendBookView(Player player, String jsonPage, String... extra) {
@@ -180,11 +179,11 @@ public class PlayerTools {
 
 		pages.append("]}");
 
-		boolean listening = player.getListeningPluginChannels().contains(BOOK_CHANNEL);
+		boolean listening = player.getListeningPluginChannels().contains(Constants.CH_BOOK);
 		
 		if(!listening) {
 			try {
-				Reflect.playerAddChannel(player, BOOK_CHANNEL);
+				Reflect.playerAddChannel(player, Constants.CH_BOOK);
 			}
 			catch (Exception e) {
 				Log.warning("Could not open book channel for player: " + player.getName());
@@ -202,7 +201,7 @@ public class PlayerTools {
 		player.getInventory().setItem(slot, book);
 
 		try {
-			player.sendPluginMessage(QuestWorld.getPlugin(), BOOK_CHANNEL, new byte[] {0});
+			player.sendPluginMessage(QuestWorld.getPlugin(), Constants.CH_BOOK, new byte[] {0});
 		}
 		catch(Exception e) {
 			Log.warning("Failed sending book to player: " + player.getName());
@@ -213,7 +212,7 @@ public class PlayerTools {
 	
 			if(!listening) {
 				try {
-					Reflect.playerRemoveChannel(player, BOOK_CHANNEL);
+					Reflect.playerRemoveChannel(player, Constants.CH_BOOK);
 				}
 				catch (Exception e) {
 					Log.warning("Could not close book channel for player " + player.getName());

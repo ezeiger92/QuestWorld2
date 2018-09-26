@@ -11,7 +11,7 @@ defaults:
 
 guide-book: |
   &eQuest Book &7(Right Click)
-  
+
   &rYour basic Guide for Quests
   If you lose it, simply craft a new one with a Workbench
 
@@ -48,7 +48,7 @@ editor:
   quest.name-set:    '&aSuccessfully renamed quest &r%name_old%&a to &r%name%'
   quest.perm-change: '&7Please type in a new permission node for &r%name%&8 (use "&7none&8" for no node)'
   quest.perm-set:    '&aSuccessfully set permission for &r%name%&a to %perm%'
-  
+
   misssion-description: '&7Please type in a Description for your Quest'
   mission.desc-set:     '&aSuccessfully set description for &r%name%'
   add-dialogue:         '&7Please type in messages or commands for your Dialogue. Type &eexit() &7when done.'
@@ -94,7 +94,7 @@ party:
 
   gui:
     title: '&eParty Menu'
-    
+
   invite:
     accept-text:  '&a&lACCEPT'
     accept-hover: '&7Click to accept this Invitation'
@@ -125,10 +125,10 @@ quests:
   locked-no-party: '&4You need to leave your current Party'
   locked-small-party: |
     &4You can only do this Quest in a Party
-		&4with at least &c<size> &4Members
+    &4with at least &c<size> &4Members
   locked-large-party: |
     &4You can only do this Quest in a Party
-		&4with at most &c<size> &4Members
+    &4with at most &c<size> &4Members
   tasks_completed: ' Tasks completed'
   state:
     cooldown: '&e&lON COOLDOWN'
