@@ -58,7 +58,7 @@ public class MenuListener extends AutoListener {
 		for (Player p : Bukkit.getOnlinePlayers()) {
 			DataObject object = QuestBook.getLastViewed(p);
 			if (event.getCategory() == object || event.getCategory().getQuests().contains(object))
-				QuestBook.setLastViewed(p, null);
+				QuestBook.clearLastViewed(p);
 		}
 	}
 
@@ -67,7 +67,7 @@ public class MenuListener extends AutoListener {
 		for (Player p : Bukkit.getOnlinePlayers()) {
 			DataObject object = QuestBook.getLastViewed(p);
 			if (event.getQuest() == object)
-				QuestBook.setLastViewed(p, null);
+				QuestBook.clearLastViewed(p);
 		}
 	}
 

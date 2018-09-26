@@ -74,7 +74,7 @@ public class QuestsCommand implements CommandExecutor {
 				}
 			}
 
-			open(p, category, quest, page, false);
+			open(p, category, quest, page, false, true);
 		}
 		else
 			sender.sendMessage(Text.colorize(QuestWorld.translate(Translation.NOT_PLAYER)));
@@ -82,21 +82,22 @@ public class QuestsCommand implements CommandExecutor {
 		return true;
 	}
 
-	public static void open(Player p, ICategory category, IQuest quest, int page, boolean force) {
+	public static void open(Player p, ICategory category, IQuest quest, int page, boolean force, boolean back) {
 		if (category != null) {
 			if (force || QuestBook.testCategory(p, category)) {
 				if (quest != null) {
 					if (force || QuestBook.testQuest(p, quest)) {
-						QuestBook.openQuest(p, quest, false, false);
+						QuestBook.clearLastViewed(p);
+						QuestBook.openQuest(p, quest, back, back);
 					}
 					else
 						p.sendMessage(Text.colorize(QuestWorld.translate(p, Translation.QUEST_UNAVAIL)));
 				}
 				else {
-					PagedMapping.clearPages(p);
 					PagedMapping.putPage(p, category.getID() / 45);
 					PagedMapping.putPage(p, Math.max(page, 0));
-					QuestBook.openCategory(p, category, true);
+					QuestBook.clearLastViewed(p);
+					QuestBook.openCategory(p, category, back);
 				}
 			}
 			else
@@ -104,8 +105,8 @@ public class QuestsCommand implements CommandExecutor {
 		}
 		else {
 			if (page >= 0) {
-				PagedMapping.clearPages(p);
 				PagedMapping.putPage(p, page);
+				QuestBook.clearLastViewed(p);
 				QuestBook.openMainMenu(p);
 			}
 			else

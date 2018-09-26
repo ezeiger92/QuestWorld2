@@ -31,6 +31,7 @@ import com.questworld.api.contract.IPlayerStatus;
 import com.questworld.api.contract.IQuest;
 import com.questworld.api.contract.IQuestState;
 import com.questworld.util.ItemBuilder;
+import com.questworld.util.Log;
 import com.questworld.util.ItemBuilder.Proto;
 import com.questworld.util.PlayerTools;
 import com.questworld.util.Text;
@@ -69,17 +70,49 @@ public class QuestBook {
 		return quest.isEnabled() && (status == QuestStatus.AVAILABLE || status == QuestStatus.REWARD_CLAIMABLE
 				|| status == QuestStatus.ON_COOLDOWN || status == QuestStatus.FINISHED);
 	}
+	
+	public static void clearLastViewed(Player p) {
+		setLastViewed(p, null, true, true);
+	}
 
 	public static void setLastViewed(Player p, DataObject object) {
 		p.setMetadata(Constants.MD_LAST_MENU, new FixedMetadataValue(QuestWorld.getPlugin(), object));
+	}
+
+	private static void setLastViewed(Player p, DataObject object, boolean catBack) {
+		setLastViewed(p, object);
+		
+		if(!catBack) {
+			p.setMetadata(Constants.MD_NO_CAT_BACK, new FixedMetadataValue(QuestWorld.getPlugin(), catBack));
+		}
+		else {
+			p.removeMetadata(Constants.MD_NO_CAT_BACK, QuestWorld.getPlugin());
+		}
+	}
+
+	private static void setLastViewed(Player p, DataObject object, boolean catBack, boolean questBack) {
+		setLastViewed(p, object, catBack);
+		
+		if(!questBack) {
+			p.setMetadata(Constants.MD_NO_QUEST_BACK, new FixedMetadataValue(QuestWorld.getPlugin(), questBack));
+		}
+		else {
+			p.removeMetadata(Constants.MD_NO_QUEST_BACK, QuestWorld.getPlugin());
+		}
+	}
+	
+	private static boolean getCategoryBack(Player p) {
+		return !p.hasMetadata(Constants.MD_NO_CAT_BACK);
+	}
+	
+	private static boolean getQuestBack(Player p) {
+		return !p.hasMetadata(Constants.MD_NO_QUEST_BACK);
 	}
 
 	public static void openMainMenu(Player p) {
 		QuestWorld.getSounds().QUEST_CLICK.playTo(p);
 		IPlayerStatus playerStatus = QuestWorld.getPlayerStatus(p);
 		playerStatus.update();
-
-		setLastViewed(p, null);
 
 		Menu menu = new Menu(1, QuestWorld.translate(p, Translation.gui_title));
 
@@ -141,12 +174,17 @@ public class QuestBook {
 
 	public static void openLastMenu(Player p) {
 		DataObject last = getLastViewed(p);
+		
+		boolean catBack = getCategoryBack(p);
+		boolean questBack = getQuestBack(p);
+		
+		Log.info("Cat back: " + catBack + " quest back: " + questBack);
 
 		if (last instanceof IQuest)
-			QuestBook.openQuest(p, (IQuest) last, true, true);
+			QuestBook.openQuest(p, (IQuest) last, catBack, questBack);
 
 		else if (last instanceof ICategory)
-			QuestBook.openCategory(p, (ICategory) last, true);
+			QuestBook.openCategory(p, (ICategory) last, catBack);
 
 		else
 			QuestBook.openMainMenu(p);
@@ -318,21 +356,21 @@ public class QuestBook {
 		IPlayerStatus playerStatus = QuestWorld.getPlayerStatus(p);
 		playerStatus.update();
 
-		setLastViewed(p, category);
+		setLastViewed(p, category, back);
 
 		Menu menu = new Menu(1, category.getName());
 		ItemBuilder glassPane = new ItemBuilder(Material.RED_STAINED_GLASS_PANE);
 		PagedMapping view = new PagedMapping(45, 9);
 
-		if (!back) {
-			PagedMapping.clearPages(p);
+		if (back) {
+			int page = PagedMapping.popPage(p);
 			PagedMapping.putPage(p, category.getID() / 45);
-			PagedMapping.putPage(p, 0);
-		}
+			PagedMapping.putPage(p, page);
 
-		view.setBackButton(" " + QuestWorld.translate(p, Translation.gui_title), event -> {
-			openMainMenu((Player) event.getWhoClicked());
-		});
+			view.setBackButton(" " + QuestWorld.translate(p, Translation.gui_title), event -> {
+				openMainMenu((Player) event.getWhoClicked());
+			});
+		}
 
 		view.addFrameButton(4, partyMenuItem(p), Buttons.partyMenu(), true);
 
@@ -421,18 +459,20 @@ public class QuestBook {
 		QuestWorld.getSounds().QUEST_CLICK.playTo(p);
 		IPlayerStatus manager = QuestWorld.getPlayerStatus(p);
 		manager.update();
-		setLastViewed(p, quest);
+		
+		setLastViewed(p, quest, categoryBack, back);
 
 		Menu menu = new Menu(3, quest.getName());
 
-		if (!back) {
-			PagedMapping.clearPages(p);
+		if (back) {
+			int page = PagedMapping.popPage(p);
 			PagedMapping.putPage(p, quest.getID() / 45);
-		}
+			PagedMapping.putPage(p, page);
 
-		menu.put(0, ItemBuilder.Proto.MAP_BACK.get().wrapLore(" " + quest.getCategory().getName()).get(), event -> {
-			openCategory((Player) event.getWhoClicked(), quest.getCategory(), categoryBack);
-		});
+			menu.put(0, ItemBuilder.Proto.MAP_BACK.get().wrapLore(" " + quest.getCategory().getName()).get(), event -> {
+				openCategory((Player) event.getWhoClicked(), quest.getCategory(), categoryBack);
+			});
+		}
 
 		// Detect all
 		menu.put(1, new ItemBuilder(Material.CHEST).display("&7Check all Tasks").get(), event -> {

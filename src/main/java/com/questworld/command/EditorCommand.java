@@ -147,7 +147,7 @@ public class EditorCommand implements CommandExecutor {
 							ICategory c =  QuestWorld.getFacade().getCategory(c_id);
 							IQuest q = c != null ? c.getQuest(q_id) : null;
 							
-							QuestsCommand.open(target,c, q, 0, true);
+							QuestsCommand.open(target,c, q, 0, true, false);
 						}
 					}
 					
