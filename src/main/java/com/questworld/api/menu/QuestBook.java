@@ -801,7 +801,7 @@ public class QuestBook {
 		// TODO: Mission move
 		for (IMission mission : quest.getMissions()) {
 			// TODO: Hack to maybe deal with out of order quests
-			int missionIndex = (mission.getIndex() + 45) % 45;
+			int missionIndex = mission.getIndex();
 			view.addButton(missionIndex,
 					new ItemBuilder(mission.getType().getSelectorItem()).flagAll()
 							.wrapText(mission.getText(), "", "&rLeft click: &eOpen mission editor",
@@ -821,13 +821,16 @@ public class QuestBook {
 		}
 		
 		for (int i = 0; i < view.getCapacity(); ++i) {
-			if(!view.hasButton(i))
+			if(!view.hasButton(i)) {
+				int index = i;
+				
 				view.addButton(i, defaultItem, event -> {
-							changes.addMission(event.getSlot() - 45);
+							changes.addMission(index);
 	
 							changes.apply();
-							openQuestEditor((Player) event.getWhoClicked(), quest);
+							openMissionList((Player) event.getWhoClicked(), quest);
 						}, true);
+			}
 		}
 
 		view.build(menu, p);

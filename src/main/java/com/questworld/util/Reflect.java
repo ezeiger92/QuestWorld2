@@ -109,6 +109,8 @@ public final class Reflect {
 			return stack.getItemMeta().getDisplayName();
 		Object rstack = CBS("inventory.CraftItemStack").getMethod("asNMSCopy", ItemStack.class)
 				.invoke(null, stack);
-		return (String) rstack.getClass().getMethod("getName").invoke(rstack);
+		Object chatMessage = rstack.getClass().getMethod("getName").invoke(rstack);
+		
+		return (String) chatMessage.getClass().getMethod("getText").invoke(chatMessage);
 	}
 }
