@@ -780,7 +780,7 @@ public class QuestBook {
 	public static void openMissionList(Player p, final IQuest quest) {
 		QuestWorld.getSounds().EDITOR_CLICK.playTo(p);
 
-		final Menu menu = new LinkedMenu(6, "&3Quests", quest, true);
+		final Menu menu = new LinkedMenu(6, "&3Missions", quest, true);
 
 		ItemStack defaultItem = new ItemBuilder(Material.RED_STAINED_GLASS_PANE)
 				.display("&7> Create mission").get();
@@ -788,7 +788,7 @@ public class QuestBook {
 		PagedMapping view = new PagedMapping(45);
 		view.reserve(1);
 		view.setBackButton(" &3Quests", event -> {
-			openCategoryList((Player) event.getWhoClicked());
+			openQuestList((Player) event.getWhoClicked(), quest.getCategory());
 		});
 
 		view.addFrameButton(4, new ItemBuilder(Material.WRITABLE_BOOK).display("&3Quest editor").get(), event -> {
@@ -818,6 +818,8 @@ public class QuestBook {
 						else
 							QBDialogue.openDeletionConfirmation(p2, mission);
 					}, true);
+			
+			view.reserve(1);
 		}
 		
 		for (int i = 0; i < view.getCapacity(); ++i) {
@@ -1153,8 +1155,8 @@ public class QuestBook {
 
 		Menu menu = new LinkedMenu(2, "&3Mission editor", mission, true);
 
-		menu.put(0, ItemBuilder.Proto.MAP_BACK.get().wrapLore(" &3Quest editor").get(), e -> {
-			openQuestEditor(p, mission.getQuest());
+		menu.put(0, ItemBuilder.Proto.MAP_BACK.get().wrapLore(" &3Missions").get(), e -> {
+			openMissionList(p, mission.getQuest());
 		});
 
 		// Mission types now handle their own menu data!
