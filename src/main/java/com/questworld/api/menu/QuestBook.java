@@ -482,17 +482,26 @@ public class QuestBook {
 		ItemStack glassLocked = new ItemBuilder(Material.RED_STAINED_GLASS_PANE)
 				.wrapText("&7&kSOMEWEIRDMISSION", "", QuestWorld.translate(p, Translation.task_locked)).get();
 		
-		ItemStack glassClaimable = new ItemBuilder(Material.RED_STAINED_GLASS_PANE)
+		ItemStack glassClaimable = new ItemBuilder(Material.PURPLE_STAINED_GLASS_PANE)
 				.wrapText(QuestWorld.translate(p, Translation.quests_state_reward_claim)).get();
 		
-		ItemStack glassCooldown = new ItemBuilder(Material.RED_STAINED_GLASS_PANE)
+		ItemStack glassCooldown = new ItemBuilder(Material.YELLOW_STAINED_GLASS_PANE)
 				.wrapText(QuestWorld.translate(p, Translation.quests_state_cooldown)).get();
 		
-		ItemStack glassInactive = new ItemBuilder(Material.RED_STAINED_GLASS_PANE)
+		ItemStack glassInactive = new ItemBuilder(Material.GRAY_STAINED_GLASS_PANE)
 				.wrapText(QuestWorld.translate(p, Translation.quests_display_rewards)).get();
-
-		int index = 9;
+		
+		int offset = 9;
+		int index = 0;
 		for (final IMission mission : quest.getOrderedMissions()) {
+			if(index >= 9) {
+				break;
+			}
+			
+			if(manager.hasCompletedTask(mission)) {
+				continue;
+			}
+			
 			ItemStack item = glassLocked;
 			
 			if (manager.hasUnlockedTask(mission)) {
@@ -510,7 +519,7 @@ public class QuestBook {
 				item = entryItem.get();
 			}
 
-			menu.put(index, item, event -> {
+			menu.put(index + offset, item, event -> {
 				if (!manager.hasUnlockedTask(mission))
 					return;
 				if (manager.getStatus(quest).equals(QuestStatus.AVAILABLE)
@@ -525,6 +534,28 @@ public class QuestBook {
 				}
 			});
 			index++;
+		}
+		
+		for (final IMission mission : quest.getOrderedMissions()) {
+			if(index >= 9) {
+				break;
+			}
+			
+			if(manager.hasCompletedTask(mission)) {
+				
+				ItemBuilder entryItem = new ItemBuilder(mission.getDisplayItem());
+				int current = manager.getProgress(mission);
+				int total = mission.getAmount();
+				String progress = Text.progressBar(current, total, mission.getType().progressString(current, total));
+
+				entryItem.wrapText(mission.getText(), "", progress);
+
+				ItemStack item = entryItem.get();
+				
+				menu.put(index + offset, item, null);
+				
+				index++;
+			}
 		}
 
 		for (int i = 0; i < 9; i++) {
