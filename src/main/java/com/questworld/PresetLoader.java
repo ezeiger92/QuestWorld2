@@ -106,6 +106,8 @@ public final class PresetLoader {
 		}
 
 		api.onDiscard();
+		api.load();
+
 		return true;
 	}
 }
