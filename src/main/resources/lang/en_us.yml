@@ -144,7 +144,7 @@ task:
   locked: '&4&lLOCKED'
   unknown-warning: '&rUnknown mission type: %type%! Contact an admin!'
   manual-check-label: '&r> Click for manual check'
-  timeframe-label: '&7within <time>'
+  timeframe-label: ' &7within <time>'
   death-reset-label: '&7without dying'
 quests-command:
   quest-unavailable: '&cQuest unavailable'
