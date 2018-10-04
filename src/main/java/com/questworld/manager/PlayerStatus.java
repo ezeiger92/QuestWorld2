@@ -330,7 +330,8 @@ public class PlayerStatus implements IPlayerStatus {
 			else
 				sendDialogueComponent(player, line);
 
-			if (hasNext) {
+			// Must check hasNext again because previous call to .next may have grabbed the final entry
+			if (dialogue.hasNext()) {
 				of(uuid).inDialogue = true;
 				Bukkit.getScheduler().scheduleSyncDelayedTask(QuestWorld.getPlugin(),
 						() -> sendDialogue(uuid, task, dialogue), 70L);
