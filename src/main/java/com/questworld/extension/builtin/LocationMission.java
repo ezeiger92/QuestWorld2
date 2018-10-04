@@ -108,6 +108,7 @@ public class LocationMission extends MissionType implements Ticking, Listener {
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onPlayerMove(PlayerMoveEvent event) {
 		double distanceSquared = worldDistance(event.getFrom(), event.getTo(), 0);
+
 		if(distanceSquared < Vector.getEpsilon())
 			return;
 		

@@ -356,7 +356,8 @@ public class PlayerStatus implements IPlayerStatus {
 			else
 				sendDialogueComponent(player, line);
 
-			if (hasNext) {
+			// Must check hasNext again because previous call to .next may have grabbed the final entry
+			if (dialogue.hasNext()) {
 				of(uuid).inDialogue = true;
 				Bukkit.getScheduler().scheduleSyncDelayedTask(QuestWorld.getPlugin(),
 						() -> sendDialogue(uuid, task, dialogue), 70L);
@@ -466,8 +467,11 @@ public class PlayerStatus implements IPlayerStatus {
 			IQuest quest = mission.getQuest();
 			String playerWorld = player.getWorld().getName();
 
-			return getStatus(quest).equals(QuestStatus.AVAILABLE) && mission.getDeathReset()
-					&& quest.getWorldEnabled(playerWorld) && quest.getCategory().isWorldEnabled(playerWorld);
+			return !hasCompletedTask(mission) &&
+					getStatus(quest).equals(QuestStatus.AVAILABLE) &&
+					mission.getDeathReset() &&
+					quest.getWorldEnabled(playerWorld) &&
+					quest.getCategory().isWorldEnabled(playerWorld);
 		}).orElse(false);
 	}
 }
