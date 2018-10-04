@@ -441,8 +441,11 @@ public class PlayerStatus implements IPlayerStatus {
 			IQuest quest = mission.getQuest();
 			String playerWorld = player.getWorld().getName();
 
-			return getStatus(quest).equals(QuestStatus.AVAILABLE) && mission.getDeathReset()
-					&& quest.getWorldEnabled(playerWorld) && quest.getCategory().isWorldEnabled(playerWorld);
+			return !hasCompletedTask(mission) &&
+					getStatus(quest).equals(QuestStatus.AVAILABLE) &&
+					mission.getDeathReset() &&
+					quest.getWorldEnabled(playerWorld) &&
+					quest.getCategory().isWorldEnabled(playerWorld);
 		}).orElse(false);
 	}
 }
