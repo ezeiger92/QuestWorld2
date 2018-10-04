@@ -24,6 +24,7 @@ import com.questworld.api.contract.IQuest;
 import com.questworld.api.contract.IQuestState;
 import com.questworld.api.event.CancellableEvent;
 import com.questworld.api.event.QuestCompleteEvent;
+import com.questworld.util.ItemBuilder;
 import com.questworld.util.Text;
 
 class Quest extends UniqueObject implements IQuestState {
@@ -368,7 +369,13 @@ class Quest extends UniqueObject implements IQuestState {
 	}
 
 	private void handoutReward(Player p) {
-		ItemStack[] itemReward = rewards.toArray(new ItemStack[rewards.size()]);
+		int size = rewards.size();
+		ItemStack[] itemReward = rewards.toArray(new ItemStack[size]);
+		
+		for(int i = 0; i < size; ++i) {
+			itemReward[i] = ItemBuilder.clone(itemReward[i]);
+		}
+		
 		for (ItemStack item : p.getInventory().addItem(itemReward).values())
 			p.getWorld().dropItemNaturally(p.getLocation(), item);
 
