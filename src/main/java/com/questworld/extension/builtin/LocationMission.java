@@ -77,6 +77,8 @@ public class LocationMission extends MissionType implements Ticking, Listener {
 
 		return left.distanceSquared(right) - radius * radius;
 	}
+	
+	private static final double REALLY_FAR = 64 * 64;
 
 	private HashMap<UUID, HashSet<UUID>> close = new HashMap<>();
 
@@ -89,7 +91,7 @@ public class LocationMission extends MissionType implements Ticking, Listener {
 		if (distance < 0)
 			entry.addProgress(1);
 
-		if (distance < 64 * 64) {
+		if (distance < REALLY_FAR) {
 			if (closeMissions == null) {
 				closeMissions = new HashSet<>();
 				close.put(entry.getMission().getUniqueId(), closeMissions);
@@ -102,13 +104,22 @@ public class LocationMission extends MissionType implements Ticking, Listener {
 				close.remove(p.getUniqueId());
 		}
 	}
-
+	
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onPlayerMove(PlayerMoveEvent event) {
-		if(worldDistance(event.getFrom(), event.getTo(), 0) < Vector.getEpsilon())
+		double distanceSquared = worldDistance(event.getFrom(), event.getTo(), 0);
+		if(distanceSquared < Vector.getEpsilon())
 			return;
 		
 		Player p = event.getPlayer();
+		
+		// We moved really fast, force update nearby quests
+		if(distanceSquared > REALLY_FAR) {
+			for(MissionEntry entry : QuestWorld.getMissionEntries(this, p)) {
+				onManual(p, entry);
+			}
+		}
+		
 		HashSet<UUID> closeMissions = close.get(p.getUniqueId());
 
 		if (closeMissions != null && !closeMissions.isEmpty()) {
