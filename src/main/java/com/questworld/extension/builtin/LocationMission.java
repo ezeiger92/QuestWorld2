@@ -9,6 +9,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
@@ -30,7 +31,7 @@ import com.questworld.util.ItemBuilder;
 import com.questworld.util.PlayerTools;
 import com.questworld.util.Text;
 
-public class LocationMission extends MissionType implements Ticking {
+public class LocationMission extends MissionType implements Ticking, Listener {
 	public LocationMission() {
 		super("REACH_LOCATION", false, new ItemStack(Material.LEATHER_BOOTS));
 	}
