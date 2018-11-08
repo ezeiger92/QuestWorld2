@@ -26,7 +26,6 @@ public abstract class PartialAdapter extends VersionAdapter {
 	@Override
 	public void makeSpawnEgg(ItemStack result, EntityType mob) {
 		throw new UnsupportedOperationException("Adaptor does not supply \"makeSpawnEgg\"");
-
 	}
 
 	@Override
@@ -45,4 +44,8 @@ public abstract class PartialAdapter extends VersionAdapter {
 		throw new UnsupportedOperationException("Adaptor does not supply \"sendActionbar\"");
 	}
 
+	@Override
+	public void sendTitle(Player player, String title, String subtitle, int fadeIn, int stay, int fadeOut) {
+		throw new UnsupportedOperationException("Adaptor does not supply \"sendTitle\"");
+	}
 }

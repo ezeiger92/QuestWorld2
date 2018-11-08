@@ -20,8 +20,6 @@ public final class Reflect {
 	static {
 		String nms = null;
 
-		adapter = new MultiAdapter();
-
 		try {
 			nms = serverClass.getMethod("getServer").getReturnType().getName().replaceFirst("[^.]+$", "");
 		}
@@ -30,8 +28,32 @@ public final class Reflect {
 		}
 		catch (Exception e) {
 		}
+		
+		String version = nms.substring(22, nms.length() - 1);
+		
+		if(isClass("net.techcable.tacospigot.TacoSpigotConfig")) {
+			version += "_TACO";
+		}
+		else if(isClass("com.destroystokyo.paper.PaperConfig")) {
+			version += "_PAPER";
+		}
+		else if(isClass("org.spigotmc.SpigotConfig")) {
+			version += "_SPIGOT";
+		}
+
+		adapter = new MultiAdapter(version);
 
 		NMS = nms;
+	}
+	
+	public static boolean isClass(String className) {
+		try {
+			Class.forName(className);
+			return true;
+		}
+		catch(Exception e) {
+			return false;
+		}
 	}
 	
 	public static Class<?> NMS(String className) throws ClassNotFoundException {

@@ -3,6 +3,8 @@ package com.questworld.util;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.EntityType;
@@ -19,6 +21,11 @@ import org.bukkit.inventory.ShapelessRecipe;
  */
 class MultiAdapter extends VersionAdapter {
 	private ArrayList<VersionAdapter> adapters = new ArrayList<>();
+	private String version;
+	
+	public MultiAdapter(String thisVersion) {
+		version = thisVersion;
+	}
 
 	void addAdapter(VersionAdapter child) {
 		if (child == null)
@@ -28,6 +35,30 @@ class MultiAdapter extends VersionAdapter {
 
 		adapters.add(child);
 		Collections.sort(adapters);
+		
+		int ourVersion = -1;
+		int size = adapters.size();
+		
+		for(int i = 0; i < size; ++i) {
+			if(this.compareTo(adapters.get(i)) != 1) {
+				ourVersion = i;
+				break;
+			}
+		}
+
+		// Try old, older, oldest, new, newer, newest
+		// Best chance to find a good match
+		if(ourVersion > -1) {
+			ArrayList<VersionAdapter> front = new ArrayList<>(adapters.subList(0, ourVersion));
+			ArrayList<VersionAdapter> back = new ArrayList<>(adapters.subList(ourVersion, size));
+			
+			Collections.reverse(front);
+			
+			adapters.clear();
+			adapters.addAll(back);
+			adapters.addAll(front);
+		}
+		
 		invalidateIndices();
 	}
 
@@ -39,8 +70,8 @@ class MultiAdapter extends VersionAdapter {
 	}
 
 	@Override
-	public String forVersion() {
-		throw new UnsupportedOperationException("Version cannot be determined for multi-version adapters");
+	protected String forVersion() {
+		return version;
 	}
 
 	private int makeSpawnEggIndex = -1;
@@ -97,6 +128,19 @@ class MultiAdapter extends VersionAdapter {
 		}
 	}
 
+	private int sendTitleIndex = -1;
+
+	@Override
+	public void sendTitle(Player player, String title, String subtitle, int fadeIn, int stay, int fadeOut) {
+		if (sendTitleIndex >= 0)
+			adapters.get(sendTitleIndex).sendTitle(player, title, subtitle, fadeIn, stay, fadeOut);
+
+		else {
+			dispatch(player, title, subtitle, fadeIn, stay, fadeOut);
+			sendTitleIndex = lastCacheIndex;
+		}
+	}
+
 	private int lastCacheIndex = -1;
 
 	private Object dispatch(Object... params) {
@@ -108,12 +152,15 @@ class MultiAdapter extends VersionAdapter {
 				break;
 
 		String methodName = trace[i + 1].getMethodName();
+		
+		Map<String, Throwable> exceptionMap = new HashMap<>();
 
 		for (Method m : VersionAdapter.class.getMethods()) {
 			if (m.getName().equals(methodName)) {
 				for (i = 0; i < adapters.size(); ++i) {
+					VersionAdapter adapter = adapters.get(i);
+					
 					try {
-						VersionAdapter adapter = adapters.get(i);
 						Object result = m.invoke(adapter, params);
 						lastCacheIndex = i;
 
@@ -123,9 +170,17 @@ class MultiAdapter extends VersionAdapter {
 						return result;
 					}
 					catch (Throwable t) {
+						exceptionMap.put(adapter.forVersion(), t);
 					}
 				}
 			}
+		}
+		
+		Log.warning("Dumping failed adapter output:");
+		for(Map.Entry<String, Throwable> entry : exceptionMap.entrySet()) {
+			Log.warning("  Version: " + entry.getKey());
+			entry.getValue().printStackTrace();
+			Log.warning("---------------------------");
 		}
 
 		throw new IllegalStateException("No version adapter found that supports \"" + methodName + "\"");
@@ -133,6 +188,6 @@ class MultiAdapter extends VersionAdapter {
 
 	@Override
 	public String toString() {
-		return adapters.toString();
+		return "(Running " + version + ") " + adapters;
 	}
 }

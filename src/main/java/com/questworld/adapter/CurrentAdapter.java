@@ -48,4 +48,9 @@ public class CurrentAdapter extends VersionAdapter {
 		Bukkit.dispatchCommand(Bukkit.getConsoleSender(),
 				"minecraft:title " + player.getName() + " actionbar " + JsonBlob.fromLegacy(message).toString());
 	}
+	
+	@Override
+	public void sendTitle(Player player, String title, String subtitle, int fadeIn, int stay, int fadeOut) {
+		player.sendTitle(title, subtitle, fadeIn, stay, fadeOut);
+	}
 }
