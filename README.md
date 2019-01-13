@@ -5,8 +5,8 @@ Extensions at [QuestWorld-Extensions](https://github.com/ezeiger92/QuestWorld-Ex
 Legacy adapter at [QuestWorld-Legacy](https://github.com/ezeiger92/QuestWorld-Legacy)
 
 Supported server versions:
-- Craftbukkit 1.12.2
-- Spigot 1.12.2
+- Craftbukkit 1.13.2, 1.12.2
+- Spigot 1.13.2, 1.12.2
 
 Any other versions may recieve limited support. Versions earlier than 1.12 are known to not work.
 
