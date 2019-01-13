@@ -35,6 +35,8 @@ import com.questworld.util.Log;
 import com.questworld.util.ItemBuilder.Proto;
 import com.questworld.util.PlayerTools;
 import com.questworld.util.Text;
+import com.questworld.util.version.ObjectMap.VDItemStack;
+import com.questworld.util.version.ObjectMap.VDMaterial;
 
 public class QuestBook {
 	public static DataObject getLastViewed(Player p) {
@@ -193,7 +195,7 @@ public class QuestBook {
 	private static ItemStack partyMenuItem(Player p) {
 		String progress = QuestWorld.getPlayerStatus(p).progressString();
 		if (QuestWorld.getPlugin().getConfig().getBoolean("party.enabled")) {
-			return new ItemBuilder(Material.PLAYER_HEAD).wrapText(QuestWorld.translate(p, Translation.gui_party), progress, "",
+			return new ItemBuilder(VDItemStack.getPlayerHead()).wrapText(QuestWorld.translate(p, Translation.gui_party), progress, "",
 					QuestWorld.translate(p, Translation.button_open)).get();
 		}
 
@@ -206,7 +208,7 @@ public class QuestBook {
 
 		Menu menu = new Menu(1, QuestWorld.translate(p, Translation.gui_party));
 
-		ItemBuilder skull = new ItemBuilder(Material.PLAYER_HEAD);
+		ItemBuilder skull = new ItemBuilder(VDItemStack.getPlayerHead());
 		menu.put(4, skull.wrapText(QuestWorld.translate(p, Translation.gui_party), "",
 				QuestWorld.translate(p, Translation.button_back_party)).get(), event -> {
 					openPartyMenu((Player) event.getWhoClicked());
@@ -266,7 +268,7 @@ public class QuestBook {
 
 		final IParty party = QuestWorld.getParty(p);
 
-		ItemBuilder wool = new ItemBuilder(Material.GREEN_WOOL);
+		ItemBuilder wool = new ItemBuilder(VDItemStack.getGreenWool());
 
 		if (party == null) {
 			menu.put(9,
@@ -325,7 +327,7 @@ public class QuestBook {
 							}
 						});
 
-				menu.put(17, new ItemBuilder(Material.RED_WOOL)
+				menu.put(17, new ItemBuilder(VDItemStack.getRedWool())
 						.wrapText("&4&lDelete your Party", "", "&rDeletes this Party", "&rBe careful with this Option!")
 						.get(), event -> {
 							QuestWorld.disbandParty(party);
@@ -333,7 +335,7 @@ public class QuestBook {
 						});
 			}
 			else {
-				menu.put(17, new ItemBuilder(Material.RED_WOOL)
+				menu.put(17, new ItemBuilder(VDItemStack.getRedWool())
 						.wrapText("&4&lLeave your Party", "", "&rLeaves this Party", "&rBe careful with this Option!")
 						.get(), event -> {
 							Player p2 = (Player) event.getWhoClicked();
@@ -342,7 +344,7 @@ public class QuestBook {
 						});
 			}
 
-			menu.put(13, new ItemBuilder(Material.PLAYER_HEAD)
+			menu.put(13, new ItemBuilder(VDItemStack.getPlayerHead())
 					.wrapText("&eMember List", "", "&rShows you all Members of this Party").get(), event -> {
 						openPartyMembers((Player) event.getWhoClicked());
 					});
@@ -359,7 +361,7 @@ public class QuestBook {
 		setLastViewed(p, category, back);
 
 		Menu menu = new Menu(1, category.getName());
-		ItemBuilder glassPane = new ItemBuilder(Material.RED_STAINED_GLASS_PANE);
+		ItemBuilder glassPane = new ItemBuilder(VDItemStack.getRedGlassPane());
 		PagedMapping view = new PagedMapping(45, 9);
 
 		if (back) {
@@ -499,7 +501,7 @@ public class QuestBook {
 				long remaining = (manager.getCooldownEnd(quest) - System.currentTimeMillis() + 59999) / 60 / 1000;
 				cooldown = Text.timeFromNum(remaining) + " remaining";
 			}
-			menu.put(8, new ItemBuilder(Material.CLOCK)
+			menu.put(8, new ItemBuilder(VDMaterial.CLOCK)
 					.wrapText(QuestWorld.translate(p, Translation.quests_display_cooldown), "", "&b" + cooldown).get(),
 					null);
 		}
@@ -513,22 +515,22 @@ public class QuestBook {
 		}
 
 		if (quest.getXP() > 0) {
-			menu.put(rewardIndex, new ItemBuilder(Material.EXPERIENCE_BOTTLE)
+			menu.put(rewardIndex, new ItemBuilder(VDMaterial.EXPERIENCE_BOTTLE)
 					.wrapText(QuestWorld.translate(p, Translation.quests_display_exp), "", "&a" + quest.getXP() + " Level")
 					.get(), null);
 			rewardIndex++;
 		}
 
-		ItemStack glassLocked = new ItemBuilder(Material.RED_STAINED_GLASS_PANE)
+		ItemStack glassLocked = new ItemBuilder(VDItemStack.getRedGlassPane())
 				.wrapText("&7&kSOMEWEIRDMISSION", "", QuestWorld.translate(p, Translation.task_locked)).get();
 		
-		ItemStack glassClaimable = new ItemBuilder(Material.PURPLE_STAINED_GLASS_PANE)
+		ItemStack glassClaimable = new ItemBuilder(VDItemStack.getPurpleGlassPane())
 				.wrapText(QuestWorld.translate(p, Translation.quests_state_reward_claim)).get();
 		
-		ItemStack glassCooldown = new ItemBuilder(Material.YELLOW_STAINED_GLASS_PANE)
+		ItemStack glassCooldown = new ItemBuilder(VDItemStack.getYellowGlassPane())
 				.wrapText(QuestWorld.translate(p, Translation.quests_state_cooldown)).get();
 		
-		ItemStack glassInactive = new ItemBuilder(Material.GRAY_STAINED_GLASS_PANE)
+		ItemStack glassInactive = new ItemBuilder(VDItemStack.getGrayGlassPane())
 				.wrapText(QuestWorld.translate(p, Translation.quests_display_rewards)).get();
 		
 		int offset = 9;
@@ -633,7 +635,7 @@ public class QuestBook {
 
 		final Menu menu = new Menu(6, "&3Categories");
 
-		ItemBuilder defaultItem = new ItemBuilder(Material.RED_STAINED_GLASS_PANE)
+		ItemBuilder defaultItem = new ItemBuilder(VDItemStack.getRedGlassPane())
 				.display("&7> Create category");
 
 		PagedMapping view = new PagedMapping(45);
@@ -681,7 +683,7 @@ public class QuestBook {
 
 		final Menu menu = new LinkedMenu(6, "&3Quests", category, true);
 
-		ItemBuilder defaultItem = new ItemBuilder(Material.RED_STAINED_GLASS_PANE)
+		ItemBuilder defaultItem = new ItemBuilder(VDItemStack.getRedGlassPane())
 				.display("&7> Create quest");
 
 		PagedMapping view = new PagedMapping(45);
@@ -690,7 +692,7 @@ public class QuestBook {
 			openCategoryList((Player) event.getWhoClicked());
 		});
 
-		view.addFrameButton(4, new ItemBuilder(Material.WRITABLE_BOOK).display("&3Category editor").get(), event -> {
+		view.addFrameButton(4, new ItemBuilder(VDMaterial.WRITABLE_BOOK).display("&3Category editor").get(), event -> {
 			openCategoryEditor(p, category);
 		}, true);
 
@@ -743,7 +745,7 @@ public class QuestBook {
 			openCategoryList((Player) event.getWhoClicked());
 		});
 
-		menu.put(4, new ItemBuilder(Material.WRITABLE_BOOK).display("&3Quest list").get(), event -> {
+		menu.put(4, new ItemBuilder(VDMaterial.WRITABLE_BOOK).display("&3Quest list").get(), event -> {
 			openQuestList(p, category);
 		});
 
@@ -778,7 +780,7 @@ public class QuestBook {
 
 		IQuest parent = category.getParent();
 		menu.put(11,
-				new ItemBuilder(Material.WRITABLE_BOOK)
+				new ItemBuilder(VDMaterial.WRITABLE_BOOK)
 						.wrapText("&7Requirement: &r&o" + (parent != null ? parent.getName() : "-none-"), "",
 								"&rLeft click: &eOpen requirement selector", "&rRight click: &eRemove requirement")
 						.get(),
@@ -836,7 +838,7 @@ public class QuestBook {
 					openWorldEditor((Player) event.getWhoClicked(), category);
 				});
 
-		menu.put(17, new ItemBuilder(Material.RED_WOOL)
+		menu.put(17, new ItemBuilder(VDItemStack.getRedWool())
 				.wrapText("&4Reset progress", "", "&e> Click to clear all player progress for this category").get(),
 				event -> {
 					// TODO: Destructive action warning
@@ -853,7 +855,7 @@ public class QuestBook {
 
 		final Menu menu = new LinkedMenu(6, "&3Missions", quest, true);
 
-		ItemStack defaultItem = new ItemBuilder(Material.RED_STAINED_GLASS_PANE)
+		ItemStack defaultItem = new ItemBuilder(VDItemStack.getRedGlassPane())
 				.display("&7> Create mission").get();
 
 		PagedMapping view = new PagedMapping(45);
@@ -862,7 +864,7 @@ public class QuestBook {
 			openQuestList((Player) event.getWhoClicked(), quest.getCategory());
 		});
 
-		view.addFrameButton(4, new ItemBuilder(Material.WRITABLE_BOOK).display("&3Quest editor").get(), event -> {
+		view.addFrameButton(4, new ItemBuilder(VDMaterial.WRITABLE_BOOK).display("&3Quest editor").get(), event -> {
 			openQuestEditor(p, quest);
 		}, true);
 		
@@ -920,7 +922,7 @@ public class QuestBook {
 			openQuestList((Player) event.getWhoClicked(), quest.getCategory());
 		});
 
-		menu.put(4, new ItemBuilder(Material.WRITABLE_BOOK).display("&3Mission list").get(), event -> {
+		menu.put(4, new ItemBuilder(VDMaterial.WRITABLE_BOOK).display("&3Mission list").get(), event -> {
 			openMissionList(p, quest);
 		});
 
@@ -966,7 +968,7 @@ public class QuestBook {
 				});
 
 		menu.put(12,
-				new ItemBuilder(Material.CLOCK)
+				new ItemBuilder(VDMaterial.CLOCK)
 						.wrapText("&7Cooldown: &b" + quest.getFormattedCooldown(), "", "&rLeft click: &e+1m",
 								"&rRight click: &e-1m", "&rShift left click: &e+1h", "&rShift right click: &e-1h")
 						.get(),
@@ -1013,7 +1015,7 @@ public class QuestBook {
 					});
 
 		menu.put(14,
-				new ItemBuilder(Material.EXPERIENCE_BOTTLE)
+				new ItemBuilder(VDMaterial.EXPERIENCE_BOTTLE)
 						.wrapText("&7Level reward: &b" + quest.getXP(), "", "&rLeft click: &e+1", "&rRight click: &e-1",
 								"&rShift left click: &e+10", "&rShift right click: &e-10")
 						.get(),
@@ -1028,7 +1030,7 @@ public class QuestBook {
 
 		IQuest parent = quest.getParent();
 		menu.put(15,
-				new ItemBuilder(Material.WRITABLE_BOOK)
+				new ItemBuilder(VDMaterial.WRITABLE_BOOK)
 						.wrapText("&7Requirement: &r&o" + (parent != null ? parent.getName() : "-none-"), "",
 								"&rLeft click: &eOpen requirement selector", "&rRight click: &eRemove requirement")
 						.get(),
@@ -1045,7 +1047,7 @@ public class QuestBook {
 					}
 				});
 
-		menu.put(16, new ItemBuilder(Material.COMMAND_BLOCK)
+		menu.put(16, new ItemBuilder(VDMaterial.COMMAND_BLOCK)
 				.wrapText("&7Command rewards", "", "&e> Click to open command editor").get(), event -> {
 					Player p2 = (Player) event.getWhoClicked();
 					p2.closeInventory();
@@ -1074,7 +1076,7 @@ public class QuestBook {
 				});
 
 		menu.put(18,
-				new ItemBuilder(Material.FIREWORK_ROCKET)
+				new ItemBuilder(VDMaterial.FIREWORK_ROCKET)
 						.wrapText("&7Party progress: " + (quest.supportsParties() ? "&2&l\u2714" : "&4&l\u2718"), "",
 								"&e> Toggle whether all party members get progress when a single member makes progress")
 						.get(),
@@ -1085,7 +1087,7 @@ public class QuestBook {
 				});
 
 		menu.put(19,
-				new ItemBuilder(Material.COMMAND_BLOCK)
+				new ItemBuilder(VDMaterial.COMMAND_BLOCK)
 						.wrapText("&7Ordered completion: " + (quest.getOrdered() ? "&2&l\u2714" : "&4&l\u2718"), "",
 								"&e> Toggle whether tasks must be completed in order")
 						.get(),
@@ -1114,7 +1116,7 @@ public class QuestBook {
 
 		String wtfString = "&7Party size: " + (quest.getPartySize() < 1 ? "&4Parties prohibited"
 				: (quest.getPartySize() == 1 ? ("&aAny size") : ("&e" + quest.getPartySize() + " members")));
-		menu.put(22, new ItemBuilder(Material.FIREWORK_ROCKET).wrapText(wtfString, "", "&e> Click to set minimum party size",
+		menu.put(22, new ItemBuilder(VDMaterial.FIREWORK_ROCKET).wrapText(wtfString, "", "&e> Click to set minimum party size",
 				"", "&rLeft click: &e+1", "&rRight click: &e-1").get(), event -> {
 					int size = MissionButton.clickNumber(quest.getPartySize(), 1, event);
 					if (size < 0)
@@ -1124,7 +1126,7 @@ public class QuestBook {
 					openQuestEditor((Player) event.getWhoClicked(), quest);
 				});
 
-		menu.put(26, new ItemBuilder(Material.RED_WOOL)
+		menu.put(26, new ItemBuilder(VDItemStack.getRedWool())
 				.wrapText("&4Reset progress", "", "&e> Click to clear all player progress for this quest").get(),
 				event -> {
 					QuestWorld.getFacade().clearAllUserData(quest);

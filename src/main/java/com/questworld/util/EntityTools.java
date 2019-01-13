@@ -7,6 +7,8 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 
 import com.questworld.QuestWorldPlugin;
+import com.questworld.util.version.ObjectMap.VDItemStack;
+import com.questworld.util.version.ObjectMap.VDMaterial;
 
 /**
  * A shared home for tools related to entities and entity manipulation.
@@ -45,24 +47,25 @@ public class EntityTools {
 	 *         <tt>type</tt>
 	 */
 	public static ItemBuilder getEntityDisplay(EntityType type) {
+		
 		switch (type) {
 			case PLAYER:
-				return new ItemBuilder(Material.PLAYER_HEAD);
+				return new ItemBuilder(VDItemStack.getPlayerHead());
 				
 			case GIANT:
-				return new ItemBuilder(Material.ZOMBIE_HEAD);
+				return new ItemBuilder(VDItemStack.getZombieHead());
 				
 			case ENDER_DRAGON:
-				return new ItemBuilder(Material.DRAGON_HEAD);
+				return new ItemBuilder(VDItemStack.getDragonHead());
 
 			case WITHER:
-				return new ItemBuilder(Material.WITHER_SKELETON_SKULL);
+				return new ItemBuilder(VDItemStack.getWitherSkull());
 			
 			case ARMOR_STAND:
 				return new ItemBuilder(Material.ARMOR_STAND);
 
 			case SNOWMAN:
-				return new ItemBuilder(Material.SNOWBALL);
+				return new ItemBuilder(VDMaterial.SNOWBALL);
 				
 			case IRON_GOLEM:
 				return new ItemBuilder(Material.IRON_INGOT);

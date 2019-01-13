@@ -10,6 +10,7 @@ import com.questworld.api.QuestWorld;
 import com.questworld.api.Translation;
 import com.questworld.util.ItemBuilder;
 import com.questworld.util.Reflect;
+import com.questworld.util.version.ObjectMap.VDMaterial;
 
 public class GuideBook {
 	private static HashSet<Integer> pastBooks = new HashSet<>();
@@ -48,7 +49,7 @@ public class GuideBook {
 		ShapelessRecipe r = null;
 
 		if (!QuestWorld.getPlugin().getConfig().getBoolean("book.disable-recipe", false))
-			r = Reflect.getAdapter().shapelessRecipe("GuideBook", guide).addIngredient(Material.CRAFTING_TABLE);
+			r = Reflect.getAdapter().shapelessRecipe("GuideBook", guide).addIngredient(VDMaterial.CRAFTING_TABLE);
 
 		recipe = r;
 

@@ -19,11 +19,10 @@ public final class Reflect {
 	private static final String NMS;
 
 	private static final MultiAdapter adapter;
+	private static final Version version;
 
 	static {
 		String nms = null;
-
-		adapter = new MultiAdapter();
 
 		try {
 			nms = serverClass.getMethod("getServer").getReturnType().getName().replaceFirst("[^.]+$", "");
@@ -33,8 +32,33 @@ public final class Reflect {
 		}
 		catch (Exception e) {
 		}
+		
+		String serialVersion = nms.substring(22, nms.length() - 1);
+		
+		if(isClass("net.techcable.tacospigot.TacoSpigotConfig")) {
+			serialVersion += "_TACO";
+		}
+		else if(isClass("com.destroystokyo.paper.PaperConfig")) {
+			serialVersion += "_PAPER";
+		}
+		else if(isClass("org.spigotmc.SpigotConfig")) {
+			serialVersion += "_SPIGOT";
+		}
+
+		version = Version.ofString(serialVersion);
+		adapter = new MultiAdapter();
 
 		NMS = nms;
+	}
+	
+	public static boolean isClass(String className) {
+		try {
+			Class.forName(className);
+			return true;
+		}
+		catch(Exception e) {
+			return false;
+		}
 	}
 	
 	public static Class<?> NMS(String className) throws ClassNotFoundException {
@@ -51,6 +75,10 @@ public final class Reflect {
 
 	public static VersionAdapter getAdapter() {
 		return adapter;
+	}
+	
+	public static Version getVersion() {
+		return version;
 	}
 
 	public static void playerAddChannel(Player p, String s) throws Exception {

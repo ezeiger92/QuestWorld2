@@ -12,6 +12,7 @@ import com.questworld.api.contract.IMission;
 import com.questworld.api.contract.IMissionState;
 import com.questworld.api.contract.MissionEntry;
 import com.questworld.api.menu.MissionButton;
+import com.questworld.util.version.ObjectMap.VDMaterial;
 
 public class JoinMission extends MissionType implements Listener {
 	public JoinMission() {
@@ -20,7 +21,7 @@ public class JoinMission extends MissionType implements Listener {
 
 	@Override
 	public ItemStack userDisplayItem(IMission instance) {
-		return new ItemStack(Material.CLOCK);
+		return new ItemStack(VDMaterial.CLOCK);
 	}
 
 	@Override

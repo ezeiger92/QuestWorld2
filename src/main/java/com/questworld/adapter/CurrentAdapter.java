@@ -8,16 +8,18 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapelessRecipe;
+import org.bukkit.inventory.meta.Damageable;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 
 import com.questworld.api.QuestWorld;
+import com.questworld.util.Version;
 import com.questworld.util.VersionAdapter;
 import com.questworld.util.json.JsonBlob;
 
 public class CurrentAdapter extends VersionAdapter {
-	@Override
-	protected String forVersion() {
-		return "v1_13_r2";
+	public CurrentAdapter() {
+		super(Version.ofString("v1_13_r2"));
 	}
 
 	@Override
@@ -58,5 +60,24 @@ public class CurrentAdapter extends VersionAdapter {
 	@Override
 	public void sendTitle(Player player, String title, String subtitle, int fadeIn, int stay, int fadeOut) {
 		player.sendTitle(title, subtitle, fadeIn, stay, fadeOut);
+	}
+	
+	@Override
+	public void setItemDamage(ItemStack item, int damage) {
+		ItemMeta meta;
+		
+		if(item.hasItemMeta()) {
+			meta = item.getItemMeta();
+		}
+		else {
+			meta = Bukkit.getItemFactory().getItemMeta(item.getType());
+		}
+		
+		if(meta instanceof Damageable) {
+			Damageable d = (Damageable) meta;
+			d.setDamage(damage);
+			
+			item.setItemMeta(meta);
+		}
 	}
 }

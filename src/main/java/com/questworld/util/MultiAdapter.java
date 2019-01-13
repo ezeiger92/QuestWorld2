@@ -5,6 +5,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.EntityType;
@@ -33,6 +34,10 @@ class MultiAdapter extends VersionAdapter {
 			}
 		}
 	}
+	
+	public MultiAdapter() {
+		super(Reflect.getVersion());
+	}
 
 	void addAdapter(VersionAdapter child) {
 		if (child == null)
@@ -42,6 +47,30 @@ class MultiAdapter extends VersionAdapter {
 
 		adapters.add(child);
 		Collections.sort(adapters);
+
+		int ourVersion = -1;
+		int size = adapters.size();
+		
+		for(int i = 0; i < size; ++i) {
+			if(this.compareTo(adapters.get(i)) != 1) {
+				ourVersion = i;
+				break;
+			}
+		}
+
+		// Try old, older, oldest, new, newer, newest
+		// Best chance to find a good match
+		if(ourVersion > -1) {
+			ArrayList<VersionAdapter> front = new ArrayList<>(adapters.subList(0, ourVersion));
+			ArrayList<VersionAdapter> back = new ArrayList<>(adapters.subList(ourVersion, size));
+			
+			Collections.reverse(front);
+			
+			adapters.clear();
+			adapters.addAll(back);
+			adapters.addAll(front);
+		}
+		
 		invalidateIndices();
 	}
 
@@ -50,11 +79,7 @@ class MultiAdapter extends VersionAdapter {
 		makePlayerHeadIndex = -1;
 		shapelessRecipeIndex = -1;
 		sendActionbarIndex = -1;
-	}
-
-	@Override
-	public String forVersion() {
-		throw new UnsupportedOperationException("Version cannot be determined for multi-version adapters");
+		setItemDamage = -1;
 	}
 
 	private int makeSpawnEggIndex = -1;
@@ -124,6 +149,19 @@ class MultiAdapter extends VersionAdapter {
 		}
 	}
 
+	private int setItemDamage = -1;
+
+	@Override
+	public void setItemDamage(ItemStack result, int damage) {
+		if (setItemDamage >= 0)
+			adapters.get(setItemDamage).setItemDamage(result, damage);
+
+		else {
+			dispatch(result, damage);
+			setItemDamage = lastCacheIndex;
+		}
+	}
+
 	private int lastCacheIndex = -1;
 
 	private Object dispatch(Object... params) {
@@ -139,9 +177,12 @@ class MultiAdapter extends VersionAdapter {
 		Method m = methodCache.get(methodName);
 		
 		if(m != null) {
+			HashMap<String, Throwable> exceptionMap = new HashMap<>();
+			
 			for (i = 0; i < adapters.size(); ++i) {
+				VersionAdapter adapter = adapters.get(i);
+				
 				try {
-					VersionAdapter adapter = adapters.get(i);
 					Object result = m.invoke(adapter, params);
 					lastCacheIndex = i;
 
@@ -151,7 +192,16 @@ class MultiAdapter extends VersionAdapter {
 					return result;
 				}
 				catch (Throwable t) {
+					exceptionMap.put(adapter.getVersion().toString(), t);
 				}
+			}
+			
+			Log.warning("Dumping failed adapter output:");
+			
+			for(Map.Entry<String, Throwable> entry : exceptionMap.entrySet()) {
+				Log.warning("  Version: " + entry.getKey());
+				entry.getValue().printStackTrace();
+				Log.warning("---------------------------");
 			}
 		}
 
@@ -160,6 +210,6 @@ class MultiAdapter extends VersionAdapter {
 
 	@Override
 	public String toString() {
-		return adapters.toString();
+		return "(Running " + getVersion() + ") " + adapters;
 	}
 }

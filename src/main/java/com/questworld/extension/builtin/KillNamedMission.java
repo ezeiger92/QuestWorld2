@@ -14,6 +14,7 @@ import com.questworld.api.contract.MissionEntry;
 import com.questworld.api.menu.MissionButton;
 import com.questworld.util.EntityTools;
 import com.questworld.util.ItemBuilder;
+import com.questworld.util.version.ObjectMap.VDMaterial;
 
 public class KillNamedMission extends KillMission {
 	private static final int EXACT = 0;
@@ -21,7 +22,7 @@ public class KillNamedMission extends KillMission {
 
 	public KillNamedMission() {
 		setName("KILL_NAMED_MOB");
-		setSelectorItem(new ItemStack(Material.GOLDEN_SWORD));
+		setSelectorItem(new ItemStack(VDMaterial.GOLDEN_SWORD));
 	}
 
 	@Override

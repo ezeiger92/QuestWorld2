@@ -22,6 +22,9 @@ import org.bukkit.inventory.ShapelessRecipe;
  * @author ezeiger92
  */
 public abstract class PartialAdapter extends VersionAdapter {
+	public PartialAdapter(Version version) {
+		super(version);
+	}
 
 	@Override
 	public void makeSpawnEgg(ItemStack result, EntityType mob) {
@@ -50,4 +53,8 @@ public abstract class PartialAdapter extends VersionAdapter {
 		throw new UnsupportedOperationException("Adaptor does not supply \"sendTitle\"");
 	}
 
+	@Override
+	public void setItemDamage(ItemStack result, int damage) {
+		throw new UnsupportedOperationException("Adaptor does not supply \"setItemDamage\"");
+	}
 }

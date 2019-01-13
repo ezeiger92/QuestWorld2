@@ -32,6 +32,8 @@ import com.questworld.util.PlayerTools;
 import com.questworld.util.Text;
 import com.questworld.util.json.JsonBlob;
 import com.questworld.util.json.Prop;
+import com.questworld.util.version.ObjectMap.VDItemStack;
+import com.questworld.util.version.ObjectMap.VDMaterial;
 
 public class MissionButton {
 	public static MenuData item(IMissionState changes) {
@@ -126,7 +128,7 @@ public class MissionButton {
 	}
 
 	public static MenuData timeframe(IMissionState changes) {
-		return simpleButton(changes, new ItemBuilder(Material.CLOCK).wrapText(
+		return simpleButton(changes, new ItemBuilder(VDMaterial.CLOCK).wrapText(
 				"&7Complete mission within: &b" + Text.timeFromNum(changes.getTimeframe()), "", "&rLeft click: &e+1m",
 				"&rRight click: &e-1m", "&rShift left click: &e+1h", "&rShift right click: &e-1h").get(), event -> {
 					int amt = clickNumber(changes.getTimeframe(), 60, event);
@@ -137,7 +139,7 @@ public class MissionButton {
 	public static MenuData deathReset(IMissionState changes) {
 		String icon = changes.getDeathReset() ? "&2&l\u2714" : "&4&l\u2718";
 		return simpleButton(changes,
-				new ItemBuilder(Material.PLAYER_HEAD).wrapText("&7Resets on death: " + icon, "",
+				new ItemBuilder(VDItemStack.getPlayerHead()).wrapText("&7Resets on death: " + icon, "",
 						"&e> Click to change whether this Mission's Progress resets when a Player dies").get(),
 				event -> {
 					changes.setDeathReset(!changes.getDeathReset());
@@ -146,7 +148,7 @@ public class MissionButton {
 
 	public static MenuData spawnersAllowed(IMissionState changes) {
 		String icon = changes.getSpawnerSupport() ? "&2&l\u2714" : "&4&l\u2718";
-		return simpleButton(changes, new ItemBuilder(Material.SPAWNER).wrapText(
+		return simpleButton(changes, new ItemBuilder(VDMaterial.SPAWNER).wrapText(
 				"&7Allow Mobs from Spawners: " + icon, "",
 				"&e> Click to change whether this Mission will also count Mobs which were spawned by a Mob Spawner")
 				.get(), event -> {

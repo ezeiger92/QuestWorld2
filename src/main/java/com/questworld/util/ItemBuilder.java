@@ -10,7 +10,6 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import com.questworld.api.QuestWorld;
@@ -188,23 +187,8 @@ public class ItemBuilder {
 	 * @return this, for chaining
 	 */
 	public @Mutable ItemBuilder damage(int damage) {
-		ItemMeta meta;
+		Reflect.getAdapter().setItemDamage(resultStack, damage);
 		
-		if(resultStack.hasItemMeta()) {
-			meta = resultStack.getItemMeta();
-		}
-		else {
-			meta = Bukkit.getItemFactory().getItemMeta(resultStack.getType());
-		}
-		
-		if(meta instanceof Damageable) {
-			
-			Damageable d = (Damageable) meta;
-			d.setDamage(damage);
-			
-			resultStack.setItemMeta(meta);
-		}
-
 		return this;
 	}
 

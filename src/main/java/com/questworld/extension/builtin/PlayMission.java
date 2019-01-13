@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.UUID;
 
 import org.bukkit.Material;
-import org.bukkit.Statistic;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -21,6 +20,8 @@ import com.questworld.api.menu.MenuData;
 import com.questworld.api.menu.MissionButton;
 import com.questworld.util.ItemBuilder;
 import com.questworld.util.Text;
+import com.questworld.util.version.ObjectMap.VDMaterial;
+import com.questworld.util.version.ObjectMap.VDStatistic;
 
 public class PlayMission extends MissionType implements Listener, Ticking {
 	private static final int TOTAL = 0;
@@ -30,7 +31,7 @@ public class PlayMission extends MissionType implements Listener, Ticking {
 	private HashMap<UUID, HashMap<UUID, Long>> timeMap = new HashMap<>();
 
 	public PlayMission() {
-		super("PLAY_TIME", false, new ItemStack(Material.CLOCK));
+		super("PLAY_TIME", false, new ItemStack(VDMaterial.CLOCK));
 	}
 
 	@Override
@@ -53,7 +54,7 @@ public class PlayMission extends MissionType implements Listener, Ticking {
 	@Override
 	public void onManual(Player player, MissionEntry result) {
 		if(result.getMission().getCustomInt() == TOTAL) {
-			result.setProgress(player.getStatistic(Statistic.PLAY_ONE_MINUTE) / 20 / 60);
+			result.setProgress(player.getStatistic(VDStatistic.PLAY_ONE_MINUTE) / 20 / 60);
 		}
 		else {
 			HashMap<UUID, Long> times = timeMap.get(player.getUniqueId());
@@ -76,7 +77,7 @@ public class PlayMission extends MissionType implements Listener, Ticking {
 	@Override
 	protected void layoutMenu(IMissionState changes) {
 		putButton(17,
-				new MenuData(new ItemBuilder(Material.CLOCK)
+				new MenuData(new ItemBuilder(VDMaterial.CLOCK)
 						.wrapText("&7Time: &b" + Text.timeFromNum(changes.getAmount()), "", "&rLeft click: &e+1m",
 								"&rRight click: &e-1m", "&rShift left click: &e+1h", "&rShift right click: &e-1h")
 						.get(), event -> {
