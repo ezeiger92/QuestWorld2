@@ -44,7 +44,7 @@ public class ObjectMap {
 		}
 		
 		public static final ItemStack getWitherSkull() {
-			return rev("WITHER_SKULL", "SKULL_ITEM", 1);
+			return rev("WITHER_SKELETON_SKULL", "SKULL_ITEM", 1);
 		}
 		
 		public static final ItemStack getZombieHead() {

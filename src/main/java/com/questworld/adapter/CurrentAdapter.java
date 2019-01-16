@@ -24,8 +24,23 @@ public class CurrentAdapter extends VersionAdapter {
 
 	@Override
 	public void makeSpawnEgg(ItemStack result, EntityType mob) {
+		String name;
 		
-		Material m = Material.matchMaterial(mob.name() + "_SPAWN_EGG");
+		switch(mob) {
+		case PIG_ZOMBIE:
+			name = "ZOMBIE_PIGMAN";
+			break;
+			
+		case MUSHROOM_COW:
+			name = "MOOSHROOM";
+			break;
+			
+		default:
+			name = mob.name();
+			break;
+		}
+		
+		Material m = Material.matchMaterial(name + "_SPAWN_EGG");
 		
 		if(m != null) {
 			result.setType(m);
