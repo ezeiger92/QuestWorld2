@@ -85,14 +85,18 @@ public final class QuestingImpl implements QuestingAPI {
 		extensions.add(new Builtin());
 		extensions.addAll(extLoader.loadLocal());
 
-		Log.fine("Retrieving Quest Configuration...");
-		facade.load();
-		int categories = facade.getCategories().size(), quests = 0;
-		for (ICategory category : facade.getCategories())
-			quests += category.getQuests().size();
+		// Wait a tick so all plugins can finish loading
+		plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+			Log.fine("Retrieving Quest Configuration...");
+			facade.load();
+			int categories = facade.getCategories().size(), quests = 0;
+			for (ICategory category : facade.getCategories())
+				quests += category.getQuests().size();
 
-		Log.fine("Successfully loaded " + categories + " Categories");
-		Log.fine("Successfully loaded " + quests + " Quests");
+			Log.fine("Successfully loaded " + categories + " Categories");
+			Log.fine("Successfully loaded " + quests + " Quests");
+			
+		}, 1);
 	}
 
 	public Directories getDataFolders() {
