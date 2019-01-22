@@ -62,7 +62,7 @@ public class EntityTools {
 				return new ItemBuilder(VDItemStack.getWitherSkull());
 				
 			case ILLUSIONER:
-				return new ItemBuilder(Material.ENDER_EYE);
+				return new ItemBuilder(VDMaterial.ENDER_EYE);
 			
 			case ARMOR_STAND:
 				return new ItemBuilder(Material.ARMOR_STAND);

@@ -35,6 +35,13 @@ public class Menu implements InventoryHolder {
 
 	public void resize(int rows) {
 		int cells = rows * ROW_WIDTH;
+		
+		// Are you fucking kidding me bukkit? It doesn't make any sense that I
+		// can create an inventory with a name and not have a "safe" way of
+		// getting that name later. Other things have already pissed me off
+		// today but this takes the damn cake.
+		// DEPRECATE CONSISTENTLY OR NOT AT ALL JESUS CHRIST
+		@SuppressWarnings("deprecation")
 		Inventory inv2 = makeInv(cells, inv.getName());
 
 		inv2.setContents(Arrays.copyOf(inv.getContents(), cells));

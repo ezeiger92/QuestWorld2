@@ -137,8 +137,16 @@ public final class Reflect {
 			return stack.getItemMeta().getDisplayName();
 		Object rstack = CBS("inventory.CraftItemStack").getMethod("asNMSCopy", ItemStack.class)
 				.invoke(null, stack);
+
 		Object chatMessage = rstack.getClass().getMethod("getName").invoke(rstack);
 		
-		return (String) chatMessage.getClass().getMethod("getText").invoke(chatMessage);
+		// Supports pre-1.13
+		// TODO: Bad! Use adapters instead
+		if(chatMessage instanceof String) {
+			return (String) chatMessage;
+		}
+		else {
+			return (String) chatMessage.getClass().getMethod("getText").invoke(chatMessage);
+		}
 	}
 }

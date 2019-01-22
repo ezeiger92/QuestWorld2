@@ -1,8 +1,13 @@
 package com.questworld.util.version;
 
+import org.bukkit.CropState;
 import org.bukkit.Material;
 import org.bukkit.Statistic;
+import org.bukkit.block.Block;
+import org.bukkit.block.data.Ageable;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.material.Crops;
 
 import com.questworld.util.Reflect;
 import com.questworld.util.Version;
@@ -18,6 +23,7 @@ public class ObjectMap {
 		public static final Material CLOCK = Material.matchMaterial(VersionDependent.pick(pre13, "WATCH", "CLOCK"));
 		public static final Material SPAWNER = Material.matchMaterial(VersionDependent.pick(pre13, "MOB_SPAWNER", "SPAWNER"));
 		public static final Material EXPERIENCE_BOTTLE = Material.matchMaterial(VersionDependent.pick(pre13, "EXP_BOTTLE", "EXPERIENCE_BOTTLE"));
+		public static final Material ENDER_EYE = Material.matchMaterial(VersionDependent.pick(pre13, "EYE_OF_ENDER", "ENDER_EYE"));
 		public static final Material WRITABLE_BOOK = Material.matchMaterial(VersionDependent.pick(pre13, "BOOK_AND_QUILL", "WRITABLE_BOOK"));
 		public static final Material COMMAND_BLOCK = Material.matchMaterial(VersionDependent.pick(pre13, "COMMAND", "COMMAND_BLOCK"));
 		public static final Material FIREWORK_ROCKET = Material.matchMaterial(VersionDependent.pick(pre13, "FIREWORK", "FIREWORK_ROCKET"));
@@ -100,5 +106,29 @@ public class ObjectMap {
 	public static class VDStatistic {
 
 		public static final Statistic PLAY_ONE_MINUTE = Statistic.valueOf(VersionDependent.pick(pre13, "PLAY_ONE_TICK", "PLAY_ONE_MINUTE"));
+	}
+	
+	public static class VDBlock {
+		public static final boolean isCropGrown(Block cropBlock) {
+			if(Reflect.getVersion().compareTo(pre13) >= 0) {
+				return cropGrown112(cropBlock);
+			}
+			else {
+				return cropGrown113(cropBlock);
+			}
+		}
+		
+		private static final boolean cropGrown113(Block cropBlock) {
+			BlockData data = cropBlock.getBlockData();
+			
+			return data instanceof Ageable && ((Ageable)data).getAge() == ((Ageable)data).getMaximumAge();
+		}
+		
+		@Deprecated // Uses pre-1.13 api for pre-1.13 support
+		private static final boolean cropGrown112(Block cropBlock) {
+			org.bukkit.material.MaterialData data = cropBlock.getState().getData();
+			
+			return data instanceof Crops && ((Crops)data).getState() == CropState.RIPE;
+		}
 	}
 }
