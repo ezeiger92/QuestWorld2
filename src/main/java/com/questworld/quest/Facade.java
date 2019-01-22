@@ -35,32 +35,32 @@ public class Facade implements IFacade {
 
 	@Override
 	public Quest getQuest(UUID uniqueId) {
-		return questMap.getOrNull(uniqueId);
+		return questMap.get(uniqueId);
 	}
 
 	@Override
 	public Mission getMission(UUID uniqueId) {
-		return missionMap.getOrNull(uniqueId);
+		return missionMap.get(uniqueId);
 	}
 
 	@Override
 	public Category createCategory(String name, int id) {
 		Category c = new Category(name, id, this);
 		categoryMap.put(c.getUniqueId(), c);
-		categoryPosition.putWeak(id, c);
+		categoryPosition.put(id, c);
 		return c;
 	}
 
 	public Quest createQuest(String name, int id, ICategory category) {
 		Quest q = new Quest(name, id, (Category) category);
-		questMap.putWeak(q.getUniqueId(), q);
+		questMap.put(q.getUniqueId(), q);
 		return q;
 	}
 
 	public Mission createMission(int id, IQuest quest) {
 		Mission m = new Mission(id, (Quest) quest);
 		ProgressTracker.loadDialogue(m);
-		missionMap.putWeak(m.getUniqueId(), m);
+		missionMap.put(m.getUniqueId(), m);
 		return m;
 	}
 
@@ -137,11 +137,11 @@ public class Facade implements IFacade {
 				for (ParseData qData : questData.get(cData.id)) {
 					Quest q = new Quest(qData.id, qData.file, category);
 					category.directAddQuest(q);
-					questMap.putWeak(q.getUniqueId(), q);
+					questMap.put(q.getUniqueId(), q);
 				}
 
 			categoryMap.put(category.getUniqueId(), category);
-			categoryPosition.putWeak(category.getID(), category);
+			categoryPosition.put(category.getID(), category);
 		}
 
 		for (Category category : categories) {
@@ -197,7 +197,7 @@ public class Facade implements IFacade {
 	@Deprecated
 	@Override
 	public Category getCategory(int id) {
-		return categoryPosition.getOrNull(id);
+		return categoryPosition.get(id);
 	}
 
 	@Override

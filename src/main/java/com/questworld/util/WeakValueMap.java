@@ -6,14 +6,14 @@ import java.util.HashMap;
 public class WeakValueMap<K, V> {
 	private HashMap<K, WeakReference<V>> map = new HashMap<>();
 
-	public V putWeak(K key, V value) {
+	public V put(K key, V value) {
 		WeakReference<V> old = map.put(key, new WeakReference<>(value));
 		if (old != null)
 			return old.get();
 		return null;
 	}
 
-	public V getOrNull(Object key) {
+	public V get(Object key) {
 		WeakReference<V> value = map.get(key);
 		if (value != null) {
 			V object = value.get();

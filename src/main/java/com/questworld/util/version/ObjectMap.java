@@ -20,7 +20,7 @@ public class ObjectMap {
 		public static final Material EXPERIENCE_BOTTLE = Material.matchMaterial(VersionDependent.pick(pre13, "EXP_BOTTLE", "EXPERIENCE_BOTTLE"));
 		public static final Material WRITABLE_BOOK = Material.matchMaterial(VersionDependent.pick(pre13, "BOOK_AND_QUILL", "WRITABLE_BOOK"));
 		public static final Material COMMAND_BLOCK = Material.matchMaterial(VersionDependent.pick(pre13, "COMMAND", "COMMAND_BLOCK"));
-		public static final Material FIREWORK_ROCKET = Material.matchMaterial(VersionDependent.pick(pre13, "FIREWWORK", "FIREWORK_ROCKET"));
+		public static final Material FIREWORK_ROCKET = Material.matchMaterial(VersionDependent.pick(pre13, "FIREWORK", "FIREWORK_ROCKET"));
 		public static final Material SNOWBALL = Material.matchMaterial(VersionDependent.pick(pre13, "SNOW_BALL", "SNOWBALL"));
 		public static final Material GOLDEN_SWORD = Material.matchMaterial(VersionDependent.pick(pre13, "GOLD_SWORD", "GOLDEN_SWORD"));
 	}
