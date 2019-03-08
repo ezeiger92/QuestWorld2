@@ -179,8 +179,6 @@ public class QuestBook {
 		
 		boolean catBack = getCategoryBack(p);
 		boolean questBack = getQuestBack(p);
-		
-		Log.info("Cat back: " + catBack + " quest back: " + questBack);
 
 		if (last instanceof IQuest)
 			QuestBook.openQuest(p, (IQuest) last, catBack, questBack);
@@ -1122,6 +1120,15 @@ public class QuestBook {
 					if (size < 0)
 						size = 0;
 					changes.setPartySize(size);
+					changes.apply();
+					openQuestEditor((Player) event.getWhoClicked(), quest);
+				});
+		
+		menu.put(24, new ItemBuilder(Material.EMERALD).wrapText(
+					"&7Enabled: " + (quest.isEnabled() ? "&atrue" : "&cfalse"),
+					"&e> Toggles hiding and disabling the quest"
+				).get(), event -> {
+					changes.setEnabled(!quest.isEnabled());
 					changes.apply();
 					openQuestEditor((Player) event.getWhoClicked(), quest);
 				});

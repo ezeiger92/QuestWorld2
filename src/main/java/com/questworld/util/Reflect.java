@@ -109,6 +109,8 @@ public final class Reflect {
 		m.setAccessible(access);
 	}
 
+	// Pre 1.13
+	@Deprecated
 	public static ItemStack nmsPickBlock(Block block) throws Exception {
 		World w = block.getWorld();
 		Chunk c = block.getChunk();

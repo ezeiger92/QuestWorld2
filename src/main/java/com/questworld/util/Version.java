@@ -97,6 +97,14 @@ public final class Version implements Comparable<Version> {
 
 		return Integer.compare(theirParts.length, ourParts.length);
 	}
+	
+	public boolean lessThan(Version other) {
+		return compareTo(other) < 0;
+	}
+	
+	public boolean greaterThan(Version other) {
+		return compareTo(other) > 0;
+	}
 
 	@Override
 	public String toString() {

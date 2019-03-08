@@ -108,7 +108,16 @@ class Quest extends UniqueObject implements IQuestState {
 		partySupport = !config.getBoolean("disable-parties");
 		ordered = config.getBoolean("in-order");
 		autoclaim = config.getBoolean("auto-claim");
-		enabled = config.getBoolean("enabled", QuestWorld.getPlugin().getConfig().getBoolean("options.quests-default-enabled"));
+		
+		// Quests missing the 'enabled' param were made when everything was enabled
+		if(config.contains("enabled")) {
+			enabled = config.getBoolean("enabled", true);
+		}
+		else {
+			enabled = true;
+			updateLastModified();
+		}
+		
 		name = Text.colorize(config.getString("name"));
 		ItemStack i2 = config.getItemStack("item", item);
 
@@ -133,6 +142,7 @@ class Quest extends UniqueObject implements IQuestState {
 		this.id = id;
 		this.category = new WeakReference<>(category);
 		this.name = name;
+		this.enabled = QuestWorld.getPlugin().getConfig().getBoolean("options.quests-default-enabled");
 
 		config = YamlConfiguration.loadConfiguration(Facade.fileFor(this));
 	}
