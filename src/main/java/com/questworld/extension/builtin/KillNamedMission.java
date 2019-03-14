@@ -69,9 +69,13 @@ public class KillNamedMission extends KillMission {
 	protected void layoutMenu(IMissionState changes) {
 		super.layoutMenu(changes);
 		putButton(12, MissionButton.entityName(changes));
-		putButton(16, MissionButton.simpleButton(changes, new ItemBuilder(Material.GOLDEN_APPLE)
-				.display("&7Name match type").selector(changes.getCustomInt(), "Exact", "Contains").get(), event -> {
+		putButton(16, MissionButton.simpleButton(changes,
+				new ItemBuilder(Material.GOLDEN_APPLE)
+						.display("&7Name match type")
+						.selector(changes.getCustomInt(), "Exact", "Contains").get(),
+				event -> {
 					changes.setCustomInt(1 - changes.getCustomInt());
-				}));
+				}
+		));
 	}
 }

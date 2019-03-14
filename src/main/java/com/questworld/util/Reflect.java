@@ -124,7 +124,6 @@ public final class Reflect {
 				blockposition);
 
 		Class<?> worldClass = NMS("World");
-		@SuppressWarnings("deprecation")
 		Object rawblock = Bukkit.getUnsafe().getClass().getMethod("getBlock", Block.class).invoke(null, block);
 		Class<?> iblockclass = NMS("IBlockData");
 		Object rawitemstack = rawblock.getClass().getMethod("a", worldClass, blockposition.getClass(), iblockclass)

@@ -37,13 +37,18 @@ import com.questworld.util.version.ObjectMap.VDMaterial;
 
 public class MissionButton {
 	public static MenuData item(IMissionState changes) {
-		return simpleButton(changes, new ItemBuilder(changes.getItem()).display(Text.itemName(changes.getItem()))
-				.wrapLore("", "&e> Click to change the mission item").get(), event -> {
+		return simpleButton(changes,
+				new ItemBuilder(changes.getItem()).wrapText(
+						Text.itemName(changes.getItem()),
+						"",
+						"&e> Click to change the mission item").get(),
+				event -> {
 					Player p = (Player) event.getWhoClicked();
 					ItemStack hand = p.getInventory().getItemInMainHand();
 					if (hand != null && hand.getType() != Material.AIR)
 						changes.setItem(hand.clone());
-				});
+				}
+		);
 	}
 
 	public static MenuData amount(IMissionState changes) {
@@ -52,42 +57,54 @@ public class MissionButton {
 
 	public static MenuData amount(IMissionState changes, int groupSize) {
 		return simpleButton(changes,
-				new ItemBuilder(Material.REDSTONE)
-						.wrapText("&7Amount: &b" + changes.getAmount(), "", "&rLeft click: &e+1", "&rRight click: &e-1",
-								"&rShift left click: &e+" + groupSize, "&rShift right click: &e-" + groupSize)
-						.get(),
+				new ItemBuilder(Material.REDSTONE).wrapText(
+						"&7Amount: &b" + changes.getAmount(),
+						"",
+						"&rLeft click: &e+1",
+						"&rRight click: &e-1",
+						"&rShift left click: &e+" + groupSize,
+						"&rShift right click: &e-" + groupSize).get(),
 				event -> {
 					int amt = clickNumber(changes.getAmount(), groupSize, event);
 					changes.setAmount(Math.max(amt, 1));
-				});
+				}
+		);
 	}
 
 	public static MenuData entity(IMissionState changes) {
 		EntityType entity = changes.getEntity();
-		return new MenuData(EntityTools.getEntityDisplay(entity)
-				.wrapText("&7Entity Type: &e" + EntityTools.nameOf(entity), "", "&e> Click to change the entity").get(),
+
+		return new MenuData(
+				EntityTools.getEntityDisplay(entity).wrapText(
+						"&7Entity Type: &e" + EntityTools.nameOf(entity),
+						"",
+						"&e> Click to change the entity").get(),
 				event -> {
 					QBDialogue.openQuestMissionEntityEditor((Player) event.getWhoClicked(), changes);
-				});
+				}
+		);
 	}
 
 	public static MenuData location(IMissionState changes) {
 		return simpleButton(changes,
-				new ItemBuilder(changes.getDisplayItem()).flagAll()
-						.wrapText(Text.stringOf(changes.getLocation(), changes.getCustomInt()), "",
-								"&e> Click to update the location")
-						.get(),
+				new ItemBuilder(changes.getDisplayItem()).flagAll().wrapText(
+						Text.stringOf(changes.getLocation(), changes.getCustomInt()),
+						"",
+						"&e> Click to update the location").get(),
 				event -> {
 					changes.setLocation(event.getWhoClicked().getLocation().getBlock().getLocation());
-				});
+				}
+		);
 	}
 
 	public static MenuData entityName(IMissionState changes) {
 		String name = changes.getCustomString();
-		return new MenuData(new ItemBuilder(Material.NAME_TAG)
-				.wrapText("&7Entity name: &r&o" + (name.length() > 0 ? name : "-none-"), "",
-						"&e> Click to change the Name")
-				.get(), event -> {
+		return new MenuData(
+				new ItemBuilder(Material.NAME_TAG).wrapText(
+						"&7Entity name: &r&o" + (name.length() > 0 ? name : "-none-"),
+						"",
+						"&e> Click to change the Name").get(),
+				event -> {
 					Player p = (Player) event.getWhoClicked();
 
 					p.closeInventory();
@@ -99,13 +116,20 @@ public class MissionButton {
 								}
 								QuestBook.openQuestMissionEditor(p, changes);
 								return true;
-							}));
-				});
+							}
+					));
+				}
+		);
 	}
 
 	public static MenuData missionName(IMissionState changes) {
-		return new MenuData(new ItemBuilder(Material.NAME_TAG).wrapText("&7" + changes.getText(), "",
-				"&rLeft click: Edit mission name", "&rRight click: Reset mission name").get(), event -> {
+		return new MenuData(
+				new ItemBuilder(Material.NAME_TAG).wrapText(
+						"&7" + changes.getText(),
+						"",
+						"&rLeft click: Edit mission name",
+						"&rRight click: Reset mission name").get(),
+				event -> {
 					Player p = (Player) event.getWhoClicked();
 
 					if (event.getClick().isRightClick()) {
@@ -122,38 +146,49 @@ public class MissionButton {
 										QuestBook.openQuestMissionEditor(p, changes.getSource());
 									}
 									return true;
-								}));
+								}
+						));
 					}
-				});
+				}
+		);
 	}
 
 	public static MenuData timeframe(IMissionState changes) {
 		return simpleButton(changes, new ItemBuilder(VDMaterial.CLOCK).wrapText(
-				"&7Complete mission within: &b" + Text.timeFromNum(changes.getTimeframe()), "", "&rLeft click: &e+1m",
-				"&rRight click: &e-1m", "&rShift left click: &e+1h", "&rShift right click: &e-1h").get(), event -> {
+				"&7Complete mission within: &b" + Text.timeFromNum(changes.getTimeframe()),
+				"",
+				"&rLeft click: &e+1m",
+				"&rRight click: &e-1m",
+				"&rShift left click: &e+1h",
+				"&rShift right click: &e-1h").get(),
+				event -> {
 					int amt = clickNumber(changes.getTimeframe(), 60, event);
 					changes.setTimeframe(Math.max(amt, 0));
-				});
+				}
+		);
 	}
 
 	public static MenuData deathReset(IMissionState changes) {
-		String icon = changes.getDeathReset() ? "&2&l\u2714" : "&4&l\u2718";
 		return simpleButton(changes,
-				new ItemBuilder(VDItemStack.getPlayerHead()).wrapText("&7Resets on death: " + icon, "",
+				new ItemBuilder(VDItemStack.getPlayerHead()).wrapText(
+						"&7Resets on death: " + Text.booleanBadge(changes.getDeathReset()),
+						"",
 						"&e> Click to change whether this Mission's Progress resets when a Player dies").get(),
 				event -> {
 					changes.setDeathReset(!changes.getDeathReset());
-				});
+				}
+		);
 	}
 
 	public static MenuData spawnersAllowed(IMissionState changes) {
-		String icon = changes.getSpawnerSupport() ? "&2&l\u2714" : "&4&l\u2718";
 		return simpleButton(changes, new ItemBuilder(VDMaterial.SPAWNER).wrapText(
-				"&7Allow Mobs from Spawners: " + icon, "",
+				"&7Allow Mobs from Spawners: " + Text.booleanBadge(changes.getSpawnerSupport()),
+				"",
 				"&e> Click to change whether this Mission will also count Mobs which were spawned by a Mob Spawner")
 				.get(), event -> {
 					changes.setSpawnerSupport(!changes.getSpawnerSupport());
-				});
+				}
+		);
 	}
 
 	private static void dialogueThing2(Player p, IMission mission, int index, List<String> dialogue) {
@@ -179,7 +214,8 @@ public class MissionButton {
 					QuestWorld.getSounds().DIALOG_ADD.playTo(p);
 
 					return false;
-				}));
+				}
+		));
 	}
 
 	private static void dialogueThing(Player p, IMission mission) {
@@ -199,7 +235,8 @@ public class MissionButton {
 						state.setDialogue(dialogue);
 						if (state.apply())
 							dialogueThing(p, mission);
-					}));
+					}
+			));
 
 			Prop above = FUSE(HOVER_TEXT("Click to insert above", GRAY), CLICK_RUN(p, () -> {
 				dialogueThing2(p, mission, index, dialogue);
@@ -239,7 +276,8 @@ public class MissionButton {
 
 					dialogueThing(p, changes.getSource());
 					p.closeInventory();
-				});
+				}
+		);
 	}
 
 	public static void apply(InventoryClickEvent event, IMissionState changes) {

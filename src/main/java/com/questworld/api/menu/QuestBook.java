@@ -31,7 +31,6 @@ import com.questworld.api.contract.IPlayerStatus;
 import com.questworld.api.contract.IQuest;
 import com.questworld.api.contract.IQuestState;
 import com.questworld.util.ItemBuilder;
-import com.questworld.util.Log;
 import com.questworld.util.ItemBuilder.Proto;
 import com.questworld.util.PlayerTools;
 import com.questworld.util.Text;
@@ -463,19 +462,20 @@ public class QuestBook {
 		setLastViewed(p, quest, categoryBack, back);
 
 		Menu menu = new Menu(3, quest.getName());
+		PagedMapping view = new PagedMapping(27, 9);
 
 		if (back) {
 			int page = PagedMapping.popPage(p);
 			PagedMapping.putPage(p, quest.getID() / 45);
 			PagedMapping.putPage(p, page);
 
-			menu.put(0, ItemBuilder.Proto.MAP_BACK.get().wrapLore(" " + quest.getCategory().getName()).get(), event -> {
+			view.setBackButton(" " + quest.getCategory().getName(), event -> {
 				openCategory((Player) event.getWhoClicked(), quest.getCategory(), categoryBack);
 			});
 		}
 
 		// Detect all
-		menu.put(1, new ItemBuilder(Material.CHEST).display("&7Check all Tasks").get(), event -> {
+		view.addFrameButton(3, new ItemBuilder(Material.CHEST).display("&7Check all Tasks").get(), event -> {
 			for (IMission mission : quest.getOrderedMissions()) {
 				if (!manager.hasUnlockedTask(mission))
 					continue;
@@ -490,7 +490,7 @@ public class QuestBook {
 			}
 
 			openQuest(p, quest, categoryBack, back);
-		});
+		}, true);
 
 		if (quest.getCooldown() >= 0) {
 			String cooldown = quest.getFormattedCooldown();
@@ -499,23 +499,23 @@ public class QuestBook {
 				long remaining = (manager.getCooldownEnd(quest) - System.currentTimeMillis() + 59999) / 60 / 1000;
 				cooldown = Text.timeFromNum(remaining) + " remaining";
 			}
-			menu.put(8, new ItemBuilder(VDMaterial.CLOCK)
+			view.addFrameButton(8, new ItemBuilder(VDMaterial.CLOCK)
 					.wrapText(QuestWorld.translate(p, Translation.quests_display_cooldown), "", "&b" + cooldown).get(),
-					null);
+					null, false);
 		}
 
-		int rewardIndex = 2;
+		int rewardIndex = 5;
 		if (quest.getMoney() > 0 && QuestWorld.getEconomy().isPresent()) {
-			menu.put(rewardIndex, new ItemBuilder(Material.GOLD_INGOT)
+			view.addFrameButton(rewardIndex, new ItemBuilder(Material.GOLD_INGOT)
 					.wrapText(QuestWorld.translate(p, Translation.quests_display_monetary), "", "&6$" + quest.getMoney())
-					.get(), null);
+					.get(), null, false);
 			rewardIndex++;
 		}
 
 		if (quest.getXP() > 0) {
-			menu.put(rewardIndex, new ItemBuilder(VDMaterial.EXPERIENCE_BOTTLE)
+			view.addFrameButton(rewardIndex, new ItemBuilder(VDMaterial.EXPERIENCE_BOTTLE)
 					.wrapText(QuestWorld.translate(p, Translation.quests_display_exp), "", "&a" + quest.getXP() + " Level")
-					.get(), null);
+					.get(), null, false);
 			rewardIndex++;
 		}
 
@@ -531,17 +531,8 @@ public class QuestBook {
 		ItemStack glassInactive = new ItemBuilder(VDItemStack.getGrayGlassPane())
 				.wrapText(QuestWorld.translate(p, Translation.quests_display_rewards)).get();
 		
-		int offset = 9;
 		int index = 0;
-		for (final IMission mission : quest.getOrderedMissions()) {
-			if(index >= 9) {
-				break;
-			}
-			
-			if(manager.hasCompletedTask(mission)) {
-				continue;
-			}
-			
+		for (final IMission mission : quest.getOrderedMissions()) {			
 			ItemStack item = glassLocked;
 			
 			if (manager.hasUnlockedTask(mission)) {
@@ -559,7 +550,7 @@ public class QuestBook {
 				item = entryItem.get();
 			}
 
-			menu.put(index + offset, item, event -> {
+			view.addButton(index, item, event -> {
 				if (!manager.hasUnlockedTask(mission))
 					return;
 				if (manager.getStatus(quest).equals(QuestStatus.AVAILABLE)
@@ -572,54 +563,36 @@ public class QuestBook {
 						openQuest(p, quest, categoryBack, back);
 					}
 				}
-			});
+			}, true);
 			index++;
 		}
 		
-		for (final IMission mission : quest.getOrderedMissions()) {
-			if(index >= 9) {
-				break;
-			}
-			
-			if(manager.hasCompletedTask(mission)) {
-				
-				ItemBuilder entryItem = new ItemBuilder(mission.getDisplayItem());
-				int current = manager.getProgress(mission);
-				int total = mission.getAmount();
-				String progress = Text.progressBar(current, total, mission.getType().progressString(current, total));
-
-				entryItem.wrapText(mission.getText(), "", progress);
-
-				ItemStack item = entryItem.get();
-				
-				menu.put(index + offset, item, null);
-				
-				index++;
-			}
-		}
+		int offset = 9 + 9 * Math.min(((quest.getMissions().size() + 8) / 9), 3);
 
 		for (int i = 0; i < 9; i++) {
 			if (manager.getStatus(quest).equals(QuestStatus.REWARD_CLAIMABLE)) {
-				menu.put(i + 18, glassClaimable, event -> {
+				menu.put(i + offset, glassClaimable, event -> {
 							quest.completeFor(p);
 							// TODO QuestWorld.getSounds().muteNext();
+							PagedMapping.putPage(p, view.getCurrentPage());
 							openQuest(p, quest, categoryBack, back);
 						});
 			}
 			else if (manager.getStatus(quest).equals(QuestStatus.ON_COOLDOWN)) {
-				menu.put(i + 18, glassCooldown, null);
+				menu.put(i + offset, glassCooldown, null);
 			}
 			else {
-				menu.put(i + 18, glassInactive, null);
+				menu.put(i + offset, glassInactive, null);
 			}
 		}
 
-		int slot = 27;
+		int slot = offset + 9;
 		for (ItemStack reward : quest.getRewards()) {
 			menu.put(slot, reward, null);
 			slot++;
 		}
-
+		
+		view.build(menu, p);
 		menu.openFor(p);
 	}
 
@@ -1125,7 +1098,7 @@ public class QuestBook {
 				});
 		
 		menu.put(24, new ItemBuilder(Material.EMERALD).wrapText(
-					"&7Enabled: " + (quest.isEnabled() ? "&atrue" : "&cfalse"),
+					"&7Enabled: " + Text.booleanBadge(quest.isEnabled()),
 					"&e> Toggles hiding and disabling the quest"
 				).get(), event -> {
 					changes.setEnabled(!quest.isEnabled());

@@ -76,21 +76,33 @@ public class PlayMission extends MissionType implements Listener, Ticking {
 
 	@Override
 	protected void layoutMenu(IMissionState changes) {
-		putButton(17,
-				new MenuData(new ItemBuilder(VDMaterial.CLOCK)
-						.wrapText("&7Time: &b" + Text.timeFromNum(changes.getAmount()), "", "&rLeft click: &e+1m",
-								"&rRight click: &e-1m", "&rShift left click: &e+1h", "&rShift right click: &e-1h")
-						.get(), event -> {
-							int amount = MissionButton.clickNumber(changes.getAmount(), 60, event);
-							if (amount < 1)
-								amount = 1;
-							changes.setAmount(amount);
-							MissionButton.apply(event, changes);
-						}));
-		putButton(16, MissionButton.simpleButton(changes, new ItemBuilder(Material.GOLDEN_APPLE)
-				.display("&7Counting method").selector(changes.getCustomInt(), "Total", "Session").get(), event -> {
+		putButton(17, new MenuData(
+				new ItemBuilder(VDMaterial.CLOCK).wrapText(
+						"&7Time: &b" + Text.timeFromNum(changes.getAmount()),
+						"",
+						"&rLeft click: &e+1m",
+						"&rRight click: &e-1m",
+						"&rShift left click: &e+1h",
+						"&rShift right click: &e-1h").get(),
+				event -> {
+					int amount = MissionButton.clickNumber(changes.getAmount(), 60, event);
+					if (amount < 1)
+						amount = 1;
+					changes.setAmount(amount);
+					MissionButton.apply(event, changes);
+				}
+				
+				
+		));
+		
+		putButton(16, MissionButton.simpleButton(changes,
+				new ItemBuilder(Material.GOLDEN_APPLE)
+						.display("&7Counting method")
+						.selector(changes.getCustomInt(), "Total", "Session").get(),
+				event -> {
 					changes.setCustomInt(1 - changes.getCustomInt());
-				}));
+				}
+		));
 	}
 	
 	// Reset all on join

@@ -18,7 +18,7 @@ class UniqueObject {
 			}
 	}
 
-	private long lastModified = System.currentTimeMillis();
+	private long lastModified = 0;
 
 	public long getLastModified() {
 		return lastModified;

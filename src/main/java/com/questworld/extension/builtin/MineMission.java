@@ -45,19 +45,22 @@ public class MineMission extends MissionType implements Listener, Decaying {
 
 	@Override
 	protected void layoutMenu(IMissionState changes) {
-		putButton(10,
-				new MenuData(
-						new ItemBuilder(changes.getDisplayItem()).wrapLore("", "&e> Click to set the block type").get(),
-						event -> {
-							Player p = (Player) event.getWhoClicked();
-							ItemStack mainItem = p.getInventory().getItemInMainHand();
-							if (mainItem != null && mainItem.getType().isBlock()) {
-								mainItem = mainItem.clone();
-								mainItem.setAmount(1);
-								changes.setItem(mainItem);
-							}
-							MissionButton.apply(event, changes);
-						}));
+		putButton(10, new MenuData(
+				new ItemBuilder(changes.getDisplayItem()).wrapLore(
+						"",
+						"&e> Click to set the block type").get(),
+				event -> {
+					Player p = (Player) event.getWhoClicked();
+					ItemStack mainItem = p.getInventory().getItemInMainHand();
+					if (mainItem != null && mainItem.getType().isBlock()) {
+						mainItem = mainItem.clone();
+						mainItem.setAmount(1);
+						changes.setItem(mainItem);
+					}
+					MissionButton.apply(event, changes);
+				}
+		));
+		
 		putButton(17, MissionButton.amount(changes));
 	}
 }

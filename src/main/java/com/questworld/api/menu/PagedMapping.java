@@ -127,6 +127,10 @@ public class PagedMapping {
 
 		build(menu, page);
 	}
+	
+	public int getCurrentPage() {
+		return currentPage;
+	}
 
 	private void build(Menu menu, int page) {
 		currentPage = page;

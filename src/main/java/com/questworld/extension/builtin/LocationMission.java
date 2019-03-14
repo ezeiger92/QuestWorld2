@@ -151,10 +151,15 @@ public class LocationMission extends MissionType implements Ticking, Listener {
 	protected void layoutMenu(IMissionState changes) {
 		String name = changes.getCustomString();
 		putButton(10, MissionButton.location(changes));
-		putButton(11, new MenuData(new ItemBuilder(Material.NAME_TAG)
-				.wrapText("&7Location name: &r&o" + (name.length() > 0 ? name : "-none-"), "",
-						"&e> Give your location a name", "", "&rLeft click: Enter name", "&rRight click: Reset name")
-				.get(), event -> {
+		putButton(11, new MenuData(
+				new ItemBuilder(Material.NAME_TAG).wrapText(
+						"&7Location name: &r&o" + (name.length() > 0 ? name : "-none-"),
+						"",
+						"&e> Give your location a name",
+						"",
+						"&rLeft click: Enter name",
+						"&rRight click: Reset name").get(),
+				event -> {
 					Player p = (Player) event.getWhoClicked();
 
 					if (event.isRightClick()) {
@@ -178,16 +183,23 @@ public class LocationMission extends MissionType implements Ticking, Listener {
 								}
 
 								return true;
-							}));
-				}));
-		putButton(17,
-				MissionButton.simpleButton(changes,
-						new ItemBuilder(Material.COMPASS).wrapText("&7Radius: &a" + changes.getCustomInt(), "",
-								"&rLeft click: &e+1", "&rRight click: &e-1", "&rShift left click: &e+16",
-								"&rShift right click: &e-16").get(),
-						event -> {
-							int amount = MissionButton.clickNumber(changes.getCustomInt(), 16, event);
-							changes.setCustomInt(Math.max(amount, 1));
-						}));
+							}
+					));
+				}
+		));
+		
+		putButton(17, MissionButton.simpleButton(changes,
+				new ItemBuilder(Material.COMPASS).wrapText(
+						"&7Radius: &a" + changes.getCustomInt(),
+						"",
+						"&rLeft click: &e+1",
+						"&rRight click: &e-1",
+						"&rShift left click: &e+16",
+						"&rShift right click: &e-16").get(),
+				event -> {
+					int amount = MissionButton.clickNumber(changes.getCustomInt(), 16, event);
+					changes.setCustomInt(Math.max(amount, 1));
+				}
+		));
 	}
 }

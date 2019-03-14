@@ -21,6 +21,9 @@ public final class Text {
 	// TODO: Probably make all of this better and then comment
 	public final static char dummyChar = '&';
 	public final static char colorChar = ChatColor.COLOR_CHAR;
+	
+	private static final String greenCheck = colorize("&2&l\u2714");
+	private static final String redX = colorize("&4&l\u2718");
 
 	/**
 	 * Colors a string
@@ -80,6 +83,17 @@ public final class Text {
 			output[i] = decolor(inputs[i]);
 
 		return output;
+	}
+	
+	/**
+	 * Transforms a boolean into a nice text badge.
+	 * 
+	 * @param state A boolean value
+	 * @return <font color="green"><b>&#x2714;</b></font> if true;
+	 * <font color="red"><b>&#x2718;</b></font> if false
+	 */
+	public static String booleanBadge(boolean state) {
+		return state ? greenCheck : redX;
 	}
 
 	public static String serializeNewline(@Nullable("Returns null") String input) {
@@ -250,7 +264,7 @@ public final class Text {
 					else
 						++n;
 
-					if (i > seq_end)
+					if (i >= seq_end)
 						committed_format = prepared_format;
 				}
 				output.add(format + s.substring(begin));

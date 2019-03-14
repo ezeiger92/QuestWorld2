@@ -151,7 +151,7 @@ public class Facade implements IFacade {
 				quest.refreshParent();
 		}
 
-		lastSave = System.currentTimeMillis();
+		lastSave = 0;
 	}
 
 	public void onDiscard() {
