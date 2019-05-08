@@ -6,6 +6,7 @@ import java.util.Map;
 
 public final class Version implements Comparable<Version> {
 	private final String serialVersion;
+	private final int hash;
 	
 	private static final Map<String, Version> cache = new HashMap<>();
 	
@@ -23,79 +24,12 @@ public final class Version implements Comparable<Version> {
 	
 	private Version(String serialVersion) {
 		this.serialVersion = serialVersion;
-	}
-	
-	private static final String processVersion(String in) {
-		in = in.toUpperCase(Locale.ENGLISH).replace('.', '_');
-
-		if (in.startsWith("V"))
-			in = in.substring(1);
-
-		return in;
-	}
-
-	private static final int apiLevel(String serverKind) {
-		switch (serverKind) {
-			case "TACO":
-			case "TACOSPIGOT":
-				return 3;
-
-			case "PAPER":
-			case "PAPERSPIGOT":
-				return 2;
-
-			case "SPIGOT":
-				return 1;
-
-			default:
-				return 0;
-		}
+		this.hash = makeHash(serialVersion);
 	}
 
 	@Override
 	public final int compareTo(Version other) {
-		String[] ourParts = toString().split("_");
-		String[] theirParts = other.toString().split("_");
-
-		int length = Math.min(ourParts.length, theirParts.length);
-
-		for (int i = 0; i < length; ++i) {
-			int ourSubver = 0;
-			int theirSubver = 0;
-
-			if (ourParts[i].startsWith("R")) {
-				ourParts[i] = ourParts[i].substring(1);
-				ourSubver = -1;
-			}
-
-			if (theirParts[i].startsWith("R")) {
-				theirParts[i] = theirParts[i].substring(1);
-				theirSubver = -1;
-			}
-
-			if (ourSubver != theirSubver) {
-				return Integer.compare(theirSubver, ourSubver);
-			}
-
-			try {
-				ourSubver = Integer.parseInt(ourParts[i]);
-			}
-			catch (NumberFormatException e) {}
-
-			try {
-				theirSubver = Integer.parseInt(theirParts[i]);
-			}
-			catch (NumberFormatException e) {}
-
-			if (ourSubver != theirSubver) {
-				return Integer.compare(theirSubver, ourSubver);
-			}
-			else if (ourSubver <= 0) {
-				return Integer.compare(apiLevel(theirParts[i]), apiLevel(ourParts[i]));
-			}
-		}
-
-		return Integer.compare(theirParts.length, ourParts.length);
+		return Integer.compareUnsigned(other.hashCode(), hashCode());
 	}
 	
 	public boolean lessThan(Version other) {
@@ -114,13 +48,99 @@ public final class Version implements Comparable<Version> {
 	@Override
 	public boolean equals(Object other) {
 		if (other instanceof Version)
-			return toString().equals(other.toString());
+			return other.hashCode() == hashCode();
 
 		return false;
 	}
 
 	@Override
 	public int hashCode() {
-		return toString().hashCode();
+		return hash;
+	}
+	
+	// release_version_patch_Rapi_type
+	private static final int[] bitPartition = {
+			// 16 unused
+			2, // MC release, 4
+			5, // MC version, 32
+			4, // MC patch, 16
+			3, // API revision, 8
+			2, // API type, 4
+	};
+	
+	private static final int[] bitPosition;
+	
+	static {
+		int[] positions = new int[bitPartition.length];
+		
+		int cumulative = 0;
+		
+		for(int i = positions.length - 1; i >= 0; --i) {
+			cumulative += bitPartition[i];
+			positions[i] = cumulative;
+		}
+		
+		bitPosition = positions;
+	}
+	
+	private static final int makeHash(String serialVersion) {
+		String[] ourParts = serialVersion.split("_");
+
+		int length = ourParts.length;
+		
+		int hash = 0;
+		
+		for (int i = 0; i < length; ++i) {
+			String part = ourParts[i];
+			
+			int value;
+			try {
+				value = Integer.parseInt(part);
+			}
+			catch (NumberFormatException e) {
+				if(part.startsWith("R")) {
+					try {
+						value = (int)(Double.parseDouble(part.substring(1)) * 10);
+					}
+					catch(NumberFormatException e2) {
+						value = 0;
+					}
+				}
+				else {
+					value = apiVariant(part);
+				}
+			}
+			
+			hash |= (value << bitPosition[i]);
+		}
+		
+		return hash;
+	}
+	
+	private static final String processVersion(String in) {
+		in = in.toUpperCase(Locale.ENGLISH).replace('.', '_');
+
+		if (in.startsWith("V"))
+			in = in.substring(1);
+
+		return in;
+	}
+
+	private static final int apiVariant(String serverKind) {
+		switch (serverKind) {
+			case "TACO":
+			case "TACOSPIGOT":
+				return 3;
+
+			case "PAPER":
+			case "PAPERSPIGOT":
+				return 2;
+
+			case "SPIGOT":
+				return 1;
+
+			default:
+				return 0;
+		}
 	}
 }
