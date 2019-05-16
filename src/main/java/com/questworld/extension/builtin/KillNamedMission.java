@@ -57,7 +57,7 @@ public class KillNamedMission extends KillMission {
 		for (MissionEntry r : QuestWorld.getMissionEntries(this, killer)) {
 			IMission mission = r.getMission();
 			EntityType type = mission.getEntity();
-			if ((type == e.getEntityType() || type == EntityType.COMPLEX_PART)
+			if ((type == e.getEntityType() || type == EntityTools.ANY_ENTITY)
 					&& (mission.getSpawnerSupport() || !EntityTools.isFromSpawner(e.getEntity()))
 					&& (mission.getCustomInt() == EXACT && name.equals(mission.getCustomString())
 							|| mission.getCustomInt() == CONTAINS && name.contains(mission.getCustomString())))

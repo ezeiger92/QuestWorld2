@@ -18,17 +18,24 @@ public class Menu implements InventoryHolder {
 	private static final int ROW_WIDTH = 9;
 	private Inventory inv;
 	private Consumer<InventoryClickEvent>[] handlers;
+	
+	// There is no reason I should have to keep track of this, butresizing needs
+	// to create a new inventory.
+	// Bukkit offers no way to get the old title without an open view.
+	// Why.
+	private final String title;
 
 	@SuppressWarnings("unchecked")
 	public Menu(int rows, String title) {
 		int cells = rows * ROW_WIDTH;
-		inv = makeInv(cells, Text.colorize(title));
+		this.title = Text.colorize(title);
+		inv = makeInv(cells);
 		handlers = new Consumer[cells];
 	}
 
-	private Inventory makeInv(int cells, String title) {
+	private Inventory makeInv(int cells) {
 		if (title != null)
-			return Bukkit.createInventory(this, cells, Text.colorize(title));
+			return Bukkit.createInventory(this, cells);
 
 		return Bukkit.createInventory(this, cells);
 	}
@@ -36,13 +43,7 @@ public class Menu implements InventoryHolder {
 	public void resize(int rows) {
 		int cells = rows * ROW_WIDTH;
 		
-		// Are you fucking kidding me bukkit? It doesn't make any sense that I
-		// can create an inventory with a name and not have a "safe" way of
-		// getting that name later. Other things have already pissed me off
-		// today but this takes the damn cake.
-		// DEPRECATE CONSISTENTLY OR NOT AT ALL JESUS CHRIST
-		@SuppressWarnings("deprecation")
-		Inventory inv2 = makeInv(cells, inv.getName());
+		Inventory inv2 = makeInv(cells);
 
 		inv2.setContents(Arrays.copyOf(inv.getContents(), cells));
 		handlers = Arrays.copyOf(handlers, cells);

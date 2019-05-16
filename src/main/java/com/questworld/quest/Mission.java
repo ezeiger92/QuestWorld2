@@ -18,6 +18,7 @@ import com.questworld.api.MissionType;
 import com.questworld.api.QuestWorld;
 import com.questworld.api.contract.IMissionState;
 import com.questworld.manager.ProgressTracker;
+import com.questworld.util.EntityTools;
 import com.questworld.util.Log;
 import com.questworld.util.Text;
 
@@ -164,7 +165,7 @@ class Mission extends UniqueObject implements IMissionState {
 		result.put("type", type.toString());
 		result.put("item", item);
 		result.put("amount", amount);
-		result.put("entity", entity.toString());
+		result.put("entity", EntityTools.serialNameOf(entity));
 		result.put("location", locationHelper(location));
 		result.put("index", index);
 		result.put("custom_string", Text.escapeColor(customString));
@@ -327,11 +328,8 @@ class Mission extends UniqueObject implements IMissionState {
 			item = i2;
 
 		amount = (Integer) data.getOrDefault("amount", amount);
-		try {
-			entity = EntityType.valueOf((String) data.get("entity"));
-		}
-		catch (IllegalArgumentException | NullPointerException e) {
-		}
+		
+		entity = EntityTools.deserializeType((String)data.get("entity"));
 		location = locationHelper((Map<String, Object>) data.get("location"));
 		if (location.getWorld() == null && !missingWorlds.contains(missingWorldName)) {
 			Log.warning("Mission location exists in missing world \"" + missingWorldName + "\". Was it deleted?");

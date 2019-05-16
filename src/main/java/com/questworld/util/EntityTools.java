@@ -16,11 +16,14 @@ import com.questworld.util.version.ObjectMap.VDMaterial;
  * @author Erik Zeiger
  */
 public class EntityTools {
+	
+	public static final EntityType ANY_ENTITY = null;
+	
 	private static final EntityType[] alive;
 	static {
 		// Alive entities
 		ArrayList<EntityType> entities = new ArrayList<>();
-		entities.add(EntityType.COMPLEX_PART);
+		entities.add(ANY_ENTITY);
 
 		for (EntityType ent : EntityType.values())
 			if (ent.isAlive())
@@ -48,6 +51,10 @@ public class EntityTools {
 	 */
 	public static ItemBuilder getEntityDisplay(EntityType type) {
 		
+		if(type == ANY_ENTITY) {
+			return new ItemBuilder(Material.NETHER_STAR);
+		}
+		
 		switch (type) {
 			case PLAYER:
 				return new ItemBuilder(VDItemStack.getPlayerHead());
@@ -72,9 +79,6 @@ public class EntityTools {
 				
 			case IRON_GOLEM:
 				return new ItemBuilder(Material.IRON_INGOT);
-				
-			case COMPLEX_PART:
-				return new ItemBuilder(Material.NETHER_STAR);
 
 			default:
 				
@@ -102,10 +106,34 @@ public class EntityTools {
 	 * @return A clean name that describes the entity
 	 */
 	public static String nameOf(EntityType entity) {
-		if (entity == EntityType.COMPLEX_PART)
+		if (entity == ANY_ENTITY)
 			return "Any Entity";
 
 		return Text.niceName(entity.toString());
+	}
+	
+	public static String serialNameOf(EntityType entity) {
+		if(entity == ANY_ENTITY) {
+			return "ANY";
+		}
+		
+		return entity.toString();
+	}
+	
+	public static EntityType deserializeType(String entityType) {
+		
+		// Poor decision on my part to represent "any entity" in 1.13 and earlier
+		// Backwards compatibility for saves from those versions
+		if(entityType == "COMPLEX_PART") {
+			return ANY_ENTITY;
+		}
+		
+		try {
+			return EntityType.valueOf(entityType);
+		}
+		catch(IllegalArgumentException | NullPointerException e) {
+			return ANY_ENTITY;
+		}
 	}
 
 	/**
