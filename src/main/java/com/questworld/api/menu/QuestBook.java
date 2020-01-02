@@ -34,7 +34,6 @@ import com.questworld.util.ItemBuilder;
 import com.questworld.util.ItemBuilder.Proto;
 import com.questworld.util.PlayerTools;
 import com.questworld.util.Text;
-import com.questworld.util.version.ObjectMap.VDItemStack;
 
 public class QuestBook {
 	public static DataObject getLastViewed(Player p) {
@@ -191,7 +190,7 @@ public class QuestBook {
 	private static ItemStack partyMenuItem(Player p) {
 		String progress = QuestWorld.getPlayerStatus(p).progressString();
 		if (QuestWorld.getPlugin().getConfig().getBoolean("party.enabled")) {
-			return new ItemBuilder(VDItemStack.getPlayerHead()).wrapText(QuestWorld.translate(p, Translation.gui_party), progress, "",
+			return new ItemBuilder(Material.PLAYER_HEAD).wrapText(QuestWorld.translate(p, Translation.gui_party), progress, "",
 					QuestWorld.translate(p, Translation.button_open)).get();
 		}
 
@@ -204,7 +203,7 @@ public class QuestBook {
 
 		Menu menu = new Menu(1, QuestWorld.translate(p, Translation.gui_party));
 
-		ItemBuilder skull = new ItemBuilder(VDItemStack.getPlayerHead());
+		ItemBuilder skull = new ItemBuilder(Material.PLAYER_HEAD);
 		menu.put(4, skull.wrapText(QuestWorld.translate(p, Translation.gui_party), "",
 				QuestWorld.translate(p, Translation.button_back_party)).get(), event -> {
 					openPartyMenu((Player) event.getWhoClicked());
@@ -264,7 +263,7 @@ public class QuestBook {
 
 		final IParty party = QuestWorld.getParty(p);
 
-		ItemBuilder wool = new ItemBuilder(VDItemStack.getGreenWool());
+		ItemBuilder wool = new ItemBuilder(Material.GREEN_WOOL);
 
 		if (party == null) {
 			menu.put(9,
@@ -323,7 +322,7 @@ public class QuestBook {
 							}
 						});
 
-				menu.put(17, new ItemBuilder(VDItemStack.getRedWool())
+				menu.put(17, new ItemBuilder(Material.RED_WOOL)
 						.wrapText("&4&lDelete your Party", "", "&rDeletes this Party", "&rBe careful with this Option!")
 						.get(), event -> {
 							QuestWorld.disbandParty(party);
@@ -331,7 +330,7 @@ public class QuestBook {
 						});
 			}
 			else {
-				menu.put(17, new ItemBuilder(VDItemStack.getRedWool())
+				menu.put(17, new ItemBuilder(Material.RED_WOOL)
 						.wrapText("&4&lLeave your Party", "", "&rLeaves this Party", "&rBe careful with this Option!")
 						.get(), event -> {
 							Player p2 = (Player) event.getWhoClicked();
@@ -340,7 +339,7 @@ public class QuestBook {
 						});
 			}
 
-			menu.put(13, new ItemBuilder(VDItemStack.getPlayerHead())
+			menu.put(13, new ItemBuilder(Material.PLAYER_HEAD)
 					.wrapText("&eMember List", "", "&rShows you all Members of this Party").get(), event -> {
 						openPartyMembers((Player) event.getWhoClicked());
 					});
@@ -357,7 +356,7 @@ public class QuestBook {
 		setLastViewed(p, category, back);
 
 		Menu menu = new Menu(1, category.getName());
-		ItemBuilder glassPane = new ItemBuilder(VDItemStack.getRedGlassPane());
+		ItemBuilder glassPane = new ItemBuilder(Material.RED_STAINED_GLASS_PANE);
 		PagedMapping view = new PagedMapping(45, 9);
 
 		if (back) {
@@ -518,16 +517,16 @@ public class QuestBook {
 			rewardIndex++;
 		}
 
-		ItemStack glassLocked = new ItemBuilder(VDItemStack.getRedGlassPane())
+		ItemStack glassLocked = new ItemBuilder(Material.RED_STAINED_GLASS_PANE)
 				.wrapText("&7&kSOMEWEIRDMISSION", "", QuestWorld.translate(p, Translation.task_locked)).get();
 		
-		ItemStack glassClaimable = new ItemBuilder(VDItemStack.getPurpleGlassPane())
+		ItemStack glassClaimable = new ItemBuilder(Material.PURPLE_STAINED_GLASS_PANE)
 				.wrapText(QuestWorld.translate(p, Translation.quests_state_reward_claim)).get();
 		
-		ItemStack glassCooldown = new ItemBuilder(VDItemStack.getYellowGlassPane())
+		ItemStack glassCooldown = new ItemBuilder(Material.YELLOW_STAINED_GLASS_PANE)
 				.wrapText(QuestWorld.translate(p, Translation.quests_state_cooldown)).get();
 		
-		ItemStack glassInactive = new ItemBuilder(VDItemStack.getGrayGlassPane())
+		ItemStack glassInactive = new ItemBuilder(Material.GRAY_STAINED_GLASS_PANE)
 				.wrapText(QuestWorld.translate(p, Translation.quests_display_rewards)).get();
 		
 		int index = 0;
@@ -605,7 +604,7 @@ public class QuestBook {
 
 		final Menu menu = new Menu(6, "&3Categories");
 
-		ItemBuilder defaultItem = new ItemBuilder(VDItemStack.getRedGlassPane())
+		ItemBuilder defaultItem = new ItemBuilder(Material.RED_STAINED_GLASS_PANE)
 				.display("&7> Create category");
 
 		PagedMapping view = new PagedMapping(45);
@@ -653,7 +652,7 @@ public class QuestBook {
 
 		final Menu menu = new LinkedMenu(6, "&3Quests", category, true);
 
-		ItemBuilder defaultItem = new ItemBuilder(VDItemStack.getRedGlassPane())
+		ItemBuilder defaultItem = new ItemBuilder(Material.RED_STAINED_GLASS_PANE)
 				.display("&7> Create quest");
 
 		PagedMapping view = new PagedMapping(45);
@@ -808,7 +807,7 @@ public class QuestBook {
 					openWorldEditor((Player) event.getWhoClicked(), category);
 				});
 
-		menu.put(17, new ItemBuilder(VDItemStack.getRedWool())
+		menu.put(17, new ItemBuilder(Material.RED_WOOL)
 				.wrapText("&4Reset progress", "", "&e> Click to clear all player progress for this category").get(),
 				event -> {
 					// TODO: Destructive action warning
@@ -825,7 +824,7 @@ public class QuestBook {
 
 		final Menu menu = new LinkedMenu(6, "&3Missions", quest, true);
 
-		ItemStack defaultItem = new ItemBuilder(VDItemStack.getRedGlassPane())
+		ItemStack defaultItem = new ItemBuilder(Material.RED_STAINED_GLASS_PANE)
 				.display("&7> Create mission").get();
 
 		PagedMapping view = new PagedMapping(45);
@@ -1105,7 +1104,7 @@ public class QuestBook {
 					openQuestEditor((Player) event.getWhoClicked(), quest);
 				});
 
-		menu.put(26, new ItemBuilder(VDItemStack.getRedWool())
+		menu.put(26, new ItemBuilder(Material.RED_WOOL)
 				.wrapText("&4Reset progress", "", "&e> Click to clear all player progress for this quest").get(),
 				event -> {
 					QuestWorld.getFacade().clearAllUserData(quest);

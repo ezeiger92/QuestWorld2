@@ -35,7 +35,6 @@ import com.questworld.util.PlayerTools;
 import com.questworld.util.Text;
 import com.questworld.util.json.JsonBlob;
 import com.questworld.util.json.Prop;
-import com.questworld.util.version.ObjectMap.VDItemStack;
 
 public class QBDialogue {
 	public static void openDeletionConfirmation(Player p, final DataObject q) {
@@ -43,7 +42,7 @@ public class QBDialogue {
 
 		Menu menu = new LinkedMenu(1, "&4&lAre you Sure?", q, true);
 
-		menu.put(6, new ItemBuilder(VDItemStack.getRedWool()).display("&cNo").get(), event -> {
+		menu.put(6, new ItemBuilder(Material.RED_WOOL).display("&cNo").get(), event -> {
 			Player p2 = (Player) event.getWhoClicked();
 			if (q instanceof IQuest)
 				QuestBook.openCategoryEditor(p2, ((IQuest) q).getCategory());
@@ -63,7 +62,7 @@ public class QBDialogue {
 		else
 			tag = "";
 
-		menu.put(2, new ItemBuilder(VDItemStack.getLimeWool()).wrapText("&aYes I am sure", "", "&rThis will delete", tag).get(),
+		menu.put(2, new ItemBuilder(Material.LIME_WOOL).wrapText("&aYes I am sure", "", "&rThis will delete", tag).get(),
 				event -> {
 					Player p2 = (Player) event.getWhoClicked();
 					QuestWorld.getSounds().DESTRUCTIVE_CLICK.playTo(p2);
@@ -113,11 +112,11 @@ public class QBDialogue {
 
 		Menu menu = new LinkedMenu(1, "&4&lAre you Sure?", q, true);
 
-		menu.put(6, new ItemBuilder(VDItemStack.getRedWool()).display("&cNo").get(), event -> {
+		menu.put(6, new ItemBuilder(Material.RED_WOOL).display("&cNo").get(), event -> {
 			QuestBook.openQuestEditor((Player) event.getWhoClicked(), q);
 		});
 
-		menu.put(2, new ItemBuilder(VDItemStack.getLimeWool())
+		menu.put(2, new ItemBuilder(Material.LIME_WOOL)
 				.wrapText("&aYes I am sure", "", "&rThis will reset this Quest's Database").get(), event -> {
 					QuestWorld.getFacade().clearAllUserData(q);
 					QuestBook.openQuestEditor((Player) event.getWhoClicked(), q);

@@ -32,7 +32,6 @@ import com.questworld.util.PlayerTools;
 import com.questworld.util.Text;
 import com.questworld.util.json.JsonBlob;
 import com.questworld.util.json.Prop;
-import com.questworld.util.version.ObjectMap.VDItemStack;
 
 public class MissionButton {
 	public static MenuData item(IMissionState changes) {
@@ -169,7 +168,7 @@ public class MissionButton {
 
 	public static MenuData deathReset(IMissionState changes) {
 		return simpleButton(changes,
-				new ItemBuilder(VDItemStack.getPlayerHead()).wrapText(
+				new ItemBuilder(Material.PLAYER_HEAD).wrapText(
 						"&7Resets on death: " + Text.booleanBadge(changes.getDeathReset()),
 						"",
 						"&e> Click to change whether this Mission's Progress resets when a Player dies").get(),

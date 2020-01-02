@@ -7,7 +7,6 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 
 import com.questworld.QuestWorldPlugin;
-import com.questworld.util.version.ObjectMap.VDItemStack;
 
 /**
  * A shared home for tools related to entities and entity manipulation.
@@ -56,16 +55,16 @@ public class EntityTools {
 		
 		switch (type) {
 			case PLAYER:
-				return new ItemBuilder(VDItemStack.getPlayerHead());
+				return new ItemBuilder(Material.PLAYER_HEAD);
 				
 			case GIANT:
-				return new ItemBuilder(VDItemStack.getZombieHead());
+				return new ItemBuilder(Material.ZOMBIE_HEAD);
 				
 			case ENDER_DRAGON:
-				return new ItemBuilder(VDItemStack.getDragonHead());
+				return new ItemBuilder(Material.DRAGON_HEAD);
 
 			case WITHER:
-				return new ItemBuilder(VDItemStack.getWitherSkull());
+				return new ItemBuilder(Material.WITHER_SKELETON_SKULL);
 				
 			case ILLUSIONER:
 				return new ItemBuilder(Material.ENDER_EYE);
