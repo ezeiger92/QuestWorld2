@@ -33,7 +33,6 @@ import com.questworld.util.Text;
 import com.questworld.util.json.JsonBlob;
 import com.questworld.util.json.Prop;
 import com.questworld.util.version.ObjectMap.VDItemStack;
-import com.questworld.util.version.ObjectMap.VDMaterial;
 
 public class MissionButton {
 	public static MenuData item(IMissionState changes) {
@@ -154,7 +153,7 @@ public class MissionButton {
 	}
 
 	public static MenuData timeframe(IMissionState changes) {
-		return simpleButton(changes, new ItemBuilder(VDMaterial.CLOCK).wrapText(
+		return simpleButton(changes, new ItemBuilder(Material.CLOCK).wrapText(
 				"&7Complete mission within: &b" + Text.timeFromNum(changes.getTimeframe()),
 				"",
 				"&rLeft click: &e+1m",
@@ -181,7 +180,7 @@ public class MissionButton {
 	}
 
 	public static MenuData spawnersAllowed(IMissionState changes) {
-		return simpleButton(changes, new ItemBuilder(VDMaterial.SPAWNER).wrapText(
+		return simpleButton(changes, new ItemBuilder(Material.SPAWNER).wrapText(
 				"&7Allow Mobs from Spawners: " + Text.booleanBadge(changes.getSpawnerSupport()),
 				"",
 				"&e> Click to change whether this Mission will also count Mobs which were spawned by a Mob Spawner")

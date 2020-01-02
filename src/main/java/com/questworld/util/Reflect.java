@@ -3,9 +3,6 @@ package com.questworld.util;
 import java.lang.reflect.Method;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Chunk;
-import org.bukkit.World;
-import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
@@ -109,30 +106,6 @@ public final class Reflect {
 		m.setAccessible(access);
 	}
 
-	// Pre 1.13
-	@Deprecated
-	public static ItemStack nmsPickBlock(Block block) throws Exception {
-		World w = block.getWorld();
-		Chunk c = block.getChunk();
-
-		Object world = w.getClass().getMethod("getHandle").invoke(w);
-		Object chunk = c.getClass().getMethod("getHandle").invoke(c);
-
-		Object blockposition = NMS("BlockPosition").getConstructor(int.class, int.class, int.class)
-				.newInstance(block.getX(), block.getY(), block.getZ());
-		Object iblockdata = chunk.getClass().getMethod("getBlockData", blockposition.getClass()).invoke(chunk,
-				blockposition);
-
-		Class<?> worldClass = NMS("World");
-		Object rawblock = Bukkit.getUnsafe().getClass().getMethod("getBlock", Block.class).invoke(null, block);
-		Class<?> iblockclass = NMS("IBlockData");
-		Object rawitemstack = rawblock.getClass().getMethod("a", worldClass, blockposition.getClass(), iblockclass)
-				.invoke(rawblock, world, blockposition, iblockdata);
-
-		return (ItemStack) CBS("inventory.CraftItemStack")
-				.getMethod("asCraftMirror", rawitemstack.getClass()).invoke(null, rawitemstack);
-	}
-
 	public static String nmsGetItemName(ItemStack stack) throws Exception {
 		if (stack.hasItemMeta() && stack.getItemMeta().hasDisplayName())
 			return stack.getItemMeta().getDisplayName();
@@ -141,13 +114,6 @@ public final class Reflect {
 
 		Object chatMessage = rstack.getClass().getMethod("getName").invoke(rstack);
 		
-		// Supports pre-1.13
-		// TODO: Bad! Use adapters instead
-		if(chatMessage instanceof String) {
-			return (String) chatMessage;
-		}
-		else {
-			return (String) chatMessage.getClass().getMethod("getText").invoke(chatMessage);
-		}
+		return (String) chatMessage.getClass().getMethod("getText").invoke(chatMessage);
 	}
 }

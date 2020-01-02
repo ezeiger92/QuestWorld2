@@ -18,11 +18,10 @@ import com.questworld.api.menu.MissionButton;
 import com.questworld.util.ItemBuilder;
 import com.questworld.util.PlayerTools;
 import com.questworld.util.Text;
-import com.questworld.util.version.ObjectMap.VDMaterial;
 
 public class CraftMission extends MissionType implements Listener, Decaying {
 	public CraftMission() {
-		super("CRAFT", true, new ItemStack(VDMaterial.CRAFTING_TABLE));
+		super("CRAFT", true, new ItemStack(Material.CRAFTING_TABLE));
 	}
 
 	@Override

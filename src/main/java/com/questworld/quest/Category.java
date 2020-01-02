@@ -17,7 +17,6 @@ import org.bukkit.inventory.ItemStack;
 import com.questworld.api.contract.ICategoryState;
 import com.questworld.api.contract.IQuest;
 import com.questworld.util.Text;
-import com.questworld.util.version.ObjectMap.VDMaterial;
 
 class Category extends UniqueObject implements ICategoryState {
 	private YamlConfiguration config;
@@ -25,7 +24,7 @@ class Category extends UniqueObject implements ICategoryState {
 
 	private boolean hidden = false;
 	private int id = -1;
-	private ItemStack item = new ItemStack(VDMaterial.WRITABLE_BOOK);
+	private ItemStack item = new ItemStack(Material.WRITABLE_BOOK);
 	private String name = "";
 	private WeakReference<Quest> parent = new WeakReference<>(null);
 	private String permission = "";

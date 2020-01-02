@@ -339,23 +339,7 @@ public class PlayerTools {
 		}
 	}
 
-	// Versions 1.13+ map 1 material to 1 block, no reflection is needed
-	private static boolean useReflectPick = !Reflect.getVersion().greaterThan(Versions.v1_12_2.getTaco());
-
-	@SuppressWarnings("deprecation")
 	public static ItemStack getStackOf(Block block) {
-		if(useReflectPick)
-			try {
-				return Reflect.nmsPickBlock(block);
-			}
-			catch(Exception e) {
-				useReflectPick = false;
-				Log.warning(
-						"Failed to reflect \"pickBlock\" method, QuestWorld was not fully prepared for your minecraft version");
-				Log.warning(
-						"Falling back to MaterialData comparison for all future checks. Mining quests may not detect blocks as accurately");
-			}
-
 		return new ItemStack(block.getType());
 	}
 }

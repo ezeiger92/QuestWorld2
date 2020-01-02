@@ -7,7 +7,6 @@ import org.bukkit.block.Block;
 import org.bukkit.block.data.Ageable;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.Crops;
 
 import com.questworld.util.Reflect;
 import com.questworld.util.Version;
@@ -16,20 +15,6 @@ import com.questworld.util.Versions;
 public class ObjectMap {
 	private static final Version pre13 = Versions.v1_12_2.getTaco();
 	private static final Version pre19 = Versions.v1_8_R3.getTaco();
-	
-	public static class VDMaterial {
-		public static final Material SKELETON_SKULL = Material.matchMaterial(VersionDependent.pick(pre13, "SKULL_ITEM", "SKELETON_SKULL"));
-		public static final Material CRAFTING_TABLE = Material.matchMaterial(VersionDependent.pick(pre13, "WORKBENCH", "CRAFTING_TABLE"));
-		public static final Material CLOCK = Material.matchMaterial(VersionDependent.pick(pre13, "WATCH", "CLOCK"));
-		public static final Material SPAWNER = Material.matchMaterial(VersionDependent.pick(pre13, "MOB_SPAWNER", "SPAWNER"));
-		public static final Material EXPERIENCE_BOTTLE = Material.matchMaterial(VersionDependent.pick(pre13, "EXP_BOTTLE", "EXPERIENCE_BOTTLE"));
-		public static final Material ENDER_EYE = Material.matchMaterial(VersionDependent.pick(pre13, "EYE_OF_ENDER", "ENDER_EYE"));
-		public static final Material WRITABLE_BOOK = Material.matchMaterial(VersionDependent.pick(pre13, "BOOK_AND_QUILL", "WRITABLE_BOOK"));
-		public static final Material COMMAND_BLOCK = Material.matchMaterial(VersionDependent.pick(pre13, "COMMAND", "COMMAND_BLOCK"));
-		public static final Material FIREWORK_ROCKET = Material.matchMaterial(VersionDependent.pick(pre13, "FIREWORK", "FIREWORK_ROCKET"));
-		public static final Material SNOWBALL = Material.matchMaterial(VersionDependent.pick(pre13, "SNOW_BALL", "SNOWBALL"));
-		public static final Material GOLDEN_SWORD = Material.matchMaterial(VersionDependent.pick(pre13, "GOLD_SWORD", "GOLDEN_SWORD"));
-	}
 	
 	public static class VDItemStack {
 		private static final ItemStack rev(String newName, String oldName, int data) {
@@ -46,7 +31,7 @@ public class ObjectMap {
 		}
 		
 		public static final ItemStack getSkeletonSkull() {
-			return new ItemStack(VDMaterial.SKELETON_SKULL);
+			return new ItemStack(Material.SKELETON_SKULL);
 		}
 		
 		public static final ItemStack getWitherSkull() {
@@ -128,7 +113,7 @@ public class ObjectMap {
 		private static final boolean cropGrown112(Block cropBlock) {
 			org.bukkit.material.MaterialData data = cropBlock.getState().getData();
 			
-			return data instanceof Crops && ((Crops)data).getState() == CropState.RIPE;
+			return data instanceof org.bukkit.material.Crops && ((org.bukkit.material.Crops)data).getState() == CropState.RIPE;
 		}
 	}
 }

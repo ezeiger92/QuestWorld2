@@ -26,7 +26,6 @@ import com.questworld.api.event.CancellableEvent;
 import com.questworld.api.event.QuestCompleteEvent;
 import com.questworld.util.ItemBuilder;
 import com.questworld.util.Text;
-import com.questworld.util.version.ObjectMap.VDMaterial;
 
 class Quest extends UniqueObject implements IQuestState {
 	private WeakReference<Category> category;
@@ -37,7 +36,7 @@ class Quest extends UniqueObject implements IQuestState {
 	private List<String> commands = new ArrayList<>();
 	private long cooldown = -1;
 	private int id = -1;
-	private ItemStack item = new ItemStack(VDMaterial.WRITABLE_BOOK);
+	private ItemStack item = new ItemStack(Material.WRITABLE_BOOK);
 	private int money = 0;
 	private String name = "";
 	private boolean ordered = false;

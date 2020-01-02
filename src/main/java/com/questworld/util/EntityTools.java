@@ -8,7 +8,6 @@ import org.bukkit.entity.LivingEntity;
 
 import com.questworld.QuestWorldPlugin;
 import com.questworld.util.version.ObjectMap.VDItemStack;
-import com.questworld.util.version.ObjectMap.VDMaterial;
 
 /**
  * A shared home for tools related to entities and entity manipulation.
@@ -69,13 +68,13 @@ public class EntityTools {
 				return new ItemBuilder(VDItemStack.getWitherSkull());
 				
 			case ILLUSIONER:
-				return new ItemBuilder(VDMaterial.ENDER_EYE);
+				return new ItemBuilder(Material.ENDER_EYE);
 			
 			case ARMOR_STAND:
 				return new ItemBuilder(Material.ARMOR_STAND);
 
 			case SNOWMAN:
-				return new ItemBuilder(VDMaterial.SNOWBALL);
+				return new ItemBuilder(Material.SNOWBALL);
 				
 			case IRON_GOLEM:
 				return new ItemBuilder(Material.IRON_INGOT);

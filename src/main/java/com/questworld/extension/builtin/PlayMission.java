@@ -20,7 +20,6 @@ import com.questworld.api.menu.MenuData;
 import com.questworld.api.menu.MissionButton;
 import com.questworld.util.ItemBuilder;
 import com.questworld.util.Text;
-import com.questworld.util.version.ObjectMap.VDMaterial;
 import com.questworld.util.version.ObjectMap.VDStatistic;
 
 public class PlayMission extends MissionType implements Listener, Ticking {
@@ -31,7 +30,7 @@ public class PlayMission extends MissionType implements Listener, Ticking {
 	private HashMap<UUID, HashMap<UUID, Long>> timeMap = new HashMap<>();
 
 	public PlayMission() {
-		super("PLAY_TIME", false, new ItemStack(VDMaterial.CLOCK));
+		super("PLAY_TIME", false, new ItemStack(Material.CLOCK));
 	}
 
 	@Override
@@ -77,7 +76,7 @@ public class PlayMission extends MissionType implements Listener, Ticking {
 	@Override
 	protected void layoutMenu(IMissionState changes) {
 		putButton(17, new MenuData(
-				new ItemBuilder(VDMaterial.CLOCK).wrapText(
+				new ItemBuilder(Material.CLOCK).wrapText(
 						"&7Time: &b" + Text.timeFromNum(changes.getAmount()),
 						"",
 						"&rLeft click: &e+1m",
