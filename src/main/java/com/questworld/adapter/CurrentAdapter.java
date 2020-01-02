@@ -15,7 +15,6 @@ import org.bukkit.inventory.meta.SkullMeta;
 import com.questworld.api.QuestWorld;
 import com.questworld.util.Version;
 import com.questworld.util.VersionAdapter;
-import com.questworld.util.json.JsonBlob;
 
 public class CurrentAdapter extends VersionAdapter {
 	public CurrentAdapter() {
@@ -68,8 +67,8 @@ public class CurrentAdapter extends VersionAdapter {
 
 	@Override
 	public void sendActionbar(Player player, String message) {
-		Bukkit.dispatchCommand(Bukkit.getConsoleSender(),
-				"minecraft:title " + player.getName() + " actionbar " + JsonBlob.fromLegacy(message).toString());
+		player.spigot().sendMessage(net.md_5.bungee.api.ChatMessageType.ACTION_BAR,
+				net.md_5.bungee.api.chat.TextComponent.fromLegacyText(message));
 	}
 	
 	@Override

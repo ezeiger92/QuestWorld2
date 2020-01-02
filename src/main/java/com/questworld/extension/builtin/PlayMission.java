@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.UUID;
 
 import org.bukkit.Material;
+import org.bukkit.Statistic;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -20,7 +21,6 @@ import com.questworld.api.menu.MenuData;
 import com.questworld.api.menu.MissionButton;
 import com.questworld.util.ItemBuilder;
 import com.questworld.util.Text;
-import com.questworld.util.version.ObjectMap.VDStatistic;
 
 public class PlayMission extends MissionType implements Listener, Ticking {
 	private static final int TOTAL = 0;
@@ -53,7 +53,7 @@ public class PlayMission extends MissionType implements Listener, Ticking {
 	@Override
 	public void onManual(Player player, MissionEntry result) {
 		if(result.getMission().getCustomInt() == TOTAL) {
-			result.setProgress(player.getStatistic(VDStatistic.PLAY_ONE_MINUTE) / 20 / 60);
+			result.setProgress(player.getStatistic(Statistic.PLAY_ONE_MINUTE) / 20 / 60);
 		}
 		else {
 			HashMap<UUID, Long> times = timeMap.get(player.getUniqueId());
