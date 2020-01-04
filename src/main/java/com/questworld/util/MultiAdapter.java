@@ -36,7 +36,7 @@ class MultiAdapter extends VersionAdapter {
 	}
 	
 	public MultiAdapter() {
-		super(Reflect.getVersion());
+		super(Reflect.specificVersion());
 	}
 
 	void addAdapter(VersionAdapter child) {

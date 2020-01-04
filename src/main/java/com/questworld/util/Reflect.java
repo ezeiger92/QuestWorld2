@@ -2,7 +2,6 @@ package com.questworld.util;
 
 import java.lang.reflect.Method;
 
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
@@ -11,26 +10,17 @@ public final class Reflect {
 	private Reflect() {
 	}
 
-	private static final Class<?> serverClass = Bukkit.getServer().getClass();
-	private static final String CBS = serverClass.getName().replaceFirst("[^.]+$", "");
+	private static final String CBS;
 	private static final String NMS;
 
 	private static final MultiAdapter adapter;
 	private static final Version version;
 
 	static {
-		String nms = null;
-
-		try {
-			nms = serverClass.getMethod("getServer").getReturnType().getName().replaceFirst("[^.]+$", "");
-		}
-		catch (RuntimeException e) {
-			throw e;
-		}
-		catch (Exception e) {
-		}
-		
-		String serialVersion = nms.substring(22, nms.length() - 1);
+		Version current = Version.current();
+		CBS = "org.bukkit.craftbukkit." + current + ".";
+		NMS = "net.minecraft.server." + current + ".";
+		String serialVersion = current.toString();
 		
 		if(isClass("net.techcable.tacospigot.TacoSpigotConfig")) {
 			serialVersion += "_TACO";
@@ -44,8 +34,6 @@ public final class Reflect {
 
 		version = Version.ofString(serialVersion);
 		adapter = new MultiAdapter();
-
-		NMS = nms;
 	}
 	
 	public static boolean isClass(String className) {
@@ -74,7 +62,7 @@ public final class Reflect {
 		return adapter;
 	}
 	
-	public static Version getVersion() {
+	public static Version specificVersion() {
 		return version;
 	}
 

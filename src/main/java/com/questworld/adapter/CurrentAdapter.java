@@ -18,7 +18,7 @@ import com.questworld.util.VersionAdapter;
 
 public class CurrentAdapter extends VersionAdapter {
 	public CurrentAdapter() {
-		super(Version.ofString("v1_13_r2"));
+		super(Version.current());
 	}
 
 	@Override
