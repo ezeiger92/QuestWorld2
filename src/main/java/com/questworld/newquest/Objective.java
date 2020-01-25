@@ -3,13 +3,13 @@ package com.questworld.newquest;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bukkit.NamespacedKey;
+import com.questworld.util.UniqueKey;
 
 public class Objective {
-	private NamespacedKey task;
+	private UniqueKey task;
 	private List<Rule> rules = new ArrayList<>();
 	
-	public Objective(NamespacedKey task) {
+	public Objective(UniqueKey task) {
 		this.task = task;
 	}
 	
