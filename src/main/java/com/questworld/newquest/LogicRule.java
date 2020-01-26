@@ -2,6 +2,10 @@ package com.questworld.newquest;
 
 import org.bukkit.event.Event;
 
+// Wrong, inner rules are dynamic so should be in an instance
+// Why did I put this in the "concrete" type?
+// Oh right because I was tired
+@Deprecated()
 public class LogicRule {
 	private LogicRule() {	
 	}
@@ -13,16 +17,6 @@ public class LogicRule {
 			super(MakeRuleKey("and"));
 			this.rules = rules;
 		}
-
-		@Override
-		public boolean test(Event event, Objective objective) {
-			for(Rule r : rules) {
-				if(!r.test(event, objective)) {
-					return false;
-				}
-			}
-			return true;
-		}
 	}
 	
 	public static class Or extends Rule {
@@ -32,16 +26,6 @@ public class LogicRule {
 			super(MakeRuleKey("or"));
 			this.rules = rules;
 		}
-
-		@Override
-		public boolean test(Event event, Objective objective) {
-			for(Rule r : rules) {
-				if(r.test(event, objective)) {
-					return true;
-				}
-			}
-			return false;
-		}
 	}
 	
 	public static class Not extends Rule {
@@ -50,11 +34,6 @@ public class LogicRule {
 		public Not(Rule rule) {
 			super(MakeRuleKey("not"));
 			this.rule = rule;
-		}
-
-		@Override
-		public boolean test(Event event, Objective objective) {
-			return !rule.test(event, objective);
 		}
 	}
 	
@@ -67,11 +46,6 @@ public class LogicRule {
 			this.rule1 = rule1;
 			this.rule2 = rule2;
 		}
-
-		@Override
-		public boolean test(Event event, Objective objective) {
-			return rule1.test(event, objective) ^ rule2.test(event, objective);
-		}
 	}
 	
 	public static class Iff extends Rule {
@@ -83,11 +57,6 @@ public class LogicRule {
 			this.rule1 = rule1;
 			this.rule2 = rule2;
 		}
-
-		@Override
-		public boolean test(Event event, Objective objective) {
-			return !(rule1.test(event, objective) ^ rule2.test(event, objective));
-		}
 	}
 	
 	public static class Implies extends Rule {
@@ -98,11 +67,6 @@ public class LogicRule {
 			super(MakeRuleKey("implies"));
 			this.rule1 = rule1;
 			this.rule2 = rule2;
-		}
-
-		@Override
-		public boolean test(Event event, Objective objective) {
-			return !rule1.test(event, objective) || rule2.test(event, objective);
 		}
 	}
 }
