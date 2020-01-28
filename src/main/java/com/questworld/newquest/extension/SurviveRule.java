@@ -15,22 +15,31 @@ public class SurviveRule extends Rule implements Listener {
 
 	@EventHandler
 	public void onPlayerDeath(PlayerDeathEvent event) {
-		
+		testConditions(event);
 	}
-	
-	private class SurviveCondition extends Condition {
 
-		public SurviveCondition() {
-			super(SurviveRule.this);
-		}
-
-		@Override
-		public boolean test(Event someEvent) {
-			PlayerDeathEvent event = (PlayerDeathEvent) someEvent;
-			
-			event.getEntity().getUniqueId(); // compare with players from some other argument
+	@Override
+	public boolean test(Event someEvent, Condition condition) {
+		PlayerDeathEvent event = (PlayerDeathEvent) someEvent;
+		SurviveCondition cond = (SurviveCondition) condition;
+		
+		if (event.getKeepInventory() && cond.ignoredIfKeepInv()) {
 			return true;
 		}
 		
+		event.getEntity().getUniqueId(); // compare with players from some other argument
+		//return true;
+		
+		return false;
+	}
+	
+	public class SurviveCondition extends Condition {
+		public SurviveCondition() {
+			super(SurviveRule.this);
+		}
+		
+		boolean ignoredIfKeepInv() {
+			return getProperty("keepinv-not-counted", o -> Boolean.parseBoolean(o.toString()));
+		}
 	}
 }

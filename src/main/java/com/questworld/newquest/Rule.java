@@ -1,7 +1,5 @@
 package com.questworld.newquest;
 
-import java.util.List;
-
 import org.bukkit.event.Event;
 
 import com.questworld.util.UniqueKey;
@@ -12,13 +10,19 @@ public abstract class Rule {
 	
 	// All live instances of rules, should not be stored here
 	// Only for mental model
-	private final List<Condition> allConditions = null;
+	private static final ConditionDB database = new ConditionDB();
 	
-	/*
-	 * onEvent(Event) {
-	 * allConditions.forEach(c.accept(Event) && RuleResultEvent.send())
-	 * }
-	 */
+	protected void testConditions(Event someEvent) {
+		for(Condition condition : database.getConditions(getClass())) {
+			test(someEvent, condition);
+		}
+	}
+	
+	public abstract boolean test(Event someEvent, Condition someCondition);
+	
+	protected void registerConditions(Condition... conditions) {
+		database.registerConditions(getClass(), conditions);
+	}
 	
 	protected Rule(UniqueKey ID) {
 		this.ID = ID;

@@ -10,7 +10,7 @@ public class LogicRule {
 	private LogicRule() {	
 	}
 	
-	public static class And extends Rule {
+	/*public static class And extends Rule {
 		private final Rule[] rules;
 		
 		public And(Rule... rules) {
@@ -68,5 +68,5 @@ public class LogicRule {
 			this.rule1 = rule1;
 			this.rule2 = rule2;
 		}
-	}
+	}*/
 }
