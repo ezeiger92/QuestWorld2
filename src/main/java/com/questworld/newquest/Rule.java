@@ -1,5 +1,6 @@
 package com.questworld.newquest;
 
+import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 
 import com.questworld.util.UniqueKey;
@@ -10,18 +11,19 @@ public abstract class Rule {
 	
 	// All live instances of rules, should not be stored here
 	// Only for mental model
-	private static final ConditionDB database = new ConditionDB();
+	private static final RuleConfigDB database = new RuleConfigDB();
 	
 	protected void testConditions(Event someEvent) {
-		for(Condition condition : database.getConditions(getClass())) {
-			test(someEvent, condition);
+		for(RuleConfig config : database.getConfigs(getClass())) {
+			// Need to get association of rule&config&player
+			test(someEvent, config, null);
 		}
 	}
 	
-	public abstract boolean test(Event someEvent, Condition someCondition);
+	public abstract boolean test(Event someEvent, RuleConfig config, Player player);
 	
-	protected void registerConditions(Condition... conditions) {
-		database.registerConditions(getClass(), conditions);
+	protected void registerConfigs(RuleConfig... configs) {
+		database.storeConfigs(getClass(), configs);
 	}
 	
 	protected Rule(UniqueKey ID) {

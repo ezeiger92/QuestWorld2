@@ -1,11 +1,12 @@
 package com.questworld.newquest.extension;
 
+import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 
-import com.questworld.newquest.Condition;
+import com.questworld.newquest.RuleConfig;
 import com.questworld.newquest.Rule;
 
 public class SurviveRule extends Rule implements Listener {
@@ -19,27 +20,30 @@ public class SurviveRule extends Rule implements Listener {
 	}
 
 	@Override
-	public boolean test(Event someEvent, Condition condition) {
+	public boolean test(Event someEvent, RuleConfig config, Player player) {
 		PlayerDeathEvent event = (PlayerDeathEvent) someEvent;
-		SurviveCondition cond = (SurviveCondition) condition;
+		Properties props = deserialize(config);
 		
-		if (event.getKeepInventory() && cond.ignoredIfKeepInv()) {
+		if (event.getKeepInventory() && props.keepInvCounted) {
 			return true;
 		}
 		
-		event.getEntity().getUniqueId(); // compare with players from some other argument
-		//return true;
+		if(player == event.getEntity()) {
+			return false;
+		}
 		
-		return false;
+		return true;
 	}
 	
-	public class SurviveCondition extends Condition {
-		public SurviveCondition() {
-			super(SurviveRule.this);
-		}
+	protected Properties deserialize(RuleConfig properties) {
+		Properties props = new Properties();
 		
-		boolean ignoredIfKeepInv() {
-			return getProperty("keepinv-not-counted", o -> Boolean.parseBoolean(o.toString()));
-		}
+		props.keepInvCounted = properties.getProperty("keepinv-not-counted", o -> Boolean.parseBoolean(o.toString()));
+		
+		return props;
+	}
+	
+	private static class Properties {
+		public boolean keepInvCounted = true;
 	}
 }

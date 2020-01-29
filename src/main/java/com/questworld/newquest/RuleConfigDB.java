@@ -8,28 +8,28 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ConditionDB {
-	private final Map<Class<? extends Rule>, List<Condition>> data;
+public class RuleConfigDB {
+	private final Map<Class<? extends Rule>, List<RuleConfig>> data;
 	
-	public ConditionDB() {
+	public RuleConfigDB() {
 		data = new HashMap<>();
 	}
 	
-	public Collection<Condition> getConditions(Class<? extends Rule> forRule) {
+	public Collection<RuleConfig> getConfigs(Class<? extends Rule> forRule) {
 		return Collections.unmodifiableList(data.getOrDefault(forRule, Collections.emptyList()));
 	}
 	
-	public void registerConditions(Class<? extends Rule> forRule, Condition... conditions) {
-		List<Condition> existing = data.get(forRule);
+	public void storeConfigs(Class<? extends Rule> forRule, RuleConfig... configs) {
+		List<RuleConfig> existing = data.get(forRule);
 		
 		if(existing == null) {
 			data.put(forRule, existing = new ArrayList<>());
 		}
 
-		existing.addAll(Arrays.asList(conditions));
+		existing.addAll(Arrays.asList(configs));
 	}
 	
-	public void clearConditions(Class<? extends Rule> forRule) {
+	public void clearConfigs(Class<? extends Rule> forRule) {
 		data.remove(forRule);
 	}
 }
