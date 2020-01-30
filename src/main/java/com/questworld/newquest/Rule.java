@@ -1,6 +1,5 @@
 package com.questworld.newquest;
 
-import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 
 import com.questworld.util.UniqueKey;
@@ -14,15 +13,15 @@ public abstract class Rule {
 	private static final RuleConfigDB database = new RuleConfigDB();
 	
 	protected void testConditions(Event someEvent) {
-		for(RuleConfig config : database.getConfigs(getClass())) {
+		for(NodeConfig config : database.getConfigs(getClass())) {
 			// Need to get association of rule&config&player
-			test(someEvent, config, null);
+			test(someEvent, config, new Profile());
 		}
 	}
 	
-	public abstract boolean test(Event someEvent, RuleConfig config, Player player);
+	public abstract boolean test(Event someEvent, NodeConfig config, Profile profile);
 	
-	protected void registerConfigs(RuleConfig... configs) {
+	protected void registerConfigs(NodeConfig... configs) {
 		database.storeConfigs(getClass(), configs);
 	}
 	

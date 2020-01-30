@@ -4,12 +4,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-public final class RuleConfig {
-	private final Rule rule;
+public final class NodeConfig {
 	private final Map<String, Object> properties;
 	
-	protected RuleConfig(Rule rule) {
-		this.rule = rule;
+	protected NodeConfig() {
 		properties = new HashMap<>();
 	}
 	
@@ -19,5 +17,13 @@ public final class RuleConfig {
 	
 	public final Object getProperty(String key) {
 		return properties.get(key);
+	}
+	
+	// Grab fancy serialization from ChromaLib
+	public final <T> T deserialize(Class<T> clazz) {
+		return null;
+	}
+	
+	public final <T> void serialize(T instance) {
 	}
 }

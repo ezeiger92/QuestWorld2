@@ -9,18 +9,18 @@ import java.util.List;
 import java.util.Map;
 
 public class RuleConfigDB {
-	private final Map<Class<? extends Rule>, List<RuleConfig>> data;
+	private final Map<Class<? extends Rule>, List<NodeConfig>> data;
 	
 	public RuleConfigDB() {
 		data = new HashMap<>();
 	}
 	
-	public Collection<RuleConfig> getConfigs(Class<? extends Rule> forRule) {
+	public Collection<NodeConfig> getConfigs(Class<? extends Rule> forRule) {
 		return Collections.unmodifiableList(data.getOrDefault(forRule, Collections.emptyList()));
 	}
 	
-	public void storeConfigs(Class<? extends Rule> forRule, RuleConfig... configs) {
-		List<RuleConfig> existing = data.get(forRule);
+	public void storeConfigs(Class<? extends Rule> forRule, NodeConfig... configs) {
+		List<NodeConfig> existing = data.get(forRule);
 		
 		if(existing == null) {
 			data.put(forRule, existing = new ArrayList<>());
