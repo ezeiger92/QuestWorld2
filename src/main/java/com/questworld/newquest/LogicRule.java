@@ -1,25 +1,43 @@
 package com.questworld.newquest;
 
+import java.util.List;
+
 import org.bukkit.event.Event;
 
-// Wrong, inner rules are dynamic so should be in an instance
-// Why did I put this in the "concrete" type?
-// Oh right because I was tired
-@Deprecated()
+import com.questworld.newquest.event.RuleResultEvent;
+
 public class LogicRule {
 	private LogicRule() {	
 	}
 	
-	/*public static class And extends Rule {
-		private final Rule[] rules;
-		
-		public And(Rule... rules) {
+	public static class And extends Rule {
+		public And() {
 			super(MakeRuleKey("and"));
-			this.rules = rules;
+		}
+
+		@Override
+		public boolean test(Event someEvent, NodeConfig config, Profile profile) {
+			RuleResultEvent event = (RuleResultEvent) someEvent;
+			RuleList list = config.deserialize(RuleList.class);
+			
+			for(int i : list.instanceIds) {
+				if(i == event.getInstanceId() && !event.getResult().isAllowed()) {
+					return false;
+				}
+			}
+			
+			return true;
 		}
 	}
 	
-	public static class Or extends Rule {
+	// Not a good instance holder
+	public static class RuleList {
+		public List<Integer> instanceIds;
+	}
+	
+	
+	
+	/*public static class Or extends Rule {
 		private final Rule[] rules;
 		
 		public Or(Rule... rules) {

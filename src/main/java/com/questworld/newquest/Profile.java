@@ -11,4 +11,11 @@ public class Profile {
 	public UUID getUniqueId() {
 		return guid;
 	}
+	
+	public void storeData(String key, String value) {
+	}
+	
+	public String getData(String key) {
+		return null;
+	}
 }

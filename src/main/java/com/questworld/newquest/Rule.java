@@ -43,10 +43,19 @@ public abstract class Rule {
 	}
 	
 	public enum Result {
-		ALLOWED,
-		DENIED,
-		OBJECTIVE_FAILURE,
-		QUSET_SUCCESS,
-		QUEST_FAILURE,
+		OBJECTIVE_SUCCESS(true),
+		OBJECTIVE_FAILURE(false),
+		QUEST_SUCCESS(true),
+		QUEST_FAILURE(false),
+		;
+		private boolean positive;
+		
+		Result(boolean positive) {
+			this.positive = positive;
+		}
+		
+		public boolean isAllowed() {
+			return positive;
+		}
 	}
 }
