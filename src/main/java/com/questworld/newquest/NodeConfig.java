@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-public final class NodeConfig {
+public final class NodeConfig<B> {
 	private final Map<String, Object> properties;
 	
 	protected NodeConfig() {
@@ -20,10 +20,10 @@ public final class NodeConfig {
 	}
 	
 	// Grab fancy serialization from ChromaLib
-	public final <T> T deserialize(Class<T> clazz) {
+	public final <T extends B> T deserialize(Class<T> clazz) {
 		return null;
 	}
 	
-	public final <T> void serialize(T instance) {
+	public final <T extends B> void serialize(T instance) {
 	}
 }

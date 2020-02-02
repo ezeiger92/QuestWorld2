@@ -3,16 +3,16 @@ package com.questworld.newquest.event;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
-import com.questworld.newquest.Rule;
+import com.questworld.newquest.Condition;
 
-public class RuleResultEvent extends Event {
+public class ConditionCheckEvent extends Event {
 	
-	public Rule getRule() {
+	public Condition getRule() {
 		return null;
 	}
 	
-	public Rule.Result getResult() {
-		return null;
+	public boolean getResult() {
+		return false;
 	}
 	
 	public int getInstanceId() {

@@ -7,7 +7,7 @@ import com.questworld.util.UniqueKey;
 
 public class Objective {
 	private UniqueKey task;
-	private List<Rule> rules = new ArrayList<>();
+	private List<Condition> rules = new ArrayList<>();
 	
 	public Objective(UniqueKey task) {
 		this.task = task;

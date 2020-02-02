@@ -10,7 +10,7 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 
 import com.questworld.newquest.NodeConfig;
 import com.questworld.newquest.Profile;
-import com.questworld.newquest.Rule;
+import com.questworld.newquest.Condition;
 
 /**
  * Prototype for how rules will work
@@ -21,9 +21,9 @@ import com.questworld.newquest.Rule;
  * @author Erik
  *
  */
-public class SurviveRule extends Rule implements Listener {
-	public SurviveRule() {
-		super(MakeRuleKey("survive"));
+public class SurviveCondition extends Condition implements Listener {
+	public SurviveCondition() {
+		super(ConditionKey("survive"));
 	}
 
 	@EventHandler
@@ -32,7 +32,7 @@ public class SurviveRule extends Rule implements Listener {
 	}
 
 	@Override
-	public boolean test(Event someEvent, NodeConfig config, Profile profile) {
+	public boolean test(Event someEvent, NodeConfig<Condition.Properties> config, Profile profile) {
 		PlayerDeathEvent event = (PlayerDeathEvent) someEvent;
 		Properties props = config.deserialize(Properties.class);
 		
@@ -51,7 +51,7 @@ public class SurviveRule extends Rule implements Listener {
 		return true;
 	}
 	
-	private static class Properties {
+	private static class Properties extends Condition.Properties {
 		public boolean keep_inv_counted = true;
 		public List<String> ignored_worlds = Arrays.asList("minigames");
 	}
