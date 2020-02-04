@@ -24,6 +24,11 @@ public class LogicConditions {
 		public int instanceId;
 	}
 	
+	public static class CondCount extends Condition.Properties {
+		public int instanceId;
+		public int count;
+	}
+	
 	public static class And extends Condition {
 		public And() {
 			super(ConditionKey("and"));
@@ -163,5 +168,60 @@ public class LogicConditions {
 			
 			return true;
 		}
+	}
+	
+	public static class Repeat extends Condition {
+		public Repeat() {
+			super(ConditionKey("repeat"));
+		}
+
+		@Override
+		public boolean test(Event someEvent, NodeConfig<Properties> config, Profile profile) {
+			ConditionCheckEvent event = (ConditionCheckEvent) someEvent;
+			CondCount condition = config.deserialize(CondCount.class);
+			
+			if(event.getInstanceId() != condition.instanceId) {
+				return false; // n/a
+			}
+			
+			int count = Integer.parseInt(profile.getData("count." + condition.instanceId));
+			
+			if(count >= condition.count) {
+				profile.storeData("count." + condition.instanceId, String.valueOf(count));
+				return true;
+			}
+			
+			profile.storeData("count." + condition.instanceId, String.valueOf(count + 1));
+			return false;
+		}
+		
+	}
+	
+	public static class Retry extends Condition {
+		public Retry() {
+			super(ConditionKey("retry"));
+		}
+
+		@Override
+		public boolean test(Event someEvent, NodeConfig<Properties> config, Profile profile) {
+
+			ConditionCheckEvent event = (ConditionCheckEvent) someEvent;
+			CondCount condition = config.deserialize(CondCount.class);
+			
+			if(event.getInstanceId() != condition.instanceId) {
+				return false; // n/a
+			}
+			
+			int count = Integer.parseInt(profile.getData("count." + condition.instanceId));
+			
+			if(count >= condition.count) {
+				profile.storeData("count." + condition.instanceId, String.valueOf(count));
+				return false;
+			}
+			
+			profile.storeData("count." + condition.instanceId, String.valueOf(count + 1));
+			return true;
+		}
+		
 	}
 }
