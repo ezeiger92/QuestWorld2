@@ -9,7 +9,7 @@ public abstract class Reward {
 	
 	private static final ConfigDB<Reward, Properties> database = new ConfigDB<>();
 	
-	public abstract boolean apply(NodeConfig<Properties> properties, Profile profile);
+	public abstract boolean apply(NodeConfig<Properties> config, Profile profile);
 	
 	protected Reward(UniqueKey ID) {
 		this.ID = ID;
