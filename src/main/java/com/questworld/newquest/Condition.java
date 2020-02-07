@@ -14,8 +14,13 @@ public abstract class Condition {
 	
 	protected void testConditions(Event someEvent) {
 		for(NodeConfig<Properties> config : database.getConfigs(getClass())) {
-			// Need to get association of rule&config&player
-			test(someEvent, config, new Profile());
+			Profile profile = new Profile();
+			
+			Properties props = config.deserialize(Properties.class);
+			
+			if(profile.isTracking(props.id)) {
+				test(someEvent, config, profile);
+			}
 		}
 	}
 	

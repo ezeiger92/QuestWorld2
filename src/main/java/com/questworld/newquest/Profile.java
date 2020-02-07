@@ -16,6 +16,10 @@ public class Profile {
 	}
 	
 	public String getData(String key) {
-		return null;
+		return "";
+	}
+	
+	public boolean isTracking(int conditionId) {
+		return true;
 	}
 }
