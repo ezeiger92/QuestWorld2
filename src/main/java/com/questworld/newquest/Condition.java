@@ -10,13 +10,13 @@ public abstract class Condition {
 	
 	// All live instances of rules, should not be stored here
 	// Only for mental model
-	private static final ConfigDB<Condition, Properties> database = new ConfigDB<>();
+	private static final ConfigDB<Condition, BaseProperties> database = new ConfigDB<>();
 	
 	protected void testConditions(Event someEvent) {
-		for(NodeConfig<Properties> config : database.getConfigs(getClass())) {
+		for(NodeConfig<BaseProperties> config : database.getConfigs(getClass())) {
 			Profile profile = new Profile();
 			
-			Properties props = config.deserialize(Properties.class);
+			BaseProperties props = config.deserialize(BaseProperties.class);
 			
 			if(profile.isTracking(props.id)) {
 				test(someEvent, config, profile);
@@ -24,7 +24,7 @@ public abstract class Condition {
 		}
 	}
 	
-	public abstract boolean test(Event someEvent, NodeConfig<Properties> config, Profile profile);
+	public abstract boolean test(Event someEvent, NodeConfig<BaseProperties> config, Profile profile);
 	
 	protected Condition(UniqueKey ID) {
 		this.ID = ID;
@@ -43,7 +43,7 @@ public abstract class Condition {
 		return ID.toString();
 	}
 	
-	public static class Properties {
+	public static class BaseProperties {
 		public int id;
 		
 	}

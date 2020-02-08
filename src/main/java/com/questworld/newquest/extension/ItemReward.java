@@ -15,7 +15,7 @@ public class ItemReward extends Reward {
 	}
 
 	@Override
-	public boolean apply(NodeConfig<Reward.Properties> config, Profile profile) {
+	public boolean apply(NodeConfig<BaseProperties> config, Profile profile) {
 		Properties props = config.deserialize(Properties.class);
 		
 		Player player = Bukkit.getPlayer(profile.getUniqueId());
@@ -24,13 +24,14 @@ public class ItemReward extends Reward {
 			return false;
 		}
 		
+		// Need overflow handle
 		player.getInventory().addItem(props.item.clone());
 		
 		return true;
 	}
 
 	
-	private static class Properties extends Reward.Properties {
+	private static class Properties extends BaseProperties {
 		public ItemStack item = new ItemStack(Material.GOLD_NUGGET);
 	}
 }

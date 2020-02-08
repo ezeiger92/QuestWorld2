@@ -7,9 +7,9 @@ public abstract class Reward {
 	private static final String NAMESPACE = "questworld-reward";
 	private final UniqueKey ID;
 	
-	private static final ConfigDB<Reward, Properties> database = new ConfigDB<>();
+	private static final ConfigDB<Reward, BaseProperties> database = new ConfigDB<>();
 	
-	public abstract boolean apply(NodeConfig<Properties> config, Profile profile);
+	public abstract boolean apply(NodeConfig<BaseProperties> config, Profile profile);
 	
 	protected Reward(UniqueKey ID) {
 		this.ID = ID;
@@ -28,7 +28,7 @@ public abstract class Reward {
 		return ID.toString();
 	}
 	
-	public static class Properties {
+	public static class BaseProperties {
 		public int id;
 		
 	}

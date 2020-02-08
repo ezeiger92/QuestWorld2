@@ -11,20 +11,20 @@ public class LogicConditions {
 	}
 	
 	// Not a good instance holder
-	public static class CondList extends Condition.Properties {
+	public static class CondList extends Condition.BaseProperties {
 		public List<Integer> instanceIds;
 	}
 	
-	public static class CondPair extends Condition.Properties {
+	public static class CondPair extends Condition.BaseProperties {
 		public int leftId;
 		public int rightId;
 	}
 	
-	public static class CondRef extends Condition.Properties {
+	public static class CondRef extends Condition.BaseProperties {
 		public int instanceId;
 	}
 	
-	public static class CondCount extends Condition.Properties {
+	public static class CondCount extends Condition.BaseProperties {
 		public int instanceId;
 		public int count;
 	}
@@ -35,7 +35,7 @@ public class LogicConditions {
 		}
 
 		@Override
-		public boolean test(Event someEvent, NodeConfig<Condition.Properties> config, Profile profile) {
+		public boolean test(Event someEvent, NodeConfig<BaseProperties> config, Profile profile) {
 			ConditionCheckEvent event = (ConditionCheckEvent) someEvent;
 			CondList list = config.deserialize(CondList.class);
 			
@@ -55,7 +55,7 @@ public class LogicConditions {
 		}
 
 		@Override
-		public boolean test(Event someEvent, NodeConfig<Condition.Properties> config, Profile profile) {
+		public boolean test(Event someEvent, NodeConfig<BaseProperties> config, Profile profile) {
 			ConditionCheckEvent event = (ConditionCheckEvent) someEvent;
 			CondList list = config.deserialize(CondList.class);
 			
@@ -75,7 +75,7 @@ public class LogicConditions {
 		}
 
 		@Override
-		public boolean test(Event someEvent, NodeConfig<Condition.Properties> config, Profile profile) {
+		public boolean test(Event someEvent, NodeConfig<BaseProperties> config, Profile profile) {
 			ConditionCheckEvent event = (ConditionCheckEvent) someEvent;
 			CondRef other = config.deserialize(CondRef.class);
 			
@@ -93,7 +93,7 @@ public class LogicConditions {
 		}
 
 		@Override
-		public boolean test(Event someEvent, NodeConfig<Condition.Properties> config, Profile profile) {
+		public boolean test(Event someEvent, NodeConfig<BaseProperties> config, Profile profile) {
 			ConditionCheckEvent event = (ConditionCheckEvent) someEvent;
 			CondPair rules = config.deserialize(CondPair.class);
 			
@@ -120,7 +120,7 @@ public class LogicConditions {
 		}
 
 		@Override
-		public boolean test(Event someEvent, NodeConfig<Condition.Properties> config, Profile profile) {
+		public boolean test(Event someEvent, NodeConfig<BaseProperties> config, Profile profile) {
 			ConditionCheckEvent event = (ConditionCheckEvent) someEvent;
 			CondPair rules = config.deserialize(CondPair.class);
 			
@@ -145,7 +145,7 @@ public class LogicConditions {
 		}
 
 		@Override
-		public boolean test(Event someEvent, NodeConfig<Condition.Properties> config, Profile profile) {
+		public boolean test(Event someEvent, NodeConfig<BaseProperties> config, Profile profile) {
 			ConditionCheckEvent event = (ConditionCheckEvent) someEvent;
 			CondPair rules = config.deserialize(CondPair.class);
 			
@@ -176,7 +176,7 @@ public class LogicConditions {
 		}
 
 		@Override
-		public boolean test(Event someEvent, NodeConfig<Properties> config, Profile profile) {
+		public boolean test(Event someEvent, NodeConfig<BaseProperties> config, Profile profile) {
 			ConditionCheckEvent event = (ConditionCheckEvent) someEvent;
 			CondCount condition = config.deserialize(CondCount.class);
 			
@@ -203,7 +203,7 @@ public class LogicConditions {
 		}
 
 		@Override
-		public boolean test(Event someEvent, NodeConfig<Properties> config, Profile profile) {
+		public boolean test(Event someEvent, NodeConfig<BaseProperties> config, Profile profile) {
 
 			ConditionCheckEvent event = (ConditionCheckEvent) someEvent;
 			CondCount condition = config.deserialize(CondCount.class);

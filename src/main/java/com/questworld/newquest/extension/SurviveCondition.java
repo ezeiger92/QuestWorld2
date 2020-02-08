@@ -32,7 +32,7 @@ public class SurviveCondition extends Condition implements Listener {
 	}
 
 	@Override
-	public boolean test(Event someEvent, NodeConfig<Condition.Properties> config, Profile profile) {
+	public boolean test(Event someEvent, NodeConfig<BaseProperties> config, Profile profile) {
 		PlayerDeathEvent event = (PlayerDeathEvent) someEvent;
 		Properties props = config.deserialize(Properties.class);
 		
@@ -51,7 +51,7 @@ public class SurviveCondition extends Condition implements Listener {
 		return true;
 	}
 	
-	private static class Properties extends Condition.Properties {
+	private static class Properties extends BaseProperties {
 		public boolean keep_inv_counted = true;
 		public List<String> ignored_worlds = Arrays.asList("minigames");
 	}
