@@ -75,6 +75,7 @@ public enum Translation implements Translator {
 
 	PARTY_LEADER_INVITED("party.leader.invite-sent", "name"),
 	PARTY_LEADER_PICKNAME("party.leader.pick-player"),
+	PARTY_LEADER_PICKCANCEL("party.leader.pick-cancel"),
 
 	PARTY_PLAYER_ABANDON("party.player.abandon", "leader"),
 	PARTY_PLAYER_INVITED("party.player.invited", "leader"),

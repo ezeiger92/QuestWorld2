@@ -6,6 +6,7 @@ import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.questworld.api.QuestWorld;
+import com.questworld.api.contract.IMission;
 import com.questworld.api.contract.QuestingAPI;
 import com.questworld.command.ClickCommand;
 import com.questworld.command.EditorCommand;
@@ -78,7 +79,14 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener {
 			getServer().getScheduler().cancelTask(questCheckHandle);
 
 		questCheckHandle = getServer().getScheduler().scheduleSyncRepeatingTask(this, () -> {
+			for (IMission mission : api.getViewer().getTickingMissions()) {
+				for (Player p : getServer().getOnlinePlayers()) {
+					api.getPlayerStatus(p).tick(mission);
+				}
+			}
+			
 			for (Player p : getServer().getOnlinePlayers())
+				
 				api.getPlayerStatus(p).update(true);
 		}, 0L, getConfig().getInt("options.quest-check-delay"));
 

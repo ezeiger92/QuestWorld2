@@ -35,16 +35,27 @@ public class PlayerStatus implements IPlayerStatus {
 		return (PlayerStatus) QuestWorld.getAPI().getPlayerStatus(player);
 	}
 
+	@Deprecated
 	private static PlayerStatus of(UUID uuid) {
 		return (PlayerStatus) QuestWorld.getAPI().getPlayerStatus(uuid);
 	}
-
+	
+	@Deprecated
 	private final UUID playerUUID;
+	private final OfflinePlayer player;
 	private final ProgressTracker tracker;
 
+	@Deprecated
 	public PlayerStatus(UUID uuid) {
 		this.playerUUID = uuid;
+		this.player = null;
 		tracker = new ProgressTracker(uuid);
+	}
+
+	public PlayerStatus(OfflinePlayer player) {
+		this.player = player;
+		this.playerUUID = player.getUniqueId();
+		tracker = new ProgressTracker(playerUUID);
 	}
 
 	@Override
@@ -163,6 +174,11 @@ public class PlayerStatus implements IPlayerStatus {
 	public void update() {
 		update(false);
 	}
+	
+	public void tick(IMission mission) {if (isMissionActive(mission))
+		if (isMissionActive(mission) && player.isOnline())
+			((Ticking) mission.getType()).onTick((Player)player, new MissionSet.Result(mission, this));
+	}
 
 	public void update(boolean quest_check) {
 		Player p = asOnline(playerUUID);
@@ -175,7 +191,7 @@ public class PlayerStatus implements IPlayerStatus {
 		for (ICategory category : QuestWorld.getFacade().getCategories()) {
 			for (IQuest quest : category.getQuests()) {
 				if (quest.isEnabled() && getStatus(quest).equals(QuestStatus.AVAILABLE)) {
-					boolean finished = quest.getMissions().size() != 0;
+					boolean finished = !quest.getMissions().isEmpty();
 					for (IMission task : quest.getMissions()) {
 						updateTimeframe(task, 0);
 						if (!hasCompletedTask(task))

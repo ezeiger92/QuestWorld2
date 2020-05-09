@@ -294,7 +294,7 @@ public class QuestBook {
 												PlayerTools.makeTranslation(true, Translation.PARTY_LEADER_PICKNAME),
 												(c, s) -> {
 													if (s.equals("cancel()")) {
-														// TODO Translation for cancel && add cancel to PICKNAME
+														PlayerTools.sendTranslation(p2, true, Translation.PARTY_LEADER_PICKCANCEL);
 														openPartyMenu(p);
 														return true;
 													}
