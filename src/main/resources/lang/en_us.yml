@@ -85,7 +85,8 @@ party:
     kick:    '&e%name% &7has been kicked from the Party'
   leader:
     invite-sent: '&7Successfully invited &e%name% &7to your Party'
-    pick-player: '&7Please type in the Name of the Player you want to invite'
+    pick-player: '&7Please type in the Name of the Player you want to invite, or cancel() to cancel'
+    pick-cancel: '&7Invite cancelled'
   player:
     abandon: '&7You have left &e%leader%''s &7Party'
     invited: '&e%leader% &7has invited you to join their Party'

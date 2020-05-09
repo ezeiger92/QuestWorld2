@@ -116,10 +116,10 @@ public class Party implements IPartyState {
 	public void playerJoin(Player p) {
 		for (OfflinePlayer member : getFullGroup())
 			if (member.isOnline())
-				PlayerTools.sendTranslation((Player) member, true, Translation.PARTY_PLAYER_JOINED, p.getName());
+				PlayerTools.sendTranslation((Player) member, true, Translation.PARTY_GROUP_JOIN, p.getName());
 
 		members.add(p.getUniqueId());
-		PlayerTools.sendTranslation(p, true, Translation.PARTY_GROUP_JOIN, p.getName(),
+		PlayerTools.sendTranslation(p, true, Translation.PARTY_PLAYER_JOINED, p.getName(),
 				Bukkit.getOfflinePlayer(leader).getName());
 		QuestWorldPlugin.getAPI().getPlayerStatus(p).getTracker().setPartyLeader(leader);
 		pending.remove(p.getUniqueId());
