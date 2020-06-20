@@ -1,6 +1,5 @@
 package com.questworld.extension.builtin;
 
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -21,7 +20,7 @@ import com.questworld.util.Text;
 
 public class CraftMission extends MissionType implements Listener, Decaying {
 	public CraftMission() {
-		super("CRAFT", true, new ItemStack(Material.CRAFTING_TABLE));
+		super("CRAFT", true);
 	}
 
 	@Override
@@ -55,7 +54,7 @@ public class CraftMission extends MissionType implements Listener, Decaying {
 				ItemStack cursor = e.getCursor();
 				// Apparently, rather than null, an empty cursor is AIR. I don't think that's
 				// intended.
-				if (cursor != null && cursor.getType() != Material.AIR)
+				if (!ItemBuilder.isAir(cursor))
 					recipeAmount = 0;
 				break;
 

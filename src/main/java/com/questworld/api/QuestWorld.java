@@ -14,6 +14,7 @@ import com.questworld.api.contract.IParty;
 import com.questworld.api.contract.IPlayerStatus;
 import com.questworld.api.contract.MissionEntry;
 import com.questworld.api.contract.QuestingAPI;
+import com.questworld.api.menu.Icons;
 import com.questworld.util.Lang;
 import com.questworld.util.Sounds;
 
@@ -134,5 +135,9 @@ public final class QuestWorld {
 
 	public static QuestingAPI getAPI() {
 		return api;
+	}
+	
+	public static Icons getIcons() {
+		return api.getIcons();
 	}
 }

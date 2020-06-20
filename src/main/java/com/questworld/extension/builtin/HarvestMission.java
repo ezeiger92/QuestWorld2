@@ -18,6 +18,7 @@ import com.questworld.api.contract.IMissionState;
 import com.questworld.api.contract.MissionEntry;
 import com.questworld.api.menu.MissionButton;
 import com.questworld.util.ItemBuilder;
+import com.questworld.util.PlayerTools;
 import com.questworld.util.Text;
 
 public class HarvestMission extends MissionType {
@@ -25,14 +26,14 @@ public class HarvestMission extends MissionType {
 	private final EnumMap<Material, Material> crops = new EnumMap<>(Material.class);
 	
 	public HarvestMission() {
-		super("HARVEST", true, new ItemStack(Material.WHEAT));
-		addCrop(Material.WHEAT, Material.WHEAT_SEEDS);
-		addCrop(Material.BEETROOT, Material.BEETROOT_SEEDS, Material.BEETROOTS);
-		addCrop(Material.POTATO, Material.POTATOES);
-		addCrop(Material.CARROT, Material.CARROTS);
-		addCrop(Material.NETHER_WART);
-		addCrop(Material.COCOA_BEANS, Material.COCOA);
-		addCrop(Material.SWEET_BERRIES, Material.SWEET_BERRY_BUSH);
+		super("HARVEST", true);
+		addCrop("WHEAT", "WHEAT_SEEDS");
+		addCrop("BEETROOT", "BEETROOT_SEEDS", "BEETROOTS");
+		addCrop("POTATO", "POTATOES");
+		addCrop("CARROT", "CARROTS");
+		addCrop("NETHER_WART");
+		addCrop("COCOA_BEANS", "COCOA");
+		addCrop("SWEET_BERRIES", "SWEET_BERRY_BUSH");
 	}
 
 	@Override
@@ -40,16 +41,26 @@ public class HarvestMission extends MissionType {
 		return "&7Harvest " + instance.getAmount() + "x " + Text.niceName(userDisplayItem(instance).getType().name());
 	}
 	
-	public void addCrop(Material crop, Iterable<Material> aliases) {
-		for(Material m : aliases) {
-			crops.put(m, crop);
+	public void addCrop(String cropName, Iterable<String> aliases) {
+		Material crop = Material.getMaterial(cropName);
+		
+		if (crop == null) {
+			return;
+		}
+		
+		for(String aliasName : aliases) {
+			Material m = Material.getMaterial(aliasName);
+			
+			if (m != null) {
+				crops.put(m, crop);
+			}
 		}
 		
 		crops.put(crop, crop);
 	}
 	
-	public void addCrop(Material crop, Material... aliases) {
-		addCrop(crop, Arrays.asList(aliases));
+	public void addCrop(String cropName, String... aliases) {
+		addCrop(cropName, Arrays.asList(aliases));
 	}
 	
 	public void clearCrops() {
@@ -103,7 +114,7 @@ public class HarvestMission extends MissionType {
 						"",
 						"&e> Click to change the Crop to the Item you are currently holding").get(),
 				event -> {
-					ItemStack hand = event.getWhoClicked().getInventory().getItemInMainHand();
+					ItemStack hand = PlayerTools.getMainHandItem(event.getWhoClicked());
 					if(hand == null)
 						return;
 					

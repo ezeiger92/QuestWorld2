@@ -120,7 +120,7 @@ public class ResourceLoader {
 		return result;
 	}
 
-	public YamlConfiguration loadConfigNoexpect(String resource, boolean printException) {
+	public YamlConfiguration loadConfigNoexcept(String resource, boolean printException) {
 		try {
 			return loadConfig(resource);
 		}

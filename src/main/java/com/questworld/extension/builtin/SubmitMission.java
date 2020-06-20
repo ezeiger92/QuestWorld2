@@ -1,6 +1,5 @@
 package com.questworld.extension.builtin;
 
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -16,7 +15,7 @@ import com.questworld.util.Text;
 
 public class SubmitMission extends MissionType implements Manual {
 	public SubmitMission() {
-		super("SUBMIT", false, new ItemStack(Material.CHEST));
+		super("SUBMIT", false);
 	}
 
 	@Override

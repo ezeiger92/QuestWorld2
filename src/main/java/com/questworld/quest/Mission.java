@@ -10,7 +10,6 @@ import java.util.Map;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
 
@@ -19,6 +18,7 @@ import com.questworld.api.QuestWorld;
 import com.questworld.api.contract.IMissionState;
 import com.questworld.manager.ProgressTracker;
 import com.questworld.util.EntityTools;
+import com.questworld.util.ItemBuilder;
 import com.questworld.util.Log;
 import com.questworld.util.Text;
 
@@ -32,7 +32,7 @@ class Mission extends UniqueObject implements IMissionState {
 	private List<String> dialogue = new ArrayList<>();
 	private String displayName = "";
 	private EntityType entity = EntityType.PLAYER;
-	private ItemStack item = new ItemStack(Material.STONE);
+	private ItemStack item = ItemBuilder.sanitizeClone(QuestWorld.getIcons().default_mission_item);
 	private int index = -1;
 	private Location location = Bukkit.getWorlds().get(0).getSpawnLocation();
 	private boolean spawnerSupport = true;
@@ -324,7 +324,7 @@ class Mission extends UniqueObject implements IMissionState {
 		type = QuestWorld.getMissionType((String) data.getOrDefault("type", type.toString()));
 		ItemStack i2 = (ItemStack) data.getOrDefault("item", item);
 
-		if (i2.getType() != Material.AIR)
+		if (!ItemBuilder.isAir(i2))
 			item = i2;
 
 		amount = (Integer) data.getOrDefault("amount", amount);

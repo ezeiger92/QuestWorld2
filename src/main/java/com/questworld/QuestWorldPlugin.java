@@ -59,9 +59,7 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener {
 		spawnListener = new SpawnerListener(this);
 		new ClickCommand(this);
 
-		GuideBook guide = GuideBook.instance();
-		if (guide.recipe() != null)
-			getServer().addRecipe(guide.recipe());
+		GuideBook.instance();
 		
 		try {
 			Reflect.serverAddChannel(this, Constants.CH_BOOK);
@@ -75,19 +73,24 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener {
 	public void loadConfigs() {
 		reloadConfig();
 
-		if (questCheckHandle != -1)
+		if (questCheckHandle != -1) {
 			getServer().getScheduler().cancelTask(questCheckHandle);
+		}
 
 		questCheckHandle = getServer().getScheduler().scheduleSyncRepeatingTask(this, () -> {
+			for (Player p : getServer().getOnlinePlayers()) {
+				api.getPlayerStatus(p).update();
+			}
+			
 			for (IMission mission : api.getViewer().getTickingMissions()) {
+				if(MenuListener.isDisabled(mission) || MenuListener.isDisabled(mission.getQuest())) {
+					continue;
+				}
+				
 				for (Player p : getServer().getOnlinePlayers()) {
 					api.getPlayerStatus(p).tick(mission);
 				}
 			}
-			
-			for (Player p : getServer().getOnlinePlayers())
-				
-				api.getPlayerStatus(p).update(true);
 		}, 0L, getConfig().getInt("options.quest-check-delay"));
 
 		int autosave = getConfig().getInt("options.autosave-interval") * 20 * 60; // minutes to ticks
@@ -97,9 +100,10 @@ public class QuestWorldPlugin extends JavaPlugin implements Listener {
 			autosaveHandle = -1;
 		}
 
-		if (autosave > 0)
-			autosaveHandle = getServer().getScheduler().scheduleSyncRepeatingTask(this, api::onSave, autosave,
-					autosave);
+		if (autosave > 0) {
+			autosaveHandle = getServer().getScheduler()
+					.scheduleSyncRepeatingTask(this, api::onSave, autosave, autosave);
+		}
 	}
 
 	@Override

@@ -10,12 +10,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.bukkit.Material;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 
+import com.questworld.api.QuestWorld;
 import com.questworld.api.contract.ICategoryState;
 import com.questworld.api.contract.IQuest;
+import com.questworld.util.ItemBuilder;
 import com.questworld.util.Text;
 
 class Category extends UniqueObject implements ICategoryState {
@@ -24,7 +25,7 @@ class Category extends UniqueObject implements ICategoryState {
 
 	private boolean hidden = false;
 	private int id = -1;
-	private ItemStack item = new ItemStack(Material.WRITABLE_BOOK);
+	private ItemStack item = ItemBuilder.sanitizeClone(QuestWorld.getIcons().default_category);
 	private String name = "";
 	private WeakReference<Quest> parent = new WeakReference<>(null);
 	private String permission = "";
@@ -61,7 +62,7 @@ class Category extends UniqueObject implements ICategoryState {
 		permission = config.getString("permission", "");
 		world_blacklist = config.getStringList("world-blacklist");
 
-		if (i2.getType() != Material.AIR)
+		if (!ItemBuilder.isAir(i2))
 			item = i2;
 	}
 

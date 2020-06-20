@@ -12,7 +12,7 @@ public abstract class Condition {
 	// Only for mental model
 	private static final ConfigDB<Condition, BaseProperties> database = new ConfigDB<>();
 	
-	protected void testConditions(Event someEvent) {
+	protected final void testConditions(Event someEvent) {
 		for(NodeConfig<BaseProperties> config : database.getConfigs(getClass())) {
 			Profile profile = new Profile();
 			

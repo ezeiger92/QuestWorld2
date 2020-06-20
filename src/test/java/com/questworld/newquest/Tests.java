@@ -20,10 +20,10 @@ public class Tests {
 		
 	}
 	
-	Map<Class<Thing>, Object> map = new HashMap<>();
+	Map<Class<? extends Thing>, Object> map = new HashMap<>();
 	
 	public void insert(Class<? extends Thing> key, Object value) {
-		map.put((Class)key, value);
+		map.put(key, value);
 	}
 	
 	public Object get(Class<? extends Thing> key) {

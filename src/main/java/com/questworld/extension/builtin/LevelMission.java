@@ -1,6 +1,5 @@
 package com.questworld.extension.builtin;
 
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -18,12 +17,12 @@ import com.questworld.api.menu.MissionButton;
 
 public class LevelMission extends MissionType implements Listener, Ticking {
 	public LevelMission() {
-		super("REACH_LEVEL", false, new ItemStack(Material.EXPERIENCE_BOTTLE));
+		super("REACH_LEVEL", false);
 	}
 
 	@Override
 	public ItemStack userDisplayItem(IMission instance) {
-		return new ItemStack(Material.COMMAND_BLOCK);
+		return getSelectorItem();
 	}
 
 	@Override

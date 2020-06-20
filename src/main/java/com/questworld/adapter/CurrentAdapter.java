@@ -1,55 +1,24 @@
 package com.questworld.adapter;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.ShapelessRecipe;
-import org.bukkit.inventory.meta.Damageable;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 
-import com.questworld.api.QuestWorld;
+import com.questworld.util.ItemBuilder;
+import com.questworld.util.Text;
 import com.questworld.util.Version;
-import com.questworld.util.VersionAdapter;
+import com.questworld.util.adapter.Action;
+import com.questworld.util.adapter.VersionAdapter;
 
 public class CurrentAdapter extends VersionAdapter {
 	public CurrentAdapter() {
 		super(Version.current());
 	}
 
-	@Override
-	public void makeSpawnEgg(ItemStack result, EntityType mob) {
-		String name;
-		
-		switch(mob) {
-		case PIG_ZOMBIE:
-			name = "ZOMBIE_PIGMAN";
-			break;
-			
-		case MUSHROOM_COW:
-			name = "MOOSHROOM";
-			break;
-			
-		default:
-			name = mob.name();
-			break;
-		}
-		
-		Material m = Material.matchMaterial(name + "_SPAWN_EGG");
-		
-		if(m != null) {
-			result.setType(m);
-		}
-		else {
-			result.setType(Material.AIR);
-		}
-	}
-
-	@Override
+	@Implementing(Action.MAKE_PLAYER_HEAD)
 	public void makePlayerHead(ItemStack result, OfflinePlayer player) {
 		result.setType(Material.PLAYER_HEAD);
 		
@@ -60,38 +29,26 @@ public class CurrentAdapter extends VersionAdapter {
 		}
 	}
 
-	@Override
-	public ShapelessRecipe shapelessRecipe(String recipeName, ItemStack output) {
-		return new ShapelessRecipe(new NamespacedKey(QuestWorld.getPlugin(), recipeName), output);
-	}
-
-	@Override
+	@Implementing(Action.SEND_ACTIONBAR)
 	public void sendActionbar(Player player, String message) {
 		player.spigot().sendMessage(net.md_5.bungee.api.ChatMessageType.ACTION_BAR,
 				net.md_5.bungee.api.chat.TextComponent.fromLegacyText(message));
 	}
 	
-	@Override
+	@Implementing(Action.SEND_TITLE)
 	public void sendTitle(Player player, String title, String subtitle, int fadeIn, int stay, int fadeOut) {
-		player.sendTitle(title, subtitle, fadeIn, stay, fadeOut);
+		player.sendTitle(Text.colorize(title), Text.colorize(subtitle), fadeIn, stay, fadeOut);
 	}
 	
-	@Override
-	public void setItemDamage(ItemStack item, int damage) {
-		ItemMeta meta;
+	@Implementing(Action.MAKE_SPAWN_EGG)
+	public void makeSpawnEgg(ItemStack stack, EntityType type) {
+		Material egg = Material.matchMaterial(type.name() + "_SPAWN_EGG");
 		
-		if(item.hasItemMeta()) {
-			meta = item.getItemMeta();
+		if(egg != null) {
+			stack.setType(egg);
 		}
 		else {
-			meta = Bukkit.getItemFactory().getItemMeta(item.getType());
-		}
-		
-		if(meta instanceof Damageable) {
-			Damageable d = (Damageable) meta;
-			d.setDamage(damage);
-			
-			item.setItemMeta(meta);
+			ItemBuilder.edit(stack).type(null);
 		}
 	}
 }

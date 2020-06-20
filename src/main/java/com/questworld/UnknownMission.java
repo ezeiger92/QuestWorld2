@@ -2,7 +2,6 @@ package com.questworld;
 
 import java.util.HashMap;
 
-import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
 import com.questworld.api.MissionType;
@@ -28,7 +27,7 @@ public class UnknownMission extends MissionType {
 	}
 
 	private UnknownMission(String name) {
-		super(name, false, new ItemStack(Material.BARRIER));
+		super(name, false, null);
 	}
 
 	@Override

@@ -65,7 +65,7 @@ public abstract class QuestExtension implements Reloadable {
 	}
 
 	public final FileConfiguration getConfiguration(String path) {
-		return loader.loadConfigNoexpect(path, true);
+		return loader.loadConfigNoexcept(path, true);
 	}
 
 	public final ResourceLoader getResourceLoader() {

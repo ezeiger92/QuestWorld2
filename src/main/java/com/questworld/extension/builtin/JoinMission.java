@@ -1,6 +1,5 @@
 package com.questworld.extension.builtin;
 
-import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -15,12 +14,12 @@ import com.questworld.api.menu.MissionButton;
 
 public class JoinMission extends MissionType implements Listener {
 	public JoinMission() {
-		super("JOIN", true, new ItemStack(Material.GOLD_NUGGET));
+		super("JOIN", true);
 	}
 
 	@Override
 	public ItemStack userDisplayItem(IMission instance) {
-		return new ItemStack(Material.CLOCK);
+		return getSelectorItem();
 	}
 
 	@Override

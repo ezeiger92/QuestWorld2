@@ -19,6 +19,7 @@ import com.questworld.api.contract.IMission;
 import com.questworld.api.contract.IParty;
 import com.questworld.api.contract.MissionEntry;
 import com.questworld.api.contract.QuestingAPI;
+import com.questworld.api.menu.Icons;
 import com.questworld.api.menu.Menu;
 import com.questworld.extension.builtin.Builtin;
 import com.questworld.listener.ExtensionInstaller;
@@ -47,6 +48,7 @@ public final class QuestingImpl implements QuestingAPI {
 	private final PresetLoader presets;
 	private final ResourceLoader resources;
 	private final MissionViewer viewer;
+	private Icons icons = new Icons();
 
 	private Directories dataFolders;
 	private Optional<Economy> econ = Optional.empty();
@@ -59,6 +61,7 @@ public final class QuestingImpl implements QuestingAPI {
 		presets = new PresetLoader(this);
 		resources = new ResourceLoader(questWorld);
 		viewer = new MissionViewer(questWorld);
+		icons.init(questWorld);
 
 		dataFolders = new Directories(resources);
 		language = new Lang(resources);
@@ -72,7 +75,7 @@ public final class QuestingImpl implements QuestingAPI {
 
 		hasPapi = Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI");
 
-		eventSounds = new Sounds(resources.loadConfigNoexpect("sounds.yml", true));
+		eventSounds = new Sounds(resources.loadConfigNoexcept("sounds.yml", true));
 
 		if (!econ.isPresent())
 			Log.info("No economy (vault) found, money rewards disabled");
@@ -197,7 +200,7 @@ public final class QuestingImpl implements QuestingAPI {
 		if (result != null)
 			return result;
 
-		result = new PlayerStatus(uuid);
+		result = new PlayerStatus(Bukkit.getOfflinePlayer(uuid));
 		statuses.put(uuid, result);
 		return result;
 	}
@@ -247,6 +250,8 @@ public final class QuestingImpl implements QuestingAPI {
 	@Override
 	public void onSave() {
 		facade.save(false);
+		
+		icons.save(plugin);
 
 		plugin.getServer().getOnlinePlayers().stream().map(p -> statuses.get(p.getUniqueId()))
 				.forEach(status -> status.getTracker().onSave());
@@ -258,7 +263,7 @@ public final class QuestingImpl implements QuestingAPI {
 	public void onReload() {
 		plugin.loadConfigs();
 		dataFolders = new Directories(resources);
-		eventSounds = new Sounds(resources.loadConfigNoexpect("sounds.yml", true));
+		eventSounds = new Sounds(resources.loadConfigNoexcept("sounds.yml", true));
 		facade.onReload();
 		language.onReload();
 
@@ -271,6 +276,8 @@ public final class QuestingImpl implements QuestingAPI {
 	public void onDiscard() {
 		facade.onDiscard();
 		viewer.clear();
+		
+		icons.init(plugin);
 
 		for (PlayerStatus status : statuses.values())
 			status.unload();
@@ -292,5 +299,10 @@ public final class QuestingImpl implements QuestingAPI {
 
 	public PresetLoader presets() {
 		return presets;
+	}
+	
+	@Override
+	public Icons getIcons() {
+		return icons;
 	}
 }

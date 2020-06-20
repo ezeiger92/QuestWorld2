@@ -3,7 +3,6 @@ package com.questworld.extension.builtin;
 import java.util.HashMap;
 import java.util.UUID;
 
-import org.bukkit.Material;
 import org.bukkit.Statistic;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -12,6 +11,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
 
 import com.questworld.api.MissionType;
+import com.questworld.api.QuestWorld;
 import com.questworld.api.Ticking;
 import com.questworld.api.contract.IMission;
 import com.questworld.api.contract.IMissionState;
@@ -25,12 +25,25 @@ import com.questworld.util.Text;
 public class PlayMission extends MissionType implements Listener, Ticking {
 	private static final int TOTAL = 0;
 	//private static final int SESSION = 1;
+	private final Statistic playtimeStatistic;
+	private final double scaleToMinute;
 	
 	// Player, Map<Mission, Long>
 	private HashMap<UUID, HashMap<UUID, Long>> timeMap = new HashMap<>();
 
 	public PlayMission() {
-		super("PLAY_TIME", false, new ItemStack(Material.CLOCK));
+		super("PLAY_TIME", false);
+		
+		Statistic stat;
+		try {
+			stat = Statistic.valueOf("PLAY_ONE_MINUTE");
+		}
+		catch(Exception e) {
+			stat = Statistic.valueOf("PLAY_ONE_TICK");
+		}
+		
+		playtimeStatistic = stat;
+		scaleToMinute = 1.0 / 20.0 / 60.0;
 	}
 
 	@Override
@@ -53,7 +66,7 @@ public class PlayMission extends MissionType implements Listener, Ticking {
 	@Override
 	public void onManual(Player player, MissionEntry result) {
 		if(result.getMission().getCustomInt() == TOTAL) {
-			result.setProgress(player.getStatistic(Statistic.PLAY_ONE_MINUTE) / 20 / 60);
+			result.setProgress((int)(player.getStatistic(playtimeStatistic) * scaleToMinute));
 		}
 		else {
 			HashMap<UUID, Long> times = timeMap.get(player.getUniqueId());
@@ -76,7 +89,7 @@ public class PlayMission extends MissionType implements Listener, Ticking {
 	@Override
 	protected void layoutMenu(IMissionState changes) {
 		putButton(17, new MenuData(
-				new ItemBuilder(Material.CLOCK).wrapText(
+				new ItemBuilder(QuestWorld.getIcons().editor.set_duration).wrapText(
 						"&7Time: &b" + Text.timeFromNum(changes.getAmount()),
 						"",
 						"&rLeft click: &e+1m",
@@ -95,7 +108,7 @@ public class PlayMission extends MissionType implements Listener, Ticking {
 		));
 		
 		putButton(16, MissionButton.simpleButton(changes,
-				new ItemBuilder(Material.GOLDEN_APPLE)
+				new ItemBuilder(QuestWorld.getIcons().editor.set_match_type)
 						.display("&7Counting method")
 						.selector(changes.getCustomInt(), "Total", "Session").get(),
 				event -> {

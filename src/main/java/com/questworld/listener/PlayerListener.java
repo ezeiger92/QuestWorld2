@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -20,6 +19,7 @@ import org.bukkit.inventory.ItemStack;
 import com.questworld.GuideBook;
 import com.questworld.QuestingImpl;
 import com.questworld.api.Decaying;
+import com.questworld.api.QuestWorld;
 import com.questworld.api.contract.IMission;
 import com.questworld.api.contract.IParty;
 import com.questworld.api.contract.IParty.LeaveReason;
@@ -29,6 +29,7 @@ import com.questworld.api.event.GenericPlayerLeaveEvent;
 import com.questworld.api.menu.QuestBook;
 import com.questworld.manager.ProgressTracker;
 import com.questworld.util.AutoListener;
+import com.questworld.util.ItemBuilder;
 
 public class PlayerListener extends AutoListener {
 	private QuestingImpl api;
@@ -118,7 +119,7 @@ public class PlayerListener extends AutoListener {
 		boolean hasTable = false;
 		for (ItemStack is : e.getInventory().getMatrix())
 			if (is != null) {
-				if (is.getType() == Material.CRAFTING_TABLE && !hasTable)
+				if (is.getType() == ItemBuilder.sanitize(QuestWorld.getIcons().items.crafting_table).getType() && !hasTable)
 					hasTable = true;
 				else
 					return;

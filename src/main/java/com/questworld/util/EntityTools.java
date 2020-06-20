@@ -2,11 +2,12 @@ package com.questworld.util;
 
 import java.util.ArrayList;
 
-import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.inventory.ItemStack;
 
 import com.questworld.QuestWorldPlugin;
+import com.questworld.api.QuestWorld;
 
 /**
  * A shared home for tools related to entities and entity manipulation.
@@ -50,46 +51,31 @@ public class EntityTools {
 	public static ItemBuilder getEntityDisplay(EntityType type) {
 		
 		if(type == ANY_ENTITY) {
-			return new ItemBuilder(Material.NETHER_STAR);
+			return new ItemBuilder(QuestWorld.getIcons().editor.any_mob);
 		}
 		
-		switch (type) {
-			case PLAYER:
-				return new ItemBuilder(Material.PLAYER_HEAD);
-				
-			case GIANT:
-				return new ItemBuilder(Material.ZOMBIE_HEAD);
-				
-			case ENDER_DRAGON:
-				return new ItemBuilder(Material.DRAGON_HEAD);
-
-			case WITHER:
-				return new ItemBuilder(Material.WITHER_SKELETON_SKULL);
-				
-			case ILLUSIONER:
-				return new ItemBuilder(Material.ENDER_EYE);
-			
-			case ARMOR_STAND:
-				return new ItemBuilder(Material.ARMOR_STAND);
-
-			case SNOWMAN:
-				return new ItemBuilder(Material.SNOWBALL);
-				
-			case IRON_GOLEM:
-				return new ItemBuilder(Material.IRON_INGOT);
-
-			default:
-				
-				try {
-					ItemBuilder ib = new ItemBuilder(Material.STONE);
-					Reflect.getAdapter().makeSpawnEgg(ib.get(), type);
-					
-					return ib;
-				}
-				catch (IllegalArgumentException e) {
-					return new ItemBuilder(Material.BARRIER);
-				}
+		ItemStack icon = QuestWorld.getIcons().editor.mob_selector.get(type.name());
+		
+		if(icon == null) {
+			Reflect.getAdapter().makeSpawnEgg(icon, type);
 		}
+		
+		if(ItemBuilder.isAir(icon)) {
+			icon = QuestWorld.getIcons().editor.unknown_mob;
+		}
+		
+		//case PLAYER: Material.PLAYER_HEAD;
+		//case GIANT: Material.ZOMBIE_HEAD;
+		//case ENDER_DRAGON: Material.DRAGON_HEAD;
+		//case WITHER: Material.WITHER_SKELETON_SKULL;
+		//case ILLUSIONER: Material.ENDER_EYE;
+		//case ARMOR_STAND: Material.ARMOR_STAND;
+		//case SNOWMAN: Material.SNOWBALL;
+		//case IRON_GOLEM: Material.IRON_INGOT;
+		//case PIG_ZOMBIE: Material.ZOMBIE_PIGMAN_SPAWN_EGG;
+		//case MUSHROOM_COW: Material.MOOSHROOM_SPAWN_EGG;
+		
+		return new ItemBuilder(icon);
 	}
 
 	/**
@@ -97,7 +83,7 @@ public class EntityTools {
 	 * names for entities that are not traditional mobs and are used internally for
 	 * other purposes.
 	 * <p>
-	 * Specifically, <tt>COMPLEX_ENTITY</tt> currently represents a wild card, and
+	 * Specifically, <tt>EntityTools.ANY_ENTITY</tt> represents a wild card, and
 	 * will return "Any Entity" as its name.
 	 * 
 	 * @param entity The desired entity type

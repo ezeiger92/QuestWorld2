@@ -34,7 +34,6 @@ public class Buttons {
 			Player p = (Player) event.getWhoClicked();
 			String defaultCategoryName = QuestWorld.translate(p, Translation.DEFAULT_CATEGORY);
 
-			p.closeInventory();
 			PlayerTools.promptInput(p, new SinglePrompt(
 					PlayerTools.makeTranslation(true, Translation.CATEGORY_NAME_EDIT, defaultCategoryName), (c, s) -> {
 						s = Text.deserializeNewline(Text.colorize(s));
@@ -67,7 +66,6 @@ public class Buttons {
 			Player p = (Player) event.getWhoClicked();
 			String defaultQuestName = QuestWorld.translate(p, Translation.DEFAULT_QUEST);
 
-			p.closeInventory();
 			PlayerTools.promptInput(p, new SinglePrompt(
 					PlayerTools.makeTranslation(true, Translation.QUEST_NAME_EDIT, defaultQuestName), (c, s) -> {
 						ICategoryState state = category.getState();

@@ -9,6 +9,10 @@ public class Log {
 	public static void setLogger(Logger logger) {
 		activeLogger = logger;
 	}
+	
+	public static Logger getLogger() {
+		return activeLogger;
+	}
 
 	public static void log(Level level, String message) {
 		activeLogger.log(level, message);

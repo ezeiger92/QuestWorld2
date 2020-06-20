@@ -6,7 +6,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
@@ -15,6 +14,7 @@ import org.bukkit.conversations.ConversationAbandonedEvent;
 import org.bukkit.conversations.ConversationAbandonedListener;
 import org.bukkit.conversations.ConversationFactory;
 import org.bukkit.conversations.Prompt;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -33,7 +33,7 @@ import com.questworld.api.event.GenericPlayerLeaveEvent;
 
 public class PlayerTools {
 
-	public static ItemStack getMainHandItem(Player player) {
+	public static ItemStack getMainHandItem(HumanEntity player) {
 		int hand = player.getInventory().getHeldItemSlot();
 		return player.getInventory().getItem(hand);
 	}
@@ -194,7 +194,7 @@ public class PlayerTools {
 		
 		int slot = player.getInventory().getHeldItemSlot();
 		ItemStack old = player.getInventory().getItem(slot);
-		ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
+		ItemStack book = ItemBuilder.sanitizeClone(QuestWorld.getIcons().items.written_book);
 		
 		Bukkit.getUnsafe().modifyItemStack(book, pages.toString());
 
@@ -232,10 +232,12 @@ public class PlayerTools {
 	}
 
 	public static void promptInput(Player p, Prompt prompt) {
+		p.closeInventory();
 		prepareConversation(p, prompt).begin();
 	}
 
 	public static void promptCommand(Player p, Prompt prompt) {
+		p.closeInventory();
 		Conversation con = prepareConversation(p, prompt);
 		p.sendMessage(prompt.getPromptText(con.getContext()));
 
@@ -243,6 +245,7 @@ public class PlayerTools {
 	}
 
 	public static void promptInputOrCommand(Player p, Prompt prompt) {
+		p.closeInventory();
 		Conversation con = prepareConversation(p, prompt);
 
 		Bukkit.getPluginManager().registerEvents(commandListener(con, prompt), QuestWorld.getPlugin());

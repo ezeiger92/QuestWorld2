@@ -5,7 +5,6 @@ import java.util.ListIterator;
 import java.util.Stack;
 import java.util.function.Consumer;
 
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
@@ -143,7 +142,7 @@ public class PagedMapping {
 						QuestWorld.translate(page > 0 ? Translation.NAV_PREV : Translation.NAV_PREVBAD))
 				.split("\n");
 
-		frame.addButton(1, new ItemBuilder(Material.PAPER).amount(page + 1).wrapText(lines).get(), event -> {
+		frame.addButton(1, new ItemBuilder(QuestWorld.getIcons().navigation).amount(page + 1).wrapText(lines).get(), event -> {
 			int delta = (event.isRightClick() ? -1 : 1) * (event.isShiftClick() ? panels.size() : 1);
 			int nextPage = Math.min(Math.max(0, page + delta), panels.size() - 1);
 			Player p = (Player) event.getWhoClicked();
@@ -163,7 +162,10 @@ public class PagedMapping {
 		});
 
 		if (backButton != null)
-			frame.addButton(0, ItemBuilder.Proto.MAP_BACK.get().wrapLore(backLabel).get(), backButton);
+			frame.addButton(0, new ItemBuilder(QuestWorld.getIcons().back)
+					.flagAll()
+					.display(QuestWorld.translate(Translation.button_back_general))
+					.wrapLore(backLabel).get(), backButton);
 
 		frame.build(menu);
 	}

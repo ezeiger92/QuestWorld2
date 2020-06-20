@@ -19,10 +19,8 @@ public class Menu implements InventoryHolder {
 	private Inventory inv;
 	private Consumer<InventoryClickEvent>[] handlers;
 	
-	// There is no reason I should have to keep track of this, butresizing needs
-	// to create a new inventory.
-	// Bukkit offers no way to get the old title without an open view.
-	// Why.
+	// Now there isn't even a way to name an inventory with Bukkit. How does this get worse every single time.
+	@SuppressWarnings("unused")
 	private final String title;
 
 	@SuppressWarnings("unchecked")
@@ -34,9 +32,6 @@ public class Menu implements InventoryHolder {
 	}
 
 	private Inventory makeInv(int cells) {
-		if (title != null)
-			return Bukkit.createInventory(this, cells);
-
 		return Bukkit.createInventory(this, cells);
 	}
 
@@ -50,7 +45,6 @@ public class Menu implements InventoryHolder {
 
 		for (HumanEntity e : inv.getViewers()) {
 			e.closeInventory();
-			e.openInventory(inv2);
 		}
 		inv = inv2;
 	}

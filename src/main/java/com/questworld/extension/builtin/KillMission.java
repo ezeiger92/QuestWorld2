@@ -1,6 +1,5 @@
 package com.questworld.extension.builtin;
 
-import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -19,7 +18,7 @@ import com.questworld.util.EntityTools;
 
 public class KillMission extends MissionType implements Listener, Decaying {
 	public KillMission() {
-		super("KILL", true, new ItemStack(Material.IRON_SWORD));
+		super("KILL", true);
 	}
 
 	@Override

@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.UUID;
 
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -33,7 +32,7 @@ import com.questworld.util.Text;
 
 public class LocationMission extends MissionType implements Ticking, Listener {
 	public LocationMission() {
-		super("REACH_LOCATION", false, new ItemStack(Material.LEATHER_BOOTS));
+		super("REACH_LOCATION", false);
 	}
 
 	@Override
@@ -152,7 +151,7 @@ public class LocationMission extends MissionType implements Ticking, Listener {
 		String name = changes.getCustomString();
 		putButton(10, MissionButton.location(changes));
 		putButton(11, new MenuData(
-				new ItemBuilder(Material.NAME_TAG).wrapText(
+				new ItemBuilder(QuestWorld.getIcons().editor.set_name).wrapText(
 						"&7Location name: &r&o" + (name.length() > 0 ? name : "-none-"),
 						"",
 						"&e> Give your location a name",
@@ -172,7 +171,6 @@ public class LocationMission extends MissionType implements Ticking, Listener {
 						return;
 					}
 
-					p.closeInventory();
 					PlayerTools.promptInput(p, new SinglePrompt(
 							PlayerTools.makeTranslation(true, Translation.LOCMISSION_NAME_EDIT), (c, s) -> {
 								changes.setCustomString(Text.deserializeNewline(Text.colorize(s)));
@@ -189,7 +187,7 @@ public class LocationMission extends MissionType implements Ticking, Listener {
 		));
 		
 		putButton(17, MissionButton.simpleButton(changes,
-				new ItemBuilder(Material.COMPASS).wrapText(
+				new ItemBuilder(QuestWorld.getIcons().editor.set_radius).wrapText(
 						"&7Radius: &a" + changes.getCustomInt(),
 						"",
 						"&rLeft click: &e+1",

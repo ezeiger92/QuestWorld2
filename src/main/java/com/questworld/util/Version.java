@@ -41,7 +41,7 @@ public final class Version implements Comparable<Version> {
 
 	@Override
 	public final int compareTo(Version other) {
-		return Integer.compareUnsigned(other.hashCode(), hashCode());
+		return Integer.compareUnsigned(hashCode(), other.hashCode());
 	}
 	
 	public boolean lessThan(Version other) {
@@ -84,42 +84,42 @@ public final class Version implements Comparable<Version> {
 		};
 		bitPosition = new int[bitPartition.length];
 
-		bitPosition[0] = bitPartition[0];
-		bitPosition[1] = bitPartition[1] + bitPosition[0];
-		bitPosition[2] = bitPartition[2] + bitPosition[1];
-		bitPosition[3] = bitPartition[3] + bitPosition[2];
-		bitPosition[4] = bitPartition[4] + bitPosition[3];
+		int accum = 0;
+		int end = bitPartition.length - 1;
+		for (int i = 1; i <= end; ++i) {
+			accum = bitPosition[end - i] = bitPartition[end - i + 1] + accum;
+		}
 	}
 	
 	private static final int makeHash(String serialVersion) {
-		String[] ourParts = serialVersion.substring(1).split("_");
-
-		int length = ourParts.length;
-		
 		int hash = 0;
+		int length = serialVersion.length();
 		
-		for (int i = 0; i < length; ++i) {
-			String part = ourParts[i];
+		for (int j = 0, start = 1; j < bitPosition.length && start < length; ++j) {
+			int end = serialVersion.indexOf('_', start);
 			
-			int value;
-			try {
-				value = Integer.parseInt(part);
-			}
-			catch (NumberFormatException e) {
-				if(part.startsWith("R")) {
-					try {
-						value = Integer.parseInt(part.substring(1));
-					}
-					catch(NumberFormatException e2) {
-						value = 0;
-					}
-				}
-				else {
-					value = apiVariant(part);
-				}
+			if(end == -1) {
+				end = length;
 			}
 			
-			hash |= (value << bitPosition[i]);
+			if(serialVersion.charAt(start) == 'R') {
+				++start;
+				j = 3;
+			}
+			else if(!Character.isDigit(serialVersion.charAt(start))) {
+				char c = serialVersion.charAt(start);
+				int val = c == 'S' ? 1 : (c == 'P' ? 2 : 3);
+				hash |= (val << bitPosition[4]);
+				break;
+			}
+			
+			int value = 0;
+			for (int i = start; i < end; ++i) {
+				value = value * 10 + (serialVersion.charAt(i) - '0');
+			}
+			hash |= (value << bitPosition[j]);
+			
+			start = end + 1;
 		}
 		
 		return hash;
@@ -132,23 +132,5 @@ public final class Version implements Comparable<Version> {
 			in = in.substring(1);
 
 		return "v" + in;
-	}
-
-	private static final int apiVariant(String serverKind) {
-		switch (serverKind) {
-			case "TACO":
-			case "TACOSPIGOT":
-				return 3;
-
-			case "PAPER":
-			case "PAPERSPIGOT":
-				return 2;
-
-			case "SPIGOT":
-				return 1;
-
-			default:
-				return 0;
-		}
 	}
 }

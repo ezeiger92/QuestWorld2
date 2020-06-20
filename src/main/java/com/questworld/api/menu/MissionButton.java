@@ -1,19 +1,11 @@
 package com.questworld.api.menu;
 
-import static com.questworld.util.json.Prop.BLUE;
-import static com.questworld.util.json.Prop.CLICK_RUN;
-import static com.questworld.util.json.Prop.DARK_GREEN;
-import static com.questworld.util.json.Prop.DARK_RED;
-import static com.questworld.util.json.Prop.FUSE;
-import static com.questworld.util.json.Prop.GRAY;
-import static com.questworld.util.json.Prop.HOVER_TEXT;
-import static com.questworld.util.json.Prop.WHITE;
+import static com.questworld.util.json.Prop.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -34,6 +26,10 @@ import com.questworld.util.json.JsonBlob;
 import com.questworld.util.json.Prop;
 
 public class MissionButton {
+	private static Icons icons() {
+		return QuestWorld.getIcons();
+	}
+	
 	public static MenuData item(IMissionState changes) {
 		return simpleButton(changes,
 				new ItemBuilder(changes.getItem()).wrapText(
@@ -41,9 +37,8 @@ public class MissionButton {
 						"",
 						"&e> Click to change the mission item").get(),
 				event -> {
-					Player p = (Player) event.getWhoClicked();
-					ItemStack hand = p.getInventory().getItemInMainHand();
-					if (hand != null && hand.getType() != Material.AIR)
+					ItemStack hand = PlayerTools.getMainHandItem(event.getWhoClicked());
+					if (!ItemBuilder.isAir(hand))
 						changes.setItem(hand.clone());
 				}
 		);
@@ -55,7 +50,7 @@ public class MissionButton {
 
 	public static MenuData amount(IMissionState changes, int groupSize) {
 		return simpleButton(changes,
-				new ItemBuilder(Material.REDSTONE).wrapText(
+				new ItemBuilder(icons().editor.set_amount).wrapText(
 						"&7Amount: &b" + changes.getAmount(),
 						"",
 						"&rLeft click: &e+1",
@@ -98,14 +93,13 @@ public class MissionButton {
 	public static MenuData entityName(IMissionState changes) {
 		String name = changes.getCustomString();
 		return new MenuData(
-				new ItemBuilder(Material.NAME_TAG).wrapText(
+				new ItemBuilder(icons().editor.set_name).wrapText(
 						"&7Entity name: &r&o" + (name.length() > 0 ? name : "-none-"),
 						"",
 						"&e> Click to change the Name").get(),
 				event -> {
 					Player p = (Player) event.getWhoClicked();
 
-					p.closeInventory();
 					PlayerTools.promptInput(p, new SinglePrompt(
 							PlayerTools.makeTranslation(true, Translation.KILLMISSION_NAME_EDIT), (c, s) -> {
 								changes.setCustomString(Text.deserializeNewline(Text.colorize(s)));
@@ -122,7 +116,7 @@ public class MissionButton {
 
 	public static MenuData missionName(IMissionState changes) {
 		return new MenuData(
-				new ItemBuilder(Material.NAME_TAG).wrapText(
+				new ItemBuilder(icons().editor.set_name).wrapText(
 						"&7" + changes.getText(),
 						"",
 						"&rLeft click: Edit mission name",
@@ -135,7 +129,6 @@ public class MissionButton {
 						apply(event, changes);
 					}
 					else {
-						p.closeInventory();
 						PlayerTools.promptInput(p, new SinglePrompt(
 								PlayerTools.makeTranslation(true, Translation.MISSION_NAME_EDIT), (c, s) -> {
 									changes.setDisplayName(Text.deserializeNewline(Text.colorize(s)));
@@ -152,7 +145,7 @@ public class MissionButton {
 	}
 
 	public static MenuData timeframe(IMissionState changes) {
-		return simpleButton(changes, new ItemBuilder(Material.CLOCK).wrapText(
+		return simpleButton(changes, new ItemBuilder(icons().editor.set_duration).wrapText(
 				"&7Complete mission within: &b" + Text.timeFromNum(changes.getTimeframe()),
 				"",
 				"&rLeft click: &e+1m",
@@ -168,7 +161,7 @@ public class MissionButton {
 
 	public static MenuData deathReset(IMissionState changes) {
 		return simpleButton(changes,
-				new ItemBuilder(Material.PLAYER_HEAD).wrapText(
+				new ItemBuilder(icons().editor.set_death_reset).wrapText(
 						"&7Resets on death: " + Text.booleanBadge(changes.getDeathReset()),
 						"",
 						"&e> Click to change whether this Mission's Progress resets when a Player dies").get(),
@@ -179,7 +172,7 @@ public class MissionButton {
 	}
 
 	public static MenuData spawnersAllowed(IMissionState changes) {
-		return simpleButton(changes, new ItemBuilder(Material.SPAWNER).wrapText(
+		return simpleButton(changes, new ItemBuilder(icons().editor.set_spawners_allowed).wrapText(
 				"&7Allow Mobs from Spawners: " + Text.booleanBadge(changes.getSpawnerSupport()),
 				"",
 				"&e> Click to change whether this Mission will also count Mobs which were spawned by a Mob Spawner")
@@ -259,7 +252,7 @@ public class MissionButton {
 	}
 
 	public static MenuData dialogue(IMissionState changes) {
-		return new MenuData(new ItemBuilder(Material.PAPER)
+		return new MenuData(new ItemBuilder(icons().editor.open_dialog_editor)
 				.wrapText("&7Dialogue", "", "&rLeft Click: Edit the Dialogue", "&rRight Click: Dialogue Preview").get(),
 				event -> {
 					Player p = (Player) event.getWhoClicked();
@@ -268,7 +261,7 @@ public class MissionButton {
 						if (changes.getDialogue().isEmpty())
 							p.sendMessage(Text.colorize("&4No Dialogue found!"));
 						else
-							PlayerStatus.sendDialogue(p.getUniqueId(), changes, changes.getDialogue().iterator());
+							PlayerStatus.sendDialogue(p, changes, changes.getDialogue().iterator());
 						return;
 					}
 

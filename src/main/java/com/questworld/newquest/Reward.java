@@ -7,6 +7,7 @@ public abstract class Reward {
 	private static final String NAMESPACE = "questworld-reward";
 	private final UniqueKey ID;
 	
+	@SuppressWarnings("unused")
 	private static final ConfigDB<Reward, BaseProperties> database = new ConfigDB<>();
 	
 	public abstract boolean apply(NodeConfig<BaseProperties> config, Profile profile);

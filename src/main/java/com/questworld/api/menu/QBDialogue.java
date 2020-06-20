@@ -1,17 +1,10 @@
 package com.questworld.api.menu;
 
-import static com.questworld.util.json.Prop.BLUE;
-import static com.questworld.util.json.Prop.CLICK_RUN;
-import static com.questworld.util.json.Prop.DARK_GREEN;
-import static com.questworld.util.json.Prop.DARK_RED;
-import static com.questworld.util.json.Prop.FUSE;
-import static com.questworld.util.json.Prop.GRAY;
-import static com.questworld.util.json.Prop.HOVER_TEXT;
+import static com.questworld.util.json.Prop.*;
 
 import java.util.ArrayDeque;
 import java.util.HashSet;
 
-import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 
@@ -37,12 +30,16 @@ import com.questworld.util.json.JsonBlob;
 import com.questworld.util.json.Prop;
 
 public class QBDialogue {
+	private static Icons icons() {
+		return QuestWorld.getIcons();
+	}
+	
 	public static void openDeletionConfirmation(Player p, final DataObject q) {
 		QuestWorld.getSounds().DESTRUCTIVE_WARN.playTo(p);
 
 		Menu menu = new LinkedMenu(1, "&4&lAre you Sure?", q, true);
 
-		menu.put(6, new ItemBuilder(Material.RED_WOOL).display("&cNo").get(), event -> {
+		menu.put(6, new ItemBuilder(icons().destructive_cancel).display("&cNo").get(), event -> {
 			Player p2 = (Player) event.getWhoClicked();
 			if (q instanceof IQuest)
 				QuestBook.openCategoryEditor(p2, ((IQuest) q).getCategory());
@@ -62,7 +59,7 @@ public class QBDialogue {
 		else
 			tag = "";
 
-		menu.put(2, new ItemBuilder(Material.LIME_WOOL).wrapText("&aYes I am sure", "", "&rThis will delete", tag).get(),
+		menu.put(2, new ItemBuilder(icons().destructive_accept).wrapText("&aYes I am sure", "", "&rThis will delete", tag).get(),
 				event -> {
 					Player p2 = (Player) event.getWhoClicked();
 					QuestWorld.getSounds().DESTRUCTIVE_CLICK.playTo(p2);
@@ -112,11 +109,11 @@ public class QBDialogue {
 
 		Menu menu = new LinkedMenu(1, "&4&lAre you Sure?", q, true);
 
-		menu.put(6, new ItemBuilder(Material.RED_WOOL).display("&cNo").get(), event -> {
+		menu.put(6, new ItemBuilder(icons().destructive_cancel).display("&cNo").get(), event -> {
 			QuestBook.openQuestEditor((Player) event.getWhoClicked(), q);
 		});
 
-		menu.put(2, new ItemBuilder(Material.LIME_WOOL)
+		menu.put(2, new ItemBuilder(icons().destructive_accept)
 				.wrapText("&aYes I am sure", "", "&rThis will reset this Quest's Database").get(), event -> {
 					QuestWorld.getFacade().clearAllUserData(q);
 					QuestBook.openQuestEditor((Player) event.getWhoClicked(), q);
@@ -270,7 +267,7 @@ public class QBDialogue {
 							openRequirementQuests(p2, quest, category);
 						}, true);
 			else
-				pager.addButton(category.getID(), new ItemBuilder(Material.BARRIER)
+				pager.addButton(category.getID(), new ItemBuilder(icons().category_locked)
 						.wrapText(category.getName(), "", "&c> Requirement cycle").get(), null, false);
 		}
 
@@ -324,7 +321,7 @@ public class QBDialogue {
 						}, false);
 			else
 				pager.addButton(quest.getID(),
-						new ItemBuilder(Material.BARRIER).wrapText(quest.getName(), "", "&c> Requirement cycle").get(),
+						new ItemBuilder(icons().category_locked).wrapText(quest.getName(), "", "&c> Requirement cycle").get(),
 						null, false);
 		}
 		pager.setBackButton(" &3Categories", event -> openRequirementCategories(p, q));

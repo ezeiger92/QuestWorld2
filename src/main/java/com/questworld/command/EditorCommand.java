@@ -23,13 +23,15 @@ import com.questworld.api.QuestWorld;
 import com.questworld.api.contract.ICategory;
 import com.questworld.api.contract.IMission;
 import com.questworld.api.contract.IQuest;
+import com.questworld.api.menu.IconSelector;
+import com.questworld.api.menu.Menu;
 import com.questworld.api.menu.PagedMapping;
 import com.questworld.api.menu.QuestBook;
 import com.questworld.manager.PlayerStatus;
 import com.questworld.util.PlayerTools;
 import com.questworld.util.Reflect;
 import com.questworld.util.Text;
-import com.questworld.util.VersionAdapter;
+import com.questworld.util.adapter.TypedAdapter;
 
 public class EditorCommand implements CommandExecutor {
 	private static final int PER_PAGE = 7;
@@ -103,8 +105,12 @@ public class EditorCommand implements CommandExecutor {
 					progressCmd(sender, label, args);
 					break;
 					
+				case "icons":
+					IconSelector.openMain((Player)sender);
+					break;
+					
 				case "adapter":
-					VersionAdapter adapter = Reflect.getAdapter();
+					TypedAdapter adapter = Reflect.getAdapter();
 	
 					sender.sendMessage("Verison(s) " + adapter.toString());
 					
@@ -114,12 +120,16 @@ public class EditorCommand implements CommandExecutor {
 						ItemStack head = new ItemStack(Material.STONE);
 						ItemStack egg = new ItemStack(Material.STONE);
 						adapter.makePlayerHead(head, player);
-						adapter.makeSpawnEgg(egg, EntityType.PIG);
 						adapter.sendActionbar(player, "test &clight red");
-						adapter.shapelessRecipe("testing", new ItemStack(Material.STONE));
 						adapter.sendTitle(player, "title &lbold (2, 3, 2)", "&agreen sub", 40, 60, 40);
+						adapter.makeSpawnEgg(egg, EntityType.PIG);
 						
-						player.getInventory().addItem(head, egg);
+						Menu display = new Menu(1, "Adapter Items");
+
+						display.put(0, head, null);
+						display.put(1, egg, null);
+						
+						display.openFor(player);
 					}
 					
 					break;

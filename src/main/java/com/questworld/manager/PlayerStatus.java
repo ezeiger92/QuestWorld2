@@ -11,7 +11,6 @@ import java.util.function.Consumer;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.InventoryHolder;
 
 import com.questworld.Directories;
 import com.questworld.QuestingImpl;
@@ -26,7 +25,6 @@ import com.questworld.api.contract.IMission;
 import com.questworld.api.contract.IPlayerStatus;
 import com.questworld.api.contract.IQuest;
 import com.questworld.api.event.MissionCompletedEvent;
-import com.questworld.api.menu.LinkedMenu;
 import com.questworld.util.PlayerTools;
 import com.questworld.util.Text;
 
@@ -34,28 +32,13 @@ public class PlayerStatus implements IPlayerStatus {
 	private static PlayerStatus of(OfflinePlayer player) {
 		return (PlayerStatus) QuestWorld.getAPI().getPlayerStatus(player);
 	}
-
-	@Deprecated
-	private static PlayerStatus of(UUID uuid) {
-		return (PlayerStatus) QuestWorld.getAPI().getPlayerStatus(uuid);
-	}
 	
-	@Deprecated
-	private final UUID playerUUID;
 	private final OfflinePlayer player;
 	private final ProgressTracker tracker;
 
-	@Deprecated
-	public PlayerStatus(UUID uuid) {
-		this.playerUUID = uuid;
-		this.player = null;
-		tracker = new ProgressTracker(uuid);
-	}
-
 	public PlayerStatus(OfflinePlayer player) {
 		this.player = player;
-		this.playerUUID = player.getUniqueId();
-		tracker = new ProgressTracker(playerUUID);
+		tracker = new ProgressTracker(player.getUniqueId());
 	}
 
 	@Override
@@ -82,16 +65,8 @@ public class PlayerStatus implements IPlayerStatus {
 		return result;
 	}
 
-	private static Player asOnline(UUID playerUUID) {
-		OfflinePlayer player = Bukkit.getOfflinePlayer(playerUUID);
-		if (player.isOnline())
-			return (Player) player;
-
-		throw new IllegalArgumentException("Player " + player.getName() + " (" + player.getUniqueId() + ") is offline");
-	}
-
-	private static Optional<Player> ifOnline(UUID playerUUID) {
-		return Optional.ofNullable(Bukkit.getPlayer(playerUUID));
+	private static Optional<Player> online(OfflinePlayer player) {
+		return Optional.ofNullable(player.isOnline() ? (Player)player : null);
 	}
 
 	public List<IMission> getActiveMissions(MissionType type) {
@@ -126,7 +101,7 @@ public class PlayerStatus implements IPlayerStatus {
 		if (!isWithinTimeframe(task)) {
 			tracker.setMissionEnd(task, null);
 			tracker.setMissionProgress(task, 0);
-			ifOnline(playerUUID)
+			online(player)
 					.ifPresent(player -> PlayerTools.sendTranslation(player, false, Translation.NOTIFY_TIME_FAIL,
 							task.getQuest().getName(), task.getText(), getProgress(task) + "/" + task.getAmount()));
 			return false;
@@ -134,7 +109,7 @@ public class PlayerStatus implements IPlayerStatus {
 		else if (getProgress(task) == 0 && amount > 0) {
 			tracker.setMissionEnd(task, System.currentTimeMillis() + task.getTimeframe() * 60L * 1000L);
 
-			ifOnline(playerUUID).ifPresent(player -> PlayerTools.sendTranslation(player, false,
+			online(player).ifPresent(player -> PlayerTools.sendTranslation(player, false,
 					Translation.NOTIFY_TIME_START, task.getText(), Text.timeFromNum(task.getTimeframe())));
 		}
 		return true;
@@ -142,51 +117,23 @@ public class PlayerStatus implements IPlayerStatus {
 
 	@Override
 	public boolean isMissionActive(IMission mission) {
-		boolean partial = mission.getQuest().isEnabled() && getStatus(mission.getQuest()) == QuestStatus.AVAILABLE &&
+		return mission.getQuest().isEnabled() && getStatus(mission.getQuest()) == QuestStatus.AVAILABLE &&
 				!hasCompletedTask(mission) && hasUnlockedTask(mission);
-
-		if(partial) {
-			for(Player player : Bukkit.getOnlinePlayers()) {
-				InventoryHolder holder = player.getOpenInventory().getTopInventory().getHolder();
-
-				if(holder instanceof LinkedMenu) {
-					LinkedMenu menu = (LinkedMenu) holder;
-
-					// Force missions pseudo-inactive
-					if(menu.isEditor() && (menu.isLinked(mission.getQuest()) || menu.isLinked(mission))) {
-						return false;
-					}
-				}
-			}
-
-			return true;
-		}
-
-		return false;
 	}
 	
 	@Override
 	public OfflinePlayer getPlayer() {
-		return Bukkit.getOfflinePlayer(playerUUID);
-	}
-
-	@Override
-	public void update() {
-		update(false);
+		return player;
 	}
 	
-	public void tick(IMission mission) {if (isMissionActive(mission))
+	public void tick(IMission mission) {
 		if (isMissionActive(mission) && player.isOnline())
 			((Ticking) mission.getType()).onTick((Player)player, new MissionSet.Result(mission, this));
 	}
 
-	public void update(boolean quest_check) {
-		Player p = asOnline(playerUUID);
-
-		if (quest_check)
-			for (IMission mission : QuestWorld.getViewer().getTickingMissions())
-				if (isMissionActive(mission))
-					((Ticking) mission.getType()).onTick(p, new MissionSet.Result(mission, this));
+	@Override
+	public void update() {
+		Player p = (Player) player;
 
 		for (ICategory category : QuestWorld.getFacade().getCategories()) {
 			for (IQuest quest : category.getQuests()) {
@@ -216,7 +163,7 @@ public class PlayerStatus implements IPlayerStatus {
 
 	@Override
 	public QuestStatus getStatus(IQuest quest) {
-		Player p = asOnline(playerUUID);
+		Player p = (Player) player;
 		String worldName = p.getWorld().getName();
 
 		if (!PlayerTools.checkPermission(p, quest.getPermission()))
@@ -321,10 +268,10 @@ public class PlayerStatus implements IPlayerStatus {
 	}
 
 	public void setProgress(IMission task, int amount) {
-		Party party = (Party) QuestWorld.getParty(playerUUID);
+		Party party = (Party) QuestWorld.getParty(player.getUniqueId());
 		if (task.getQuest().supportsParties() && party != null)
 			for (UUID memberUuid : party.getGroupUUIDs())
-				of(memberUuid).setSingleProgress(task, amount);
+				of(Bukkit.getOfflinePlayer(memberUuid)).setSingleProgress(task, amount);
 		else
 			setSingleProgress(task, amount);
 	}
@@ -338,15 +285,15 @@ public class PlayerStatus implements IPlayerStatus {
 
 		if (amount == task.getAmount()) {
 			Bukkit.getPluginManager().callEvent(new MissionCompletedEvent(task));
-			sendDialogue(playerUUID, task, task.getDialogue().iterator());
+			sendDialogue(player, task, task.getDialogue().iterator());
 		}
 	}
 
 	protected boolean inDialogue = false;
 
-	public static void sendDialogue(UUID uuid, IMission task, Iterator<String> dialogue) {
-		of(uuid).inDialogue = false;
-		ifOnline(uuid).ifPresent(player -> {
+	public static void sendDialogue(OfflinePlayer player, IMission task, Iterator<String> dialogue) {
+		of(player).inDialogue = false;
+		online(player).ifPresent(p -> {
 			String line;
 
 			// Grab a line if we can
@@ -367,16 +314,16 @@ public class PlayerStatus implements IPlayerStatus {
 				// Previously "check !task.getType().getID().equals("ACCEPT_QUEST_FROM_NPC") &&
 				// "
 				// This was done to keep quests quiet when interacting with citizens
-				PlayerTools.sendTranslation(player, false, Translation.NOTIFY_COMPLETED, task.getQuest().getName(),
+				PlayerTools.sendTranslation(p, false, Translation.NOTIFY_COMPLETED, task.getQuest().getName(),
 						task.getText());
 			else
-				sendDialogueComponent(player, line);
+				sendDialogueComponent(p, line);
 
 			// Must check hasNext again because previous call to .next may have grabbed the final entry
 			if (dialogue.hasNext()) {
-				of(uuid).inDialogue = true;
+				of(player).inDialogue = true;
 				Bukkit.getScheduler().scheduleSyncDelayedTask(QuestWorld.getPlugin(),
-						() -> sendDialogue(uuid, task, dialogue), 70L);
+						() -> sendDialogue(player, task, dialogue), 70L);
 			}
 		});
 	}
@@ -479,7 +426,7 @@ public class PlayerStatus implements IPlayerStatus {
 
 	@Override
 	public boolean hasDeathEvent(IMission mission) {
-		return ifOnline(playerUUID).map(player -> {
+		return online(player).map(player -> {
 			IQuest quest = mission.getQuest();
 			String playerWorld = player.getWorld().getName();
 

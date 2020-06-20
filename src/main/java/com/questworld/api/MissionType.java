@@ -8,6 +8,7 @@ import org.bukkit.inventory.ItemStack;
 import com.questworld.api.annotation.Control;
 import com.questworld.api.contract.IMission;
 import com.questworld.api.contract.IMissionState;
+import com.questworld.api.menu.Icons;
 import com.questworld.api.menu.Menu;
 import com.questworld.api.menu.MenuData;
 import com.questworld.api.menu.MissionButton;
@@ -19,6 +20,10 @@ public abstract class MissionType {
 	private ItemStack selectorItem;
 	private boolean supportsTimeframes;
 	private Map<Integer, MenuData> menuData;
+	
+	public MissionType(String name, boolean supportsTimeframes) {
+		this(name, supportsTimeframes, null);
+	}
 
 	public MissionType(String name, boolean supportsTimeframes, ItemStack item) {
 		Log.fine("MissionType - Creating: " + name);
@@ -52,7 +57,14 @@ public abstract class MissionType {
 	}
 
 	public final ItemStack getSelectorItem() {
-		return selectorItem;
+		Icons icons = QuestWorld.getIcons();
+		ItemStack item = icons.mission_icons.getOrDefault(getName(), selectorItem);
+		
+		if(item == null) {
+			return icons.unknown_mission;
+		}
+		
+		return item;
 	}
 
 	public final String getName() {
@@ -79,10 +91,6 @@ public abstract class MissionType {
 
 	@Control
 	public void validate(IMissionState instance) {
-	}
-
-	protected final void setSelectorItem(ItemStack material) {
-		selectorItem = material.clone();
 	}
 
 	public String progressString(int current, int total) {

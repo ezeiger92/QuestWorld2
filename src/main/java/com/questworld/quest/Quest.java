@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -36,7 +35,7 @@ class Quest extends UniqueObject implements IQuestState {
 	private List<String> commands = new ArrayList<>();
 	private long cooldown = -1;
 	private int id = -1;
-	private ItemStack item = new ItemStack(Material.WRITABLE_BOOK);
+	private ItemStack item = ItemBuilder.sanitizeClone(QuestWorld.getIcons().default_category);
 	private int money = 0;
 	private String name = "";
 	private boolean ordered = false;
@@ -130,7 +129,7 @@ class Quest extends UniqueObject implements IQuestState {
 		partySize = config.getInt("min-party-size", 1);
 		permission = config.getString("permission", "");
 
-		if (i2.getType() != Material.AIR)
+		if (!ItemBuilder.isAir(i2))
 			item = i2;
 
 		loadMissions();
@@ -286,7 +285,7 @@ class Quest extends UniqueObject implements IQuestState {
 		rewards.clear();
 		for (int i = 0; i < 9; i++) {
 			ItemStack item = p.getInventory().getItem(i);
-			if (item != null && item.getType() != null && item.getType() != Material.AIR)
+			if (!ItemBuilder.isAir(item))
 				rewards.add(item.clone());
 		}
 	}

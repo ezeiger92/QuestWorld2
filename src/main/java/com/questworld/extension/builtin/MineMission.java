@@ -1,7 +1,5 @@
 package com.questworld.extension.builtin;
 
-import org.bukkit.Material;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -22,7 +20,7 @@ import com.questworld.util.Text;
 
 public class MineMission extends MissionType implements Listener, Decaying {
 	public MineMission() {
-		super("MINE_BLOCK", true, new ItemStack(Material.IRON_PICKAXE));
+		super("MINE_BLOCK", true);
 	}
 
 	@Override
@@ -50,8 +48,7 @@ public class MineMission extends MissionType implements Listener, Decaying {
 						"",
 						"&e> Click to set the block type").get(),
 				event -> {
-					Player p = (Player) event.getWhoClicked();
-					ItemStack mainItem = p.getInventory().getItemInMainHand();
+					ItemStack mainItem = PlayerTools.getMainHandItem(event.getWhoClicked());
 					if (mainItem != null && mainItem.getType().isBlock()) {
 						mainItem = mainItem.clone();
 						mainItem.setAmount(1);

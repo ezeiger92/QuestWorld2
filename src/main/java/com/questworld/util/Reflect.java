@@ -6,6 +6,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 
+import com.questworld.util.adapter.MultiAdapter;
+import com.questworld.util.adapter.TypedAdapter;
+import com.questworld.util.adapter.VersionAdapter;
+
 public final class Reflect {
 	private Reflect() {
 	}
@@ -58,7 +62,7 @@ public final class Reflect {
 		adapter.addAdapter(child);
 	}
 
-	public static VersionAdapter getAdapter() {
+	public static TypedAdapter getAdapter() {
 		return adapter;
 	}
 	

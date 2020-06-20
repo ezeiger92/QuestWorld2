@@ -7,14 +7,13 @@ import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import com.questworld.api.QuestWorld;
-import com.questworld.api.Translation;
 import com.questworld.api.annotation.Mutable;
+import com.questworld.api.annotation.Nullable;
 
 /**
  * This class provides a builder for ItemStacks. It is exactly what you expect,
@@ -27,39 +26,6 @@ import com.questworld.api.annotation.Mutable;
  * @author ezeiger92
  */
 public class ItemBuilder {
-	/**
-	 * A handy set of builder prototypes that were being created by hand too often.
-	 * 
-	 * @author Erik Zeiger
-	 */
-	public static enum Proto {
-		MAP_BACK(new ItemBuilder(Material.MAP).flagAll().display(QuestWorld.translate(Translation.button_back_general))
-				.get()),;
-		private ItemStack item;
-
-		Proto(ItemStack item) {
-			this.item = item;
-		}
-
-		/**
-		 * Creates a new ItemBuilder from the prototype item.
-		 * 
-		 * @return A new ItemBuilder
-		 */
-		public ItemBuilder get() {
-			return new ItemBuilder(item);
-		}
-
-		/**
-		 * Copies the prototype item.
-		 * 
-		 * @return A new ItemStack
-		 */
-		public ItemStack getItem() {
-			return item.clone();
-		}
-	}
-
 	/**
 	 * Null pointer safe tool for cloning ItemStacks
 	 * 
@@ -98,6 +64,30 @@ public class ItemBuilder {
 		return true;
 	}
 
+	private static final Material AIR_MATERIAL = Material.matchMaterial("AIR");
+	private static final Material FALLBACK_MATERIAL = Material.matchMaterial("STONE");
+	private static final ItemStack FALLBACK_ITEM = new ItemStack(FALLBACK_MATERIAL);
+	
+	public static boolean isAir(@Nullable ItemStack stack) {
+		return stack == null || stack.getType() == AIR_MATERIAL;
+	}
+	
+	public static ItemStack sanitize(@Nullable ItemStack stack) {
+		if (isAir(stack)) {
+			return FALLBACK_ITEM.clone();
+		}
+		
+		return stack;
+	}
+	
+	public static ItemStack sanitizeClone(@Nullable ItemStack stack) {
+		if (isAir(stack)) {
+			return FALLBACK_ITEM.clone();
+		}
+		
+		return stack.clone();
+	}
+
 	private static boolean isWildcard(ItemMeta meta) {
 		return meta != null && meta.hasLore() && meta.getLore().get(0).equals("*");
 	}
@@ -114,8 +104,8 @@ public class ItemBuilder {
 		ItemBuilder res = new ItemBuilder();
 		res.resultStack = stack;
 
-		if (stack.getType() == Material.AIR)
-			res.type(Material.BARRIER);
+		if (isAir(stack))
+			res.type(FALLBACK_MATERIAL);
 
 		return res;
 	}
@@ -131,10 +121,7 @@ public class ItemBuilder {
 	 * @param stack Base item to work with
 	 */
 	public ItemBuilder(ItemStack stack) {
-		resultStack = stack.clone();
-
-		if (stack.getType() == Material.AIR)
-			type(Material.BARRIER);
+		resultStack = sanitizeClone(stack);
 	}
 
 	/**
@@ -142,11 +129,13 @@ public class ItemBuilder {
 	 *
 	 * @param type Material of item
 	 */
-	public ItemBuilder(Material type) {
-		resultStack = new ItemStack(type);
-
-		if (type == Material.AIR)
-			type(Material.BARRIER);
+	public ItemBuilder(@Nullable Material type) {
+		if (type == null || type == AIR_MATERIAL) {
+			resultStack = FALLBACK_ITEM.clone();
+		}
+		else {
+			resultStack = new ItemStack(type);
+		}
 	}
 
 	/**
@@ -180,26 +169,17 @@ public class ItemBuilder {
 	}
 
 	/**
-	 * Sets stack damage
-	 *
-	 * @param damage Target damage for stack
-	 * 
-	 * @return this, for chaining
-	 */
-	public @Mutable ItemBuilder damage(int damage) {
-		Reflect.getAdapter().setItemDamage(resultStack, damage);
-		
-		return this;
-	}
-
-	/**
 	 * Sets stack material
 	 *
 	 * @param type Material
 	 * 
 	 * @return this, for chaining
 	 */
-	public @Mutable ItemBuilder type(Material type) {
+	public @Mutable ItemBuilder type(@Nullable Material type) {
+		if (type == null) {
+			type = AIR_MATERIAL;
+		}
+		
 		resultStack.setType(type);
 		return this;
 	}
@@ -215,18 +195,6 @@ public class ItemBuilder {
 	 */
 	public @Mutable ItemBuilder skull(OfflinePlayer player) {
 		Reflect.getAdapter().makePlayerHead(resultStack, player);
-		return this;
-	}
-
-	/**
-	 * Sets the mob type, given the current material supports mob types.
-	 * 
-	 * @param entity The type of entity
-	 * @return this, for chaining
-	 */
-	// TODO: 1.13
-	public @Mutable ItemBuilder mob(EntityType entity) {
-		Reflect.getAdapter().makeSpawnEgg(resultStack, entity);
 		return this;
 	}
 
