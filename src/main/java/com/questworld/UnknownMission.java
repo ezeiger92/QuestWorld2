@@ -8,6 +8,7 @@ import com.questworld.api.MissionType;
 import com.questworld.api.QuestWorld;
 import com.questworld.api.Translation;
 import com.questworld.api.contract.IMission;
+import com.questworld.api.lang.MissionReplacements;
 import com.questworld.util.Log;
 
 public class UnknownMission extends MissionType {
@@ -33,7 +34,7 @@ public class UnknownMission extends MissionType {
 	@Override
 	protected String userInstanceDescription(IMission instance) {
 		
-		return QuestWorld.translate(Translation.TYPE_UNKNOWN, getName());
+		return QuestWorld.translate(Translation.TYPE_UNKNOWN, new MissionReplacements(instance));
 	}
 
 	@Override

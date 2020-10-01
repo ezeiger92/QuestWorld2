@@ -21,6 +21,8 @@ import com.questworld.QuestWorldPlugin;
 import com.questworld.api.QuestWorld;
 import com.questworld.api.Translation;
 import com.questworld.api.contract.IPartyState;
+import com.questworld.api.lang.PartyReplacements;
+import com.questworld.api.lang.PlayerReplacements;
 import com.questworld.util.PlayerTools;
 import com.questworld.util.json.JsonBlob;
 
@@ -88,7 +90,7 @@ public class Party implements IPartyState {
 	public void invitePlayer(Player p) {
 
 		PlayerTools.sendTranslation(p, true, Translation.PARTY_PLAYER_INVITED,
-				Bukkit.getOfflinePlayer(leader).getName());
+				new PartyReplacements(this));
 		
 		PlayerTools.tellraw(p, JsonBlob.fromLegacy(QuestWorld.translate(p, Translation.PARTY_ACCEPT_TEXT), GREEN, BOLD,
 				HOVER_TEXT(JsonBlob.fromLegacy(QuestWorld.translate(p, Translation.PARTY_ACCEPT_HOVER), GRAY)),
@@ -97,7 +99,7 @@ public class Party implements IPartyState {
 						int maxParty = QuestWorld.getPlugin().getConfig().getInt("party.max-members");
 						if (getSize() >= maxParty) {
 							PlayerTools.sendTranslation(p, true, Translation.PARTY_ERROR_FULL,
-									Integer.toString(maxParty));
+									new PartyReplacements(this));
 						}
 						else
 							playerJoin(p);
@@ -116,11 +118,10 @@ public class Party implements IPartyState {
 	public void playerJoin(Player p) {
 		for (OfflinePlayer member : getFullGroup())
 			if (member.isOnline())
-				PlayerTools.sendTranslation((Player) member, true, Translation.PARTY_GROUP_JOIN, p.getName());
+				PlayerTools.sendTranslation((Player) member, true, Translation.PARTY_GROUP_JOIN, new PartyReplacements(this), new PlayerReplacements(p));
 
 		members.add(p.getUniqueId());
-		PlayerTools.sendTranslation(p, true, Translation.PARTY_PLAYER_JOINED, p.getName(),
-				Bukkit.getOfflinePlayer(leader).getName());
+		PlayerTools.sendTranslation(p, true, Translation.PARTY_PLAYER_JOINED, new PartyReplacements(this), new PlayerReplacements(p));
 		QuestWorldPlugin.getAPI().getPlayerStatus(p).getTracker().setPartyLeader(leader);
 		pending.remove(p.getUniqueId());
 		save();
@@ -138,21 +139,20 @@ public class Party implements IPartyState {
 		switch (reason) {
 			case ABANDON:
 				for (Player p : remainingOnlineGroup)
-					PlayerTools.sendTranslation(p, true, Translation.PARTY_GROUP_ABANDON, traitor.getName());
+					PlayerTools.sendTranslation(p, true, Translation.PARTY_GROUP_ABANDON, new PartyReplacements(this), new PlayerReplacements(traitor));
 				break;
 
 			case DISCONNECT:
 				for (Player p : remainingOnlineGroup)
-					PlayerTools.sendTranslation(p, true, Translation.PARTY_GROUP_ABANDON, traitor.getName());
+					PlayerTools.sendTranslation(p, true, Translation.PARTY_GROUP_ABANDON, new PartyReplacements(this), new PlayerReplacements(traitor));
 				break;
 
 			case KICKED:
 				if (traitor.isOnline())
-					PlayerTools.sendTranslation((Player) traitor, true, Translation.PARTY_PLAYER_KICKED,
-							traitor.getName());
+					PlayerTools.sendTranslation((Player) traitor, true, Translation.PARTY_PLAYER_KICKED, new PartyReplacements(this), new PlayerReplacements(traitor));
 
 				for (Player p : remainingOnlineGroup)
-					PlayerTools.sendTranslation(p, true, Translation.PARTY_GROUP_KICK, traitor.getName());
+					PlayerTools.sendTranslation(p, true, Translation.PARTY_GROUP_KICK, new PartyReplacements(this), new PlayerReplacements(traitor));
 				break;
 		}
 

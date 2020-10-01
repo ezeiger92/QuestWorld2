@@ -22,6 +22,8 @@ import com.questworld.api.event.CancellableEvent;
 import com.questworld.api.event.CategoryDeleteEvent;
 import com.questworld.api.event.MissionDeleteEvent;
 import com.questworld.api.event.QuestDeleteEvent;
+import com.questworld.api.lang.CategoryReplacements;
+import com.questworld.api.lang.QuestReplacements;
 import com.questworld.util.EntityTools;
 import com.questworld.util.ItemBuilder;
 import com.questworld.util.PlayerTools;
@@ -70,7 +72,7 @@ public class QBDialogue {
 							QuestWorld.getFacade().deleteCategory(category);
 							p2.closeInventory();
 							QuestBook.openCategoryList(p2);
-							PlayerTools.sendTranslation(p2, true, Translation.CATEGORY_DELETED, category.getName());
+							PlayerTools.sendTranslation(p2, true, Translation.CATEGORY_DELETED, new CategoryReplacements(category));
 						}
 					}
 					else if (q instanceof IQuest) {
@@ -83,7 +85,7 @@ public class QBDialogue {
 
 							p2.closeInventory();
 							QuestBook.openQuestList(p2, quest.getCategory());
-							PlayerTools.sendTranslation(p2, true, Translation.QUEST_DELETED, quest.getName());
+							PlayerTools.sendTranslation(p2, true, Translation.QUEST_DELETED, new QuestReplacements(quest));
 						}
 					}
 					else if (q instanceof IMission) {

@@ -16,6 +16,8 @@ import com.questworld.api.SinglePrompt;
 import com.questworld.api.Translation;
 import com.questworld.api.contract.IMission;
 import com.questworld.api.contract.IMissionState;
+import com.questworld.api.lang.CustomReplacements;
+import com.questworld.api.lang.MissionReplacements;
 import com.questworld.manager.PlayerStatus;
 import com.questworld.manager.ProgressTracker;
 import com.questworld.util.EntityTools;
@@ -101,10 +103,10 @@ public class MissionButton {
 					Player p = (Player) event.getWhoClicked();
 
 					PlayerTools.promptInput(p, new SinglePrompt(
-							PlayerTools.makeTranslation(true, Translation.KILLMISSION_NAME_EDIT), (c, s) -> {
+							PlayerTools.makeTranslation(true, Translation.KILLMISSION_NAME_EDIT, new MissionReplacements(changes)), (c, s) -> {
 								changes.setCustomString(Text.deserializeNewline(Text.colorize(s)));
 								if (changes.apply()) {
-									PlayerTools.sendTranslation(p, true, Translation.KILLMISSION_NAME_SET);
+									PlayerTools.sendTranslation(p, true, Translation.KILLMISSION_NAME_SET, new MissionReplacements(changes));
 								}
 								QuestBook.openQuestMissionEditor(p, changes);
 								return true;
@@ -130,10 +132,10 @@ public class MissionButton {
 					}
 					else {
 						PlayerTools.promptInput(p, new SinglePrompt(
-								PlayerTools.makeTranslation(true, Translation.MISSION_NAME_EDIT), (c, s) -> {
+								PlayerTools.makeTranslation(true, Translation.MISSION_NAME_EDIT, new MissionReplacements(changes)), (c, s) -> {
 									changes.setDisplayName(Text.deserializeNewline(Text.colorize(s)));
 									if (changes.apply()) {
-										PlayerTools.sendTranslation(p, true, Translation.MISSION_NAME_SET);
+										PlayerTools.sendTranslation(p, true, Translation.MISSION_NAME_SET, new MissionReplacements(changes));
 										QuestBook.openQuestMissionEditor(p, changes.getSource());
 									}
 									return true;
@@ -186,22 +188,28 @@ public class MissionButton {
 		int endoff = dialogue.size() - index;
 
 		PlayerTools.promptInputOrCommand(p,
-				new SinglePrompt(PlayerTools.makeTranslation(true, Translation.MISSION_DIALOG_ADD), null, (c, s) -> {
+				new SinglePrompt(PlayerTools.makeTranslation(true, Translation.MISSION_DIALOG_ADD, new MissionReplacements(mission)), null, (c, s) -> {
 					if (s.equalsIgnoreCase("exit()") || s.equalsIgnoreCase("/exit")) {
 						IMissionState state = mission.getState();
 						state.setDialogue(dialogue);
 						if (state.apply()) {
 							String filename = ProgressTracker.dialogueFile(state.getSource()).getName();
-							PlayerTools.sendTranslation(p, true, Translation.MISSION_DIALOG_SET, filename);
+							PlayerTools.sendTranslation(p, true, Translation.MISSION_DIALOG_SET, new CustomReplacements().Add("path", filename));
 							dialogueThing(p, mission);
 						}
 						return true;
 					}
 
-					Translation translator = s.startsWith("/") ? Translation.MISSION_COMMAND_ADDED
-							: Translation.MISSION_DIALOG_ADDED;
+					String next;
+					if (s.startsWith("/")) {
+						next = PlayerTools.makeTranslation(true, Translation.MISSION_COMMAND_ADDED, new CustomReplacements().Add("command", s));
+					}
+					else {
+						next = PlayerTools.makeTranslation(true, Translation.MISSION_DIALOG_ADDED, new CustomReplacements().Add("line", s));
+					}
+					
 					dialogue.add(dialogue.size() - endoff, Text.deserializeNewline(Text.colorize(s)));
-					SinglePrompt.setNextDisplay(c, PlayerTools.makeTranslation(true, translator, s));
+					SinglePrompt.setNextDisplay(c, next);
 					QuestWorld.getSounds().DIALOG_ADD.playTo(p);
 
 					return false;

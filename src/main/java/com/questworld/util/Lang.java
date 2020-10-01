@@ -4,11 +4,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import com.questworld.api.Translator;
+import com.questworld.api.lang.PlaceholderSupply;
 
 public final class Lang implements Reloadable {
 	private static String langPath(String langCode) {
@@ -103,16 +106,8 @@ public final class Lang implements Reloadable {
 		currentLang = langPath;
 		return true;
 	}
-
-	private String replaceAll(String translation, String[] search, String[] replacements) {
-		int len = Math.min(replacements.length, search.length);
-		for (int i = 0; i < len; ++i)
-			translation = translation.replace(search[i], replacements[i]);
-
-		return translation;
-	}
-
-	public String translateRaw(Translator key, String... replacements) {
+	
+	private String getTemplate(Translator key) {
 		String translation = languages.get(currentLang).getString(key.path());
 		if (translation == null) {
 			translation = languages.get(fallbackLang).getString(key.path());
@@ -125,8 +120,31 @@ public final class Lang implements Reloadable {
 			else
 				Log.warning("Lang " + currentLang + " missing " + key.toString());
 		}
+		
+		return translation;
+	}
 
-		return replaceAll(translation, key.placeholders(), replacements);
+	private static final Pattern PH_KEY = Pattern.compile("%([\\w\\._-]+)%");
+	
+	public String translateRaw(Translator key, PlaceholderSupply<?>... replacementSource) {
+		String template = getTemplate(key);
+		Matcher m = PH_KEY.matcher(template);
+
+		Log.info("Translating " + key.path() + " with " + replacementSource.length + " sources");
+		while (m.find()) {
+			
+			Log.info("    Attempting replacment for " + m.group(1));
+			for (PlaceholderSupply<?> e : replacementSource) {
+				String replacement = e.getReplacement(m.group(1));
+				
+				if (!replacement.isEmpty()) {
+					template = template.replace(m.group(), replacement);
+					break;
+				}
+			}
+		}
+		
+		return template;
 	}
 
 	@Override

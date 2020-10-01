@@ -19,8 +19,7 @@ public class Menu implements InventoryHolder {
 	private Inventory inv;
 	private Consumer<InventoryClickEvent>[] handlers;
 	
-	// Now there isn't even a way to name an inventory with Bukkit. How does this get worse every single time.
-	@SuppressWarnings("unused")
+	// I am le dumb
 	private final String title;
 
 	@SuppressWarnings("unchecked")
@@ -32,6 +31,10 @@ public class Menu implements InventoryHolder {
 	}
 
 	private Inventory makeInv(int cells) {
+		if (title != null) {
+			return Bukkit.createInventory(this, cells, title);
+		}
+		
 		return Bukkit.createInventory(this, cells);
 	}
 

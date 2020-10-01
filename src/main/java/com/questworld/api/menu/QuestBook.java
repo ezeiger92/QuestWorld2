@@ -28,6 +28,10 @@ import com.questworld.api.contract.IParty.LeaveReason;
 import com.questworld.api.contract.IPlayerStatus;
 import com.questworld.api.contract.IQuest;
 import com.questworld.api.contract.IQuestState;
+import com.questworld.api.lang.CategoryReplacements;
+import com.questworld.api.lang.CustomReplacements;
+import com.questworld.api.lang.PlayerReplacements;
+import com.questworld.api.lang.QuestReplacements;
 import com.questworld.util.ItemBuilder;
 import com.questworld.util.PlayerTools;
 import com.questworld.util.Text;
@@ -113,6 +117,8 @@ public class QuestBook {
 		QuestWorld.getSounds().QUEST_CLICK.playTo(p);
 		IPlayerStatus playerStatus = QuestWorld.getPlayerStatus(p);
 		playerStatus.update();
+		
+		PlayerReplacements playerPH = new PlayerReplacements(playerStatus);
 
 		Menu menu = new Menu(1, QuestWorld.translate(p, Translation.gui_title));
 
@@ -122,43 +128,34 @@ public class QuestBook {
 		for (ICategory category : QuestWorld.getFacade().getCategories()) {
 			IQuest parent = category.getParent();
 
+			CategoryReplacements categoryPH = new CategoryReplacements(playerStatus, category);
+			
 			if (!category.isHidden()) {
 				if (!category.isWorldEnabled(p.getWorld().getName())) {
 					view.addButton(category.getID(),
 							new ItemBuilder(icons().category_locked)
 									.wrapText(category.getName(), "",
-											QuestWorld.translate(p, Translation.LOCKED_WORLD, p.getWorld().getName()))
+											QuestWorld.translate(p, Translation.LOCKED_WORLD, categoryPH, playerPH))
 									.get(),
 							null, false);
 				}
 				else if (!PlayerTools.checkPermission(p, category.getPermission())) {
-					String parts[] = category.getPermission().split(" ", 2);
 					view.addButton(category.getID(),
 							new ItemBuilder(icons().category_locked).wrapText(category.getName(), "",
-									QuestWorld.translate(p, Translation.LOCKED_NO_PERM, parts[0], parts[parts.length - 1]))
+									QuestWorld.translate(p, Translation.LOCKED_NO_PERM, categoryPH, playerPH))
 									.get(),
 							null, false);
 				}
 				else if (parent != null && !playerStatus.hasFinished(parent)) {
 					view.addButton(category.getID(),
 							new ItemBuilder(icons().category_locked).wrapText(category.getName(), "",
-									QuestWorld.translate(p, Translation.LOCKED_PARENT, category.getParent().getName()))
+									QuestWorld.translate(p, Translation.LOCKED_PARENT, categoryPH, playerPH))
 									.get(),
 							null, false);
 				}
 				else {
-
-					int questCount = playerStatus.countQuests(category, null);
-					int finishedCount = playerStatus.getProgress(category);
 					view.addButton(category.getID(),
-							new ItemBuilder(category.getItem()).wrapText((category.getName() + "\n"
-									+ QuestWorld.translate(p, Translation.CATEGORY_DESC, String.valueOf(questCount),
-											String.valueOf(finishedCount),
-											String.valueOf(playerStatus.countQuests(category, QuestStatus.AVAILABLE)),
-											String.valueOf(playerStatus.countQuests(category, QuestStatus.ON_COOLDOWN)),
-											String.valueOf(
-													playerStatus.countQuests(category, QuestStatus.REWARD_CLAIMABLE)),
-											Text.progressBar(finishedCount, questCount, null))).split("\n"))
+							new ItemBuilder(category.getItem()).wrapText(QuestWorld.translate(p, Translation.CATEGORY_DESC, categoryPH, playerPH))
 									.get(),
 							event -> {
 								Player p2 = (Player) event.getWhoClicked();
@@ -304,18 +301,18 @@ public class QuestBook {
 													if (player != null) {
 														if (QuestWorld.getParty(player) == null) {
 															PlayerTools.sendTranslation(p2, true,
-																	Translation.PARTY_LEADER_INVITED, name);
+																	Translation.PARTY_LEADER_INVITED, new PlayerReplacements(player));
 															party.invitePlayer(player);
 															openPartyMenu(p);
 															return true;
 														}
 														else
 															PlayerTools.sendTranslation(p2, true,
-																	Translation.PARTY_ERROR_MEMBER, name);
+																	Translation.PARTY_ERROR_MEMBER, new PlayerReplacements(player));
 													}
 													else {
 														PlayerTools.sendTranslation(p2, true,
-																Translation.PARTY_ERROR_OFFLINE, name);
+																Translation.PARTY_ERROR_OFFLINE, new PlayerReplacements(name));
 													}
 													return false;
 												}));
@@ -368,6 +365,8 @@ public class QuestBook {
 				openMainMenu((Player) event.getWhoClicked());
 			});
 		}
+		
+		PlayerReplacements playerPH = new PlayerReplacements(playerStatus);
 
 		view.addFrameButton(4, partyMenuItem(p), Buttons.partyMenu(), true);
 
@@ -375,45 +374,37 @@ public class QuestBook {
 			if(!quest.isEnabled()) {
 				continue;
 			}
-
-			IQuest parent = quest.getParent();
+			
+			QuestReplacements questPH = new QuestReplacements(playerStatus, quest);
 
 			QuestStatus questStatus = playerStatus.getStatus(quest);
 
 			Translation translation;
-			String[] keys;
 
 			switch(playerStatus.getStatus(quest)) {
 				case LOCKED_WORLD:
 					translation = Translation.LOCKED_WORLD;
-					keys = new String[]{ p.getWorld().getName() };
 					break;
 
 				case LOCKED_NO_PERM: {
-					String parts[] = quest.getPermission().split(" ", 2);
 					translation = Translation.LOCKED_NO_PERM;
-					keys = new String[]{ parts[0], parts[parts.length - 1] };
 					break;
 				}
 
 				case LOCKED_PARENT:
 					translation = Translation.LOCKED_PARENT;
-					keys = new String[]{ parent.getName() };
 					break;
 
 				case LOCKED_NO_PARTY:
 					translation = Translation.LOCKED_NO_PARTY;
-					keys = new String[0];
 					break;
 
 				case LOCKED_PARTY_SIZE:
 					translation = Translation.LOCKED_SMALL_PARTY;
-					keys = new String[]{ String.valueOf(quest.getPartySize()) };
 					break;
 
 				default:
 					translation = null;
-					keys = null;
 					break;
 			}
 
@@ -444,7 +435,7 @@ public class QuestBook {
 			else {
 				view.addButton(quest.getID(),
 						glassPane.wrapText(quest.getName(), "",
-								QuestWorld.translate(p, translation, keys)).getNew(),
+								QuestWorld.translate(p, translation, questPH, playerPH)).getNew(),
 						null, false);
 			}
 		}
@@ -736,13 +727,15 @@ public class QuestBook {
 					Player p2 = (Player) event.getWhoClicked();
 					
 					PlayerTools.promptInput(p2, new SinglePrompt(
-							PlayerTools.makeTranslation(true, Translation.CATEGORY_NAME_EDIT, category.getName()),
+							PlayerTools.makeTranslation(true, Translation.CATEGORY_NAME_EDIT, new CategoryReplacements(category)),
 							(c, s) -> {
 								String oldName = category.getName();
 								s = Text.deserializeNewline(Text.colorize(s));
 								changes.setName(s);
 								if (changes.apply())
-									PlayerTools.sendTranslation(p2, true, Translation.CATEGORY_NAME_SET, s, oldName);
+									PlayerTools.sendTranslation(p2, true, Translation.CATEGORY_NAME_SET,
+											new CategoryReplacements(category),
+											new CustomReplacements().Add("name_old", oldName));
 
 								QuestBook.openCategoryEditor(p2, category);
 								return true;
@@ -779,13 +772,14 @@ public class QuestBook {
 					Player p2 = (Player) event.getWhoClicked();
 					
 					PlayerTools.promptInput(p2, new SinglePrompt(PlayerTools.makeTranslation(true,
-							Translation.CATEGORY_PERM_EDIT, category.getName(), category.getPermission()), (c, s) -> {
+							Translation.CATEGORY_PERM_EDIT, new CategoryReplacements(category)), (c, s) -> {
 								String permission = s.equalsIgnoreCase("none") ? "" : s;
 								String oldPerm = category.getPermission();
 								changes.setPermission(permission);
 								if (changes.apply())
 									PlayerTools.sendTranslation(p2, true, Translation.CATEGORY_PERM_SET,
-											category.getName(), s, oldPerm);
+											new CategoryReplacements(category),
+											new CustomReplacements().Add("perm_old", oldPerm));
 
 								QuestBook.openCategoryEditor(p2, category);
 								return true;
@@ -918,12 +912,14 @@ public class QuestBook {
 					Player p2 = (Player) event.getWhoClicked();
 					
 					PlayerTools.promptInput(p2, new SinglePrompt(
-							PlayerTools.makeTranslation(true, Translation.QUEST_NAME_EDIT, quest.getName()), (c, s) -> {
+							PlayerTools.makeTranslation(true, Translation.QUEST_NAME_EDIT, new QuestReplacements(quest)), (c, s) -> {
 								String oldName = quest.getName();
 								s = Text.deserializeNewline(Text.colorize(s));
 								changes.setName(s);
 								if (changes.apply())
-									PlayerTools.sendTranslation(p2, true, Translation.QUEST_NAME_SET, s, oldName);
+									PlayerTools.sendTranslation(p2, true, Translation.QUEST_NAME_SET,
+											new QuestReplacements(quest),
+											new CustomReplacements().Add("name_old", oldName));
 
 								openQuestEditor(p2, quest);
 								return true;
@@ -1036,13 +1032,14 @@ public class QuestBook {
 					Player p2 = (Player) event.getWhoClicked();
 					
 					PlayerTools.promptInput(p2, new SinglePrompt(PlayerTools.makeTranslation(true,
-							Translation.QUEST_PERM_EDIT, quest.getName(), quest.getPermission()), (c, s) -> {
+							Translation.QUEST_PERM_EDIT, new QuestReplacements(quest)), (c, s) -> {
 								String permission = s.equalsIgnoreCase("none") ? "" : s;
 								String oldPerm = quest.getPermission();
 								changes.setPermission(permission);
 								if (changes.apply())
-									PlayerTools.sendTranslation(p2, true, Translation.QUEST_PERM_SET, quest.getName(),
-											s, oldPerm);
+									PlayerTools.sendTranslation(p2, true, Translation.QUEST_PERM_SET,
+											new QuestReplacements(quest),
+											new CustomReplacements().Add("perm_old", oldPerm));
 
 								openQuestEditor(p2, quest);
 								return true;

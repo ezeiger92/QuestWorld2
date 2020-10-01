@@ -25,6 +25,7 @@ import com.questworld.api.contract.IMission;
 import com.questworld.api.contract.IPlayerStatus;
 import com.questworld.api.contract.IQuest;
 import com.questworld.api.event.MissionCompletedEvent;
+import com.questworld.api.lang.MissionReplacements;
 import com.questworld.util.PlayerTools;
 import com.questworld.util.Text;
 
@@ -103,14 +104,17 @@ public class PlayerStatus implements IPlayerStatus {
 			tracker.setMissionProgress(task, 0);
 			online(player)
 					.ifPresent(player -> PlayerTools.sendTranslation(player, false, Translation.NOTIFY_TIME_FAIL,
-							task.getQuest().getName(), task.getText(), getProgress(task) + "/" + task.getAmount()));
+							new MissionReplacements(this, task)));
+							//task.getQuest().getName(), task.getText(), getProgress(task) + "/" + task.getAmount()));
 			return false;
 		}
 		else if (getProgress(task) == 0 && amount > 0) {
 			tracker.setMissionEnd(task, System.currentTimeMillis() + task.getTimeframe() * 60L * 1000L);
 
 			online(player).ifPresent(player -> PlayerTools.sendTranslation(player, false,
-					Translation.NOTIFY_TIME_START, task.getText(), Text.timeFromNum(task.getTimeframe())));
+					Translation.NOTIFY_TIME_START,
+					new MissionReplacements(this, task)));
+					//task.getText(), Text.timeFromNum(task.getTimeframe())));
 		}
 		return true;
 	}
@@ -127,7 +131,7 @@ public class PlayerStatus implements IPlayerStatus {
 	}
 	
 	public void tick(IMission mission) {
-		if (isMissionActive(mission) && player.isOnline())
+		if (player.isOnline() && isMissionActive(mission))
 			((Ticking) mission.getType()).onTick((Player)player, new MissionSet.Result(mission, this));
 	}
 
@@ -314,8 +318,7 @@ public class PlayerStatus implements IPlayerStatus {
 				// Previously "check !task.getType().getID().equals("ACCEPT_QUEST_FROM_NPC") &&
 				// "
 				// This was done to keep quests quiet when interacting with citizens
-				PlayerTools.sendTranslation(p, false, Translation.NOTIFY_COMPLETED, task.getQuest().getName(),
-						task.getText());
+				PlayerTools.sendTranslation(p, false, Translation.NOTIFY_COMPLETED, new MissionReplacements(of(player), task));
 			else
 				sendDialogueComponent(p, line);
 

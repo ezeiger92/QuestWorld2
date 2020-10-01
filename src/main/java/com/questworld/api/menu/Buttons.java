@@ -11,6 +11,9 @@ import com.questworld.api.Translation;
 import com.questworld.api.contract.ICategory;
 import com.questworld.api.contract.ICategoryState;
 import com.questworld.api.contract.IQuest;
+import com.questworld.api.lang.CategoryReplacements;
+import com.questworld.api.lang.CustomReplacements;
+import com.questworld.api.lang.QuestReplacements;
 import com.questworld.util.PlayerTools;
 import com.questworld.util.Text;
 
@@ -35,10 +38,10 @@ public class Buttons {
 			String defaultCategoryName = QuestWorld.translate(p, Translation.DEFAULT_CATEGORY);
 
 			PlayerTools.promptInput(p, new SinglePrompt(
-					PlayerTools.makeTranslation(true, Translation.CATEGORY_NAME_EDIT, defaultCategoryName), (c, s) -> {
+					PlayerTools.makeTranslation(true, Translation.CATEGORY_NAME_EDIT, new CustomReplacements().Add("name", defaultCategoryName)), (c, s) -> {
 						s = Text.deserializeNewline(Text.colorize(s));
-						QuestWorld.getFacade().createCategory(s, id);
-						PlayerTools.sendTranslation(p, true, Translation.CATEGORY_CREATED, s);
+						ICategory category = QuestWorld.getFacade().createCategory(s, id);
+						PlayerTools.sendTranslation(p, true, Translation.CATEGORY_CREATED, new CategoryReplacements(category));
 						QuestBook.openCategoryList(p);
 
 						return true;
@@ -67,12 +70,12 @@ public class Buttons {
 			String defaultQuestName = QuestWorld.translate(p, Translation.DEFAULT_QUEST);
 
 			PlayerTools.promptInput(p, new SinglePrompt(
-					PlayerTools.makeTranslation(true, Translation.QUEST_NAME_EDIT, defaultQuestName), (c, s) -> {
+					PlayerTools.makeTranslation(true, Translation.QUEST_NAME_EDIT, new CustomReplacements().Add("name", defaultQuestName)), (c, s) -> {
 						ICategoryState state = category.getState();
 						s = Text.deserializeNewline(Text.colorize(s));
-						state.addQuest(s, id);
+						IQuest quest = state.addQuest(s, id);
 						if (state.apply()) {
-							PlayerTools.sendTranslation(p, true, Translation.QUEST_CREATED, s);
+							PlayerTools.sendTranslation(p, true, Translation.QUEST_CREATED, new QuestReplacements(quest));
 						}
 
 						QuestBook.openQuestList(p, category);

@@ -92,9 +92,7 @@ public class Icons extends ConfigObject {
 		public ItemStack world_display; // grass block
 		public Map<String, ItemStack> custom_world_display = new HashMap<>();
 		
-		public ItemStack any_mob; // nether star
 		public ItemStack unknown_mob; // barrier
-		public Map<String, ItemStack> mob_selector = new HashMap<>();
 	}
 	
 	public Items items = new Items();

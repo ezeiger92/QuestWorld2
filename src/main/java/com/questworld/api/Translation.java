@@ -1,5 +1,7 @@
 package com.questworld.api;
 
+import com.questworld.api.lang.PlaceholderSupply;
+
 /**
  * The default translation mapping from <tt>lang/**_**.yml</tt>
  * 
@@ -125,10 +127,17 @@ public enum Translation implements Translator {
 
 	private String path;
 	private String[] placeholders;
+	private Class<? extends PlaceholderSupply<?>>[] sources;
 
-	Translation(String path, String... placeholders) {
+	Translation(String path, String first, String... placeholders) {
 		this.path = path;
-		this.placeholders = wrap(placeholders);
+		this.placeholders = wrap(first, placeholders);
+	}
+
+	@SafeVarargs
+	Translation(String path, Class<? extends PlaceholderSupply<?>>... sources) {
+		this.path = path;
+		this.sources = sources;
 	}
 
 	Translation() {
@@ -144,6 +153,11 @@ public enum Translation implements Translator {
 	@Override
 	public String[] placeholders() {
 		return placeholders.clone();
+	}
+	
+	@Override
+	public Class<? extends PlaceholderSupply<?>>[] sources() {
+		return sources;
 	}
 
 	@Override

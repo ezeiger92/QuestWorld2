@@ -44,10 +44,6 @@ class Category extends UniqueObject implements ICategoryState {
 		copy(copy);
 	}
 
-	/*
-	 * @Deprecated public Category(Map<String, Object> data) { loadMap(data); }
-	 */
-
 	// Package
 	Category(int id, YamlConfiguration config, Facade facade) {
 		this.id = id;
@@ -145,10 +141,13 @@ class Category extends UniqueObject implements ICategoryState {
 	}
 
 	@Override
-	public void addQuest(String name, int id) {
+	public IQuest addQuest(String name, int id) {
 		// Quests should never reference a CategoryState, getSource always returns the
 		// actual Category
-		quests.put(id, facade.createQuest(name, id, getSource()));
+		Quest quest = facade.createQuest(name, id, getSource());
+		quests.put(id, quest);
+		
+		return quest;
 	}
 
 	public Facade getFacade() {
@@ -207,19 +206,6 @@ class Category extends UniqueObject implements ICategoryState {
 		return true;
 	}
 
-	/*
-	 * @Deprecated public Map<String, Object> serialize() { HashMap<String, Object>
-	 * result = new HashMap<>();
-	 * 
-	 * Quest parent = getParent(); result.put("unique", getUniqueId().toString());
-	 * result.put("index", id); result.put("hidden", hidden); result.put("name",
-	 * name); result.put("permission", permission); result.put("item", item);
-	 * result.put("parent", parent != null ? parent.getUniqueId().toString() :
-	 * null); result.put("world-blacklist", world_blacklist);
-	 * 
-	 * return result; }
-	 */
-
 	protected void copy(Category source) {
 		id = source.id;
 		facade = source.facade;
@@ -262,25 +248,4 @@ class Category extends UniqueObject implements ICategoryState {
 	public boolean discard() {
 		return false;
 	}
-
-	/*
-	 * @Deprecated WeakReference<Quest> fancyParentResolveFunction(Integer id) {
-	 * if(id == null) return null;
-	 * 
-	 * Quest q = facade.getQuest(id.longValue()); if(q == null) return null;
-	 * 
-	 * return new WeakReference<>(q); }
-	 * 
-	 * @Deprecated
-	 * 
-	 * @SuppressWarnings("unchecked") private void loadMap(Map<String, Object> data)
-	 * { id = (Integer)data.getOrDefault("index", -1); hidden =
-	 * (Boolean)data.getOrDefault("hidden", false); name =
-	 * (String)data.getOrDefault("name", ""); permission =
-	 * (String)data.getOrDefault("permission", ""); item =
-	 * (ItemStack)data.getOrDefault("item", new ItemStack(Material.STONE)); parent =
-	 * fancyParentResolveFunction((Integer)data.getOrDefault("parent", null));
-	 * world_blacklist = (List<String>)data.getOrDefault("world-blacklist", new
-	 * ArrayList<>()); }
-	 */
 }

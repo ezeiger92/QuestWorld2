@@ -22,9 +22,11 @@ class CategoryState extends Category {
 	}
 
 	@Override
-	public void addQuest(String name, int id) {
-		super.addQuest(name, id);
+	public IQuest addQuest(String name, int id) {
+		IQuest result = super.addQuest(name, id);
 		changeBits |= BitFlag.getBits(Member.QUESTS);
+		
+		return result;
 	}
 
 	@Override

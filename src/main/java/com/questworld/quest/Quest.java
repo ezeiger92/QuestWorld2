@@ -521,14 +521,4 @@ class Quest extends UniqueObject implements IQuestState {
 	public boolean equals(Object o) {
 		return super.equals(o);
 	}
-
-	/*
-	 * @Deprecated Quest(Map<String, Object> data) { loadMap(data); }
-	 * 
-	 * @Deprecated public Map<String, Object> serialize() { return null; }
-	 * 
-	 * @Deprecated private void loadMap(Map<String, Object> data) {
-	 * 
-	 * }
-	 */
 }

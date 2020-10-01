@@ -20,7 +20,7 @@ public interface ICategoryState extends ICategory {
 	// setQuests
 	// setWorlds
 
-	void addQuest(String name, int id);
+	IQuest addQuest(String name, int id);
 
 	void removeQuest(IQuest quest);
 

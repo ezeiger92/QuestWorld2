@@ -13,6 +13,7 @@ import org.bukkit.inventory.ItemStack;
 import com.questworld.api.QuestWorld;
 import com.questworld.api.Translation;
 import com.questworld.api.annotation.Nullable;
+import com.questworld.api.lang.CustomReplacements;
 
 public final class Text {
 	private Text() {
@@ -111,19 +112,24 @@ public final class Text {
 	}
 
 	public static String stringOf(Location location) {
-		if (location.getWorld() != null)
-			return QuestWorld.translate(Translation.WORLD_FMT, String.valueOf(location.getBlockX()),
-					String.valueOf(location.getBlockY()), String.valueOf(location.getBlockZ()),
-					location.getWorld().getName());
+		if (location.getWorld() != null) // "x", "y", "z", "world"
+			return QuestWorld.translate(Translation.WORLD_FMT, new CustomReplacements()
+					.Add("x", String.valueOf(location.getBlockX()))
+					.Add("y", String.valueOf(location.getBlockY()))
+					.Add("z", String.valueOf(location.getBlockZ()))
+					.Add("world", location.getWorld().getName()));
 		
 		return QuestWorld.translate(Translation.UNKNOWN_WORLD);
 	}
 
 	public static String stringOf(Location location, int radius) {
 		if (location.getWorld() != null)
-			return QuestWorld.translate(Translation.RANGE_FMT, String.valueOf(location.getBlockX()),
-					String.valueOf(location.getBlockY()), String.valueOf(location.getBlockZ()),
-					location.getWorld().getName(), String.valueOf(radius));
+			return QuestWorld.translate(Translation.RANGE_FMT, new CustomReplacements()
+					.Add("x", String.valueOf(location.getBlockX()))
+					.Add("y", String.valueOf(location.getBlockY()))
+					.Add("z", String.valueOf(location.getBlockZ()))
+					.Add("world", location.getWorld().getName())
+					.Add("range", String.valueOf(radius)));
 		
 		return QuestWorld.translate(Translation.UNKNOWN_WORLD);
 	}
@@ -157,9 +163,11 @@ public final class Text {
 
 	public static String timeFromNum(long minutes) {
 		long hours = minutes / 60;
-		minutes = minutes - hours * 60;
+		minutes = minutes - hours * 60; // "hours", "minutes"),
 		
-		return QuestWorld.translate(Translation.TIME_FMT, String.valueOf(hours), String.valueOf(minutes));
+		return QuestWorld.translate(Translation.TIME_FMT, new CustomReplacements()
+				.Add("hours", String.valueOf(hours))
+				.Add("minutes", String.valueOf(minutes)));
 	}
 
 	private static final String[] progress_colors = { "&4", "&c", "&6", "&e", "&2", "&a" };

@@ -17,6 +17,7 @@ import com.questworld.api.QuestWorld;
 public class EntityTools {
 	
 	public static final EntityType ANY_ENTITY = null;
+	public static final String ANY_ID = "ANY";
 	
 	private static final EntityType[] alive;
 	static {
@@ -51,16 +52,17 @@ public class EntityTools {
 	public static ItemBuilder getEntityDisplay(EntityType type) {
 		
 		if(type == ANY_ENTITY) {
-			return new ItemBuilder(QuestWorld.getIcons().editor.any_mob);
+			return new ItemBuilder(QuestWorld.getIcons().items.mob_egg_overloads.get(EntityTools.ANY_ID));
 		}
 		
-		ItemStack icon = QuestWorld.getIcons().editor.mob_selector.get(type.name());
+		ItemStack icon = QuestWorld.getIcons().items.mob_egg_overloads.get(type.name());
 		
-		if(icon == null) {
+		if (ItemBuilder.isAir(icon)) {
+			icon = new ItemBuilder((ItemStack) null).get();
 			Reflect.getAdapter().makeSpawnEgg(icon, type);
 		}
 		
-		if(ItemBuilder.isAir(icon)) {
+		if (ItemBuilder.isAir(icon)) {
 			icon = QuestWorld.getIcons().editor.unknown_mob;
 		}
 		

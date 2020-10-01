@@ -8,12 +8,12 @@ import org.bukkit.inventory.ItemStack;
 import com.questworld.api.annotation.Control;
 import com.questworld.api.contract.IMission;
 import com.questworld.api.contract.IMissionState;
+import com.questworld.api.lang.MissionReplacements;
 import com.questworld.api.menu.Icons;
 import com.questworld.api.menu.Menu;
 import com.questworld.api.menu.MenuData;
 import com.questworld.api.menu.MissionButton;
 import com.questworld.util.Log;
-import com.questworld.util.Text;
 
 public abstract class MissionType {
 	private String name;
@@ -44,9 +44,8 @@ public abstract class MissionType {
 	private final String formatTimeframe(IMission instance) {
 		if (instance.getTimeframe() == 0 || !supportsTimeframes)
 			return "";
-		long duration = instance.getTimeframe();
 
-		return " " + QuestWorld.translate(Translation.TIMEFRAME_LABEL, Text.timeFromNum(duration));
+		return " " + QuestWorld.translate(Translation.TIMEFRAME_LABEL, new MissionReplacements(instance));
 	}
 
 	private final String formatDeathReset(IMission instance) {

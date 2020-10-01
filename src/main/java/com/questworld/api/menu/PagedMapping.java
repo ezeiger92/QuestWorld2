@@ -14,6 +14,7 @@ import org.bukkit.metadata.Metadatable;
 import com.questworld.Constants;
 import com.questworld.api.QuestWorld;
 import com.questworld.api.Translation;
+import com.questworld.api.lang.CustomReplacements;
 import com.questworld.util.ItemBuilder;
 
 public class PagedMapping {
@@ -136,10 +137,14 @@ public class PagedMapping {
 
 		panels.get(page).build(menu, 9, activeSize);
 
+		
+		
 		String[] lines = QuestWorld
-				.translate(Translation.NAV_ITEM, String.valueOf(page + 1), String.valueOf(panels.size()),
-						QuestWorld.translate(page < panels.size() - 1 ? Translation.NAV_NEXT : Translation.NAV_NEXTBAD),
-						QuestWorld.translate(page > 0 ? Translation.NAV_PREV : Translation.NAV_PREVBAD))
+				.translate(Translation.NAV_ITEM, new CustomReplacements()// "page", "pages", "pre-next", "pre-last")
+						.Add("page", String.valueOf(page + 1))
+						.Add("pages", String.valueOf(panels.size()))
+						.Add("pre-next", QuestWorld.translate(page < panels.size() - 1 ? Translation.NAV_NEXT : Translation.NAV_NEXTBAD))
+						.Add("pre-last", QuestWorld.translate(page > 0 ? Translation.NAV_PREV : Translation.NAV_PREVBAD)))
 				.split("\n");
 
 		frame.addButton(1, new ItemBuilder(QuestWorld.getIcons().navigation).amount(page + 1).wrapText(lines).get(), event -> {

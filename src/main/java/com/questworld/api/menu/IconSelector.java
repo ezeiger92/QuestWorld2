@@ -232,7 +232,7 @@ public class IconSelector {
 			existingIcons = existingWorldIcons();
 			break;
 			
-		case "editor.mob_selector":
+		case "items.mob_egg_overloads":
 			existingIcons = existingMobIcons();
 			break;
 			

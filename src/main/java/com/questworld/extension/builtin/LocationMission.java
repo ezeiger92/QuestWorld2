@@ -23,6 +23,7 @@ import com.questworld.api.contract.IMissionState;
 import com.questworld.api.contract.IPlayerStatus;
 import com.questworld.api.contract.MissionEntry;
 import com.questworld.api.event.GenericPlayerLeaveEvent;
+import com.questworld.api.lang.MissionReplacements;
 import com.questworld.api.menu.MenuData;
 import com.questworld.api.menu.MissionButton;
 import com.questworld.api.menu.QuestBook;
@@ -165,18 +166,18 @@ public class LocationMission extends MissionType implements Ticking, Listener {
 						changes.setCustomString("");
 
 						if (changes.apply()) {
-							PlayerTools.sendTranslation(p, true, Translation.LOCMISSION_NAME_SET);
+							PlayerTools.sendTranslation(p, true, Translation.LOCMISSION_NAME_SET, new MissionReplacements(changes));
 							QuestBook.openQuestMissionEditor(p, changes.getSource());
 						}
 						return;
 					}
 
 					PlayerTools.promptInput(p, new SinglePrompt(
-							PlayerTools.makeTranslation(true, Translation.LOCMISSION_NAME_EDIT), (c, s) -> {
+							PlayerTools.makeTranslation(true, Translation.LOCMISSION_NAME_EDIT, new MissionReplacements(changes)), (c, s) -> {
 								changes.setCustomString(Text.deserializeNewline(Text.colorize(s)));
 
 								if (changes.apply()) {
-									PlayerTools.sendTranslation(p, true, Translation.LOCMISSION_NAME_SET);
+									PlayerTools.sendTranslation(p, true, Translation.LOCMISSION_NAME_SET, new MissionReplacements(changes));
 									QuestBook.openQuestMissionEditor(p, changes.getSource());
 								}
 

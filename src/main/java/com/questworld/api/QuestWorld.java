@@ -14,6 +14,7 @@ import com.questworld.api.contract.IParty;
 import com.questworld.api.contract.IPlayerStatus;
 import com.questworld.api.contract.MissionEntry;
 import com.questworld.api.contract.QuestingAPI;
+import com.questworld.api.lang.PlaceholderSupply;
 import com.questworld.api.menu.Icons;
 import com.questworld.util.Lang;
 import com.questworld.util.Sounds;
@@ -81,12 +82,12 @@ public final class QuestWorld {
 		return api.getSounds();
 	}
 
-	public static String translate(Translator key, String... replacements) {
-		return api.translate(key, replacements);
+	public static String translate(Translator key, PlaceholderSupply<?>... replacementSource) {
+		return api.translate(key, replacementSource);
 	}
-
-	public static String translate(Player player, Translator key, String... replacements) {
-		return api.translate(player, key, replacements);
+	
+	public static String translate(Player player, Translator key, PlaceholderSupply<?>... replacementSource) {
+		return api.translate(player, key, replacementSource);
 	}
 	
 	public static Lang getLang() {

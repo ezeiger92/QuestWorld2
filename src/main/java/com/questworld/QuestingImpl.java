@@ -19,6 +19,7 @@ import com.questworld.api.contract.IMission;
 import com.questworld.api.contract.IParty;
 import com.questworld.api.contract.MissionEntry;
 import com.questworld.api.contract.QuestingAPI;
+import com.questworld.api.lang.PlaceholderSupply;
 import com.questworld.api.menu.Icons;
 import com.questworld.api.menu.Menu;
 import com.questworld.extension.builtin.Builtin;
@@ -154,13 +155,13 @@ public final class QuestingImpl implements QuestingAPI {
 	}
 
 	@Override
-	public String translate(Translator key, String... replacements) {
-		return translate(null, key, replacements);
+	public String translate(Translator key, PlaceholderSupply<?>... replacementSource) {
+		return translate(null, key, replacementSource);
 	}
-
+	
 	@Override
-	public String translate(Player player, Translator key, String... replacements) {
-		String translation = language.translateRaw(key, replacements);
+	public String translate(Player player, Translator key, PlaceholderSupply<?>... replacementSource) {
+		String translation = language.translateRaw(key, replacementSource);
 
 		if (hasPapi)
 			translation = me.clip.placeholderapi.PlaceholderAPI.setPlaceholders(player, translation);

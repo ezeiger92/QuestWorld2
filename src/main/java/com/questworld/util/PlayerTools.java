@@ -30,6 +30,7 @@ import com.questworld.api.QuestWorld;
 import com.questworld.api.Translation;
 import com.questworld.api.Translator;
 import com.questworld.api.event.GenericPlayerLeaveEvent;
+import com.questworld.api.lang.PlaceholderSupply;
 
 public class PlayerTools {
 
@@ -67,11 +68,11 @@ public class PlayerTools {
 
 	private static Pattern keywordPattern = Pattern
 			.compile("\\s*%(tellraw|title|subtitle|actionbar)%\\s*((?:(?!%(?:tellraw|title|subtitle|actionbar)%).)*)");
-
-	public static void sendTranslation(CommandSender p, boolean prefixed, Translator key, String... replacements) {
+	
+	public static void sendTranslation(CommandSender p, boolean prefixed, Translator key, PlaceholderSupply<?>... replacementSource) {
 		Player player = p instanceof Player ? (Player) p : null;
 
-		String text = makeTranslation(prefixed, player, key, replacements);
+		String text = makeTranslation(prefixed, player, key, replacementSource);
 		if (text.isEmpty())
 			return;
 
@@ -145,13 +146,13 @@ public class PlayerTools {
 			}
 		}
 	}
-
-	public static String makeTranslation(boolean prefixed, Translator key, String... replacements) {
-		return makeTranslation(prefixed, null, key, replacements);
+	
+	public static String makeTranslation(boolean prefixed, Translator key, PlaceholderSupply<?>... replacementSource) {
+		return makeTranslation(prefixed, null, key, replacementSource);
 	}
-
-	public static String makeTranslation(boolean prefixed, Player p, Translator key, String... replacements) {
-		String text = QuestWorld.translate(p, key, replacements);
+	
+	public static String makeTranslation(boolean prefixed, Player p, Translator key, PlaceholderSupply<?>... replacementSource) {
+		String text = QuestWorld.translate(p, key, replacementSource);
 		if (!text.isEmpty() && prefixed)
 			text = QuestWorld.translate(p, Translation.DEFAULT_PREFIX) + text;
 
